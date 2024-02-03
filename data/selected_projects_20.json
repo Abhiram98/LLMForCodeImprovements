@@ -1,0 +1,704 @@
+{
+ "rnavagamuwa##spring-security-abac": {
+  "github": {
+   "owner": "rnavagamuwa",
+   "repository": "spring-security-abac",
+   "default_branch": "master",
+   "commit_sha": "8c5578f688b6226b2e1f4c0f9f208d2befb4a0eb",
+   "stars": "6",
+   "forks": "7",
+   "is_forked": "False",
+   "created": "2019-03-15T05:05:28Z",
+   "updated": "2021-02-18T19:18:06Z",
+   "download_url": "https://github.com/rnavagamuwa/spring-security-abac/archive/master.zip",
+   "github_link": "https://github.com/rnavagamuwa/spring-security-abac"
+  },
+  "metrics": {
+   "files": 22,
+   "blank": 276,
+   "comment": 156,
+   "code": 999,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "sdk",
+    "java_version": "default"
+   }
+  }
+
+ },
+ "Cruii##learning-servlet":{
+  "github": {
+   "owner": "Cruii",
+   "repository": "learning-servlet",
+   "default_branch": "master",
+   "commit_sha": "b678139fc00cea7a24f39bfab3aa1b44d7b4a363",
+   "stars": "69",
+   "forks": "0",
+   "is_forked": "False",
+   "created": "2018-07-29T08:26:05Z",
+   "updated": "2021-11-21T03:17:17Z",
+   "download_url": "https://github.com/Cruii/learning-servlet/archive/master.zip",
+   "github_link": "https://github.com/Cruii/learning-servlet"
+  },
+  "metrics": {
+   "files": 13,
+   "blank": 71,
+   "comment": 150,
+   "code": 313,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "baspath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "jcustenborder##kafka-connect-archtype": {
+  "github": {
+   "owner": "jcustenborder",
+   "repository": "kafka-connect-archtype",
+   "default_branch": "master",
+   "commit_sha": "cf9d9d13ca9d52c2c7ad951ea654d1cc23eb630d",
+   "stars": "127",
+   "forks": "59",
+   "is_forked": "False",
+   "created": "2016-05-19T22:20:11Z",
+   "updated": "2022-01-27T13:44:46Z",
+   "download_url": "https://github.com/jcustenborder/kafka-connect-archtype/archive/master.zip",
+   "github_link": "https://github.com/jcustenborder/kafka-connect-archtype"
+  },
+  "metrics": {
+   "files": 19,
+   "blank": 113,
+   "comment": 81,
+   "code": 429,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "jenkins",
+   "build_info":{
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "elephantscale##hadoop-book": {
+  "github": {
+   "owner": "elephantscale",
+   "repository": "hadoop-book",
+   "default_branch": "master",
+   "commit_sha": "63c37951ec50e2caa30eec9d3fb28c3fedabb081",
+   "stars": "173",
+   "forks": "73",
+   "is_forked": "False",
+   "created": "2013-06-02T01:40:44Z",
+   "updated": "2021-12-02T18:00:59Z",
+   "download_url": "https://github.com/elephantscale/hadoop-book/archive/master.zip",
+   "github_link": "https://github.com/elephantscale/hadoop-book"
+  },
+  "metrics": {
+   "files": 36,
+   "blank": 707,
+   "comment": 1458,
+   "code": 4404,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "11"
+   }
+  }
+ },
+ "ejlchina##okhttps": {
+  "github": {
+   "owner": "ejlchina",
+   "repository": "okhttps",
+   "default_branch": "master",
+   "commit_sha": "master",
+   "stars": "217",
+   "forks": "45",
+   "is_forked": "False",
+   "created": "2020-03-31T08:22:07Z",
+   "updated": "2022-01-30T05:54:29Z",
+   "download_url": "https://github.com/ejlchina/okhttps/archive/master.zip",
+   "github_link": "https://github.com/ejlchina/okhttps"
+  },
+  "metrics": {
+   "files": 83,
+   "blank": 1408,
+   "comment": 1650,
+   "code": 5722,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "MockBukkit##MockBukkit": {
+  "github": {
+   "owner": "MockBukkit",
+   "repository": "MockBukkit",
+   "default_branch": "v1.18",
+   "commit_sha": "v1.18",
+   "stars": "291",
+   "forks": "75",
+   "is_forked": "False",
+   "created": "2017-12-05T22:16:02Z",
+   "updated": "2022-01-30T10:10:47Z",
+   "download_url": "https://github.com/MockBukkit/MockBukkit/archive/v1.18.zip",
+   "github_link": "https://github.com/MockBukkit/MockBukkit"
+  },
+  "metrics": {
+   "files": 183,
+   "blank": 4620,
+   "comment": 2402,
+   "code": 24166,
+   "jars": 3
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": false,
+    "gradle": true,
+    "none": false
+   },
+   "ci_type": "travis",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "code-disaster##steamworks4j": {
+  "github": {
+   "owner": "code-disaster",
+   "repository": "steamworks4j",
+   "default_branch": "master",
+   "commit_sha": "1a92c3b088d9c03183e91d7c79597cbdef1d76cf",
+   "stars": "348",
+   "forks": "48",
+   "is_forked": "False",
+   "created": "2014-08-16T17:57:46Z",
+   "updated": "2022-02-02T15:26:14Z",
+   "download_url": "https://github.com/code-disaster/steamworks4j/archive/master.zip",
+   "github_link": "https://github.com/code-disaster/steamworks4j"
+  },
+  "metrics": {
+   "files": 116,
+   "blank": 2461,
+   "comment": 1600,
+   "code": 6718,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "zhoumengkang##netty-restful-server": {
+  "github": {
+   "owner": "zhoumengkang",
+   "repository": "netty-restful-server",
+   "default_branch": "master",
+   "commit_sha": "be83f1892a42242a4fd33c79322a79274f73864d",
+   "stars": "404",
+   "forks": "186",
+   "is_forked": "False",
+   "created": "2015-12-29T04:03:16Z",
+   "updated": "2022-01-28T15:47:19Z",
+   "download_url": "https://github.com/zhoumengkang/netty-restful-server/archive/master.zip",
+   "github_link": "https://github.com/zhoumengkang/netty-restful-server"
+  },
+  "metrics": {
+   "files": 40,
+   "blank": 445,
+   "comment": 203,
+   "code": 1621,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "travis",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "widdix##aws-s3-virusscan": {
+  "github": {
+   "owner": "widdix",
+   "repository": "aws-s3-virusscan",
+   "default_branch": "master",
+   "commit_sha": "ace10b0c118edd26888bb63cd49ccd6793876731",
+   "stars": "444",
+   "forks": "112",
+   "is_forked": "False",
+   "created": "2016-03-23T07:06:23Z",
+   "updated": "2022-02-01T15:21:01Z",
+   "download_url": "https://github.com/widdix/aws-s3-virusscan/archive/master.zip",
+   "github_link": "https://github.com/widdix/aws-s3-virusscan"
+  },
+  "metrics": {
+   "files": 9,
+   "blank": 104,
+   "comment": 1,
+   "code": 809,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "github_workflow",
+   "build_info": {
+    "basepath": "test",
+    "java_version": "default"
+   }
+  }
+ },
+ "chwshuang##web": {
+  "github": {
+   "owner": "chwshuang",
+   "repository": "web",
+   "default_branch": "master",
+   "commit_sha": "b70de533fa3a3462f72d5c230bcfc5fb179f4e0e",
+   "stars": "492",
+   "forks": "335",
+   "is_forked": "False",
+   "created": "2015-01-12T06:09:23Z",
+   "updated": "2022-01-28T03:03:24Z",
+   "download_url": "https://github.com/chwshuang/web/archive/master.zip",
+   "github_link": "https://github.com/chwshuang/web"
+  },
+  "metrics": {
+   "files": 14,
+   "blank": 94,
+   "comment": 108,
+   "code": 422,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "11"
+   }
+  }
+ },
+ "HtmlUnit##htmlunit": {
+  "github": {
+   "owner": "HtmlUnit",
+   "repository": "htmlunit",
+   "default_branch": "master",
+   "commit_sha": "master",
+   "stars": "533",
+   "forks": "120",
+   "is_forked": "False",
+   "created": "2018-09-02T08:59:44Z",
+   "updated": "2022-02-02T11:17:02Z",
+   "download_url": "https://github.com/HtmlUnit/htmlunit/archive/master.zip",
+   "github_link": "https://github.com/HtmlUnit/htmlunit"
+  },
+  "metrics": {
+   "files": 2003,
+   "blank": 63637,
+   "comment": 175501,
+   "code": 382838,
+   "jars": 21
+  },
+  "systems": {
+   "build_types": {
+    "ant": true,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "github_workflow",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "Netflix##blitz4j": {
+  "github": {
+   "owner": "Netflix",
+   "repository": "blitz4j",
+   "default_branch": "master",
+   "commit_sha": "d03aaf4ede238dc204a4420c8d333565f86fc6f2",
+   "stars": "557",
+   "forks": "116",
+   "is_forked": "False",
+   "created": "2012-11-13T00:41:02Z",
+   "updated": "2022-01-17T20:39:02Z",
+   "download_url": "https://github.com/Netflix/blitz4j/archive/master.zip",
+   "github_link": "https://github.com/Netflix/blitz4j"
+  },
+  "metrics": {
+   "files": 19,
+   "blank": 441,
+   "comment": 1317,
+   "code": 2153,
+   "jars": 1
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": false,
+    "gradle": true,
+    "none": false
+   },
+   "ci_type": "travis",
+   "build_info": {
+    "basepath": "",
+    "java_version": "11",
+    "command": "./gradlew clean build -x test"
+   }
+  }
+ },
+ "smart-doc-group##smart-doc": {
+  "github": {
+   "owner": "smart-doc-group",
+   "repository": "smart-doc",
+   "default_branch": "master",
+   "commit_sha": "master",
+   "stars": "607",
+   "forks": "133",
+   "is_forked": "False",
+   "created": "2019-09-10T01:23:13Z",
+   "updated": "2022-01-30T01:10:24Z",
+   "download_url": "https://github.com/smart-doc-group/smart-doc/archive/master.zip",
+   "github_link": "https://github.com/smart-doc-group/smart-doc"
+  },
+  "metrics": {
+   "files": 127,
+   "blank": 2172,
+   "comment": 5069,
+   "code": 11933,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "travis",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "pulsarIO##realtime-analytics": {
+  "github": {
+   "owner": "pulsarIO",
+   "repository": "realtime-analytics",
+   "default_branch": "master",
+   "commit_sha": "3b1a82736fcf209978c07e95d01577d567346fa4",
+   "stars": "661",
+   "forks": "132",
+   "is_forked": "False",
+   "created": "2015-01-29T07:17:58Z",
+   "updated": "2022-01-04T20:16:09Z",
+   "download_url": "https://github.com/pulsarIO/realtime-analytics/archive/master.zip",
+   "github_link": "https://github.com/pulsarIO/realtime-analytics"
+  },
+  "metrics": {
+   "files": 119,
+   "blank": 1987,
+   "comment": 1637,
+   "code": 10884,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "11"
+   }
+  }
+ },
+ "BottegaIT##ddd-leaven-v2": {
+  "github": {
+   "owner": "BottegaIT",
+   "repository": "ddd-leaven-v2",
+   "default_branch": "master",
+   "commit_sha": "a1a0cf597e430cf58afe627cd5a724fa33665d2e",
+   "stars": "746",
+   "forks": "228",
+   "is_forked": "False",
+   "created": "2013-12-06T14:00:22Z",
+   "updated": "2022-02-02T01:06:51Z",
+   "download_url": "https://github.com/BottegaIT/ddd-leaven-v2/archive/master.zip",
+   "github_link": "https://github.com/BottegaIT/ddd-leaven-v2"
+  },
+  "metrics": {
+   "files": 169,
+   "blank": 1287,
+   "comment": 2996,
+   "code": 3918,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "11"
+   }
+  }
+ },
+ "apache##datasketches-java": {
+  "github": {
+   "owner": "apache",
+   "repository": "datasketches-java",
+   "default_branch": "master",
+   "commit_sha": "master",
+   "stars": "757",
+   "forks": "196",
+   "is_forked": "False",
+   "created": "2015-06-30T01:05:21Z",
+   "updated": "2022-01-31T18:13:18Z",
+   "download_url": "https://github.com/apache/datasketches-java/archive/master.zip",
+   "github_link": "https://github.com/apache/datasketches-java"
+  },
+  "metrics": {
+   "files": 447,
+   "blank": 12789,
+   "comment": 27852,
+   "code": 71964,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "11"
+   }
+  }
+ },
+ "yahoo##elide": {
+  "github": {
+   "owner": "yahoo",
+   "repository": "elide",
+   "default_branch": "master",
+   "commit_sha": "master",
+   "stars": "848",
+   "forks": "204",
+   "is_forked": "False",
+   "created": "2015-10-12T17:55:01Z",
+   "updated": "2022-02-01T02:59:18Z",
+   "download_url": "https://github.com/yahoo/elide/archive/master.zip",
+   "github_link": "https://github.com/yahoo/elide"
+  },
+  "metrics": {
+   "files": 1154,
+   "blank": 21087,
+   "comment": 21545,
+   "code": 100677,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "17"
+   }
+  }
+ },
+ "callicoder##spring-boot-react-oauth2-social-login-demo": {
+  "github": {
+   "owner": "callicoder",
+   "repository": "spring-boot-react-oauth2-social-login-demo",
+   "default_branch": "master",
+   "commit_sha": "1b77669e0ca326b1c556a83dc0c3bae233653788",
+   "stars": "863",
+   "forks": "543",
+   "is_forked": "False",
+   "created": "2018-10-01T04:19:38Z",
+   "updated": "2022-02-03T04:19:23Z",
+   "download_url": "https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo/archive/master.zip",
+   "github_link": "https://github.com/callicoder/spring-boot-react-oauth2-social-login-demo"
+  },
+  "metrics": {
+   "files": 33,
+   "blank": 289,
+   "comment": 18,
+   "code": 1117,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": false,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "bennidi##mbassador": {
+  "github": {
+   "owner": "bennidi",
+   "repository": "mbassador",
+   "default_branch": "master",
+   "commit_sha": "04b9cd080446ac733ce1aba9ea12d6a4493c3aea",
+   "stars": "905",
+   "forks": "144",
+   "is_forked": "False",
+   "created": "2012-10-23T07:27:32Z",
+   "updated": "2022-02-02T07:43:21Z",
+   "download_url": "https://github.com/bennidi/mbassador/archive/master.zip",
+   "github_link": "https://github.com/bennidi/mbassador"
+  },
+  "metrics": {
+   "files": 120,
+   "blank": 1680,
+   "comment": 1604,
+   "code": 5520,
+   "jars": 0
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": true,
+    "gradle": true,
+    "none": false
+   },
+   "ci_type": "travis",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ },
+ "spring-projects##spring-graphql": {
+  "github": {
+   "owner": "spring-projects",
+   "repository": "spring-graphql",
+   "default_branch": "main",
+   "commit_sha": "main",
+   "stars": "989",
+   "forks": "123",
+   "is_forked": "False",
+   "created": "2020-07-20T16:35:00Z",
+   "updated": "2022-02-02T15:00:58Z",
+   "download_url": "https://github.com/spring-projects/spring-graphql/archive/main.zip",
+   "github_link": "https://github.com/spring-projects/spring-graphql"
+  },
+  "metrics": {
+   "files": 202,
+   "blank": 3960,
+   "comment": 5790,
+   "code": 12576,
+   "jars": 1
+  },
+  "systems": {
+   "build_types": {
+    "ant": false,
+    "maven": false,
+    "gradle": true,
+    "none": false
+   },
+   "ci_type": "none",
+   "build_info": {
+    "basepath": "",
+    "java_version": "default"
+   }
+  }
+ }
+}
