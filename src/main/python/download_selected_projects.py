@@ -1,9 +1,14 @@
 import json
+import os.path
 import subprocess
+import urllib.request
 
 import sample_projects
 
 def main():
+    if not os.path.exists("../../../data/Java-Corpus.json"):
+        corpus_url = "http://mondego.ics.uci.edu/projects/SourcererJBF/jbf-arti/Java-Corpus.json"
+        urllib.request.urlretrieve(corpus_url, "../../../data/Java-Corpus.json")
 
     sample_projects.main(write=False)
 
