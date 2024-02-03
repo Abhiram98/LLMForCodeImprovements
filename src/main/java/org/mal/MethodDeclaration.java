@@ -7,7 +7,8 @@ public class MethodDeclaration {
     private Integer endCharacter;
     private String url;
 
-    public MethodDeclaration(org.eclipse.jdt.core.dom.MethodDeclaration method, String name, Integer startCharacter, Integer endCharacter, String url) {
+    public MethodDeclaration(org.eclipse.jdt.core.dom.MethodDeclaration method,
+                             String name, Integer startCharacter, Integer endCharacter, String url) {
         this.method = method;
         this.name = name;
         this.startCharacter = startCharacter;

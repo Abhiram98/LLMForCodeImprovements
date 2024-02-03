@@ -9,11 +9,11 @@ import java.util.ArrayList;
 public class MavenCommandRunner {
 
     public static MavenCommandResult mvnClean(File workingDir){
-        return MavenCommandRunner.runMavenCommand("clean",workingDir);
+        return MavenCommandRunner.runMavenCommand("clean", workingDir);
     }
 
     public static MavenCommandResult mvnCompile(File workingDir){
-        return MavenCommandRunner.runMavenCommand("compile",workingDir);
+        return MavenCommandRunner.runMavenCommand("compile", workingDir);
     }
 
     /**

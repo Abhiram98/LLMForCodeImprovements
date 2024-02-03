@@ -18,7 +18,6 @@ public class OpenAIRequestHandler {
 
     public OpenAIRequestHandler() {
         API_KEY = FileIO.readStringFromFile(Configurations.OPEN_AI_KEY).strip();
-        System.out.println(API_KEY);
     }
 
     public JSONArray getGPT4Response(String prompt) {

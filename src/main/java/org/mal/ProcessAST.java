@@ -78,7 +78,7 @@ public class ProcessAST {
             MethodDeclaration method = iterator.previous();
             fileName++;
             JSONObject object = generateCodeImprovements(method, projectName);
-            FileIO.writeJSONObjectToFile(object,Configurations.IMPROVEMENTS +"/"+projectName, String.valueOf(fileName));
+            FileIO.writeJSONObjectToFile(object,Configurations.IMPROVEMENTS +"/"+projectName, String.valueOf(fileName), false);
             FileIO.readJSONObjectFromFile(Configurations.IMPROVEMENTS +"/"+projectName,String.valueOf(fileName));
             if (fileName==200){
                 break;

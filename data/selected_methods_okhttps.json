@@ -1,0 +1,58 @@
+[
+    {
+        "Old_Method": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n    }\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n      }\n    }\n  }\n catch (  Exception e) {\n    response.close();\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/internal/ResultBody.java",
+        "Start": 3853,
+        "Stop": 4601,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "toFile"
+    },
+    {
+        "Old_Method": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n    }\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n      }\n    }\n  }\n catch (  Exception e) {\n    response.close();\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/internal/ResultBody.java",
+        "Start": 3853,
+        "Stop": 4601,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "toFile"
+    },
+    {
+        "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+        "Start": 6005,
+        "Stop": 7715,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "doDownload"
+    },
+    {
+        "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+        "Start": 6005,
+        "Stop": 7715,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "doDownload"
+    },
+    {
+        "Old_Method": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}\n",
+        "File_Path": "okhttps/okhttps-stomp/src/main/java/cn/zhxu/stomp/Stomp.java",
+        "Start": 8602,
+        "Stop": 9429,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "subscribe"
+    },
+    {
+        "Old_Method": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}\n",
+        "File_Path": "okhttps/okhttps-stomp/src/main/java/cn/zhxu/stomp/Stomp.java",
+        "Start": 8602,
+        "Stop": 9429,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "subscribe"
+    },
+    {
+        "Old_Method": "private RequestBody buildRequestBody(){\n  if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n    MultipartBody.Builder builder=multipartBodyBuilder();\n    if (bodyParams != null) {\n      bodyParams.forEach((key,value) -> {\n        if (value == null)         return;\n        byte[] content=value.toString().getBytes(charset);\n        RequestBody body=RequestBody.create(null,content);\n        builder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      }\n);\n    }\n    if (files != null) {\n      files.forEach((name,file) -> {\n        MediaType type=httpClient.mediaType(file.getType());\n        builder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n      }\n);\n    }\n    return builder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (bodyParams == null) {\n    return emptyRequestBody();\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder=new FormBody.Builder(charset);\n    bodyParams.forEach((key,value) -> {\n      if (value == null)       return;\n      builder.add(key,value.toString());\n    }\n);\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+        "Start": 19603,
+        "Stop": 21270,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "buildRequestBody"
+    }
+]

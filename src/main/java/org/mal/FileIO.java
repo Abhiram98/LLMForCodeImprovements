@@ -2,6 +2,7 @@ package org.mal;
 
 import org.apache.log4j.Logger;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -114,7 +115,8 @@ public class FileIO {
      * @throws IOException
      */
 
-    public static void writeJSONObjectToFile(JSONObject jsonObject, String fileDirectory, String fileName) throws IOException {
+    public static void writeJSONObjectToFile(JSONObject jsonObject, String fileDirectory,
+                                             String fileName, Boolean overwrite) throws IOException {
         Path directoryPath = Paths.get(fileDirectory);
         Path filePath = directoryPath.resolve(fileName);
 
@@ -124,7 +126,7 @@ public class FileIO {
         }
 
         // Check if the file already exists
-        if (Files.exists(filePath)) {
+        if (!overwrite && Files.exists(filePath)) {
             throw new IOException("File already exists: " + filePath);
         }
 
@@ -133,7 +135,25 @@ public class FileIO {
             file.flush();
         }
     }
+    public static void writeJSONArrayToFile(JSONArray jsonArray, String fileDirectory, String fileName, Boolean overwrite) throws IOException {
+        Path directoryPath = Paths.get(fileDirectory);
+        Path filePath = directoryPath.resolve(fileName);
 
+        // Create the directory hierarchy if it does not exist
+        if (!Files.exists(directoryPath)) {
+            Files.createDirectories(directoryPath);
+        }
+
+        // Check if the file already exists
+        if (!overwrite && Files.exists(filePath)) {
+            throw new IOException("File already exists: " + filePath);
+        }
+
+        try (FileWriter file = new FileWriter(filePath.toString())) {
+            file.write(jsonArray.toString(4)); // Write the JSON object to file with indentation
+            file.flush();
+        }
+    }
     /**
      *
      * @param fileDirectory
@@ -165,6 +185,25 @@ public class FileIO {
         }
         String content = new String(Files.readAllBytes(file));
         return new JSONObject(content);
+    }
+
+
+    /**
+     *
+     * @param fileDirectory
+     * @param fileName
+     * @return
+     * @throws IOException
+     */
+    public static JSONArray readJSONArrayFromFile(String fileDirectory, String fileName) throws IOException {
+        Path filePath = Paths.get(fileDirectory, fileName);
+        // Check if the file exists
+        if (!Files.exists(filePath)) {
+            throw new IOException("File does not exist: " + filePath);
+        }
+
+        String content = new String(Files.readAllBytes(filePath));
+        return new JSONArray(content);
     }
 
     /**

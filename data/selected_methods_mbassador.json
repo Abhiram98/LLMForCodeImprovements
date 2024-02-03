@@ -1,0 +1,50 @@
+[
+    {
+        "Old_Method": "public Iterator<T> iterator(){\n  return new Iterator<T>(){\n    private ISetEntry<T> current=head;\n    private void removeOrphans(){\n      Lock writelock=lock.writeLock();\n      try {\n        writelock.lock();\n        do {\n          ISetEntry orphaned=current;\n          current=current.next();\n          if (orphaned == head) {\n            head=head.next();\n          }\n          orphaned.remove();\n        }\n while (current != null && current.getValue() == null);\n      }\n  finally {\n        writelock.unlock();\n      }\n    }\n    public boolean hasNext(){\n      if (current == null)       return false;\n      if (current.getValue() == null) {\n        removeOrphans();\n        return current != null;\n      }\n else {\n        return true;\n      }\n    }\n    public T next(){\n      if (current == null) {\n        return null;\n      }\n      T value=current.getValue();\n      if (value == null) {\n        removeOrphans();\n        return next();\n      }\n else {\n        current=current.next();\n        return value;\n      }\n    }\n    public void remove(){\n      if (current == null) {\n        return;\n      }\n      ISetEntry<T> newCurrent=current.next();\n      WeakConcurrentSet.this.remove(current.getValue());\n      current=newCurrent;\n    }\n  }\n;\n}\n",
+        "File_Path": "mbassador/src/main/java/net/engio/mbassy/common/WeakConcurrentSet.java",
+        "Start": 643,
+        "Stop": 3187,
+        "Project_Name": "data/projects/mbassador",
+        "Method_Name": "iterator"
+    },
+    {
+        "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+        "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+        "Start": 506,
+        "Stop": 2025,
+        "Project_Name": "data/projects/mbassador",
+        "Method_Name": "testIteratorCleanup"
+    },
+    {
+        "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+        "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+        "Start": 506,
+        "Stop": 2025,
+        "Project_Name": "data/projects/mbassador",
+        "Method_Name": "testIteratorCleanup"
+    },
+    {
+        "Old_Method": "public static void main(String[] args){\n  bus.subscribe(new ListenerDefinition.SyncAsyncListener());\n  Object listener=new ListenerDefinition.SyncAsyncListener();\n  bus.subscribe(listener);\n  bus.subscribe(listener);\n  bus.subscribe(new Object());\n  bus.subscribe(new String());\n  bus.publishAsync(new File(\"/tmp/random.csv\"));\n  bus.post(new File(\"/tmp/random.csv\")).asynchronously();\n  bus.publish(\"some message\");\n  bus.post(\"some message\").now();\n}\n",
+        "File_Path": "mbassador/examples/SubscriptionAndPublication.java",
+        "Start": 850,
+        "Stop": 1791,
+        "Project_Name": "data/projects/mbassador",
+        "Method_Name": "main"
+    },
+    {
+        "Old_Method": "public static void main(String[] args){\n  bus.subscribe(new ListenerDefinition.SyncAsyncListener());\n  Object listener=new ListenerDefinition.SyncAsyncListener();\n  bus.subscribe(listener);\n  bus.subscribe(listener);\n  bus.subscribe(new Object());\n  bus.subscribe(new String());\n  bus.publishAsync(new File(\"/tmp/random.csv\"));\n  bus.post(new File(\"/tmp/random.csv\")).asynchronously();\n  bus.publish(\"some message\");\n  bus.post(\"some message\").now();\n}\n",
+        "File_Path": "mbassador/examples/SubscriptionAndPublication.java",
+        "Start": 850,
+        "Stop": 1791,
+        "Project_Name": "data/projects/mbassador",
+        "Method_Name": "main"
+    },
+    {
+        "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+        "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+        "Start": 3620,
+        "Stop": 5539,
+        "Project_Name": "data/projects/mbassador",
+        "Method_Name": "subscribe"
+    }
+]

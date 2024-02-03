@@ -1,0 +1,50 @@
+[
+    {
+        "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+        "Start": 4347,
+        "Stop": 5782,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "authorize"
+    },
+    {
+        "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+        "Start": 4347,
+        "Stop": 5782,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "authorize"
+    },
+    {
+        "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+        "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+        "Start": 4171,
+        "Stop": 4889,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "WebSecurityConfig"
+    },
+    {
+        "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+        "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+        "Start": 4171,
+        "Stop": 4889,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "WebSecurityConfig"
+    },
+    {
+        "Old_Method": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\nswitch (propertyType) {\ncase HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\ncase COOKIE:\n  value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\nbreak;\ncase QUERY_PARAM:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase FORM_DATA:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase PATH_PARAM:\nvalue=extractPathParam(httpServletRequest,value);\nbreak;\n}\ntemplateData.put(key,value);\n}\nreturn templateData;\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+        "Start": 2835,
+        "Stop": 4525,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "generateFreemakerTemplateData"
+    },
+    {
+        "Old_Method": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\nswitch (propertyType) {\ncase HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\ncase COOKIE:\n  value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\nbreak;\ncase QUERY_PARAM:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase FORM_DATA:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase PATH_PARAM:\nvalue=extractPathParam(httpServletRequest,value);\nbreak;\n}\ntemplateData.put(key,value);\n}\nreturn templateData;\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+        "Start": 2835,
+        "Stop": 4525,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "generateFreemakerTemplateData"
+    }
+]

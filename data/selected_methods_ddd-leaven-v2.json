@@ -1,0 +1,18 @@
+[
+    {
+        "Old_Method": "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n catch (    Exception e) {\n      throw new RuntimeException(e);\n    }\n  }\n}\n",
+        "File_Path": "ddd-leaven-v2/src/main/java/pl/com/bottega/ecommerce/system/saga/impl/SpringSagaRegistry.java",
+        "Start": 2646,
+        "Stop": 3169,
+        "Project_Name": "data/projects/ddd-leaven-v2",
+        "Method_Name": "registerSagaLoaderBeans"
+    },
+    {
+        "Old_Method": "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n catch (    Exception e) {\n      throw new RuntimeException(e);\n    }\n  }\n}\n",
+        "File_Path": "ddd-leaven-v2/src/main/java/pl/com/bottega/ecommerce/system/saga/impl/SpringSagaRegistry.java",
+        "Start": 2646,
+        "Stop": 3169,
+        "Project_Name": "data/projects/ddd-leaven-v2",
+        "Method_Name": "registerSagaLoaderBeans"
+    }
+]
