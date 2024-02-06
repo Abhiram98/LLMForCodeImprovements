@@ -1,7 +1,7 @@
 package org.mal.apply;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.mal.Configurations;
 import org.mal.FileIO;
@@ -17,42 +17,102 @@ import java.util.List;
 import static org.mal.FileIO.*;
 
 public class ApplyChanges {
+    int numberOfUnsuccessfulCompiles = 0;
+    int totalParsableImprovementFiles = 0;
+    int totalUnParsableImprovementFiles = 0;
+
     public static String replaceContent(String originalString, int start, int end, String newContent) {
         StringBuilder sb = new StringBuilder(originalString);
         return sb.delete(start, end).insert(start, newContent).toString();
     }
 
     public void processImprovements() throws Exception {
-        File file = new File("selected_repos_updated.txt");
+
         try {
-            List<String> lines = FileUtils.readLines(file, "UTF-8");
-            for (String projectName : lines) {
-                incoperateChangesAndCompile(projectName);
+            JSONObject selectedProjects = FileIO.readJSONObjectFromFile(Configurations.DATA_FOLDER,
+                    Configurations.PROJECT_META_FILE);
+            for(String key: selectedProjects.keySet()){
+                JSONObject obj = (JSONObject) selectedProjects.get(key);
+                String projectName = ((JSONObject) obj.get("github")).get("repository").toString();
+                String projectPath = Configurations.PROJECT_REPOSITORY + projectName;
+                String sourcePath = ((JSONObject)((JSONObject)
+                                        obj.get("systems"))
+                                            .get("build_info"))
+                                            .get("basepath").toString();
+                String buildCommand = "";
+                String cleanCommand = "";
+                try {
+                     buildCommand = ((JSONObject) ((JSONObject)
+                            obj.get("systems"))
+                            .get("build_info"))
+                            .get("command").toString();
+                } catch (JSONException e){
+                    System.out.println("Failed to find specific command");
+                }
+                try {
+                    cleanCommand = ((JSONObject) ((JSONObject)
+                            obj.get("systems"))
+                            .get("build_info"))
+                            .get("clean_command").toString();
+                } catch (JSONException e) {
+                    System.out.println("Failed to find specific command");
+                }
+
+                    String javaVersion = ((JSONObject)((JSONObject)
+                        obj.get("systems"))
+                        .get("build_info"))
+                        .get("java_version").toString();
+
+                JSONObject buildTypes = (JSONObject)((JSONObject) obj.get("systems")).get("build_types");
+                String buildSystem = "";
+                for (String buildKey: buildTypes.keySet()){
+                    if (buildTypes.get(buildKey).toString().equals("true")){
+                        buildSystem = buildKey;
+                    }
+                }
+
+                JavaProject jp = JavaProject.createProject(projectName, projectPath, sourcePath,
+                                    buildSystem, buildCommand, cleanCommand, javaVersion);
+                incoperateChangesAndCompile(jp);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        System.out.println("Final Status:");
+        System.out.println("totalParsableImprovementFiles="+totalParsableImprovementFiles);
+        System.out.println("totalUnParsableImprovementFiles="+totalUnParsableImprovementFiles);
+        System.out.println("numberOfUnsuccessfulCompiles="+numberOfUnsuccessfulCompiles);
     }
 
-    private void incoperateChangesAndCompile(String projectName) throws Exception {
-        Path projectPath = Paths.get(Configurations.IMPROVEMENTS, projectName);
-        if (!Files.exists(projectPath) || !Files.isDirectory(projectPath)) {
-            throw new FileNotFoundException("Improvements cannot be found for " + projectName);
+    private void incoperateChangesAndCompile(JavaProject project) throws Exception {
+        Path impromentsPath = Paths.get(Configurations.IMPROVEMENTS, project.projectName);
+        if (!Files.exists(impromentsPath) || !Files.isDirectory(impromentsPath)) {
+            throw new FileNotFoundException("Improvements cannot be found for " + project.projectName);
         }
-        int numberOfUnsuccessfulCompiles = 0;
-        int totalParsableImprovementFiles = 0;
-        int totalUnParsableImprovementFiles = 0;
-        List<Path> jsons = FileIO.getAllFilesInDirectory(Path.of(Configurations.IMPROVEMENTS + "/" + projectName + "/"), "");
+//        int numberOfUnsuccessfulCompiles = 0;
+//        int totalParsableImprovementFiles = 0;
+//        int totalUnParsableImprovementFiles = 0;
+        List<Path> jsons = FileIO.getAllFilesInDirectory(
+                Path.of(Configurations.IMPROVEMENTS + "/" + project.projectName + "/"), "");
+
         for (Path json : jsons) {
             System.out.println(json);
-            if (json.getFileName().toString().matches("\\d+") && !validJSON(json)) {
-                totalUnParsableImprovementFiles += 1;
-                continue;
-            }
-            totalParsableImprovementFiles += 1;
-            if (json.getFileName().toString().matches("\\d+")) {
-                if(prepareProjectForImprovements(projectName)){
-                    Improvement improvement = getImprovement(json);
+            if (json.getFileName().toString().matches(Configurations.OUTPUT_REGEX)) {
+                if (!validJSON(json)) {
+                    totalUnParsableImprovementFiles += 1;
+                    continue;
+                }
+
+                totalParsableImprovementFiles += 1;
+                if (prepareProjectForImprovements(project)) {
+                    Improvement improvement;
+                    try {
+                        improvement = getImprovement(json);
+                    } catch (Exception e){
+                        continue;
+                    }
                     Path path = Path.of(Configurations.PROJECT_REPOSITORY + improvement.getFilePath());
                     Path backupPath = path.resolveSibling(path.getFileName() + ".bak");
                     backupFile(path, backupPath);
@@ -61,11 +121,12 @@ public class ApplyChanges {
                     String newFileContent = replaceContent(oldFileContent, improvement.getStart(), improvement.getStop(), improvement.getImprovedCode());
                     // Apply improvement
                     modifyFileContent(path, newFileContent);  // add the changed method
-                    MavenCommandResult result = compileProject(projectName);
-                    if (result.getExitCode() != 0) {
-                        FileIO.writeLinesToFile(Configurations.COMPILE_ERRORS + projectName + "/" + json.getFileName() + ".txt", result.getOutput());
-                        numberOfUnsuccessfulCompiles += 1;
+//                    MavenCommandResult result = compileProject(projectName);
+                    BuildCommandResult result = project.build();
 
+                    if (result.getExitCode() != 0) {
+                        FileIO.writeLinesToFile(Configurations.COMPILE_ERRORS + project.projectName + "/" + json.getFileName() + ".txt", result.getOutput());
+                        numberOfUnsuccessfulCompiles += 1;
                     }
                     restoreFile(backupPath, path);  // revert the change
                 }
@@ -73,17 +134,22 @@ public class ApplyChanges {
                 System.out.println("Total unparsable improvement files: " + totalUnParsableImprovementFiles);
                 System.out.println("Total unsuccessful compiles: " + numberOfUnsuccessfulCompiles);
             }
+
         }
 
     }
 
-    private static MavenCommandResult compileProject(String projectName) {
-        MavenCommandRunner.mvnClean(new File(Configurations.PROJECT_REPOSITORY + projectName + "/"));
-        return MavenCommandRunner.mvnCompile(new File(Configurations.PROJECT_REPOSITORY + projectName + "/"));
+    private static BuildCommandResult compileProject(String projectName) {
+        MavenCommandRunner.mvnClean(
+                new File(Configurations.PROJECT_REPOSITORY + projectName + "/"),
+                "default");
+        return MavenCommandRunner.mvnCompile(
+                new File(Configurations.PROJECT_REPOSITORY + projectName + "/"),
+                "default");
     }
 
-    private boolean prepareProjectForImprovements(String projectName) throws MavenOperationException {
-        File projectDirectory = new File(Configurations.PROJECT_REPOSITORY + projectName + "/");
+    private boolean prepareProjectForImprovements(JavaProject project) throws MavenOperationException {
+        File projectDirectory = new File(Configurations.PROJECT_REPOSITORY + project.projectName + "/");
 
         // Ensure the project directory exists and is a directory
         if (!projectDirectory.exists() || !projectDirectory.isDirectory()) {
@@ -91,16 +157,18 @@ public class ApplyChanges {
         }
 
         // Attempt to clean the project
-        MavenCommandResult cleanResult = MavenCommandRunner.mvnClean(projectDirectory);
+//        BuildCommandResult cleanResult = MavenCommandRunner.mvnClean(projectDirectory);
+        BuildCommandResult cleanResult = project.clean();
         if (cleanResult.getExitCode() != 0) {
             // Including more specific details from Maven output can be helpful for debugging
-            throw new MavenOperationException("Failed to clean the project: " + projectName + ". Error: " + cleanResult.getOutput());
+            throw new MavenOperationException("Failed to clean the project: " + project.projectName + ". Error: " + cleanResult.getOutput());
         }
 
         // Attempt to compile the project
-        MavenCommandResult compileResult = MavenCommandRunner.mvnCompile(projectDirectory);
+//        BuildCommandResult compileResult = MavenCommandRunner.mvnCompile(projectDirectory);
+        BuildCommandResult compileResult = project.build();
         if (compileResult.getExitCode() != 0) {
-            throw new MavenOperationException("Failed to compile the project: " + projectName + ". Error: " + compileResult.getOutput());
+            throw new MavenOperationException("Failed to compile the project: " + project.projectName + ". Error: " + compileResult.getOutput());
         }
 
         return true; // Project is cleaned and compiled successfully

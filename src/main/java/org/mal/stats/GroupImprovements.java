@@ -1,5 +1,6 @@
 package org.mal.stats;
 
+import org.mal.Configurations;
 import org.mal.FileIO;
 
 import java.io.IOException;
@@ -28,7 +29,11 @@ public class GroupImprovements {
         System.out.println("Total instances ::: "+improvementsCounts.values().stream().mapToInt(Integer::intValue).sum());
         for (Pattern s : getStringPatterns()) {
             patternAndImprvements.put(s,improvements.stream().filter(x -> s.matcher(x).find()).toList());
-            patternToInstances.put(s,improvements.stream().filter(x -> s.matcher(x).find()).map(improvementsCounts::get).reduce(Integer::sum).get());
+            try {
+                patternToInstances.put(s, improvements.stream().filter(x -> s.matcher(x).find()).map(improvementsCounts::get).reduce(Integer::sum).get());
+            } catch (Exception e){
+                patternToInstances.put(s, 0);
+            }
             improvements = improvements.stream().filter(x -> !s.matcher(x).find()).toList();
         }
         patternAndImprvements.entrySet().forEach(x-> System.out.println(x.getKey().pattern()+" ::: "+x.getValue().size()+" ::: "+x.getValue().toString()));
@@ -36,6 +41,8 @@ public class GroupImprovements {
         List<String> nonMatched = improvements.stream().filter(x -> getStringPatterns().stream().noneMatch(y -> y.matcher(x).find())).toList();
         System.out.println("Size of non-matched improvements "+nonMatched.size());
         nonMatched.forEach(System.out::println);
+
+        System.out.println("Matched-improvements--");
         patternToInstances.entrySet().forEach(x -> System.out.println(x.getKey()+" ::: "+ x.getValue()));
     }
 
@@ -46,15 +53,28 @@ public class GroupImprovements {
      * @throws IOException
      */
     private static Map<String, Integer> getImprovementsCounts() throws IOException {
-        Map<String, Integer> collect = FileIO.readFileLineByLineNIO(Path.of(getFileInResources("improvements.txt").getPath()))
-                .map(q -> q.replaceAll("^\\d+\\. ", ""))
-                .map(line -> line.split(","))
-                .filter(z -> z.length == 2)
-                .filter(parts -> parts[0] != null && parts[1] != null)
-                .filter(parts -> !parts[0].trim().isEmpty() && !parts[1].trim().isEmpty())
-                .collect(Collectors.toMap(x -> x[0],
-                        y -> Integer.parseInt(y[1].trim()), (existing, replacement) -> existing));
-        return collect;
+//        Map<String, Integer> collect = FileIO.readFileLineByLineNIO(Path.of(getFileInResources("improvements.txt").getPath()))
+//                .map(q -> q.replaceAll("^\\d+\\. ", ""))
+//                .map(line -> line.split(","))
+//                .filter(z -> z.length == 2)
+//                .filter(parts -> parts[0] != null && parts[1] != null)
+//                .filter(parts -> !parts[0].trim().isEmpty() && !parts[1].trim().isEmpty())
+//                .collect(Collectors.toMap(x -> x[0],
+//                        y -> Integer.parseInt(y[1].trim()), (existing, replacement) -> existing));
+
+        List<String> lines = FileIO.readFileLineByLineNIO(Path.of(Configurations.IMPROVEMENTS+"improvements.txt")).toList();
+        Map<String, Integer> countMap = new HashMap<>();
+
+        for (String str : lines) {
+            // If the string is already in the map, increment its count; otherwise, add it with count 1.
+            countMap.put(str, countMap.getOrDefault(str, 0) + 1);
+        }
+//
+//        Map<String, Integer> collect =
+//                FileIO.readFileLineByLineNIO(Path.of(Configurations.IMPROVEMENTS+"improvements.txt"))
+//                .collect(Collectors.toMap(x -> x,
+//                        y -> 1, (existing, replacement) -> existing));
+        return countMap;
     }
 
 
@@ -65,7 +85,10 @@ public class GroupImprovements {
      * @throws IOException
      */
     private static List<String> getImprovements() throws IOException {
-        return FileIO.readFileLineByLineNIO(Path.of(getFileInResources("improvements.txt").getPath())).map(x -> x.split(",")[0]).toList();
+
+        return FileIO.readFileLineByLineNIO(
+                Path.of(Configurations.IMPROVEMENTS+"improvements.txt")
+        ).toList();
     }
 
 

@@ -2,11 +2,11 @@ package org.mal.apply;
 
 import java.util.List;
 
-public class MavenCommandResult {
+public class BuildCommandResult {
     private final int exitCode;
     private final List<String> output;
 
-    public MavenCommandResult(int exitCode, List<String> output) {
+    public BuildCommandResult(int exitCode, List<String> output) {
         this.exitCode = exitCode;
         this.output = output;
     }

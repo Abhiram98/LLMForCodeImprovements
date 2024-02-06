@@ -7,14 +7,14 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Map;
 
-public class MavenCommandRunner {
+public class GradleCommandRunner {
 
-    public static BuildCommandResult mvnClean(File workingDir, String javaHome){
-        return MavenCommandRunner.runMavenCommand("clean", workingDir, javaHome);
+    public static BuildCommandResult gradleClean(File workingDir, String javaHome){
+        return GradleCommandRunner.runGradleCommand("clean", workingDir, javaHome);
     }
 
-    public static BuildCommandResult mvnCompile(File workingDir, String javaHome){
-        return MavenCommandRunner.runMavenCommand("compile", workingDir, javaHome);
+    public static BuildCommandResult gradleCompile(File workingDir, String javaHome){
+        return GradleCommandRunner.runGradleCommand("build", workingDir, javaHome);
     }
 
     /**
@@ -34,13 +34,13 @@ public class MavenCommandRunner {
      * @throws IOException If an I/O error occurs during the execution of the Maven command or while reading its output.
      * @throws InterruptedException If the current thread is interrupted while waiting for the Maven process to complete.
      */
-    private static BuildCommandResult runMavenCommand(String command, File workingDir, String javaHome) {
+    private static BuildCommandResult runGradleCommand(String command, File workingDir, String javaHome) {
         StringWriter outputWriter = new StringWriter();
         ArrayList<String> result = new ArrayList<>();
         int exitCode = -1;
 
         try {
-            ProcessBuilder builder = new ProcessBuilder("mvn", command);
+            ProcessBuilder builder = new ProcessBuilder("gradle", command, "-x", "test");
             builder.directory(workingDir);
             builder.redirectErrorStream(true);
             Map<String, String> env = builder.environment();

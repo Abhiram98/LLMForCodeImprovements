@@ -1,12 +1,11 @@
 package org.mal.stats;
 
-import org.apache.commons.io.FileUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.Configurations;
 import org.mal.FileIO;
+import org.mal.utils.SelectedProjects;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -76,7 +75,8 @@ public class AnalyseStats {
             }
             List<Path> jsons = FileIO.getAllFilesInDirectory(Path.of(Configurations.IMPROVEMENTS +"/"+project+"/"), "").stream().filter(x-> {
                 try {
-                    return x.getFileName().toString().matches("\\d+") && validJSON(x);
+                    return x.getFileName().toString().matches(Configurations.OUTPUT_REGEX)
+                            && validJSON(x);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -134,13 +134,14 @@ public class AnalyseStats {
      * @return A List of project names, or an empty list if an error occurs.
      */
     private static List<String> getProjectList(){
-        File file = new File("selected_repos_updated.txt");
-        try {
-            return FileUtils.readLines(file, "UTF-8");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return Collections.emptyList();
-        }
+//        File file = new File("selected_repos_updated.txt");
+//        try {
+//            return FileUtils.readLines(file, "UTF-8");
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            return Collections.emptyList();
+//        }
+        return SelectedProjects.getProjectNames();
     }
 
     private static boolean validJSON(Path json) throws IOException {
