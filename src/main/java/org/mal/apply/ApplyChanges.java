@@ -41,6 +41,10 @@ public class ApplyChanges {
                                             .get("basepath").toString();
                 String buildCommand = "";
                 String cleanCommand = "";
+                if (new File(Configurations.DATA_FOLDER+ "applied-"+ projectName).exists()){
+                    System.out.println("already applied");
+                    continue;
+                }
                 try {
                      buildCommand = ((JSONObject) ((JSONObject)
                             obj.get("systems"))
@@ -74,6 +78,8 @@ public class ApplyChanges {
                 JavaProject jp = JavaProject.createProject(projectName, projectPath, sourcePath,
                                     buildSystem, buildCommand, cleanCommand, javaVersion);
                 incoperateChangesAndCompile(jp);
+                FileIO.writeLinesToFile(Configurations.DATA_FOLDER+ "applied-"+ projectName,
+                        List.of("Done"));
             }
 
         } catch (IOException e) {

@@ -1,8 +1,10 @@
 package org.mal.selection;
 
 import org.mal.Configurations;
+import org.mal.utils.SelectedProjects;
 
 import java.io.File;
+import java.util.List;
 
 public class SelectMain {
     public static void main(String[] args){
@@ -10,9 +12,9 @@ public class SelectMain {
 //        SelectFunctions sf = new SelectFunctions("blitz4j", "data/projects/blitz4j");
 //        sf.getFunctions();
 
-        File projectDir = new File(Configurations.PROJECT_REPOSITORY);
-        for (File folder: projectDir.listFiles()){
-            SelectFunctions sf = new SelectFunctions(folder.getName(), folder.getPath());
+        List<String> projectNames = SelectedProjects.getProjectNames();
+        for (String name: projectNames){
+            SelectFunctions sf = new SelectFunctions(name, Configurations.PROJECT_REPOSITORY+name);
             sf.getFunctions();
 
         }

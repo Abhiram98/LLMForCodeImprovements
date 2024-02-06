@@ -8,12 +8,12 @@
         "Method_Name": "toFile"
     },
     {
-        "Old_Method": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n    }\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n      }\n    }\n  }\n catch (  Exception e) {\n    response.close();\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}\n",
-        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/internal/ResultBody.java",
-        "Start": 3853,
-        "Stop": 4601,
+        "Old_Method": "@Test public void testGlobalCallback(){\n  HTTP http=HTTP.builder().responseListener((  HttpTask<?> task,  HttpResult result) -> {\n    println(\"全局 onResponse: \" + result.getStatus());\n    return true;\n  }\n).completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n    println(\"全局 onComplete: \" + state);\n    return true;\n  }\n).exceptionListener((  HttpTask<?> task,  IOException error) -> {\n    println(\"全局 onException: \" + error.getMessage());\n    return false;\n  }\n).build();\n  http.async(\"http://www.baidu.com\").setOnResponse((  HttpResult result) -> {\n    println(\"单例 onResponse: \" + result.getStatus());\n  }\n).setOnComplete((  HttpResult.State state) -> {\n    println(\"单例 onComplete: \" + state);\n  }\n).setOnException((  IOException error) -> {\n    println(\"单例 onException: \" + error.getMessage());\n  }\n).get();\n  sleep(2000);\n}\n",
+        "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/ListenerTests.java",
+        "Start": 151,
+        "Stop": 1367,
         "Project_Name": "data/projects/okhttps",
-        "Method_Name": "toFile"
+        "Method_Name": "testGlobalCallback"
     },
     {
         "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
@@ -24,12 +24,12 @@
         "Method_Name": "doDownload"
     },
     {
-        "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
-        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
-        "Start": 6005,
-        "Stop": 7715,
+        "Old_Method": "private String buildUrlPath(){\n  if (Platform.isBlank(urlPath)) {\n    throw new OkHttpsException(\"url 不能为空！\");\n  }\n  StringBuilder sb=new StringBuilder(urlPath);\n  if (pathParams != null) {\n    pathParams.forEach((name,value) -> {\n      String target=\"{\" + name + \"}\";\n      int start=sb.indexOf(target);\n      if (start >= 0) {\n        String newValue=value != null ? value.toString() : \"\";\n        sb.replace(start,start + target.length(),newValue);\n      }\n else {\n        throw new OkHttpsException(\"PathPara [ \" + name + \" ] 不存在于 url [ \"+ urlPath+ \" ]\");\n      }\n    }\n);\n  }\n  if (urlParams != null) {\n    if (sb.indexOf(\"?\") >= 0) {\n      int lastIndex=sb.length() - 1;\n      if (sb.lastIndexOf(\"?\") < lastIndex) {\n        if (sb.lastIndexOf(\"=\") < sb.lastIndexOf(\"?\") + 2) {\n          throw new OkHttpsException(\"url 格式错误，'?' 后没有发现 '='\");\n        }\n        if (sb.lastIndexOf(\"&\") < lastIndex) {\n          sb.append('&');\n        }\n      }\n    }\n else {\n      sb.append('?');\n    }\n    urlParams.forEach((name,value) -> {\n      if (value == null)       return;\n      sb.append(name).append('=').append(value).append('&');\n    }\n);\n    sb.delete(sb.length() - 1,sb.length());\n  }\n  return sb.toString();\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+        "Start": 22867,
+        "Stop": 24516,
         "Project_Name": "data/projects/okhttps",
-        "Method_Name": "doDownload"
+        "Method_Name": "buildUrlPath"
     },
     {
         "Old_Method": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}\n",
@@ -40,12 +40,12 @@
         "Method_Name": "subscribe"
     },
     {
-        "Old_Method": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}\n",
-        "File_Path": "okhttps/okhttps-stomp/src/main/java/cn/zhxu/stomp/Stomp.java",
-        "Start": 8602,
-        "Stop": 9429,
+        "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+        "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+        "Start": 680,
+        "Stop": 1474,
         "Project_Name": "data/projects/okhttps",
-        "Method_Name": "subscribe"
+        "Method_Name": "download"
     },
     {
         "Old_Method": "private RequestBody buildRequestBody(){\n  if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n    MultipartBody.Builder builder=multipartBodyBuilder();\n    if (bodyParams != null) {\n      bodyParams.forEach((key,value) -> {\n        if (value == null)         return;\n        byte[] content=value.toString().getBytes(charset);\n        RequestBody body=RequestBody.create(null,content);\n        builder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      }\n);\n    }\n    if (files != null) {\n      files.forEach((name,file) -> {\n        MediaType type=httpClient.mediaType(file.getType());\n        builder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n      }\n);\n    }\n    return builder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (bodyParams == null) {\n    return emptyRequestBody();\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder=new FormBody.Builder(charset);\n    bodyParams.forEach((key,value) -> {\n      if (value == null)       return;\n      builder.add(key,value.toString());\n    }\n);\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}\n",

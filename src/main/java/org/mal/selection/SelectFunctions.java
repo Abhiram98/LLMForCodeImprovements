@@ -65,7 +65,7 @@ public class SelectFunctions {
                 allSelectedMethods.add(methods.get(ind));
                 Integer ind2 = ran.nextInt(numMethods);
                 if (ind2!=ind) {
-                    allSelectedMethods.add(methods.get(ind));
+                    allSelectedMethods.add(methods.get(ind2));
                 }
             }
         }
@@ -109,7 +109,8 @@ public class SelectFunctions {
                     Paths.get(projectPath), ".java")
             );
 
-            System.out.println(allFiles);
+//            System.out.println(allFiles);
+            System.out.println(projectName);
             List<Integer> methodLengths = new ArrayList<Integer>();
             ArrayList<org.mal.MethodDeclaration> allSelectedMethods = new ArrayList<>();
             HashMap<Integer, ArrayList<org.mal.MethodDeclaration>> byLineNum = new HashMap<>();

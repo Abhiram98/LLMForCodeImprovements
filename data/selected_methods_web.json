@@ -16,11 +16,11 @@
         "Method_Name": "del"
     },
     {
-        "Old_Method": "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  Jedis jedis=null;\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  }\n  finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}\n",
-        "File_Path": "web/cache/src/main/java/com/aitongyi/web/cache/CacheService.java",
-        "Start": 1034,
-        "Stop": 1334,
+        "Old_Method": "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(\"mysql url:\" + dbUrl);\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}\n",
+        "File_Path": "web/dao/src/main/java/com/aitongyi/web/dao/conf/DatabaseConfig.java",
+        "Start": 1211,
+        "Stop": 1703,
         "Project_Name": "data/projects/web",
-        "Method_Name": "del"
+        "Method_Name": "dataSource"
     }
 ]

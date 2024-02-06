@@ -8,11 +8,11 @@
         "Method_Name": "dbTest"
     },
     {
-        "Old_Method": "@Test public void dbTest() throws SQLException {\n  Connection c=DbUtils.getConnection();\n  String sql=\"select uUsername from user where uId = ?\";\n  PreparedStatement ps=c.prepareStatement(sql);\n  ps.setInt(1,1);\n  ResultSet rs=ps.executeQuery();\n  while (rs.next()) {\n    System.out.println(rs.getString(1));\n  }\n  rs.close();\n  ps.close();\n  c.close();\n}\n",
-        "File_Path": "learning-servlet/myservlet06/src/test/DbTest.java",
-        "Start": 199,
-        "Stop": 563,
+        "Old_Method": "@Override protected void doPost(HttpServletRequest req,HttpServletResponse resp) throws ServletException, IOException {\n  InputStream fis=new FileInputStream(new File(\"/Users/ray/IdeaProjects/LearningServlet/myservlet04/src/banana.png\"));\n  byte[] buf=new byte[1024];\n  int len;\n  OutputStream fos=resp.getOutputStream();\n  resp.setContentType(\"image/webp\");\n  while ((len=fis.read(buf)) != -1) {\n    fos.write(buf,0,len);\n  }\n  fis.close();\n  fos.close();\n}\n",
+        "File_Path": "learning-servlet/myservlet04/src/main/java/com/ray/MyServlet.java",
+        "Start": 561,
+        "Stop": 1100,
         "Project_Name": "data/projects/learning-servlet",
-        "Method_Name": "dbTest"
+        "Method_Name": "doPost"
     }
 ]

@@ -8,11 +8,11 @@
         "Method_Name": "registerSagaLoaderBeans"
     },
     {
-        "Old_Method": "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n catch (    Exception e) {\n      throw new RuntimeException(e);\n    }\n  }\n}\n",
-        "File_Path": "ddd-leaven-v2/src/main/java/pl/com/bottega/ecommerce/system/saga/impl/SpringSagaRegistry.java",
-        "Start": 2646,
-        "Stop": 3169,
+        "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+        "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+        "Start": 2542,
+        "Stop": 3087,
         "Project_Name": "data/projects/ddd-leaven-v2",
-        "Method_Name": "registerSagaLoaderBeans"
+        "Method_Name": "canNotPurchaseIfOfferChanged"
     }
 ]

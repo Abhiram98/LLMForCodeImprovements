@@ -65,46 +65,46 @@
    },
    "ci_type": "none",
    "build_info": {
-    "baspath": "",
-    "java_version": "default"
-   }
-  }
- },
- "jcustenborder##kafka-connect-archtype": {
-  "github": {
-   "owner": "jcustenborder",
-   "repository": "kafka-connect-archtype",
-   "default_branch": "master",
-   "commit_sha": "cf9d9d13ca9d52c2c7ad951ea654d1cc23eb630d",
-   "stars": "127",
-   "forks": "59",
-   "is_forked": "False",
-   "created": "2016-05-19T22:20:11Z",
-   "updated": "2022-01-27T13:44:46Z",
-   "download_url": "https://github.com/jcustenborder/kafka-connect-archtype/archive/master.zip",
-   "github_link": "https://github.com/jcustenborder/kafka-connect-archtype"
-  },
-  "metrics": {
-   "files": 19,
-   "blank": 113,
-   "comment": 81,
-   "code": 429,
-   "jars": 0
-  },
-  "systems": {
-   "build_types": {
-    "ant": false,
-    "maven": true,
-    "gradle": false,
-    "none": false
-   },
-   "ci_type": "jenkins",
-   "build_info":{
     "basepath": "",
     "java_version": "default"
    }
   }
  },
+ "patrickfav##bytes-java": {
+ "github": {
+  "owner": "patrickfav",
+  "repository": "bytes-java",
+  "default_branch": "master",
+  "commit_sha": "6fbe82687396bd5a39eea291cec6aab7869a69de",
+  "stars": "115",
+  "forks": "23",
+  "is_forked": "False",
+  "created": "2017-10-31T08:15:45Z",
+  "updated": "2021-12-30T01:13:04Z",
+  "download_url": "https://github.com/patrickfav/bytes-java/archive/master.zip",
+  "github_link": "https://github.com/patrickfav/bytes-java"
+ },
+ "metrics": {
+  "files": 32,
+  "blank": 1154,
+  "comment": 3211,
+  "code": 5509,
+  "jars": 1
+ },
+ "systems": {
+  "build_types": {
+   "ant": false,
+   "maven": true,
+   "gradle": false,
+   "none": false
+  },
+  "ci_type": "travis",
+  "build_info": {
+    "basepath": "",
+    "java_version": "11"
+   }
+ }
+},
  "elephantscale##hadoop-book": {
   "github": {
    "owner": "elephantscale",
@@ -417,7 +417,8 @@
    "build_info": {
     "basepath": "",
     "java_version": "11",
-    "command": "./gradlew clean build -x test"
+    "command": "./gradlew clean build -x test",
+    "clean_command": "./gradlew clean"
    }
   }
  },
@@ -626,7 +627,7 @@
    },
    "ci_type": "none",
    "build_info": {
-    "basepath": "",
+    "basepath": "spring-social",
     "java_version": "default"
    }
   }
@@ -656,13 +657,13 @@
    "build_types": {
     "ant": false,
     "maven": true,
-    "gradle": true,
+    "gradle": false,
     "none": false
    },
    "ci_type": "travis",
    "build_info": {
     "basepath": "",
-    "java_version": "default"
+    "java_version": "11"
    }
   }
  },

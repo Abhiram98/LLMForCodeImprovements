@@ -16,12 +16,12 @@
         "Method_Name": "getValue"
     },
     {
-        "Old_Method": "public static String getValue(String sql,Object... params){\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet rs=null;\n  String res=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    rs=statement.executeQuery();\n    if (rs.next()) {\n      res=rs.getString(1);\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,rs);\n  }\n  return res;\n}\n",
-        "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/Mysql.java",
-        "Start": 4994,
-        "Stop": 5866,
+        "Old_Method": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,resultSet);\n  }\n  return beanList;\n}\n",
+        "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+        "Start": 4628,
+        "Stop": 5587,
         "Project_Name": "data/projects/netty-restful-server",
-        "Method_Name": "getValue"
+        "Method_Name": "list"
     },
     {
         "Old_Method": "public static int getInt(String str){\n  try {\n    if (null == instance) {\n      getInstance();\n    }\n    return Integer.parseInt(properties.getProperty(str));\n  }\n catch (  Exception e) {\n    e.printStackTrace();\n    return 0;\n  }\n}\n",
