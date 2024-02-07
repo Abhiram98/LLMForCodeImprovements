@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [{
+            "Improvement": "Remove unnecessary print statement",
+            "Change_Diff": "- System.out.println(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);",
+            "Description": "The print statement on line 6 can be removed as it is not necessary and may clutter the console output.",
+            "Start": 6,
+            "End": 6
+        }],
+        "Final code": "public InputSplit[] getSplits(JobConf job,int numSplits){\n  long totalRows=getNumberOfRows(job);\n  long rowsPerSplit=totalRows / numSplits;\n\n  InputSplit[] splits=new InputSplit[numSplits];\n  long currentRow=0;\n  for (int split=0; split < numSplits - 1; ++split) {\n    splits[split]=new RangeInputSplit(currentRow,rowsPerSplit);\n    currentRow+=rowsPerSplit;\n  }\n  splits[numSplits - 1]=new RangeInputSplit(currentRow,totalRows - currentRow);\n  return splits;\n}"
+    }],
+    "Old_Method": "/** \n * Create the desired number of splits, dividing the number of rows between the mappers.\n */\npublic InputSplit[] getSplits(JobConf job,int numSplits){\n  long totalRows=getNumberOfRows(job);\n  long rowsPerSplit=totalRows / numSplits;\n  System.out.println(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);\n  InputSplit[] splits=new InputSplit[numSplits];\n  long currentRow=0;\n  for (int split=0; split < numSplits - 1; ++split) {\n    splits[split]=new RangeInputSplit(currentRow,rowsPerSplit);\n    currentRow+=rowsPerSplit;\n  }\n  splits[numSplits - 1]=new RangeInputSplit(currentRow,totalRows - currentRow);\n  return splits;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/terasort/TeraGen.java",
+    "Start": 4921,
+    "Stop": 5780,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "getSplits"
+}

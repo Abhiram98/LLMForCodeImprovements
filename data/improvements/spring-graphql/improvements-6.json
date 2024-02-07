@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use method references instead of lambda expressions",
+                "Change_Diff": "- h -> h.add(\"h\",\"one\")\n+ h::add(\"h\",\"one\")",
+                "Description": "Instead of using a lambda expression to add default headers in the WebClient's defaultHeaders() method, use method references.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use a single HttpGraphQlClient.Builder instance",
+                "Change_Diff": "- HttpGraphQlClient.Builder<?> builder2=client.mutate()...",
+                "Description": "Instead of creating a new HttpGraphQlClient.Builder instance for each mutation, reuse the existing builder instance.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Use a lambda expression for single default header",
+                "Change_Diff": "- testClientBuilder.defaultHeader(\"h\",\"three\")\n+ testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"three\"))",
+                "Description": "Instead of using the defaultHeader() method to add a single default header, use a lambda expression to add the header.",
+                "Start": 16,
+                "End": 16
+            }
+        ],
+        "Final code": "    @Test\n    void mutateWebTestClientViaConsumer() {\n        HttpBuilderSetup clientSetup = new HttpBuilderSetup();\n        HttpGraphQlClient.Builder<?> builder = clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", \"one\")));\n        HttpGraphQlClient client = builder.build();\n        client.document(DOCUMENT).execute().block(TIMEOUT);\n        assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n        builder.webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", \"two\")));\n        client.document(DOCUMENT).execute().block(TIMEOUT);\n        assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\", \"two\");\n        builder.webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", \"three\")));\n        client.document(DOCUMENT).execute().block(TIMEOUT);\n        assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n    }"
+    }],
+    "Old_Method": "@Test void mutateWebTestClientViaConsumer(){\n  HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n  HttpGraphQlClient.Builder<?> builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n  HttpGraphQlClient client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n  HttpGraphQlClient.Builder<?> builder2=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n  client=builder2.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\",\"two\");\n  HttpGraphQlClient.Builder<?> builder3=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));\n  client=builder3.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/test/java/org/springframework/graphql/client/WebGraphQlClientBuilderTests.java",
+    "Start": 5152,
+    "Stop": 6358,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "mutateWebTestClientViaConsumer"
+}

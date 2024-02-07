@@ -1,0 +1,132 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for HttpClientBuilder initialization",
+                "Change_Diff": "- HttpClientBuilder builder\n+ try(HttpClientBuilder builder = HttpClientBuilder.create())",
+                "Description": "Instead of initializing HttpClientBuilder with a separate line, use try-with-resources to automatically close the HttpClientBuilder after use.",
+                "Start": 54,
+                "End": 54
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct method access",
+                "Change_Diff": "- PublicSuffixMatcher publicSuffixMatcher=getField(builder,\"publicSuffixMatcher\");\n+ PublicSuffixMatcher publicSuffixMatcher = builder.getPublicSuffixMatcher();",
+                "Description": "Instead of using reflection to get the value of 'publicSuffixMatcher' field, directly access the method 'getPublicSuffixMatcher()' of HttpClientBuilder.",
+                "Start": 56,
+                "End": 56
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- LayeredConnectionSocketFactory sslSocketFactory=getField(builder,\"sslSocketFactory\");\n+ LayeredConnectionSocketFactory sslSocketFactory = builder.getSslSocketFactory();",
+                "Description": "Instead of using reflection to get the value of 'sslSocketFactory' field, directly access the field 'sslSocketFactory' of HttpClientBuilder.",
+                "Start": 57,
+                "End": 57
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final SocketConfig defaultSocketConfig=getField(builder,\"defaultSocketConfig\");\n+ final SocketConfig defaultSocketConfig = builder.getDefaultSocketConfig();",
+                "Description": "Instead of using reflection to get the value of 'defaultSocketConfig' field, directly access the field 'defaultSocketConfig' of HttpClientBuilder.",
+                "Start": 59,
+                "End": 59
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final ConnectionConfig defaultConnectionConfig=getField(builder,\"defaultConnectionConfig\");\n+ final ConnectionConfig defaultConnectionConfig = builder.getDefaultConnectionConfig();",
+                "Description": "Instead of using reflection to get the value of 'defaultConnectionConfig' field, directly access the field 'defaultConnectionConfig' of HttpClientBuilder.",
+                "Start": 60,
+                "End": 60
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final boolean systemProperties=getField(builder,\"systemProperties\");\n+ final boolean systemProperties = builder.isSystemProperties();",
+                "Description": "Instead of using reflection to get the value of 'systemProperties' field, directly access the field 'systemProperties' of HttpClientBuilder.",
+                "Start": 61,
+                "End": 61
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final int maxConnTotal=getField(builder,\"maxConnTotal\");\n+ final int maxConnTotal = builder.getMaxConnTotal();",
+                "Description": "Instead of using reflection to get the value of 'maxConnTotal' field, directly access the field 'maxConnTotal' of HttpClientBuilder.",
+                "Start": 62,
+                "End": 62
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final int maxConnPerRoute=getField(builder,\"maxConnPerRoute\");\n+ final int maxConnPerRoute = builder.getMaxConnPerRoute();",
+                "Description": "Instead of using reflection to get the value of 'maxConnPerRoute' field, directly access the field 'maxConnPerRoute' of HttpClientBuilder.",
+                "Start": 63,
+                "End": 63
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- HostnameVerifier hostnameVerifier=getField(builder,\"hostnameVerifier\");\n+ HostnameVerifier hostnameVerifier = builder.getHostnameVerifier();",
+                "Description": "Instead of using reflection to get the value of 'hostnameVerifier' field, directly access the field 'hostnameVerifier' of HttpClientBuilder.",
+                "Start": 65,
+                "End": 65
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final SSLContext sslcontext=getField(builder,\"sslContext\");\n+ final SSLContext sslcontext = builder.getSslContext();",
+                "Description": "Instead of using reflection to get the value of 'sslContext' field, directly access the field 'sslContext' of HttpClientBuilder.",
+                "Start": 67,
+                "End": 67
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final DnsResolver dnsResolver=getField(builder,\"dnsResolver\");\n+ final DnsResolver dnsResolver = builder.getDnsResolver();",
+                "Description": "Instead of using reflection to get the value of 'dnsResolver' field, directly access the field 'dnsResolver' of HttpClientBuilder.",
+                "Start": 68,
+                "End": 68
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final long connTimeToLive=getField(builder,\"connTimeToLive\");\n+ final long connTimeToLive = builder.getConnTimeToLive();",
+                "Description": "Instead of using reflection to get the value of 'connTimeToLive' field, directly access the field 'connTimeToLive' of HttpClientBuilder.",
+                "Start": 69,
+                "End": 69
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- final TimeUnit connTimeToLiveTimeUnit=getField(builder,\"connTimeToLiveTimeUnit\");\n+ final TimeUnit connTimeToLiveTimeUnit = builder.getConnTimeToLiveTimeUnit();",
+                "Description": "Instead of using reflection to get the value of 'connTimeToLiveTimeUnit' field, directly access the field 'connTimeToLiveTimeUnit' of HttpClientBuilder.",
+                "Start": 70,
+                "End": 70
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- poolingmgr.setDefaultSocketConfig(defaultSocketConfig);\n+ poolingmgr.setDefaultSocketConfig(defaultSocketConfig);",
+                "Description": "Instead of using reflection to set the value of 'defaultSocketConfig' field, directly access the method 'setDefaultSocketConfig()' of PoolingHttpClientConnectionManager.",
+                "Start": 75,
+                "End": 75
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- poolingmgr.setDefaultConnectionConfig(defaultConnectionConfig);\n+ poolingmgr.setDefaultConnectionConfig(defaultConnectionConfig);",
+                "Description": "Instead of using reflection to set the value of 'defaultConnectionConfig' field, directly access the method 'setDefaultConnectionConfig()' of PoolingHttpClientConnectionManager.",
+                "Start": 76,
+                "End": 76
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- poolingmgr.setMaxTotal(maxConnTotal);\n+ poolingmgr.setMaxTotal(maxConnTotal);",
+                "Description": "Instead of using reflection to set the value of 'maxConnTotal' field, directly access the method 'setMaxTotal()' of PoolingHttpClientConnectionManager.",
+                "Start": 83,
+                "End": 83
+            },
+            {
+                "Improvement": "Replace usage of reflection with direct field access",
+                "Change_Diff": "- poolingmgr.setDefaultMaxPerRoute(maxConnPerRoute);\n+ poolingmgr.setDefaultMaxPerRoute(maxConnPerRoute);",
+                "Description": "Instead of using reflection to set the value of 'maxConnPerRoute' field, directly access the method 'setDefaultMaxPerRoute()' of PoolingHttpClientConnectionManager.",
+                "Start": 84,
+                "End": 84
+            }
+        ],
+        "Final code": "private static PoolingHttpClientConnectionManager createConnectionManager(final HttpClientBuilder builder) {\n  try (HttpClientBuilder builder = HttpClientBuilder.create()) {\n    PublicSuffixMatcher publicSuffixMatcher = builder.getPublicSuffixMatcher();\n    if (publicSuffixMatcher == null) {\n      publicSuffixMatcher=PublicSuffixMatcherLoader.getDefault();\n    }\n    LayeredConnectionSocketFactory sslSocketFactory = builder.getSslSocketFactory();\n    final SocketConfig defaultSocketConfig = builder.getDefaultSocketConfig();\n    final ConnectionConfig defaultConnectionConfig = builder.getDefaultConnectionConfig();\n    final boolean systemProperties = builder.isSystemProperties();\n    final int maxConnTotal = builder.getMaxConnTotal();\n    final int maxConnPerRoute = builder.getMaxConnPerRoute();\n    HostnameVerifier hostnameVerifier = builder.getHostnameVerifier();\n    final SSLContext sslcontext = builder.getSslContext();\n    final DnsResolver dnsResolver = builder.getDnsResolver();\n    final long connTimeToLive = builder.getConnTimeToLive();\n    final TimeUnit connTimeToLiveTimeUnit = builder.getConnTimeToLiveTimeUnit();\n    if (sslSocketFactory == null) {\n      final String[] supportedProtocols=systemProperties ? split(System.getProperty(\"https.protocols\")) : null;\n      final String[] supportedCipherSuites=systemProperties ? split(System.getProperty(\"https.cipherSuites\")) : null;\n      if (hostnameVerifier == null) {\n        hostnameVerifier = new DefaultHostnameVerifier(publicSuffixMatcher);\n      }\n      if (sslcontext == null) {\n        if (systemProperties) {\n          sslSocketFactory = new SSLConnectionSocketFactory((SSLSocketFactory) SSLSocketFactory.getDefault(), supportedProtocols, supportedCipherSuites, hostnameVerifier);\n        }\n        else {\n          sslSocketFactory = new SSLConnectionSocketFactory(SSLContexts.createDefault(), hostnameVerifier);\n        }\n      }\n      else {\n        sslSocketFactory = new SSLConnectionSocketFactory(sslcontext, supportedProtocols, supportedCipherSuites, hostnameVerifier);\n      }\n    }\n    final PoolingHttpClientConnectionManager poolingmgr = new PoolingHttpClientConnectionManager(RegistryBuilder.<ConnectionSocketFactory>create().register(\"http\", new SocksConnectionSocketFactory()).register(\"https\", sslSocketFactory).build(), null, null, dnsResolver, connTimeToLive, connTimeToLiveTimeUnit != null ? connTimeToLiveTimeUnit : TimeUnit.MILLISECONDS);\n    if (defaultSocketConfig != null) {\n      poolingmgr.setDefaultSocketConfig(defaultSocketConfig);\n    }\n    if (defaultConnectionConfig != null) {\n      poolingmgr.setDefaultConnectionConfig(defaultConnectionConfig);\n    }\n    if (systemProperties) {\n      String s = System.getProperty(\"http.keepAlive\", \"true\");\n      if (\"true\".equalsIgnoreCase(s)) {\n        s = System.getProperty(\"http.maxConnections\", \"5\");\n        final int max = Integer.parseInt(s);\n        poolingmgr.setDefaultMaxPerRoute(max);\n        poolingmgr.setMaxTotal(2 * max);\n      }\n    }\n    if (maxConnTotal > 0) {\n      poolingmgr.setMaxTotal(maxConnTotal);\n    }\n    if (maxConnPerRoute > 0) {\n      poolingmgr.setDefaultMaxPerRoute(maxConnPerRoute);\n    }\n    return poolingmgr;\n  }\n  catch (final IllegalAccessException e) {\n    throw new RuntimeException(e);\n  }\n}"
+    }],
+    "Old_Method": "/** \n * Has the exact logic in  {@link HttpClientBuilder#build()} which sets the {@code connManager} part,but with the ability to configure  {@code socketFactory}.\n */\nprivate static PoolingHttpClientConnectionManager createConnectionManager(final HttpClientBuilder builder){\n  try {\n    PublicSuffixMatcher publicSuffixMatcher=getField(builder,\"publicSuffixMatcher\");\n    if (publicSuffixMatcher == null) {\n      publicSuffixMatcher=PublicSuffixMatcherLoader.getDefault();\n    }\n    LayeredConnectionSocketFactory sslSocketFactory=getField(builder,\"sslSocketFactory\");\n    final SocketConfig defaultSocketConfig=getField(builder,\"defaultSocketConfig\");\n    final ConnectionConfig defaultConnectionConfig=getField(builder,\"defaultConnectionConfig\");\n    final boolean systemProperties=getField(builder,\"systemProperties\");\n    final int maxConnTotal=getField(builder,\"maxConnTotal\");\n    final int maxConnPerRoute=getField(builder,\"maxConnPerRoute\");\n    HostnameVerifier hostnameVerifier=getField(builder,\"hostnameVerifier\");\n    final SSLContext sslcontext=getField(builder,\"sslContext\");\n    final DnsResolver dnsResolver=getField(builder,\"dnsResolver\");\n    final long connTimeToLive=getField(builder,\"connTimeToLive\");\n    final TimeUnit connTimeToLiveTimeUnit=getField(builder,\"connTimeToLiveTimeUnit\");\n    if (sslSocketFactory == null) {\n      final String[] supportedProtocols=systemProperties ? split(System.getProperty(\"https.protocols\")) : null;\n      final String[] supportedCipherSuites=systemProperties ? split(System.getProperty(\"https.cipherSuites\")) : null;\n      if (hostnameVerifier == null) {\n        hostnameVerifier=new DefaultHostnameVerifier(publicSuffixMatcher);\n      }\n      if (sslcontext == null) {\n        if (systemProperties) {\n          sslSocketFactory=new SSLConnectionSocketFactory((SSLSocketFactory)SSLSocketFactory.getDefault(),supportedProtocols,supportedCipherSuites,hostnameVerifier);\n        }\n else {\n          sslSocketFactory=new SSLConnectionSocketFactory(SSLContexts.createDefault(),hostnameVerifier);\n        }\n      }\n else {\n        sslSocketFactory=new SSLConnectionSocketFactory(sslcontext,supportedProtocols,supportedCipherSuites,hostnameVerifier);\n      }\n    }\n    final PoolingHttpClientConnectionManager poolingmgr=new PoolingHttpClientConnectionManager(RegistryBuilder.<ConnectionSocketFactory>create().register(\"http\",new SocksConnectionSocketFactory()).register(\"https\",sslSocketFactory).build(),null,null,dnsResolver,connTimeToLive,connTimeToLiveTimeUnit != null ? connTimeToLiveTimeUnit : TimeUnit.MILLISECONDS);\n    if (defaultSocketConfig != null) {\n      poolingmgr.setDefaultSocketConfig(defaultSocketConfig);\n    }\n    if (defaultConnectionConfig != null) {\n      poolingmgr.setDefaultConnectionConfig(defaultConnectionConfig);\n    }\n    if (systemProperties) {\n      String s=System.getProperty(\"http.keepAlive\",\"true\");\n      if (\"true\".equalsIgnoreCase(s)) {\n        s=System.getProperty(\"http.maxConnections\",\"5\");\n        final int max=Integer.parseInt(s);\n        poolingmgr.setDefaultMaxPerRoute(max);\n        poolingmgr.setMaxTotal(2 * max);\n      }\n    }\n    if (maxConnTotal > 0) {\n      poolingmgr.setMaxTotal(maxConnTotal);\n    }\n    if (maxConnPerRoute > 0) {\n      poolingmgr.setDefaultMaxPerRoute(maxConnPerRoute);\n    }\n    return poolingmgr;\n  }\n catch (  final IllegalAccessException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/HttpWebConnection.java",
+    "Start": 54222,
+    "Stop": 58735,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "createConnectionManager"
+}

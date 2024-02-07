@@ -1,0 +1,12 @@
+{
+    "Method_Improvements": [{
+        "details": "Expected a ',' or '}' at 461 [character 17 line 8]",
+        "error": "An unexpected error occurred"
+    }],
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

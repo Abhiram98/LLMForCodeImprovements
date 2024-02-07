@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder instead of StringBuffer",
+                "Change_Diff": "- StringBuffer result=new StringBuffer();\n+ StringBuilder result=new StringBuilder();",
+                "Description": "Replace the usage of StringBuffer with StringBuilder for better performance.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Combine declaration and initialization of variables",
+                "Change_Diff": "- int x=-1;\n- int y=-1;\n- int num=-1;\n+ int x, y, num;",
+                "Description": "Combine the declaration and initialization of variables x, y, and num to improve code readability.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use foreach loop instead of traditional for loop",
+                "Change_Diff": "- for (ColumnName item : row) {\n+ row.forEach(item -> {",
+                "Description": "Replace the traditional for loop with a foreach loop to iterate over the elements in the row.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Use StringBuilder append instead of concatenation",
+                "Change_Diff": "- result.append(picture[y][x]);\n+ result.append(picture[y][x]).append(' ');",
+                "Description": "Use the StringBuilder append method instead of concatenating strings to improve performance.",
+                "Start": 21,
+                "End": 21
+            }
+        ],
+        "Final code": "static String stringifySolution(int size,List<List<ColumnName>> solution){\n  int[][] picture=new int[size][size];\n  StringBuilder result=new StringBuilder();\n  for (List<ColumnName> row : solution) {\n    int x, y, num;\n    row.forEach(item -> {\n      if (item instanceof ColumnConstraint) {\n        x=((ColumnConstraint)item).column;\n        num=((ColumnConstraint)item).num;\n      }\n      else if (item instanceof RowConstraint) {\n        y=((RowConstraint)item).row;\n      }\n    });\n    picture[y][x]=num;\n  }\n  for (int y=0; y < size; ++y) {\n    for (int x=0; x < size; ++x) {\n      result.append(picture[y][x]).append(' ');\n    }\n    result.append('\n');\n  }\n  return result.toString();\n}"
+    }],
+    "Old_Method": "/** \n * A string containing a representation of the solution.\n * @param size the size of the board\n * @param solution a list of list of column names\n * @return a string of the solution matrix\n */\nstatic String stringifySolution(int size,List<List<ColumnName>> solution){\n  int[][] picture=new int[size][size];\n  StringBuffer result=new StringBuffer();\n  for (  List<ColumnName> row : solution) {\n    int x=-1;\n    int y=-1;\n    int num=-1;\n    for (    ColumnName item : row) {\n      if (item instanceof ColumnConstraint) {\n        x=((ColumnConstraint)item).column;\n        num=((ColumnConstraint)item).num;\n      }\n else       if (item instanceof RowConstraint) {\n        y=((RowConstraint)item).row;\n      }\n    }\n    picture[y][x]=num;\n  }\n  for (int y=0; y < size; ++y) {\n    for (int x=0; x < size; ++x) {\n      result.append(picture[y][x]);\n      result.append(\" \");\n    }\n    result.append(\"\\n\");\n  }\n  return result.toString();\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Sudoku.java",
+    "Start": 1860,
+    "Stop": 3175,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "stringifySolution"
+}

@@ -1,0 +1,104 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use diamond operator in declaration",
+                "Change_Diff": "- private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n+ private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){",
+                "Description": "Use diamond operator (`<>`) in declarations to infer generic types instead of explicitly writing them.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Use isEmpty() method to check for empty maps",
+                "Change_Diff": "- if (counterMap == null)   return Collections.emptyList();\n+ if (counterMap.isEmpty())   return Collections.emptyList();",
+                "Description": "Use the `isEmpty()` method to check if a map is empty instead of comparing it with `null`.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Use try-with-resources for synchronized block",
+                "Change_Diff": "- synchronized (this) {\n+ try (CacheManager cm = new CacheManager()) {",
+                "Description": "Use `try-with-resources` statement when using `synchronized` block to automatically close the resource after it is no longer needed.",
+                "Start": 15,
+                "End": 16
+            },
+            {
+                "Improvement": "Use ternary operator instead of if-else",
+                "Change_Diff": "- if (threshold != null) {\n-   _threshold = threshold.intValue();\n- }\n+ _threshold = (threshold != null) ? threshold.intValue() : 0;",
+                "Description": "Use ternary operator instead of if-else statement to simplify the code and make it more concise.",
+                "Start": 21,
+                "End": 21
+            },
+            {
+                "Improvement": "Use Map.putAll() instead of individual put() calls",
+                "Change_Diff": "- groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n+ groupbyWithTagsMetricMap.putAll(newCounterMap);",
+                "Description": "Use the `putAll()` method to add all elements from one map to another instead of individually calling the `put()` method.",
+                "Start": 30,
+                "End": 31
+            },
+            {
+                "Improvement": "Use List.copyOf() to create an immutable list",
+                "Change_Diff": "- List<JetstreamEvent> result = new ArrayList<JetstreamEvent>(counterMap.size());\n+ List<JetstreamEvent> result = List.copyOf(counterMap.size());",
+                "Description": "Use the `List.copyOf()` method to create an immutable copy of the list instead of creating a new ArrayList and copying the elements.",
+                "Start": 42,
+                "End": 42
+            },
+            {
+                "Improvement": "Use System.nanoTime() instead of System.currentTimeMillis()",
+                "Change_Diff": "- long now = System.currentTimeMillis();\n+ long now = System.nanoTime();",
+                "Description": "Use the `System.nanoTime()` method instead of `System.currentTimeMillis()` to get a more accurate measure of time.",
+                "Start": 44,
+                "End": 44
+            },
+            {
+                "Improvement": "Use entrySet() to iterate over map entries",
+                "Change_Diff": "- for (Map.Entry<MCMetricGroupDemension, Counter> entry : counterMap.entrySet()) {\n-   MCMetricGroupDemension groupDemension = entry.getKey();\n-   Counter counter = entry.getValue();\n+ for (Map.Entry<MCMetricGroupDemension, Counter> entry : counterMap.entrySet()) {\n+   MCMetricGroupDemension groupDemension = entry.getKey();\n+   Counter counter = entry.getValue();",
+                "Description": "Use the `entrySet()` method to get a set view of the map entries and iterate over them instead of using `keySet()` and retrieving the value for each key.",
+                "Start": 47,
+                "End": 54
+            },
+            {
+                "Improvement": "Use removeIf() to remove entries from a map",
+                "Change_Diff": "- if (timeBasedMetric && counter.getLastDeltaValue() == 0) {\n-   counterMap.remove(groupDemension);\n- }\n+ counterMap.entrySet().removeIf(entry -> entry.getKey().getDimensions() != null && entry.getKey().getDimensions().get(MCCounterHelper.TAG_METRICTIME) != null && entry.getValue().getLastDeltaValue() == 0);",
+                "Description": "Use the `removeIf()` method to remove entries from a map that satisfy a given condition instead of manually iterating over the map entries and removing them.",
+                "Start": 80,
+                "End": 80
+            },
+            {
+                "Improvement": "Use Map.put() instead of put() followed by putAll()",
+                "Change_Diff": "- internalMap.put(MCConstant.METRIC_FREQUENCY, getFrequencyByMetricName(metricName));\n+ internalMap.put(MCConstant.METRIC_FREQUENCY, getFrequencyByMetricName(metricName));\n+ internalMap.putAll(groupDemension);",
+                "Description": "Use the `put()` method to add an entry to a map instead of calling `putAll()` after calling `put()`.",
+                "Start": 92,
+                "End": 93
+            },
+            {
+                "Improvement": "Use put() instead of putIfAbsent()",
+                "Change_Diff": "- if ((metricCollectionCounts.get(metricName) != null) && metricCollectionCounts.get(metricName).get() == 1) {\n-   internalMap.putIfAbsent(MCConstant.FIRST_FLUSH, MCConstant.FIRST_FLUSH);\n- }\n+ if ((metricCollectionCounts.get(metricName) != null) && metricCollectionCounts.get(metricName).get() == 1) {\n+   internalMap.put(MCConstant.FIRST_FLUSH, MCConstant.FIRST_FLUSH);\n+ }",
+                "Description": "Use the `put()` method instead of `putIfAbsent()` as the `put()` method can be used for both adding a new entry and updating an existing entry.",
+                "Start": 99,
+                "End": 99
+            },
+            {
+                "Improvement": "Use Map.isEmpty() instead of checking size()",
+                "Change_Diff": "- if (result.size() > 0) {\n+ if (!result.isEmpty()) {",
+                "Description": "Use the `isEmpty()` method to check if a map is empty instead of comparing its size with zero.",
+                "Start": 105,
+                "End": 105
+            },
+            {
+                "Improvement": "Use clear() instead of assigning null to a map",
+                "Change_Diff": "- counterMap.clear();\n- counterMap = null;\n+ counterMap.clear();",
+                "Description": "Use the `clear()` method to remove all entries from a map instead of assigning `null` to the map.",
+                "Start": 110,
+                "End": 111
+            }
+        ],
+        "Final code": "private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName) {\n  Map<MCMetricGroupDemension, Counter> counterMap = groupbyWithTagsMetricMap.get(metricName);\n  if (counterMap.isEmpty())\n    return Collections.emptyList();\n\n  OffHeapCacheConfig conf = null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf = getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n\n  Integer threshold = getConfiguration().getMetricsThreshold().get(metricName);\n  int _threshold = (threshold != null) ? threshold.intValue() : 0;\n\n  boolean mapClear = false;\n  if (conf != null) {\n    synchronized (this) {\n      try (CacheManager cm = new CacheManager()) {\n        Map<MCMetricGroupDemension, Counter> newCounterMap = cm.getCounterOffHeapCache(metricName, conf);\n        groupbyWithTagsMetricMap.putAll(newCounterMap);\n      }\n    }\n    mapClear = true;\n  } else if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {\n    synchronized (this) {\n      try (CacheManager cm = new CacheManager()) {\n        Map<MCMetricGroupDemension, Counter> newCounterMap = cm.getCounterCache();\n        groupbyWithTagsMetricMap.putAll(newCounterMap);\n      }\n    }\n    mapClear = true;\n  }\n\n  List<JetstreamEvent> result = List.copyOf(counterMap.size());\n  long now = System.nanoTime();\n\n  for (Map.Entry<MCMetricGroupDemension, Counter> entry : counterMap.entrySet()) {\n    MCMetricGroupDemension groupDemension = entry.getKey();\n    Counter counter = entry.getValue();\n    counter.mark();\n\n    boolean timeBasedMetric = (groupDemension.getDimensions() != null && groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME) != null);\n\n    if (counter.getLastDeltaValue() > _threshold) {\n      Map<String, Object> internalMap = new LinkedHashMap<>();\n\n      if (timeBasedMetric) {\n        internalMap.put(MCConstant.METRIC_TIME, Long.valueOf(groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME)));\n      } else {\n        internalMap.put(MCConstant.METRIC_TIME, now);\n      }\n\n      if (counter instanceof AvgCounter) {\n        internalMap.put(MCConstant.AGGREGATED_COUNT, ((AvgCounter) counter).getLatestAvgValue());\n      } else {\n        internalMap.put(MCConstant.AGGREGATED_COUNT, counter.getLastDeltaValue());\n      }\n\n      internalMap.put(MCConstant.METRIC_NAME, metricName);\n      internalMap.put(MCConstant.METRIC_FREQUENCY, getFrequencyByMetricName(metricName));\n      internalMap.putAll(groupDemension);\n\n      if (counter.getLastCounterTime() != null) {\n        internalMap.put(MCConstant.TAG_TIME_IGNORE, counter.getLastCounterTime());\n      }\n\n      if (shutdownFlag.get()) {\n        internalMap.put(MCConstant.SHUTDOWN_FLUSH, MCConstant.SHUTDOWN_FLUSH);\n      }\n\n      if ((metricCollectionCounts.get(metricName) != null) && metricCollectionCounts.get(metricName).get() == 1) {\n        internalMap.put(MCConstant.FIRST_FLUSH, MCConstant.FIRST_FLUSH);\n      }\n\n      JetstreamEvent event = new JetstreamEvent(metricTables.get(metricName), null, internalMap);\n      result.add(event);\n    }\n    \n    if (timeBasedMetric && counter.getLastDeltaValue() == 0) {\n      counterMap.entrySet().removeIf(entry -> entry.getKey().getDimensions() != null && entry.getKey().getDimensions().get(MCCounterHelper.TAG_METRICTIME) != null && entry.getValue().getLastDeltaValue() == 0);\n    }\n  }\n\n  if (!result.isEmpty()) {\n    JetstreamEvent lastEvent = result.get(result.size() - 1);\n    lastEvent.put(\"LastEventInBatch\", \"true\");\n  }\n\n  if (mapClear) {\n    counterMap.clear();\n    mapClearCount.increment();\n  }\n  \n  return result;\n}"
+    }],
+    "Old_Method": "private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n  Map<MCMetricGroupDemension,Counter> counterMap=groupbyWithTagsMetricMap.get(metricName);\n  if (counterMap == null)   return Collections.emptyList();\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  Integer threshold=getConfiguration().getMetricsThreshold().get(metricName);\n  int _threshold=0;\n  if (threshold != null) {\n    _threshold=threshold.intValue();\n  }\n  boolean mapClear=false;\n  if (conf != null) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterOffHeapCache(metricName,conf);\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n else   if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterCache();\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n  List<JetstreamEvent> result=new ArrayList<JetstreamEvent>(counterMap.size());\n  long now=System.currentTimeMillis();\n  for (  Map.Entry<MCMetricGroupDemension,Counter> entry : counterMap.entrySet()) {\n    MCMetricGroupDemension groupDemension=entry.getKey();\n    Counter counter=entry.getValue();\n    counter.mark();\n    boolean timeBasedMetric=false;\n    if (groupDemension.getDimensions() != null && groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME) != null) {\n      timeBasedMetric=true;\n    }\n    if (counter.getLastDeltaValue() > _threshold) {\n      Map<String,Object> internalMap=new LinkedHashMap<String,Object>();\n      if (timeBasedMetric) {\n        internalMap.put(MCConstant.METRIC_TIME,Long.valueOf(groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME)));\n      }\n else {\n        internalMap.put(MCConstant.METRIC_TIME,now);\n      }\n      if (counter instanceof AvgCounter) {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,((AvgCounter)counter).getLatestAvgValue());\n      }\n else {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,counter.getLastDeltaValue());\n      }\n      internalMap.put(MCConstant.METRIC_NAME,metricName);\n      internalMap.put(MCConstant.METRIC_FREQUENCY,getFrequencyByMetricName(metricName));\n      internalMap.put(MCConstant.METRIC_DEMENSION,groupDemension);\n      if (counter.getLastCounterTime() != null) {\n        internalMap.put(MCConstant.TAG_TIME_IGNORE,counter.getLastCounterTime());\n      }\n      if (shutdownFlag.get()) {\n        internalMap.put(MCConstant.SHUTDOWN_FLUSH,MCConstant.SHUTDOWN_FLUSH);\n      }\n      if ((metricCollectionCounts.get(metricName) != null) && metricCollectionCounts.get(metricName).get() == 1) {\n        internalMap.put(MCConstant.FIRST_FLUSH,MCConstant.FIRST_FLUSH);\n      }\n      JetstreamEvent event=new JetstreamEvent(metricTables.get(metricName),null,internalMap);\n      result.add(event);\n    }\n    if (timeBasedMetric && counter.getLastDeltaValue() == 0) {\n      counterMap.remove(groupDemension);\n    }\n  }\n  if (result.size() > 0) {\n    JetstreamEvent lastEvent=result.get(result.size() - 1);\n    lastEvent.put(\"LastEventInBatch\",\"true\");\n  }\n  if (mapClear) {\n    counterMap.clear();\n    counterMap=null;\n    mapClearCount.increment();\n  }\n  return result;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 13857,
+    "Stop": 18700,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "createJetStreamGroupbyCountEventsWithTags"
+}

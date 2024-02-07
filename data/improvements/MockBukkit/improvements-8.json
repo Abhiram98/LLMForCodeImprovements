@@ -1,0 +1,62 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Rename variables for clarity",
+                "Change_Diff": "- AtomicBoolean executed=new AtomicBoolean();\n+ AtomicBoolean isExecuted=new AtomicBoolean();\n- AtomicBoolean completed=new AtomicBoolean();\n+ AtomicBoolean isCompleted=new AtomicBoolean();\n- AtomicBoolean notPrimaryThread=new AtomicBoolean();\n+ AtomicBoolean isNotPrimaryThread=new AtomicBoolean();",
+                "Description": "Rename the variables executed, completed, and notPrimaryThread to isExecuted, isCompleted, and isNotPrimaryThread respectively for better clarity and readability.",
+                "Start": 2,
+                "End": 5
+            },
+            {
+                "Improvement": "Use lambda expression",
+                "Change_Diff": "- new Thread(new Runnable() {\n+ new Thread(() -> {",
+                "Description": "Replace the anonymous inner class and its Runnable implementation with a lambda expression for a more concise and modern syntax.",
+                "Start": 9,
+                "End": 10
+            },
+            {
+                "Improvement": "Improve variable naming",
+                "Change_Diff": "- Thread thread=new Thread(() -> {\n+ Thread asyncThread=new Thread(() -> {",
+                "Description": "Rename the variable 'thread' to 'asyncThread' for better clarity in relation to its purpose.",
+                "Start": 13,
+                "End": 13
+            },
+            {
+                "Improvement": "Extract task execution to a separate method",
+                "Change_Diff": "+ private void executeTask(Runnable task) {\n+   try {\n+     scheduler.runTaskLater(null, bukkitTask -> {\n+       if (mainThread != Thread.currentThread()) {\n+         isNotPrimaryThread.set(true);\n+       }\n+       isExecuted.set(true);\n+     }, 1);\n+   }\n+   finally {\n+     isCompleted.set(true);\n+   }\n+ }\n\n @Test\n void registerOneTasksAsynchronously() {\n-   final Thread mainThread=Thread.currentThread();\n+   mainThread = Thread.currentThread();\n    AtomicBoolean isExecuted = new AtomicBoolean();\n    AtomicBoolean isCompleted = new AtomicBoolean();\n    AtomicBoolean isNotPrimaryThread = new AtomicBoolean();\n\n-   Thread asyncThread=new Thread(() -> {\n+   Thread asyncThread=new Thread(() -> {\n      executeTask(() -> {\n        if (mainThread != Thread.currentThread()) {\n          isNotPrimaryThread.set(true);\n        }\n        isExecuted.set(true);\n      });\n    });",
+                "Description": "Extract the task execution logic to a separate method, 'executeTask', to improve code organization and readability.",
+                "Start": 12,
+                "End": 76
+            },
+            {
+                "Improvement": "Remove redundant imports",
+                "Change_Diff": "- import java.util.concurrent.atomic.AtomicBoolean;\n\n+ import java.util.concurrent.atomic.AtomicBoolean;\n",
+                "Description": "Remove the duplicate import statement to improve code cleanliness.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use constants for magic numbers",
+                "Change_Diff": "- scheduler.runTaskLater(null, bukkitTask -> {\n+ scheduler.runTaskLater(null, bukkitTask -> {\n",
+                "Description": "Replace the magic number 1 with a constant variable for better code clarity and maintainability.",
+                "Start": 22,
+                "End": 22
+            },
+            {
+                "Improvement": "Declare and initialize startTime variable closer to its usage",
+                "Change_Diff": "- long startTime = System.currentTimeMillis();\n... \n+ while (!completetionStatus.get()) {\n+   long startTime = System.currentTimeMillis();",
+                "Description": "Declare and initialize the startTime variable closer to its usage to improve code readability and reduce confusion.",
+                "Start": 27,
+                "End": 27
+            }
+        ],
+        "Final code": "@Test void registerOneTasksAsynchronously() {\n+ final Thread mainThread = Thread.currentThread();\n\n+ AtomicBoolean isExecuted = new AtomicBoolean();\n+ AtomicBoolean isCompleted = new AtomicBoolean();\n+ AtomicBoolean isNotPrimaryThread = new AtomicBoolean();\n\n+ private void executeTask(Runnable task) {\n+   try {\n+     scheduler.runTaskLater(null, bukkitTask -> {\n+       if (mainThread != Thread.currentThread()) {\n+         isNotPrimaryThread.set(true);\n+       }\n+       isExecuted.set(true);\n+     }, DELAY);\n+   }\n+   finally {\n+     isCompleted.set(true);\n+   }\n+ }\n\n+ Thread asyncThread=new Thread(() -> {\n+   executeTask(() -> {\n+     if (mainThread != Thread.currentThread()) {\n+       isNotPrimaryThread.set(true);\n+     }\n+     isExecuted.set(true);\n+   });\n+ });\n+ \n+ asyncThread.start();\n+ long startTime = System.currentTimeMillis();\n+ while (!isCompleted.get()) {\n+   checkTimeout(startTime, asyncThread);\n+   scheduler.performOneTick();\n+   Thread.yield();\n+ }\n+ while (!isExecuted.get()) {\n+   checkTimeout(startTime);\n+   scheduler.performOneTick();\n+ }\n\n+ assertTrue(isExecuted.get());\n+ assertFalse(isNotPrimaryThread.get());\n}"
+    }],
+    "Old_Method": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,1);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertTrue(executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n",
+    "File_Path": "MockBukkit/src/test/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMockTest.java",
+    "Start": 14506,
+    "Stop": 15448,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "registerOneTasksAsynchronously"
+}

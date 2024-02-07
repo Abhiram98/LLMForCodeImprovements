@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use foreach loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < u; i++) {\n+ for (int num : arr) {",
+                "Description": "Instead of using a traditional for loop to iterate over the 'arr' array, use a foreach loop.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Use 'try-with-resources' for WritableHandle",
+                "Change_Diff": "- try (WritableHandle wdh = WritableMemory.allocateDirect(bytes)) {\n+ try (WritableHandle wdh = WritableMemory.allocateDirect(bytes)){",
+                "Description": "Use the 'try-with-resources' statement for 'WritableHandle' to automatically close the resource after use.",
+                "Start": 26,
+                "End": 26
+            }
+        ],
+        "Final code": "public void checkHeapifyWrap(int k, int u, boolean ordered) {\n  UpdateSketch usk = UpdateSketch.builder().setNominalEntries(k).build();\n  for (int num : arr) {\n    usk.update(num);\n  }\n  CompactSketch refSk = usk.compact(ordered, null);\n  byte[] barr = refSk.toByteArray();\n  Memory srcMem = Memory.wrap(barr);\n  CompactSketch testSk = (CompactSketch) Sketch.heapify(srcMem);\n  checkByRange(refSk, testSk, u, ordered);\n  byte[] byteArray = refSk.toByteArray();\n  Memory heapROMem = Memory.wrap(byteArray);\n  testSk = (CompactSketch) Sketch.heapify(heapROMem);\n  checkByRange(refSk, testSk, u, ordered);\n  int bytes = usk.getCompactBytes();\n  try (WritableHandle wdh = WritableMemory.allocateDirect(bytes)) {\n    WritableMemory directMem = wdh.getWritable();\n    refSk = usk.compact(ordered, directMem);\n    testSk = (CompactSketch) Sketch.wrap(directMem);\n    checkByRange(refSk, testSk, u, ordered);\n    testSk = (CompactSketch) Sketch.wrap(directMem);\n    checkByRange(refSk, testSk, u, ordered);\n  } catch (final Exception e) {\n    throw new RuntimeException(e);\n  }\n}"
+    }],
+    "Old_Method": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/CompactSketchTest.java",
+    "Start": 1975,
+    "Stop": 3351,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkHeapifyWrap"
+}

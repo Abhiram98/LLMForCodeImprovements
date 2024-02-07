@@ -1,0 +1,97 @@
+[
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Consolidate multiple formLogin() calls",
+                    "Change_Diff": "- http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n+ http.formLogin()\n                .loginPage(\"/login.jsp\")\n                .loginProcessingUrl(\"/login\")\n                .defaultSuccessUrl(\"/home\")\n                .failureUrl(\"/?error=1\");",
+                    "Description": "Instead of calling formLogin() multiple times, consolidate them into a single call with method chaining.",
+                    "Start": 32,
+                    "End": 32
+                },
+                {
+                    "Improvement": "Consolidate multiple logout() calls",
+                    "Change_Diff": "- http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n+ http.logout()\n                .logoutUrl(\"/logout\")\n                .logoutSuccessUrl(\"/\")\n                .deleteCookies(\"JSESSIONID\");",
+                    "Description": "Instead of calling logout() multiple times, consolidate them into a single call with method chaining.",
+                    "Start": 33,
+                    "End": 33
+                },
+                {
+                    "Improvement": "Consolidate multiple rememberMe() calls",
+                    "Change_Diff": "- http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n+ http.rememberMe()\n                .tokenValiditySeconds(1209600)\n                .rememberMeParameter(\"remember-me\");",
+                    "Description": "Instead of calling rememberMe() multiple times, consolidate them into a single call with method chaining.",
+                    "Start": 34,
+                    "End": 34
+                },
+                {
+                    "Improvement": "Use lambda expression for HeaderWriter",
+                    "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){\n    public void writeHeaders(HttpServletRequest request,HttpServletResponse response){\n        response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n        response.setHeader(\"Expires\",\"0\");\n        response.setHeader(\"Pragma\",\"no-cache\");\n        response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n        response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n        response.setHeader(\"x-content-type-options\",\"nosniff\");\n    }\n}\n;\n+ HeaderWriter headerWriter = (request, response) -> {\n            response.setHeader(\"Cache-Control\", \"no-cache, no-store, max-age=0, must-revalidate\");\n            response.setHeader(\"Expires\", \"0\");\n            response.setHeader(\"Pragma\", \"no-cache\");\n            response.setHeader(\"X-Frame-Options\", \"SAMEORIGIN\");\n            response.setHeader(\"X-XSS-Protection\", \"1; mode=block\");\n            response.setHeader(\"x-content-type-options\", \"nosniff\");\n        };",
+                    "Description": "Use a lambda expression for the HeaderWriter instead of creating an anonymous class.",
+                    "Start": 37,
+                    "End": 37
+                }
+            ],
+            "Final code": "@Override\nprotected void configure(HttpSecurity http) throws Exception {\n    http.formLogin()\n        .loginPage(\"/login.jsp\")\n        .loginProcessingUrl(\"/login\")\n        .defaultSuccessUrl(\"/home\")\n        .failureUrl(\"/?error=1\");\n\n    http.logout()\n        .logoutUrl(\"/logout\")\n        .logoutSuccessUrl(\"/\")\n        .deleteCookies(\"JSESSIONID\");\n\n    http.rememberMe()\n        .tokenValiditySeconds(1209600)\n        .rememberMeParameter(\"remember-me\");\n\n    CharacterEncodingFilter encodeFilter = new CharacterEncodingFilter();\n    encodeFilter.setEncoding(\"utf-8\");\n    encodeFilter.setForceEncoding(true);\n    http.addFilterBefore(encodeFilter, CsrfFilter.class);\n\n    http.headers().disable();\n\n    HeaderWriter headerWriter = (request, response) -> {\n        response.setHeader(\"Cache-Control\", \"no-cache, no-store, max-age=0, must-revalidate\");\n        response.setHeader(\"Expires\", \"0\");\n        response.setHeader(\"Pragma\", \"no-cache\");\n        response.setHeader(\"X-Frame-Options\", \"SAMEORIGIN\");\n        response.setHeader(\"X-XSS-Protection\", \"1; mode=block\");\n        response.setHeader(\"x-content-type-options\", \"nosniff\");\n    };\n    List<HeaderWriter> headerWriterFilterList = new ArrayList<>();\n    headerWriterFilterList.add(headerWriter);\n    HeaderWriterFilter headerFilter = new HeaderWriterFilter(headerWriterFilterList);\n    http.addFilter(headerFilter);\n}"
+        }],
+        "Old_Method": "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n  http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n  http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter=new HeaderWriter(){\n    public void writeHeaders(    HttpServletRequest request,    HttpServletResponse response){\n      response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n      response.setHeader(\"Expires\",\"0\");\n      response.setHeader(\"Pragma\",\"no-cache\");\n      response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n      response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n      response.setHeader(\"x-content-type-options\",\"nosniff\");\n    }\n  }\n;\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}\n",
+        "File_Path": "web/back/src/main/java/com/aitongyi/web/back/conf/SecurityConfig.java",
+        "Start": 1726,
+        "Stop": 3424,
+        "Project_Name": "data/projects/web",
+        "Method_Name": "configure"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use try-with-resources to automatically close the Jedis resource",
+                    "Change_Diff": "- jedis=jedisPool.getResource();\n+ try (Jedis jedis = jedisPool.getResource()) {",
+                    "Description": "Instead of manually closing the Jedis resource, use try-with-resources to automatically close it.",
+                    "Start": 5,
+                    "End": 5
+                },
+                {
+                    "Improvement": "Remove the finally block for closing Jedis",
+                    "Change_Diff": "- finally {\n-     if (jedis != null) {\n-         jedis.close();\n-     }\n- }",
+                    "Description": "With try-with-resources, there is no need for the finally block to close the Jedis resource.",
+                    "Start": 9,
+                    "End": 13
+                }
+            ],
+            "Final code": "/**\n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  try (Jedis jedis = jedisPool.getResource()) {\n    jedis.del(key);\n  }\n}"
+        }],
+        "Old_Method": "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  Jedis jedis=null;\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  }\n  finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}\n",
+        "File_Path": "web/cache/src/main/java/com/aitongyi/web/cache/CacheService.java",
+        "Start": 1034,
+        "Stop": 1334,
+        "Project_Name": "data/projects/web",
+        "Method_Name": "del"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Remove unnecessary logging statement",
+                    "Change_Diff": "- logger.info(\"mysql url:\" + dbUrl);\n+ // logger.info(\"mysql url:\" + dbUrl);",
+                    "Description": "There is a logging statement that prints the MySQL URL. This statement can be removed as it does not provide any useful information.",
+                    "Start": 6,
+                    "End": 6
+                },
+                {
+                    "Improvement": "Use try-with-resources for DataSource creation",
+                    "Change_Diff": "- BasicDataSource dataSource=new BasicDataSource();\n+ try (BasicDataSource dataSource = new BasicDataSource()) {",
+                    "Description": "Using try-with-resources for DataSource creation ensures that the DataSource is closed properly after its use.",
+                    "Start": 7,
+                    "End": 7
+                }
+            ],
+            "Final code": "@Bean(destroyMethod=\"close\")\npublic DataSource dataSource(){\n  // logger.info(\"mysql url:\" + dbUrl);\n  try (BasicDataSource dataSource = new BasicDataSource()) {\n    dataSource.setDriverClassName(jdbcDriver);\n    dataSource.setUrl(dbUrl);\n    dataSource.setUsername(username);\n    dataSource.setPassword(password);\n    dataSource.setMaxTotal(maxTotal);\n    dataSource.setMinIdle(minIdle);\n    dataSource.setMaxIdle(maxIdle);\n    return dataSource;\n  }\n}"
+        }],
+        "Old_Method": "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(\"mysql url:\" + dbUrl);\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}\n",
+        "File_Path": "web/dao/src/main/java/com/aitongyi/web/dao/conf/DatabaseConfig.java",
+        "Start": 1211,
+        "Stop": 1703,
+        "Project_Name": "data/projects/web",
+        "Method_Name": "dataSource"
+    }
+]

@@ -1,0 +1,234 @@
+[
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 5789 [character 2647 line 18]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "@Nullable private MappingInfo getMappingInfo(Method method,Object handler,Class<?> handlerType){\n  Set<Annotation> annotations=AnnotatedElementUtils.findAllMergedAnnotations(method,new LinkedHashSet<>(Arrays.asList(BatchMapping.class,SchemaMapping.class)));\n  if (annotations.isEmpty()) {\n    return null;\n  }\n  if (annotations.size() != 1) {\n    throw new IllegalArgumentException(\"Expected either @BatchMapping or @SchemaMapping, not both: \" + method.toGenericString());\n  }\n  String typeName;\n  String field;\n  boolean batchMapping=false;\n  int batchSize=-1;\n  HandlerMethod handlerMethod=createHandlerMethod(method,handler,handlerType);\n  Annotation annotation=annotations.iterator().next();\n  if (annotation instanceof SchemaMapping) {\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n  }\n else {\n    BatchMapping mapping=(BatchMapping)annotation;\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n    batchMapping=true;\n    batchSize=mapping.maxBatchSize();\n  }\n  if (!StringUtils.hasText(typeName)) {\n    SchemaMapping mapping=AnnotatedElementUtils.findMergedAnnotation(handlerType,SchemaMapping.class);\n    if (mapping != null) {\n      typeName=mapping.typeName();\n    }\n  }\n  if (!StringUtils.hasText(typeName)) {\n    for (    MethodParameter parameter : handlerMethod.getMethodParameters()) {\n      if (!batchMapping) {\n        Assert.state(this.argumentResolvers != null,\"`argumentResolvers` is not initialized\");\n        HandlerMethodArgumentResolver resolver=this.argumentResolvers.getArgumentResolver(parameter);\n        if (resolver instanceof SourceMethodArgumentResolver) {\n          typeName=parameter.getParameterType().getSimpleName();\n          break;\n        }\n      }\n else {\n        if (Collection.class.isAssignableFrom(parameter.getParameterType())) {\n          typeName=parameter.nested().getNestedParameterType().getSimpleName();\n          break;\n        }\n      }\n    }\n  }\n  Assert.hasText(typeName,\"No parentType specified, and a source/parent method argument was also not found: \" + handlerMethod.getShortLogMessage());\n  return new MappingInfo(typeName,field,batchMapping,batchSize,handlerMethod);\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/annotation/support/AnnotatedControllerConfigurer.java",
+        "Start": 16586,
+        "Stop": 18892,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "getMappingInfo"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Avoid double negation in if condition",
+                    "Change_Diff": "- if (!this.adapter.supports(container.getClass())) {\n+ if (this.adapter.supports(container.getClass())) {",
+                    "Description": "Instead of negating the condition and using an if block, flip the condition and remove the else block.",
+                    "Start": 9,
+                    "End": 12
+                },
+                {
+                    "Improvement": "Extract method for creating edges",
+                    "Change_Diff": "@@ -20,6 +23,12 @@\n   \n     DefaultPageInfo pageInfo = new DefaultPageInfo(edges.ge\n     return new DefaultConnection<>(edges, pageInfo);\n   }",
+                    "Description": "Extract the code for creating edges into a separate method for better modularity and readability.",
+                    "Start": 13,
+                    "End": 23
+                }
+            ],
+            "Final code": "private <T>Object adaptDataContainer(@Nullable Object container) {\n    if (container == null) {\n        return EMPTY_CONNECTION;\n    }\n    if (container instanceof Connection<?>) {\n        return container;\n    }\n    if (this.adapter.supports(container.getClass())) {\n        return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n}\n\nprivate <T>DefaultConnection<T> createConnection(Collection<T> nodes, Object container) {\n    int index = 0;\n    List<Edge<T>> edges = new ArrayList<>(nodes.size());\n    for (T node : nodes) {\n        String cursor = this.adapter.cursorAt(container, index++);\n        edges.add(new DefaultEdge<>(node, new DefaultConnectionCursor(cursor)));\n    }\n    DefaultPageInfo pageInfo = new DefaultPageInfo(edges.get(0).getCursor(), edges.get(edges.size() - 1).getCursor(), this.adapter.hasPrevious(container), this.adapter.hasNext(container));\n    return new DefaultConnection<>(edges, pageInfo);\n}\n\npublic <T>Object adaptDataContainer(@Nullable Object container) {\n    if (container == null) {\n        return EMPTY_CONNECTION;\n    }\n    return createConnection(this.adapter.getContent(container), container);\n}"
+        }],
+        "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+        "Start": 7935,
+        "Stop": 9024,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "adaptDataContainer"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 1474 [character 620 line 18]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  if (clazz.getName().startsWith(\"java.\")) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  if (name != null) {\n    GraphQLObjectType objectType=schema.getObjectType(name);\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(clazz);\n  if (schema.containsType(name)) {\n    return schema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : clazz.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,schema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=clazz.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,schema);\n  }\n  return null;\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/execution/ClassNameTypeResolver.java",
+        "Start": 2869,
+        "Stop": 3854,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "getTypeForClass"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Replace enhanced for loop with stream",
+                    "Change_Diff": "- for (QueryByExampleExecutor<?> executor : executors) {\n+ executors.stream().forEach(executor -> {",
+                    "Description": "Instead of using an enhanced for loop to iterate over `executors`, use a stream and lambda expression to iterate over them.",
+                    "Start": 20,
+                    "End": 29
+                },
+                {
+                    "Improvement": "Replace enhanced for loop with stream",
+                    "Change_Diff": "- for (ReactiveQueryByExampleExecutor<?> executor : reactiveExecutors) {\n+ reactiveExecutors.stream().forEach(executor -> {",
+                    "Description": "Instead of using an enhanced for loop to iterate over `reactiveExecutors`, use a stream and lambda expression to iterate over them.",
+                    "Start": 32,
+                    "End": 41
+                },
+                {
+                    "Improvement": "Use method reference instead of lambda expression",
+                    "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> single() {\n @Override public DataFetcher<?> single() {",
+                    "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                    "Start": 48,
+                    "End": 60
+                },
+                {
+                    "Improvement": "Use method reference instead of lambda expression",
+                    "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> single() {\n @Override public DataFetcher<?> single() {",
+                    "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                    "Start": 67,
+                    "End": 79
+                },
+                {
+                    "Improvement": "Use method reference instead of lambda expression",
+                    "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> many() {\n @Override public DataFetcher<?> many() {",
+                    "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                    "Start": 81,
+                    "End": 93
+                },
+                {
+                    "Improvement": "Use method reference instead of lambda expression",
+                    "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> many() {\n @Override public DataFetcher<?> many() {",
+                    "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                    "Start": 100,
+                    "End": 112
+                },
+                {
+                    "Improvement": "Use method reference instead of lambda expression",
+                    "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> scrollable() {\n @Override public DataFetcher<?> scrollable() {",
+                    "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                    "Start": 114,
+                    "End": 126
+                },
+                {
+                    "Improvement": "Use method reference instead of lambda expression",
+                    "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> scrollable() {\n @Override public DataFetcher<?> scrollable() {",
+                    "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                    "Start": 133,
+                    "End": 145
+                }
+            ],
+            "Final code": "public static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QueryByExampleExecutor<?>> executors, List<ReactiveQueryByExampleExecutor<?>> reactiveExecutors, @Nullable CursorStrategy<ScrollPosition> cursorStrategy, @Nullable ScrollSubrange defaultScrollSubrange) {\n    Map<String, DataFetcherFactory> factories = new HashMap<>();\n    executors.stream().forEach(executor -> {\n        String typeName = RepositoryUtils.getGraphQlTypeName(executor);\n        if (typeName != null) {\n            Builder<?, ?> builder = customize(executor, builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n            factories.put(typeName, builder::single);\n            factories.put(typeName, builder::many);\n            factories.put(typeName, builder::scrollable);\n        }\n    });\n    reactiveExecutors.stream().forEach(executor -> {\n        String typeName = RepositoryUtils.getGraphQlTypeName(executor);\n        if (typeName != null) {\n            ReactiveBuilder<?, ?> builder = customize(executor, builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n            factories.put(typeName, builder::single);\n            factories.put(typeName, builder::many);\n            factories.put(typeName, builder::scrollable);\n        }\n    });\n    if (logger.isTraceEnabled()) {\n        logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n    }\n    return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}"
+        }],
+        "Old_Method": "/** \n * Return a  {@link RuntimeWiringConfigurer} that installs a{@link graphql.schema.idl.WiringFactory} to find queries with a returntype whose name matches to the domain type name of the given repositories and registers  {@link DataFetcher}s for them. <p><strong>Note:<\/strong> This applies only to top-level queries and repositories annotated with  {@link GraphQlRepository @GraphQlRepository}.\n * @param executors repositories to consider for registration\n * @param reactiveExecutors reactive repositories to consider for registration\n * @param cursorStrategy for decoding cursors in pagination requests;if  {@code null}, then  {@link Builder#cursorStrategy} defaults apply.\n * @param defaultScrollSubrange default parameters for scrolling;if  {@code null}, then  {@link Builder#defaultScrollSubrange} defaults apply.\n * @return the created configurer\n * @since 1.2.0\n */\npublic static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QueryByExampleExecutor<?>> executors,List<ReactiveQueryByExampleExecutor<?>> reactiveExecutors,@Nullable CursorStrategy<ScrollPosition> cursorStrategy,@Nullable ScrollSubrange defaultScrollSubrange){\n  Map<String,DataFetcherFactory> factories=new HashMap<>();\n  for (  QueryByExampleExecutor<?> executor : executors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      Builder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  for (  ReactiveQueryByExampleExecutor<?> executor : reactiveExecutors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      ReactiveBuilder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  if (logger.isTraceEnabled()) {\n    logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n  }\n  return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/query/QueryByExampleDataFetcher.java",
+        "Start": 8299,
+        "Stop": 11102,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "autoRegistrationConfigurer"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Replace traditional for loop with enhanced for loop",
+                    "Change_Diff": "- for (QuerydslPredicateExecutor<?> executor : executors) {\n+ for (QuerydslPredicateExecutor<?> executor : executors) {",
+                    "Description": "Instead of using a traditional for loop to iterate over `executors`, use an enhanced for loop.",
+                    "Start": 9,
+                    "End": 9
+                },
+                {
+                    "Improvement": "Replace traditional for loop with enhanced for loop",
+                    "Change_Diff": "- for (ReactiveQuerydslPredicateExecutor<?> executor : reactiveExecutors) {\n+ for (ReactiveQuerydslPredicateExecutor<?> executor : reactiveExecutors) {",
+                    "Description": "Instead of using a traditional for loop to iterate over `reactiveExecutors`, use an enhanced for loop.",
+                    "Start": 21,
+                    "End": 21
+                }
+            ],
+            "Final code": "public static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QuerydslPredicateExecutor<?>> executors,List<ReactiveQuerydslPredicateExecutor<?>> reactiveExecutors,@Nullable CursorStrategy<ScrollPosition> cursorStrategy,@Nullable ScrollSubrange defaultScrollSubrange){\n  Map<String,DataFetcherFactory> factories=new HashMap<>();\n  for (QuerydslPredicateExecutor<?> executor : executors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      Builder builder=customize(executor,QuerydslDataFetcher.builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange).customizer(customizer(executor)));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  for (ReactiveQuerydslPredicateExecutor<?> executor : reactiveExecutors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      ReactiveBuilder builder=customize(executor,QuerydslDataFetcher.builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange).customizer(customizer(executor)));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  if (logger.isTraceEnabled()) {\n    logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n  }\n  return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}"
+        }],
+        "Old_Method": "/** \n * Return a  {@link RuntimeWiringConfigurer} that installs a{@link graphql.schema.idl.WiringFactory} to find queries with a returntype whose name matches to the domain type name of the given repositories and registers  {@link DataFetcher}s for them. <p><strong>Note:<\/strong> This applies only to top-level queries and repositories annotated with  {@link GraphQlRepository @GraphQlRepository}. If a repository is also an instance of  {@link QuerydslBinderCustomizer}, this is transparently detected and applied through the {@code QuerydslDataFetcher} builder  methods.\n * @param executors repositories to consider for registration\n * @param reactiveExecutors reactive repositories to consider for registration\n * @param cursorStrategy for decoding cursors in pagination requests;if  {@code null}, then  {@link Builder#cursorStrategy} defaults apply.\n * @param defaultScrollSubrange default parameters for scrolling;if  {@code null}, then  {@link Builder#defaultScrollSubrange} defaults apply.\n * @return the created configurer\n * @since 1.2.0\n */\n@SuppressWarnings({\"unchecked\",\"rawtypes\"}) public static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QuerydslPredicateExecutor<?>> executors,List<ReactiveQuerydslPredicateExecutor<?>> reactiveExecutors,@Nullable CursorStrategy<ScrollPosition> cursorStrategy,@Nullable ScrollSubrange defaultScrollSubrange){\n  Map<String,DataFetcherFactory> factories=new HashMap<>();\n  for (  QuerydslPredicateExecutor<?> executor : executors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      Builder builder=customize(executor,QuerydslDataFetcher.builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange).customizer(customizer(executor)));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  for (  ReactiveQuerydslPredicateExecutor<?> executor : reactiveExecutors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      ReactiveBuilder builder=customize(executor,QuerydslDataFetcher.builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange).customizer(customizer(executor)));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  if (logger.isTraceEnabled()) {\n    logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n  }\n  return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/query/QuerydslDataFetcher.java",
+        "Start": 9439,
+        "Stop": 12618,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "autoRegistrationConfigurer"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Unterminated string at 916 [character 0 line 19]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "/** \n * Use this method to resolve the arguments asynchronously. This is only useful when at least one of the values is a  {@link Mono}\n */\n@SuppressWarnings(\"unchecked\") protected Mono<Object[]> toArgsMono(Object[] args){\n  List<Mono<Object>> monoList=new ArrayList<>();\n  for (  Object arg : args) {\n    Mono<Object> argMono=(arg instanceof Mono ? (Mono<Object>)arg : Mono.justOrEmpty(arg));\n    monoList.add(argMono.defaultIfEmpty(NO_VALUE));\n  }\n  return Mono.zip(monoList,values -> {\n    for (int i=0; i < values.length; i++) {\n      if (values[i] == NO_VALUE) {\n        values[i]=null;\n      }\n    }\n    return values;\n  }\n);\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/InvocableHandlerMethodSupport.java",
+        "Start": 4964,
+        "Stop": 5600,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "toArgsMono"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use method references instead of lambda expressions",
+                    "Change_Diff": "- h -> h.add(\"h\",\"one\")\n+ h::add(\"h\",\"one\")",
+                    "Description": "Instead of using a lambda expression to add default headers in the WebClient's defaultHeaders() method, use method references.",
+                    "Start": 3,
+                    "End": 3
+                },
+                {
+                    "Improvement": "Use a single HttpGraphQlClient.Builder instance",
+                    "Change_Diff": "- HttpGraphQlClient.Builder<?> builder2=client.mutate()...",
+                    "Description": "Instead of creating a new HttpGraphQlClient.Builder instance for each mutation, reuse the existing builder instance.",
+                    "Start": 10,
+                    "End": 10
+                },
+                {
+                    "Improvement": "Use a lambda expression for single default header",
+                    "Change_Diff": "- testClientBuilder.defaultHeader(\"h\",\"three\")\n+ testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"three\"))",
+                    "Description": "Instead of using the defaultHeader() method to add a single default header, use a lambda expression to add the header.",
+                    "Start": 16,
+                    "End": 16
+                }
+            ],
+            "Final code": "    @Test\n    void mutateWebTestClientViaConsumer() {\n        HttpBuilderSetup clientSetup = new HttpBuilderSetup();\n        HttpGraphQlClient.Builder<?> builder = clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", \"one\")));\n        HttpGraphQlClient client = builder.build();\n        client.document(DOCUMENT).execute().block(TIMEOUT);\n        assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n        builder.webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", \"two\")));\n        client.document(DOCUMENT).execute().block(TIMEOUT);\n        assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\", \"two\");\n        builder.webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", \"three\")));\n        client.document(DOCUMENT).execute().block(TIMEOUT);\n        assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n    }"
+        }],
+        "Old_Method": "@Test void mutateWebTestClientViaConsumer(){\n  HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n  HttpGraphQlClient.Builder<?> builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n  HttpGraphQlClient client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n  HttpGraphQlClient.Builder<?> builder2=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n  client=builder2.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\",\"two\");\n  HttpGraphQlClient.Builder<?> builder3=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));\n  client=builder3.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/test/java/org/springframework/graphql/client/WebGraphQlClientBuilderTests.java",
+        "Start": 5152,
+        "Stop": 6358,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "mutateWebTestClientViaConsumer"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Remove unnecessary if condition",
+                    "Change_Diff": "- if (index >= 0) {\n+ if (index >= 0 && index < getInterfaceParameterAnnotations().length) {",
+                    "Description": "The if condition `index >= 0` checks if the index is non-negative. However, the subsequent if condition `index < getInterfaceParameterAnnotations().length` already ensures this condition. Therefore, the first if condition is unnecessary and can be removed.",
+                    "Start": 6,
+                    "End": 6
+                },
+                {
+                    "Improvement": "Optimize loop",
+                    "Change_Diff": "- for (Annotation[] paramAnns : ifcAnns) {\n+ for (int i = 0; i < ifcAnns.length && i <= index; i++) {\n+     Annotation[] paramAnns = ifcAnns[i];",
+                    "Description": "The current loop iterates over the `ifcAnns` array and checks if the index `i` is less than the length of `ifcAnns`. However, since we are only interested in the annotations up to the index, we can optimize the loop by adding an additional condition `i <= index` to stop the iteration once the desired index is reached.",
+                    "Start": 12,
+                    "End": 12
+                }
+            ],
+            "Final code": "@Override\npublic Annotation[] getParameterAnnotations() {\n    Annotation[] anns = this.combinedAnnotations;\n    if (anns == null) {\n        anns = super.getParameterAnnotations();\n        int index = getParameterIndex();\n        if (index >= 0 && index < getInterfaceParameterAnnotations().length) {\n            for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n                for (int i = 0; i < ifcAnns.length && i <= index; i++) {\n                    Annotation[] paramAnns = ifcAnns[i];\n                    if (paramAnns.length > 0) {\n                        List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);\n                        merged.addAll(Arrays.asList(anns));\n                        for (Annotation paramAnn : paramAnns) {\n                            boolean existingType = false;\n                            for (Annotation ann : anns) {\n                                if (ann.annotationType() == paramAnn.annotationType()) {\n                                    existingType = true;\n                                    break;\n                                }\n                            }\n                            if (!existingType) {\n                                merged.add(adaptAnnotation(paramAnn));\n                            }\n                        }\n                        anns = merged.toArray(new Annotation[0]);\n                    }\n                }\n            }\n        }\n        this.combinedAnnotations = anns;\n    }\n    return anns;\n}"
+        }],
+        "Old_Method": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns=this.combinedAnnotations;\n  if (anns == null) {\n    anns=super.getParameterAnnotations();\n    int index=getParameterIndex();\n    if (index >= 0) {\n      for (      Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n        if (index < ifcAnns.length) {\n          Annotation[] paramAnns=ifcAnns[index];\n          if (paramAnns.length > 0) {\n            List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n            merged.addAll(Arrays.asList(anns));\n            for (            Annotation paramAnn : paramAnns) {\n              boolean existingType=false;\n              for (              Annotation ann : anns) {\n                if (ann.annotationType() == paramAnn.annotationType()) {\n                  existingType=true;\n                  break;\n                }\n              }\n              if (!existingType) {\n                merged.add(adaptAnnotation(paramAnn));\n              }\n            }\n            anns=merged.toArray(new Annotation[0]);\n          }\n        }\n      }\n    }\n    this.combinedAnnotations=anns;\n  }\n  return anns;\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/HandlerMethod.java",
+        "Start": 12864,
+        "Stop": 13925,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "getParameterAnnotations"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 3052 [character 2129 line 18]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "/** \n * Create a validation callback for the given  {@link HandlerMethod}, possibly  {@code null} if the method or the method parameters do not have{@link Validated},  {@link Valid}, or  {@link Constraint} annotations.\n */\n@Nullable public BiConsumer<Object,Object[]> getValidationHelperFor(HandlerMethod handlerMethod){\n  boolean requiresMethodValidation=false;\n  Class<?>[] methodValidationGroups=null;\n  Validated validatedAnnotation=findAnnotation(handlerMethod,Validated.class);\n  if (validatedAnnotation != null) {\n    requiresMethodValidation=true;\n    methodValidationGroups=validatedAnnotation.value();\n  }\n else   if (findAnnotation(handlerMethod,Valid.class) != null) {\n    requiresMethodValidation=true;\n  }\n  BiConsumer<Object,Object[]> parameterValidator=null;\n  MethodParameter[] parameters=handlerMethod.getMethodParameters();\n  for (int i=0; i < parameters.length; i++) {\n    MethodParameter parameter=parameters[i];\n    for (    Annotation annot : parameter.getParameterAnnotations()) {\n      MergedAnnotations merged=MergedAnnotations.from(annot);\n      if (merged.isPresent(Valid.class) || merged.isPresent(Constraint.class)) {\n        requiresMethodValidation=true;\n      }\n else       if (annot.annotationType().equals(Validated.class)) {\n        Class<?>[] groups=((Validated)annot).value();\n        parameterValidator=(parameterValidator != null ? parameterValidator.andThen(new MethodParameterValidator(i,groups)) : new MethodParameterValidator(i,groups));\n      }\n    }\n  }\n  BiConsumer<Object,Object[]> result=(requiresMethodValidation ? new HandlerMethodValidator(handlerMethod,methodValidationGroups) : null);\n  if (parameterValidator != null) {\n    return (result != null ? result.andThen(parameterValidator) : parameterValidator);\n  }\n  return result;\n}\n",
+        "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/annotation/support/ValidationHelper.java",
+        "Start": 2068,
+        "Stop": 3894,
+        "Project_Name": "data/projects/spring-graphql",
+        "Method_Name": "getValidationHelperFor"
+    }
+]

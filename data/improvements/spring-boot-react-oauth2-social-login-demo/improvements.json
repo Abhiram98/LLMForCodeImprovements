@@ -1,0 +1,68 @@
+[
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 2813 [character 1014 line 18]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n  return false;\n}\n",
+        "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/TokenProvider.java",
+        "Start": 1471,
+        "Stop": 2183,
+        "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+        "Method_Name": "validateToken"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use isEmpty() method instead of StringUtils.isEmpty()",
+                    "Change_Diff": "- if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n+ if (oAuth2UserInfo.getEmail().isEmpty()) {",
+                    "Description": "Replace StringUtils.isEmpty() with the isEmpty() method of the email string to check if it is empty.",
+                    "Start": 4,
+                    "End": 4
+                },
+                {
+                    "Improvement": "Use map() and orElseThrow() methods instead of Optional.isPresent()",
+                    "Change_Diff": "- if (userOptional.isPresent()) {\n+ User user = userOptional.map(u -> updateExistingUser(u, oAuth2UserInfo)).orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \" + user.getProvider() + \" account to login.\"));",
+                    "Description": "Replace Optional.isPresent() with the map() method to update the existing user if present, or throw an exception using orElseThrow() if not present.",
+                    "Start": 12,
+                    "End": 13
+                }
+            ],
+            "Final code": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {\n    OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());\n    if (oAuth2UserInfo.getEmail().isEmpty()) {\n        throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n    }\n    User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())\n            .map(u -> updateExistingUser(u, oAuth2UserInfo))\n            .orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \" + user.getProvider() + \" account to login.\"));\n    return UserPrincipal.create(user, oAuth2User.getAttributes());\n}"
+        }],
+        "Old_Method": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}\n",
+        "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/oauth2/CustomOAuth2UserService.java",
+        "Start": 1883,
+        "Stop": 3147,
+        "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+        "Method_Name": "processOAuth2User"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use a foreach loop instead of traditional for loop",
+                    "Change_Diff": "- for (Cookie cookie : cookies) {\n+ for (int i = 0; i < cookies.length; i++) {\n+ Cookie cookie = cookies[i];",
+                    "Description": "Instead of using a traditional for loop to iterate over `cookies`, use a foreach loop or an enhanced for loop.",
+                    "Start": 5,
+                    "End": 5
+                },
+                {
+                    "Improvement": "Use lambda expression instead of if statement",
+                    "Change_Diff": "- if (cookie.getName().equals(name)) {\n+ Arrays.stream(cookies)\n    .filter(cookie -> cookie.getName().equals(name))\n    .findFirst()",
+                    "Description": "Instead of using an if statement to check if the cookie name is equal to the specified name, use a lambda expression and stream to find the first matching cookie.",
+                    "Start": 6,
+                    "End": 6
+                }
+            ],
+            "Final code": "public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {\n    Cookie[] cookies = request.getCookies();\n    if (cookies != null && cookies.length > 0) {\n        for (int i = 0; i < cookies.length; i++) {\n            Cookie cookie = cookies[i];\n            if (cookie.getName().equals(name)) {\n                cookie.setValue(\"\");\n                cookie.setPath(\"/\");\n                cookie.setMaxAge(0);\n                response.addCookie(cookie);\n            }\n        }\n    }\n}"
+        }],
+        "Old_Method": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (    Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        cookie.setValue(\"\");\n        cookie.setPath(\"/\");\n        cookie.setMaxAge(0);\n        response.addCookie(cookie);\n      }\n    }\n  }\n}\n",
+        "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/util/CookieUtils.java",
+        "Start": 1016,
+        "Stop": 1537,
+        "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+        "Method_Name": "deleteCookie"
+    }
+]

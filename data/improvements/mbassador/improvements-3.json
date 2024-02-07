@@ -1,0 +1,48 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary imports",
+                "Change_Diff": "- import java.io.File;\n+ ",
+                "Description": "There are unnecessary imports of the java.io.File class, remove them.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use proper variable names",
+                "Change_Diff": "- Object listener=new ListenerDefinition.SyncAsyncListener();\n+ Object syncAsyncListener = new ListenerDefinition.SyncAsyncListener();",
+                "Description": "The variable name 'listener' is not descriptive, use a more meaningful name like 'syncAsyncListener'.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Remove duplicate subscription",
+                "Change_Diff": "- bus.subscribe(listener);\n- bus.subscribe(listener);\n+ ",
+                "Description": "The same listener is being subscribed twice, remove the duplicate subscription.",
+                "Start": 4,
+                "End": 5
+            },
+            {
+                "Improvement": "Use proper argument for subscribe method",
+                "Change_Diff": "- bus.subscribe(new Object());\n- bus.subscribe(new String());\n+ bus.subscribe(new ListenerDefinition.SyncAsyncListener());",
+                "Description": "The subscribe method expects an instance of ListenerDefinition.SyncAsyncListener as an argument, not Object or String.",
+                "Start": 6,
+                "End": 7
+            },
+            {
+                "Improvement": "Change method call to proper syntax",
+                "Change_Diff": "- bus.publishAsync(new File(\"/tmp/random.csv\"));\n+ bus.postAsync(new File(\"/tmp/random.csv\")).now();",
+                "Description": "The publishAsync method is being called incorrectly, change it to postAsync().now() to properly publish the file.",
+                "Start": 8,
+                "End": 8
+            }
+        ],
+        "Final code": "public static void main(String[] args){\n  bus.subscribe(new ListenerDefinition.SyncAsyncListener());\n  Object syncAsyncListener = new ListenerDefinition.SyncAsyncListener();\n  bus.subscribe(syncAsyncListener);\n  bus.publish(new File(\"/tmp/random.csv\"));\n  bus.post(new File(\"/tmp/random.csv\")).asynchronously();\n  bus.publish(\"some message\");\n  bus.post(\"some message\")).now();\n}"
+    }],
+    "Old_Method": "public static void main(String[] args){\n  bus.subscribe(new ListenerDefinition.SyncAsyncListener());\n  Object listener=new ListenerDefinition.SyncAsyncListener();\n  bus.subscribe(listener);\n  bus.subscribe(listener);\n  bus.subscribe(new Object());\n  bus.subscribe(new String());\n  bus.publishAsync(new File(\"/tmp/random.csv\"));\n  bus.post(new File(\"/tmp/random.csv\")).asynchronously();\n  bus.publish(\"some message\");\n  bus.post(\"some message\").now();\n}\n",
+    "File_Path": "mbassador/examples/SubscriptionAndPublication.java",
+    "Start": 850,
+    "Stop": 1791,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "main"
+}

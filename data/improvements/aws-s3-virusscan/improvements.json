@@ -1,0 +1,201 @@
+[
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 4536 [character 2769 line 32]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "protected void waitForStack(final Context context,final String stackName,final FinalStatus finalStackStatus){\n  System.out.println(\"waitForStack[\" + stackName + \"]: to reach status \"+ finalStackStatus.finalStatus);\n  final List<StackEvent> eventsDisplayed=new ArrayList<>();\n  while (true) {\n    try {\n      Thread.sleep(20000);\n    }\n catch (    final InterruptedException e) {\n    }\n    final List<StackEvent> events=getStackEvents(stackName);\n    for (    final StackEvent event : events) {\n      boolean displayed=false;\n      for (      final StackEvent eventDisplayed : eventsDisplayed) {\n        if (event.getEventId().equals(eventDisplayed.getEventId())) {\n          displayed=true;\n        }\n      }\n      if (!displayed) {\n        System.out.println(\"waitForStack[\" + stackName + \"]: \"+ event.getTimestamp().toString()+ \" \"+ event.getLogicalResourceId()+ \" \"+ event.getResourceStatus()+ \" \"+ event.getResourceStatusReason());\n        eventsDisplayed.add(event);\n      }\n    }\n    try {\n      final DescribeStacksResult res=this.cf.describeStacks(new DescribeStacksRequest().withStackName(stackName));\n      final StackStatus currentStatus=StackStatus.fromValue(res.getStacks().get(0).getStackStatus());\n      if (finalStackStatus.finalStatus == currentStatus) {\n        System.out.println(\"waitForStack[\" + stackName + \"]: final status reached.\");\n        return;\n      }\n else {\n        if (finalStackStatus.intermediateStatus.contains(currentStatus)) {\n          System.out.println(\"waitForStack[\" + stackName + \"]: continue to wait (still in intermediate status \"+ currentStatus+ \") ...\");\n        }\n else {\n          context.reportStackFailure(stackName);\n          throw new RuntimeException(\"waitForStack[\" + stackName + \"]: reached invalid intermediate status \"+ currentStatus+ \".\");\n        }\n      }\n    }\n catch (    final AmazonServiceException e) {\n      if (e.getErrorMessage().equals(\"Stack with id \" + stackName + \" does not exist\")) {\n        if (finalStackStatus.notFoundIsFinalStatus) {\n          System.out.println(\"waitForStack[\" + stackName + \"]: final  reached (not found).\");\n          return;\n        }\n else {\n          if (finalStackStatus.notFoundIsIntermediateStatus) {\n            System.out.println(\"waitForStack[\" + stackName + \"]: continue to wait (stack not found) ...\");\n          }\n else {\n            context.reportStackFailure(stackName);\n            throw new RuntimeException(\"waitForStack[\" + stackName + \"]: stack not found.\");\n          }\n        }\n      }\n else {\n        throw e;\n      }\n    }\n  }\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+        "Start": 6172,
+        "Stop": 9325,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "waitForStack"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use try-finally for clean up",
+                    "Change_Diff": "- try {\n+ try {\n     return callable.call();\n }",
+                    "Description": "Wrap the callable logic in a try-finally block to ensure that any resources are cleaned up properly.",
+                    "Start": 4,
+                    "End": 8
+                },
+                {
+                    "Improvement": "Use logger instead of System.out",
+                    "Change_Diff": "- System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \" + e.getMessage());\n+ logger.error(\"retry[\" + t.incrementAndGet() + \"] exception: \" + e.getMessage(), e);",
+                    "Description": "Instead of using System.out to print exception messages, use a logger for better control and management of log statements.",
+                    "Start": 9,
+                    "End": 9
+                }
+            ],
+            "Final code": "protected final <T>T retry(final Context context, final Callable<T> callable) {\n    final AtomicInteger t = new AtomicInteger(0);\n    final Callable<T> wrapper = () -> {\n        try {\n            return callable.call();\n        } finally {\n            // Clean up resources here\n        }\n    };\n    final RetryConfig config = new RetryConfigBuilder()\n            .retryOnAnyException()\n            .withMaxNumberOfTries(30)\n            .withDelayBetweenTries(10, ChronoUnit.SECONDS)\n            .withFixedBackoff()\n            .build();\n    try {\n        // Execute callable logic with retry\n        final CallResults<Object> results = new CallExecutor(config).execute(wrapper);\n        return (T) results.getResult();\n    } catch (final RuntimeException e) {\n        // Report failure\n        context.reportFailure();\n        throw e;\n    }\n}"
+        }],
+        "Old_Method": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (    final Exception e) {\n      System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n      e.printStackTrace(System.out);\n      System.out.println();\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ATest.java",
+        "Start": 555,
+        "Stop": 1605,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "retry"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "A JSON Object can not directly nest another JSON Object or JSON Array. at 2 [character 3 line 1]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "protected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  if (Config.has(Config.Key.TEMPLATE_DIR)) {\n    final String dir=Config.get(Config.Key.TEMPLATE_DIR);\n    if (Config.has(Config.Key.BUCKET_NAME)) {\n      final String bucketName=Config.get(Config.Key.BUCKET_NAME);\n      final String bucketRegion=Config.get(Config.Key.BUCKET_REGION);\n      final AmazonS3 s3local=AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build();\n      s3local.putObject(bucketName,stackName,new File(dir + template));\n      req=req.withTemplateURL(\"https://\" + bucketName + \".s3.\"+ bucketRegion+ \".amazonaws.com/\"+ stackName);\n    }\n else {\n      final String body=readFile(dir + template,StandardCharsets.UTF_8);\n      req=req.withTemplateBody(body);\n    }\n  }\n else {\n    req=req.withTemplateURL(\"https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/\" + template);\n  }\n  if (Config.get(Config.Key.FAILURE_POLICY).equals(\"retain\")) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+        "Start": 1185,
+        "Stop": 2820,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "createStack"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use lambda expression instead of anonymous class for retry method",
+                    "Change_Diff": "- this.retry(context,() -> {\n+ this.retry(context, () -> {",
+                    "Description": "Instead of creating an anonymous class for the retry method, use a lambda expression for cleaner and more concise code.",
+                    "Start": 26,
+                    "End": 29
+                },
+                {
+                    "Improvement": "Use try-with-resources for resource management",
+                    "Change_Diff": "- this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength());\n+ try (S3Object s3Object = createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength())) {",
+                    "Description": "Use try-with-resources to automatically close resources such as S3 objects and S3 clients after use. This ensures proper cleanup and reduces the chance of resource leaks.",
+                    "Start": 34,
+                    "End": 34
+                },
+                {
+                    "Improvement": "Use logger instead of standard output",
+                    "Change_Diff": "- System.out.println(\"Remaining objects:\");\n- for (final String object : objects) {\n- System.out.println(object);}\n+ log.info(\"Remaining objects:\");\n+ for (final String object : objects) {\n+ log.info(object);}",
+                    "Description": "Replace the standard output statements with logging statements to provide more controlled and configurable output.",
+                    "Start": 39,
+                    "End": 46
+                }
+            ],
+            "Final code": "@Test\npublic void test() {\n    final Context context = new Context();\n    final String vpcStackName = \"vpc-2azs-\" + this.random8String();\n    final String stackName = \"s3-virusscan-\" + this.random8String();\n    final String bucketName = \"s3-virusscan-\" + this.random8String();\n    final InfectedFileCache cache = new InfectedFileCache();\n\n    try {\n        this.createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");\n\n        try {\n            this.createStack(context, stackName, \"template.yaml\", new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n\n            try (S3Object s3Object = createBucketWithSQSNotification(bucketName, this.getStackOutputValue(stackName, \"ScanQueueArn\"))) {\n                cache.getFiles().forEach(file -> this.createObject(bucketName, file.getkey(), file.getContent(), file.getContentType(), file.getContentLength()));\n\n                this.retry(context, () -> {\n                    final long count = this.countBucket(bucketName);\n\n                    if (count != 0) {\n                        throw new RuntimeException(\"there are \" + count + \" infected files left\");\n                    }\n\n                    return false;\n                });\n            }\n            catch (final RuntimeException e) {\n                final List<String> objects = this.listBucket(bucketName, 100);\n                log.info(\"Remaining objects:\");\n\n                for (final String object : objects) {\n                    log.info(object);\n                }\n\n                throw e;\n            }\n            finally {\n                this.deleteBucket(context, bucketName);\n            }\n        }\n        finally {\n            this.deleteStack(context, stackName);\n        }\n    }\n    finally {\n        this.deleteStack(context, vpcStackName);\n    }\n}"
+        }],
+        "Old_Method": "@Test public void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n        this.retry(context,() -> {\n          final long count=this.countBucket(bucketName);\n          if (count != 0) {\n            throw new RuntimeException(\"there are \" + count + \" infected files left\");\n          }\n          return false;\n        }\n);\n      }\n catch (      final RuntimeException e) {\n        final List<String> objects=this.listBucket(bucketName,100);\n        System.out.println(\"Remaining objects:\");\n        for (        final String object : objects) {\n          System.out.println(object);\n        }\n        throw e;\n      }\n finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestRealworldFiles.java",
+        "Start": 247,
+        "Stop": 2293,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "test"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 461 [character 17 line 8]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+        "Start": 8428,
+        "Stop": 8863,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "countBucket"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use constant field for default value",
+                    "Change_Diff": "- if (key.defaultValue == null) {\n+ if (key.getDefaultValue() == null) {",
+                    "Description": "Instead of directly accessing the `defaultValue` field, create a `getDefaultValue()` method for the `Key` class and use it to access the default value.",
+                    "Start": 3,
+                    "End": 3
+                },
+                {
+                    "Improvement": "Use equals() method for String comparison",
+                    "Change_Diff": "- if (env == null) {\n+ if (env.equals(null)) {",
+                    "Description": "Instead of using the `==` operator to compare strings, use the `equals()` method for proper string comparison.",
+                    "Start": 5,
+                    "End": 5
+                },
+                {
+                    "Improvement": "Check for empty string in env variable",
+                    "Change_Diff": "+ if (env.isEmpty()) {\n+     throw new IllegalArgumentException(\"config not found: \" + key.name);\n+ }",
+                    "Description": "Add a check to see if the `env` variable is an empty string, and throw an exception if it is. This will ensure that an empty string is not incorrectly treated as a valid value.",
+                    "Start": 7,
+                    "End": 9
+                }
+            ],
+            "Final code": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env.equals(null)) {\n    if (key.getDefaultValue().isEmpty()) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n    else {\n      return key.getDefaultValue();\n    }\n  }\n  else if (env.isEmpty()) {\n    throw new IllegalArgumentException(\"config not found: \" + key.name);\n  }\n  else {\n    return env;\n  }\n}"
+        }],
+        "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+        "Start": 813,
+        "Stop": 1187,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "get"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Remove unnecessary try-finally blocks",
+                    "Change_Diff": "- try {\n+ {\n",
+                    "Description": "There are unnecessary try-finally blocks in the code that can be removed.",
+                    "Start": 3,
+                    "End": 5
+                },
+                {
+                    "Improvement": "Extract methods for repeated code",
+                    "Change_Diff": "No changes are needed for this improvement.",
+                    "Description": "There are multiple blocks of code that are repeated. It is recommended to extract these blocks of code into separate methods to improve the readability and maintainability of the code.",
+                    "Start": 26,
+                    "End": 46
+                },
+                {
+                    "Improvement": "Use more meaningful variable names",
+                    "Change_Diff": "- final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n+ final String vpcStackName = \"vpc-2azs-\" + this.random8String();",
+                    "Description": "It is recommended to use more meaningful variable names to improve the readability of the code.",
+                    "Start": 20,
+                    "End": 20
+                }
+            ],
+            "Final code": "@Test\npublic void testWithoutFileDeletion() {\n  final Context context = new Context();\n  final String vpcStackName = \"vpc-2azs-\" + this.random8String();\n  final String stackName = \"s3-virusscan-\" + this.random8String();\n  final String bucketName = \"s3-virusscan-\" + this.random8String();\n\n  this.createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");\n\n  this.createStack(context, stackName, \"template.yaml\",\n      new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName),\n      new Parameter().withParameterKey(\"TagFiles\").withParameterValue(\"true\"),\n      new Parameter().withParameterKey(\"DeleteInfectedFiles\").withParameterValue(\"false\"));\n\n  this.createBucketWithSQSNotification(bucketName, this.getStackOutputValue(stackName, \"ScanQueueArn\"));\n\n  this.createObject(bucketName, \"no-virus.txt\", \"not a virus\");\n  this.createObject(bucketName, \"virus.txt\", \"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n\n  this.retry(context, () -> {\n    final List<Tag> tags = this.getObjectTags(bucketName, \"no-virus.txt\");\n    if (tags.size() == 1) {\n      final Tag tag = tags.get(0);\n      if (\"clamav-status\".equals(tag.getKey())) {\n        if (\"clean\".equals(tag.getValue())) {\n          return tags;\n        } else {\n          throw new RuntimeException(\"clamav-status tag value expected to be clean, but saw \" + tag.getValue());\n        }\n      } else {\n        throw new RuntimeException(\"one and only tag key expected to be clamav-status, but saw \" + tag.getKey());\n      }\n    } else {\n      throw new RuntimeException(\"one tag expected, but saw \" + tags.size());\n    }\n  });\n\n  this.retry(context, () -> {\n    final List<Tag> tags = getObjectTags(bucketName, \"virus.txt\");\n    if (tags.size() == 1) {\n      final Tag tag = tags.get(0);\n      if (\"clamav-status\".equals(tag.getKey())) {\n        if (\"infected\".equals(tag.getValue())) {\n          return tags;\n        } else {\n          throw new RuntimeException(\"clamav-status tag value expected to be infected, but saw \" + tag.getValue());\n        }\n      } else {\n        throw new RuntimeException(\"one and only tag key expected to be clamav-status, but saw \" + tag.getKey());\n      }\n    } else {\n      throw new RuntimeException(\"one tag expected, but saw \" + tags.size());\n    }\n  });\n\n  this.deleteObject(context, bucketName, \"no-virus.txt\");\n  this.deleteObject(context, bucketName, \"virus.txt\");\n\n  this.deleteBucket(context, bucketName);\n\n  this.deleteStack(context, stackName);\n\n  this.deleteStack(context, vpcStackName);\n}"
+        }],
+        "Old_Method": "@Test public void testWithoutFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName),new Parameter().withParameterKey(\"TagFiles\").withParameterValue(\"true\"),new Parameter().withParameterKey(\"DeleteInfectedFiles\").withParameterValue(\"false\"));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n        this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n        this.retry(context,() -> {\n          final List<Tag> tags=this.getObjectTags(bucketName,\"no-virus.txt\");\n          if (tags.size() == 1) {\n            final Tag tag=tags.get(0);\n            if (\"clamav-status\".equals(tag.getKey())) {\n              if (\"clean\".equals(tag.getValue())) {\n                return tags;\n              }\n else {\n                throw new RuntimeException(\"clamav-status tag value expected to be clean, but saw \" + tag.getValue());\n              }\n            }\n else {\n              throw new RuntimeException(\"one and only tag key expected to be clamav-status, but saw \" + tag.getKey());\n            }\n          }\n else {\n            throw new RuntimeException(\"one tag expected, but saw \" + tags.size());\n          }\n        }\n);\n        this.retry(context,() -> {\n          final List<Tag> tags=this.getObjectTags(bucketName,\"virus.txt\");\n          if (tags.size() == 1) {\n            final Tag tag=tags.get(0);\n            if (\"clamav-status\".equals(tag.getKey())) {\n              if (\"infected\".equals(tag.getValue())) {\n                return tags;\n              }\n else {\n                throw new RuntimeException(\"clamav-status tag value expected to be infected, but saw \" + tag.getValue());\n              }\n            }\n else {\n              throw new RuntimeException(\"one and only tag key expected to be clamav-status, but saw \" + tag.getKey());\n            }\n          }\n else {\n            throw new RuntimeException(\"one tag expected, but saw \" + tags.size());\n          }\n        }\n);\n        this.deleteObject(context,bucketName,\"no-virus.txt\");\n        this.deleteObject(context,bucketName,\"virus.txt\");\n      }\n  finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestEicarFile.java",
+        "Start": 242,
+        "Stop": 3981,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "testWithoutFileDeletion"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use try-with-resources to automatically close resources",
+                    "Change_Diff": "- try {\n+ try (Context context = new Context()) {",
+                    "Description": "Instead of manually closing the `Context` resource, use try-with-resources to automatically close it.",
+                    "Start": 1,
+                    "End": 1
+                },
+                {
+                    "Improvement": "Combine string concatenation using StringBuilder",
+                    "Change_Diff": "- final String vpcStackName = \"vpc-2azs-\" + this.random8String();\n+ final String vpcStackName = new StringBuilder(\"vpc-2azs-\").append(this.random8String()).toString();",
+                    "Description": "Instead of concatenating multiple strings using the '+' operator, use `StringBuilder` to improve performance.",
+                    "Start": 3,
+                    "End": 3
+                },
+                {
+                    "Improvement": "Use Stream API to simplify code",
+                    "Change_Diff": "- for (int i = 0; i < arr.length; i++) {\n+ int sum = Arrays.stream(arr).sum();",
+                    "Description": "Instead of manually iterating over the `arr` array to calculate the sum, use the `Arrays.stream` method along with `sum` to simplify the code.",
+                    "Start": 6,
+                    "End": 6
+                }
+            ],
+            "Final code": "@Test\npublic void testWithFileDeletion() {\n  try (Context context = new Context()) {\n    final String vpcStackName = new StringBuilder(\"vpc-2azs-\").append(this.random8String()).toString();\n    final String stackName = new StringBuilder(\"s3-virusscan-\").append(this.random8String()).toString();\n    final String bucketName = new StringBuilder(\"s3-virusscan-\").append(this.random8String()).toString();\n    this.createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context, stackName, \"template.yaml\", new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName, this.getStackOutputValue(stackName, \"ScanQueueArn\"));\n        this.createObject(bucketName, \"no-virus.txt\", \"not a virus\");\n        this.createObject(bucketName, \"virus.txt\", \"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n        this.retry(context, () -> {\n          if (this.doesObjectExist(bucketName, \"virus.txt\") == true) {\n            throw new RuntimeException(\"virus.txt must be deleted\");\n          }\n          return false;\n        });\n        this.retry(context, () -> {\n          if (this.doesObjectExist(bucketName, \"no-virus.txt\") == false) {\n            throw new RuntimeException(\"no-virus.txt must be existing\");\n          }\n          return true;\n        });\n        this.deleteObject(context, bucketName, \"no-virus.txt\");\n      } finally {\n        this.deleteBucket(context, bucketName);\n      }\n    } finally {\n      this.deleteStack(context, stackName);\n    }\n  } finally {\n    this.deleteStack(context, vpcStackName);\n  }\n}"
+        }],
+        "Old_Method": "@Test public void testWithFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n        this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"virus.txt\") == true) {\n            throw new RuntimeException(\"virus.txt must be deleted\");\n          }\n          return false;\n        }\n);\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"no-virus.txt\") == false) {\n            throw new RuntimeException(\"no-virus.txt must be existing\");\n          }\n          return true;\n        }\n);\n        this.deleteObject(context,bucketName,\"no-virus.txt\");\n      }\n  finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+        "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestEicarFile.java",
+        "Start": 3987,
+        "Stop": 6025,
+        "Project_Name": "data/projects/aws-s3-virusscan",
+        "Method_Name": "testWithFileDeletion"
+    }
+]

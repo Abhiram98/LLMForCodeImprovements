@@ -1,0 +1,48 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary null check",
+                "Change_Diff": "- if (cachedObject != null) {\n+ if (this.apiResourceListCache.containsKey(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\")) {",
+                "Description": "Instead of checking if `cachedObject` is not null, directly check if `apiResourceListCache` contains the key `XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"`.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Remove redundant creation of RestTemplateBuilder",
+                "Change_Diff": "- RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n+ RestTemplate rt = new RestTemplate(new HttpComponentsClientHttpRequestFactory(this.httpClient));",
+                "Description": "Instead of creating a separate `RestTemplateBuilder` and then building a `RestTemplate` using that builder, directly create a `RestTemplate` with the desired `HttpComponentsClientHttpRequestFactory`.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Use ResponseEntity<String> instead of raw ResponseEntity",
+                "Change_Diff": "- ResponseEntity response = rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", String.class, entity);\n+ ResponseEntity<String> response = rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", String.class, entity);",
+                "Description": "Specify the generic type `String` for the `ResponseEntity` to improve code clarity and avoid unchecked type warnings.",
+                "Start": 13,
+                "End": 13
+            },
+            {
+                "Improvement": "Use containsKey() instead of get() != null check",
+                "Change_Diff": "- if (this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\") != null) {\n+ if (this.apiResourceListCache.containsKey(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\")) {",
+                "Description": "Instead of checking if the value returned by `get()` is not null, directly use the `containsKey()` method to check the existence of the key in `apiResourceListCache`.",
+                "Start": 21,
+                "End": 21
+            },
+            {
+                "Improvement": "Simplify JSONObject creation",
+                "Change_Diff": "- return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", new JSONObject(response.getBody().toString())));\n+ return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", new JSONObject(response.getBody())));",
+                "Description": "Instead of converting the response body to a string and then creating a `JSONObject` from that string, directly create a `JSONObject` using the response body object.",
+                "Start": 26,
+                "End": 26
+            }
+        ],
+        "Final code": "@Override\npublic Optional<JSONObject> getApiResourceList() {\n    JSONObject cachedObject = this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n    if (this.apiResourceListCache.containsKey(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\")) {\n        return Optional.of(cachedObject);\n    }\n    RestTemplate rt = new RestTemplate(new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    HttpEntity<String> entity = new HttpEntity<>(this.restHeaders);\n    ResponseEntity<String> response = rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", String.class, entity);\n    if (response.getStatusCode() != HttpStatus.OK) {\n        return Optional.empty();\n    }\n    return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", new JSONObject(response.getBody())));\n}"
+    }],
+    "Old_Method": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 5788,
+    "Stop": 6769,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "getApiResourceList"
+}

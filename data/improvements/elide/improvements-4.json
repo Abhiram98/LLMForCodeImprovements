@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use method references and lambdas instead of anonymous classes",
+                "Change_Diff": "- List<QueryPlan> toMerge=query.getMetricProjections().stream().map(projection -> projection.resolve(query)).collect(Collectors.toList());\n+ List<QueryPlan> toMerge=query.getMetricProjections().stream().map(query::resolveProjection).collect(Collectors.toList());",
+                "Description": "Replace the lambda expression with a method reference to improve code readability.",
+                "Start": 36,
+                "End": 36
+            },
+            {
+                "Improvement": "Use a more descriptive exception message",
+                "Change_Diff": "- throw new UnsupportedOperationException(\"Incompatible metrics in client query.  Cannot merge \" + \"into a single query\");\n+ throw new UnsupportedOperationException(\"Multiple incompatible metrics found in client query. Unable to merge into a single query.\");",
+                "Description": "Change the exception message to provide more information about the issue.",
+                "Start": 38,
+                "End": 38
+            }
+        ],
+        "Final code": "private Query expandMetricQueryPlans(Query query){\n  List<QueryPlan> toMerge=query.getMetricProjections().stream().map(query::resolveProjection).collect(Collectors.toList());\n  List<QueryPlan> mergedPlans=merger.merge(toMerge);\n  if (mergedPlans.size() != 1) {\n    throw new UnsupportedOperationException(\"Multiple incompatible metrics found in client query. Unable to merge into a single query.\");\n  }\n  QueryPlan mergedPlan=mergedPlans.get(0);\n  QueryPlanTranslator queryPlanTranslator=new QueryPlanTranslator(query,metaDataStore,merger);\n  Query merged=(mergedPlan == null) ? QueryPlanTranslator.addHiddenProjections(metaDataStore,query).build() : queryPlanTranslator.translate(mergedPlan);\n  for (  Optimizer optimizer : optimizers) {\n    SQLTable table=(SQLTable)query.getSource();\n    if (table.getHints().contains(optimizer.negateHint())) {\n      continue;\n    }\n    if (!table.getHints().contains(optimizer.hint())) {\n      continue;\n    }\n    if (optimizer.canOptimize(merged)) {\n      merged=optimizer.optimize(merged);\n    }\n  }\n  return merged;\n}"
+    }],
+    "Old_Method": "/** \n * Transforms a client query into a potentially nested/complex query by expanding each metric into its respective query plan - and then merging the plans together into a consolidated query.\n * @param query The client query.\n * @return A query that reflects each metric's individual query plan.\n */\nprivate Query expandMetricQueryPlans(Query query){\n  List<QueryPlan> toMerge=query.getMetricProjections().stream().map(projection -> projection.resolve(query)).collect(Collectors.toList());\n  List<QueryPlan> mergedPlans=merger.merge(toMerge);\n  if (mergedPlans.size() != 1) {\n    throw new UnsupportedOperationException(\"Incompatible metrics in client query.  Cannot merge \" + \"into a single query\");\n  }\n  QueryPlan mergedPlan=mergedPlans.get(0);\n  QueryPlanTranslator queryPlanTranslator=new QueryPlanTranslator(query,metaDataStore,merger);\n  Query merged=(mergedPlan == null) ? QueryPlanTranslator.addHiddenProjections(metaDataStore,query).build() : queryPlanTranslator.translate(mergedPlan);\n  for (  Optimizer optimizer : optimizers) {\n    SQLTable table=(SQLTable)query.getSource();\n    if (table.getHints().contains(optimizer.negateHint())) {\n      continue;\n    }\n    if (!table.getHints().contains(optimizer.hint())) {\n      continue;\n    }\n    if (optimizer.canOptimize(merged)) {\n      merged=optimizer.optimize(merged);\n    }\n  }\n  return merged;\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/queryengines/sql/SQLQueryEngine.java",
+    "Start": 16011,
+    "Stop": 18007,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "expandMetricQueryPlans"
+}

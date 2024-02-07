@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use try-finally for clean up",
+                "Change_Diff": "- try {\n+ try {\n     return callable.call();\n }",
+                "Description": "Wrap the callable logic in a try-finally block to ensure that any resources are cleaned up properly.",
+                "Start": 4,
+                "End": 8
+            },
+            {
+                "Improvement": "Use logger instead of System.out",
+                "Change_Diff": "- System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \" + e.getMessage());\n+ logger.error(\"retry[\" + t.incrementAndGet() + \"] exception: \" + e.getMessage(), e);",
+                "Description": "Instead of using System.out to print exception messages, use a logger for better control and management of log statements.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "protected final <T>T retry(final Context context, final Callable<T> callable) {\n    final AtomicInteger t = new AtomicInteger(0);\n    final Callable<T> wrapper = () -> {\n        try {\n            return callable.call();\n        } finally {\n            // Clean up resources here\n        }\n    };\n    final RetryConfig config = new RetryConfigBuilder()\n            .retryOnAnyException()\n            .withMaxNumberOfTries(30)\n            .withDelayBetweenTries(10, ChronoUnit.SECONDS)\n            .withFixedBackoff()\n            .build();\n    try {\n        // Execute callable logic with retry\n        final CallResults<Object> results = new CallExecutor(config).execute(wrapper);\n        return (T) results.getResult();\n    } catch (final RuntimeException e) {\n        // Report failure\n        context.reportFailure();\n        throw e;\n    }\n}"
+    }],
+    "Old_Method": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (    final Exception e) {\n      System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n      e.printStackTrace(System.out);\n      System.out.println();\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ATest.java",
+    "Start": 555,
+    "Stop": 1605,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "retry"
+}

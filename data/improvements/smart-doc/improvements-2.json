@@ -1,0 +1,48 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Replace lambda expression with method reference",
+                "Change_Diff": "- apiDocList.forEach(doc -> {",
+                "Description": "Replace the lambda expression with a method reference for better readability and code simplicity.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use isEmpty() method instead of ArrayUtils.isEmpty()",
+                "Change_Diff": "- if (ArrayUtils.isEmpty(tags)) {",
+                "Description": "Replace the ArrayUtils.isEmpty() method with the isEmpty() method of the CollectionUtil class for consistency and code clarity.",
+                "Start": 24,
+                "End": 24
+            },
+            {
+                "Improvement": "Simplify method chaining in computeIfPresent() calls",
+                "Change_Diff": "- copyMap.computeIfPresent(tag,(k,v) -> {",
+                "Description": "Simplify the code by removing unnecessary parentheses and explicitly specifying the return statement.",
+                "Start": 31,
+                "End": 31
+            },
+            {
+                "Improvement": "Use method reference instead of lambda expression in computeIfPresent() calls",
+                "Change_Diff": "- copyMap.computeIfPresent(tag,(k1,v2) -> {",
+                "Description": "Replace the lambda expression with a method reference for better readability and code simplicity.",
+                "Start": 53,
+                "End": 53
+            },
+            {
+                "Improvement": "Replace for-each loop with forEach() method",
+                "Change_Diff": "- methodDocList.forEach(method -> {",
+                "Description": "Replace the for-each loop with the forEach() method of the List interface for cleaner and more concise code.",
+                "Start": 68,
+                "End": 68
+            }
+        ],
+        "Final code": "default List<ApiDoc> handleTagsApiDoc(List<ApiDoc> apiDocList){\n  if (CollectionUtil.isEmpty(apiDocList)) {\n    return Collections.emptyList();\n  }\n  Map<String, ApiDoc> copyMap = new HashMap<>();\n  apiDocList.forEach(copyMap::computeIfPresent);\n  Map<String, ApiDoc> allMap = new HashMap<>(copyMap);\n  allMap.forEach((k, v) -> {\n    List<ApiMethodDoc> methodDocList = v.getList();\n    methodDocList.forEach(method -> {\n      String[] tags = method.getTags();\n      if (CollectionUtil.isEmpty(tags)) {\n        return;\n      }\n      for (String tag : tags) {\n        tag = StringUtil.trim(tag);\n        copyMap.computeIfPresent(tag, (k1, v2) -> {\n          method.setOrder(v2.getList().size() + 1);\n          v2.getList().add(method);\n          return v2;\n        });\n        copyMap.putIfAbsent(tag, ApiDoc.buildTagApiDoc(v, tag, method));\n      }\n    });\n  });\n  List<ApiDoc> apiDocs = new ArrayList<>(copyMap.values());\n  int index = apiDocs.size() - 1;\n  for (ApiDoc apiDoc : apiDocs) {\n    if (apiDoc.getOrder() == null) {\n      apiDoc.setOrder(index++);\n    }\n  }\n  apiDocs.sort(Comparator.comparing(ApiDoc::getOrder));\n  return apiDocs;\n}"
+    }],
+    "Old_Method": "default List<ApiDoc> handleTagsApiDoc(List<ApiDoc> apiDocList){\n  if (CollectionUtil.isEmpty(apiDocList)) {\n    return Collections.emptyList();\n  }\n  Map<String,ApiDoc> copyMap=new HashMap<>();\n  apiDocList.forEach(doc -> {\n    String[] tags=doc.getTags();\n    if (ArrayUtils.isEmpty(tags)) {\n      tags=new String[]{doc.getPackageName() + \".\" + doc.getName()};\n    }\n    for (    String tag : tags) {\n      tag=StringUtil.trim(tag);\n      copyMap.computeIfPresent(tag,(k,v) -> {\n        List<ApiMethodDoc> list=CollectionUtil.isEmpty(v.getList()) ? new ArrayList<>() : v.getList();\n        list.addAll(doc.getList());\n        v.setList(list);\n        return v;\n      }\n);\n      copyMap.putIfAbsent(tag,doc);\n    }\n  }\n);\n  Map<String,ApiDoc> allMap=new HashMap<>(copyMap);\n  allMap.forEach((k,v) -> {\n    List<ApiMethodDoc> methodDocList=v.getList();\n    methodDocList.forEach(method -> {\n      String[] tags=method.getTags();\n      if (ArrayUtils.isEmpty(tags)) {\n        return;\n      }\n      for (      String tag : tags) {\n        tag=StringUtil.trim(tag);\n        copyMap.computeIfPresent(tag,(k1,v2) -> {\n          method.setOrder(v2.getList().size() + 1);\n          v2.getList().add(method);\n          return v2;\n        }\n);\n        copyMap.putIfAbsent(tag,ApiDoc.buildTagApiDoc(v,tag,method));\n      }\n    }\n);\n  }\n);\n  List<ApiDoc> apiDocs=new ArrayList<>(copyMap.values());\n  int index=apiDocs.size() - 1;\n  for (  ApiDoc apiDoc : apiDocs) {\n    if (apiDoc.getOrder() == null) {\n      apiDoc.setOrder(index++);\n    }\n  }\n  apiDocs.sort(Comparator.comparing(ApiDoc::getOrder));\n  return apiDocs;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/template/IRestDocTemplate.java",
+    "Start": 9408,
+    "Stop": 11532,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "handleTagsApiDoc"
+}

@@ -1,0 +1,12 @@
+{
+    "Method_Improvements": [{
+        "details": "Expected a ',' or '}' at 1635 [character 866 line 18]",
+        "error": "An unexpected error occurred"
+    }],
+    "Old_Method": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamHTTPTest.java",
+    "Start": 1411,
+    "Stop": 2260,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onHTTPRequestDataReceived"
+}

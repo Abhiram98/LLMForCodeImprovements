@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use a more descriptive variable name instead of 'i'",
+                "Change_Diff": "- for (int i=0; i<64; i++) {\n+ for (int numBytes=0; numBytes<64; numBytes++) {",
+                "Description": "Use a variable name that better describes its purpose, such as 'numBytes', instead of using a generic name like 'i'.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Extract inner loop into a separate method",
+                "Change_Diff": "- for (int j=2; j <= 36; j++) {\n+ for (int j=2; j <= 36; j++) {\n+     testEncoding(rnd, j);\n+ }",
+                "Description": "Extract the inner loop into a separate method to improve readability and maintainability of the code.",
+                "Start": 4,
+                "End": 8
+            },
+            {
+                "Improvement": "Use a StringBuilder instead of concatenating strings",
+                "Change_Diff": "- System.out.println(\"radix\" + j + \":\\t\" + encodedBigEndian);\n+ System.out.println(\"radix\" + j + \":\\t\".concat(encodedBigEndian));",
+                "Description": "Use a StringBuilder to concatenate strings instead of using the '+' operator to improve performance and reduce memory usage.",
+                "Start": 12,
+                "End": 12
+            },
+            {
+                "Improvement": "Extract assertion into a separate method",
+                "Change_Diff": "- assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n+ assertArrayEquals(getExpectedResult(rnd).array(),decoded);",
+                "Description": "Extract the assertion into a separate method to improve readability and simplify the logic in the main code block.",
+                "Start": 19,
+                "End": 19
+            }
+        ],
+        "Final code": "@Test\npublic void encodeDecodeRadix() {\n    int leadingZeroHits = 0;\n    int encodings = 0;\n    for (int numBytes = 0; numBytes < 64; numBytes++) {\n        Bytes rnd = Bytes.random(numBytes % 256);\n        System.out.println(\"\\n\\nNEW TEST: \" + numBytes + \" bytes\\n\");\n        testAllEncodings(rnd);\n    }\n    System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings + \" encodings\");\n}\n\nprivate void testAllEncodings(Bytes rnd) {\n    int leadingZeroHits = 0;\n    int encodings = 0;\n    for (int j = 2; j <= 36; j++) {\n        encodings++;\n        BinaryToTextEncoding.EncoderDecoder encoding = new BinaryToTextEncoding.BaseRadixNumber(j);\n        String encodedBigEndian = encoding.encode(rnd.array(), ByteOrder.BIG_ENDIAN);\n        byte[] decoded = encoding.decode(encodedBigEndian);\n        System.out.println(\"radix\" + j + \":\\t\".concat(encodedBigEndian));\n        System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n        System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n        assertArrayEquals(getExpectedResult(rnd).array(), decoded);\n    }\n}\n\nprivate Bytes getExpectedResult(Bytes rnd) {\n    if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        return rnd;\n    } else {\n        leadingZeroHits++;\n        return rnd.resize(rnd.length() - 1);\n    }\n}"
+    }],
+    "Old_Method": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n      String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n      byte[] decoded=encoding.decode(encodedBigEndian);\n      System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n      System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n      System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n      if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        assertArrayEquals(rnd.array(),decoded);\n      }\n else {\n        leadingZeroHits++;\n        assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n      }\n    }\n  }\n  System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BinaryToTextEncodingTest.java",
+    "Start": 3738,
+    "Stop": 5067,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "encodeDecodeRadix"
+}

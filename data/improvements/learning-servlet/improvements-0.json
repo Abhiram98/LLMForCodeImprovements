@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources statement to handle database connection",
+                "Change_Diff": "- Connection c=DbUtils.getConnection();\n+ try (Connection c = DbUtils.getConnection()) {",
+                "Description": "Instead of manually closing the database connection, use try-with-resources statement to automatically close the connection.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use PreparedStatement parameterized query",
+                "Change_Diff": "- String sql=\"select uUsername from user where uId = ?\";\n+ String sql=\"select uUsername from user where uId = ?\";\nsql = sql.trim();",
+                "Description": "To prevent SQL injection, use PreparedStatement with parameterized query instead of concatenating values directly in the SQL string. Trim the SQL string to remove leading and trailing white spaces.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Close ResultSet in a finally block",
+                "Change_Diff": "ResultSet rs=ps.executeQuery();\n+ try (ResultSet rs = ps.executeQuery()) {\n  while (rs.next()) {\n    System.out.println(rs.getString(1));\n  }\n} catch (Exception e) { // Handle exception\n} finally {\n  rs.close();\n}",
+                "Description": "To ensure that the ResultSet is always closed, move the ResultSet declaration and closing code inside a try-with-resources statement. Add a catch block to handle any exception that occurs.",
+                "Start": 10,
+                "End": 14
+            },
+            {
+                "Improvement": "Close PreparedStatement and Connection in a finally block",
+                "Change_Diff": "ResultSet rs.close();\nps.close();\nc.close();\n+ } finally {\n  ps.close();\n  c.close();\n}",
+                "Description": "To ensure that the PreparedStatement and Connection are always closed, move the closing code inside a finally block.",
+                "Start": 15,
+                "End": 17
+            }
+        ],
+        "Final code": "@Test public void dbTest() throws SQLException {\n  try (Connection c = DbUtils.getConnection()) {\n    String sql = \"select uUsername from user where uId = ?\";\n    sql = sql.trim();\n    try (PreparedStatement ps = c.prepareStatement(sql)) {\n      ps.setInt(1, 1);\n      try (ResultSet rs = ps.executeQuery()) {\n        while (rs.next()) {\n          System.out.println(rs.getString(1));\n        }\n      } catch (Exception e) { // Handle exception\n      }\n    }\n  } catch (SQLException e) { // Handle exception\n  }\n}"
+    }],
+    "Old_Method": "@Test public void dbTest() throws SQLException {\n  Connection c=DbUtils.getConnection();\n  String sql=\"select uUsername from user where uId = ?\";\n  PreparedStatement ps=c.prepareStatement(sql);\n  ps.setInt(1,1);\n  ResultSet rs=ps.executeQuery();\n  while (rs.next()) {\n    System.out.println(rs.getString(1));\n  }\n  rs.close();\n  ps.close();\n  c.close();\n}\n",
+    "File_Path": "learning-servlet/myservlet06/src/test/DbTest.java",
+    "Start": 199,
+    "Stop": 563,
+    "Project_Name": "data/projects/learning-servlet",
+    "Method_Name": "dbTest"
+}

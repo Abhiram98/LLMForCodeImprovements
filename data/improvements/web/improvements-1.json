@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources to automatically close the Jedis resource",
+                "Change_Diff": "- jedis=jedisPool.getResource();\n+ try (Jedis jedis = jedisPool.getResource()) {",
+                "Description": "Instead of manually closing the Jedis resource, use try-with-resources to automatically close it.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Remove the finally block for closing Jedis",
+                "Change_Diff": "- finally {\n-     if (jedis != null) {\n-         jedis.close();\n-     }\n- }",
+                "Description": "With try-with-resources, there is no need for the finally block to close the Jedis resource.",
+                "Start": 9,
+                "End": 13
+            }
+        ],
+        "Final code": "/**\n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  try (Jedis jedis = jedisPool.getResource()) {\n    jedis.del(key);\n  }\n}"
+    }],
+    "Old_Method": "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  Jedis jedis=null;\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  }\n  finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}\n",
+    "File_Path": "web/cache/src/main/java/com/aitongyi/web/cache/CacheService.java",
+    "Start": 1034,
+    "Stop": 1334,
+    "Project_Name": "data/projects/web",
+    "Method_Name": "del"
+}

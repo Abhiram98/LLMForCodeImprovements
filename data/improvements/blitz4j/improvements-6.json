@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated code into a separate method",
+                "Change_Diff": "- while (i <= 1000) {\n+ while (shouldContinue(i)) {",
+                "Description": "The code inside the while loop can be extracted into a separate method to improve readability and maintainability.",
+                "Start": 6,
+                "End": 17
+            },
+            {
+                "Improvement": "Use logger instead of printing stack trace",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.error(\"Exception caught\", e);",
+                "Description": "Instead of printing the stack trace, use a logger to log the exception.",
+                "Start": 13,
+                "End": 14
+            }
+        ],
+        "Final code": "public void run() {\n    int i = 0;\n    while (shouldContinue(i)) {\n        try {\n            ConfigurationManager.getConfigInstance().setProperty(\"log4j.junk\", (i++) + \"\");\n            Thread.sleep(10);\n            Thread.yield();\n        } catch (Exception e) {\n            logger.error(\"Exception caught\", e);\n        }\n    }\n}\n\nprivate boolean shouldContinue(int i) {\n    return i <= 1000;\n}"
+    }],
+    "Old_Method": "public void run(){\n  int i=0;\n  while (i <= 1000) {\n    try {\n      ConfigurationManager.getConfigInstance().setProperty(\"log4j.junk\",(i++) + \"\");\n      Thread.sleep(10);\n      Thread.yield();\n    }\n catch (    Exception e) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/test/java/com/netflix/blitz4j/TestBlitz4j.java",
+    "Start": 7912,
+    "Stop": 8617,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "run"
+}

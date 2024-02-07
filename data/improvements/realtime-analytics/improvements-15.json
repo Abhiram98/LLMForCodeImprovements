@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use switch statement instead of multiple if statements",
+                "Change_Diff": "- if (pathInfo.startsWith(PATH_PING)) {\n-   ping(request,pathInfo,response);\n- }\n- else if (pathInfo.startsWith(PATH_COUNTER)) {\n-   stats.incQueryRequestCount();\n-   getCounters(request,pathInfo,response);\n- }\n- else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n-   stats.incQueryRequestCount();\n-   getMetrics(request,pathInfo,response);\n- }\n- else {\n-   stats.incInvalidRequestCount();\n-   response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n- }",
+                "Description": "Instead of using multiple if statements to check the value of 'pathInfo', use a switch statement for better readability and maintainability.",
+                "Start": 18,
+                "End": 31
+            },
+            {
+                "Improvement": "Extract repeated code into separate methods",
+                "Change_Diff": "+ private void handlePingRequest(HttpServletRequest request, String pathInfo, HttpServletResponse response) {\n+     ping(request, pathInfo, response);\n+ }\n+\n+ private void handleCounterRequest(HttpServletRequest request, String pathInfo, HttpServletResponse response) {\n+     stats.incQueryRequestCount();\n+     getCounters(request, pathInfo, response);\n+ }\n+\n+ private void handleMetricGroupRequest(HttpServletRequest request, String pathInfo, HttpServletResponse response) {\n+     stats.incQueryRequestCount();\n+     getMetrics(request, pathInfo, response);\n+ }\n+\n+ private void handleInvalidRequest(HttpServletResponse response) {\n+     stats.incInvalidRequestCount();\n+     response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n+ }",
+                "Description": "Extract the code blocks inside each if statement into separate methods to improve readability, maintainability, and reduce duplication.",
+                "Start": 18,
+                "End": 31
+            },
+            {
+                "Improvement": "Add comments to explain the purpose of each method",
+                "Change_Diff": "+ // Handle ping request\n+ private void handlePingRequest(HttpServletRequest request, String pathInfo, HttpServletResponse response) {\n+     ping(request, pathInfo, response);\n+ }\n+\n+ // Handle counter request\n+ private void handleCounterRequest(HttpServletRequest request, String pathInfo, HttpServletResponse response) {\n+     stats.incQueryRequestCount();\n+     getCounters(request, pathInfo, response);\n+ }\n+\n+ // Handle metric group request\n+ private void handleMetricGroupRequest(HttpServletRequest request, String pathInfo, HttpServletResponse response) {\n+     stats.incQueryRequestCount();\n+     getMetrics(request, pathInfo, response);\n+ }\n+\n+ // Handle invalid request\n+ private void handleInvalidRequest(HttpServletResponse response) {\n+     stats.incInvalidRequestCount();\n+     response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n+ }",
+                "Description": "Add comments above each extracted method to explain the purpose of the method.",
+                "Start": 18,
+                "End": 31
+            }
+        ],
+        "Final code": "@Override\npublic void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {\n    ServletInputStream inputStream = request.getInputStream();\n    if (inputStream != null) {\n        inputStream.mark(Integer.MAX_VALUE);\n    }\n    try {\n        String pathInfo = request.getPathInfo();\n        switch (pathInfo) {\n            case PATH_PING -> handlePingRequest(request, pathInfo, response);\n            case PATH_COUNTER -> handleCounterRequest(request, pathInfo, response);\n            case PATH_METRICGROUP -> handleMetricGroupRequest(request, pathInfo, response);\n            default -> handleInvalidRequest(response);\n        }\n    } catch (Throwable ex) {\n        String requestTxt = readRequest(request);\n        stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n        stats.registerError(ex);\n        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n    } finally {\n        response.addHeader(\"Access-Control-Allow-Origin\", \"*\");\n        response.addHeader(\"Access-Control-Allow-Methods\", \"*\");\n        response.addHeader(\"Access-Control-Allow-Headers\", \"Content-Type\");\n    }\n}"
+    }],
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

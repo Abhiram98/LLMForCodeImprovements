@@ -1,0 +1,299 @@
+[
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Extract complex code into separate methods",
+                    "Change_Diff": "- for (int i=0; i < numEntries; i++) {\n+ processLeaderboardEntry(userStats, entries, i, friends, utils);",
+                    "Description": "Extract the code inside the for loop into a separate method to improve readability and maintainability.",
+                    "Start": 8,
+                    "End": 43
+                },
+                {
+                    "Improvement": "Use StringBuilder for string concatenation",
+                    "Change_Diff": "- System.out.println(\"Leaderboard entry #\" + i + \": accountID=\"+ entry.getSteamIDUser().getAccountID()+ \", globalRank=\"+ entry.getGlobalRank()+ \", score=\"+ entry.getScore()+ \", numDetails=\"+ numDetails);\n+ StringBuilder sb = new StringBuilder();\n+ sb.append(\"Leaderboard entry #\").append(i).append(\": accountID=\").append(entry.getSteamIDUser().getAccountID()).append(\", globalRank=\").append(entry.getGlobalRank()).append(\", score=\").append(entry.getScore()).append(\", numDetails=\").append(numDetails);\n+ System.out.println(sb.toString());",
+                    "Description": "Use StringBuilder to improve the string concatenation performance and avoid the creation of unnecessary intermediate strings.",
+                    "Start": 12,
+                    "End": 15
+                }
+            ],
+            "Final code": "@Override\npublic void onLeaderboardScoresDownloaded(SteamLeaderboardHandle leaderboard,SteamLeaderboardEntriesHandle entries,int numEntries){\n  System.out.println(\"Leaderboard scores downloaded: handle=\" + leaderboard.toString() + \", entries=\"+ entries.toString()+ \", count=\"+ numEntries);\n  int[] details=new int[16];\n  for (int i=0; i < numEntries; i++) {\n    SteamLeaderboardEntry entry=new SteamLeaderboardEntry();\n    if (userStats.getDownloadedLeaderboardEntry(entries,i,entry,details)) {\n      processLeaderboardEntry(userStats, entries, i, friends, utils);\n    }\n  }\n}\n\nprivate void processLeaderboardEntry(UserStats userStats, SteamLeaderboardEntriesHandle entries, int index, Friends friends, Utils utils) {\n  SteamLeaderboardEntry entry=new SteamLeaderboardEntry();\n  if (userStats.getDownloadedLeaderboardEntry(entries,index,entry,details)) {\n    int numDetails=entry.getNumDetails();\n    StringBuilder sb = new StringBuilder();\n    sb.append(\"Leaderboard entry #\").append(index).append(\": accountID=\").append(entry.getSteamIDUser().getAccountID()).append(\", globalRank=\").append(entry.getGlobalRank()).append(\", score=\").append(entry.getScore()).append(\", numDetails=\").append(numDetails);\n    System.out.println(sb.toString());\n    for (int detail=0; detail < numDetails; detail++) {\n      System.out.println(\"  ... detail #\" + detail + \"=\"+ details[detail]);\n    }\n    if (friends.requestUserInformation(entry.getSteamIDUser(),false)) {\n      System.out.println(\"  ... requested user information for entry\");\n    }\n    else {\n      System.out.println(\"  ... user name is '\" + friends.getFriendPersonaName(entry.getSteamIDUser()) + \"'\");\n      int smallAvatar=friends.getSmallFriendAvatar(entry.getSteamIDUser());\n      if (smallAvatar != 0) {\n        int w=utils.getImageWidth(smallAvatar);\n        int h=utils.getImageHeight(smallAvatar);\n        System.out.println(\"  ... small avatar size: \" + w + \"x\"+ h+ \" pixels\");\n        ByteBuffer image=ByteBuffer.allocateDirect(w * h * 4);\n        try {\n          if (utils.getImageRGBA(smallAvatar,image)) {\n            System.out.println(\"  ... small avatar retrieve avatar image successful\");\n            int nonZeroes=w * h;\n            for (int y=0; y < h; y++) {\n              for (int x=0; x < w; x++) {\n                if (image.getInt(y * w + x) == 0) {\n                  nonZeroes--;\n                }\n              }\n            }\n            if (nonZeroes == 0) {\n              System.err.println(\"Something's wrong! Avatar image is empty!\");\n            }\n          }\n          else {\n            System.out.println(\"  ... small avatar retrieve avatar image failed!\");\n          }\n        }\n        catch (SteamException e) {\n          e.printStackTrace();\n        }\n      }\n      else {\n        System.out.println(\"  ... small avatar image not available!\");\n      }\n    }\n  }\n}"
+        }],
+        "Old_Method": "@Override public void onLeaderboardScoresDownloaded(SteamLeaderboardHandle leaderboard,SteamLeaderboardEntriesHandle entries,int numEntries){\n  System.out.println(\"Leaderboard scores downloaded: handle=\" + leaderboard.toString() + \", entries=\"+ entries.toString()+ \", count=\"+ numEntries);\n  int[] details=new int[16];\n  for (int i=0; i < numEntries; i++) {\n    SteamLeaderboardEntry entry=new SteamLeaderboardEntry();\n    if (userStats.getDownloadedLeaderboardEntry(entries,i,entry,details)) {\n      int numDetails=entry.getNumDetails();\n      System.out.println(\"Leaderboard entry #\" + i + \": accountID=\"+ entry.getSteamIDUser().getAccountID()+ \", globalRank=\"+ entry.getGlobalRank()+ \", score=\"+ entry.getScore()+ \", numDetails=\"+ numDetails);\n      for (int detail=0; detail < numDetails; detail++) {\n        System.out.println(\"  ... detail #\" + detail + \"=\"+ details[detail]);\n      }\n      if (friends.requestUserInformation(entry.getSteamIDUser(),false)) {\n        System.out.println(\"  ... requested user information for entry\");\n      }\n else {\n        System.out.println(\"  ... user name is '\" + friends.getFriendPersonaName(entry.getSteamIDUser()) + \"'\");\n        int smallAvatar=friends.getSmallFriendAvatar(entry.getSteamIDUser());\n        if (smallAvatar != 0) {\n          int w=utils.getImageWidth(smallAvatar);\n          int h=utils.getImageHeight(smallAvatar);\n          System.out.println(\"  ... small avatar size: \" + w + \"x\"+ h+ \" pixels\");\n          ByteBuffer image=ByteBuffer.allocateDirect(w * h * 4);\n          try {\n            if (utils.getImageRGBA(smallAvatar,image)) {\n              System.out.println(\"  ... small avatar retrieve avatar image successful\");\n              int nonZeroes=w * h;\n              for (int y=0; y < h; y++) {\n                for (int x=0; x < w; x++) {\n                  if (image.getInt(y * w + x) == 0) {\n                    nonZeroes--;\n                  }\n                }\n              }\n              if (nonZeroes == 0) {\n                System.err.println(\"Something's wrong! Avatar image is empty!\");\n              }\n            }\n else {\n              System.out.println(\"  ... small avatar retrieve avatar image failed!\");\n            }\n          }\n catch (          SteamException e) {\n            e.printStackTrace();\n          }\n        }\n else {\n          System.out.println(\"  ... small avatar image not available!\");\n        }\n      }\n    }\n  }\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+        "Start": 3066,
+        "Stop": 5589,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "onLeaderboardScoresDownloaded"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Remove unnecessary print statements",
+                    "Change_Diff": "- System.out.println(\"Register user ...\");\n+ user=new SteamUser(userCallback);",
+                    "Description": "Remove the unnecessary print statements used for debugging purposes.",
+                    "Start": 1,
+                    "End": 2
+                },
+                {
+                    "Improvement": "Move variable declarations closer to their usage",
+                    "Change_Diff": "- user=new SteamUser(userCallback);\n- userStats=new SteamUserStats(userStatsCallback);\n- remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n- ugc=new SteamUGC(ugcCallback);\n- utils=new SteamUtils(utilsCallback);\n- apps=new SteamApps();\n- friends=new SteamFriends(friendsCallback);",
+                    "Description": "Instead of declaring all the variables at the beginning of the method, move the declarations closer to their usage.",
+                    "Start": 4,
+                    "End": 14
+                },
+                {
+                    "Improvement": "Combine multiple print statements",
+                    "Change_Diff": "- System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n- System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n- System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n- System.out.println(\"App ID: \" + utils.getAppID());\n- System.out.println(\"App build ID: \" + apps.getAppBuildId());\n- System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n- System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n- System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());",
+                    "Description": "Combine multiple print statements into a single print statement for better readability.",
+                    "Start": 16,
+                    "End": 23
+                }
+            ],
+            "Final code": "@Override\nprotected void registerInterfaces() {\n  user = new SteamUser(userCallback);\n  userStats = new SteamUserStats(userStatsCallback);\n  remoteStorage = new SteamRemoteStorage(remoteStorageCallback);\n  ugc = new SteamUGC(ugcCallback);\n  utils = new SteamUtils(utilsCallback);\n  apps = new SteamApps();\n  friends = new SteamFriends(friendsCallback);\n\n  System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID() +\n    \"\\nLocal user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()) +\n    \"\\nLocal user friends name: \" + friends.getPersonaName() +\n    \"\\nApp ID: \" + utils.getAppID() +\n    \"\\nApp build ID: \" + apps.getAppBuildId() +\n    \"\\nApp owner: \" + apps.getAppOwner().getAccountID() +\n    \"\\nCurrent game language: \" + apps.getCurrentGameLanguage() +\n    \"\\nAvailable game languages: \" + apps.getAvailableGameLanguages());\n}"
+        }],
+        "Old_Method": "@Override protected void registerInterfaces(){\n  System.out.println(\"Register user ...\");\n  user=new SteamUser(userCallback);\n  System.out.println(\"Register user stats callback ...\");\n  userStats=new SteamUserStats(userStatsCallback);\n  System.out.println(\"Register remote storage ...\");\n  remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n  System.out.println(\"Register UGC ...\");\n  ugc=new SteamUGC(ugcCallback);\n  System.out.println(\"Register Utils ...\");\n  utils=new SteamUtils(utilsCallback);\n  System.out.println(\"Register Apps ...\");\n  apps=new SteamApps();\n  System.out.println(\"Register Friends ...\");\n  friends=new SteamFriends(friendsCallback);\n  System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n  System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n  System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n  System.out.println(\"App ID: \" + utils.getAppID());\n  System.out.println(\"App build ID: \" + apps.getAppBuildId());\n  System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n  System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n  System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+        "Start": 13419,
+        "Stop": 14725,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "registerInterfaces"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Extract method for checking if handle is valid",
+                    "Change_Diff": "- if (setHandle == null || getNativeHandle(setHandle) == 0) {\n+ if (!isValidSetHandle()) {",
+                    "Description": "Create a separate method to handle the logic of checking if the handle is valid or not.",
+                    "Start": 1,
+                    "End": 2
+                },
+                {
+                    "Improvement": "Extract method for checking and printing digital action",
+                    "Change_Diff": "- if (digitalActionHandle != null) {\n+ if (shouldPrintDigitalAction()) {",
+                    "Description": "Create a separate method to handle the logic of checking and printing the digital action.",
+                    "Start": 8,
+                    "End": 17
+                },
+                {
+                    "Improvement": "Extract method for checking and printing analog action",
+                    "Change_Diff": "- if (analogActionHandle != null) {\n+ if (shouldPrintAnalogAction()) {",
+                    "Description": "Create a separate method to handle the logic of checking and printing the analog action.",
+                    "Start": 19,
+                    "End": 28
+                }
+            ],
+            "Final code": "@Override\nprotected void processUpdate() throws SteamException {\n  if (!isValidSetHandle()) {\n    return;\n  }\n  for (int i=0; i < numControllers; i++) {\n    SteamControllerHandle handle=controllerHandles[i];\n    controller.activateActionSet(handle,setHandle);\n    if (shouldPrintDigitalAction()) {\n      System.out.println(\"  digital action: \" + getNativeHandle(digitalActionHandle));\n    }\n    if (shouldPrintAnalogAction()) {\n      System.out.println(\"  analog action: \" + analogActionData.getX() + \", \" + analogActionData.getY() + \", \" + analogActionData.getMode().name());\n    }\n  }\n}"
+        }],
+        "Old_Method": "@Override protected void processUpdate() throws SteamException {\n  if (setHandle == null || getNativeHandle(setHandle) == 0) {\n    return;\n  }\n  for (int i=0; i < numControllers; i++) {\n    SteamControllerHandle handle=controllerHandles[i];\n    controller.activateActionSet(handle,setHandle);\n    if (digitalActionHandle != null) {\n      controller.getDigitalActionData(handle,digitalActionHandle,digitalActionData);\n      if (digitalActionData.getActive() && digitalActionData.getState()) {\n        System.out.println(\"  digital action: \" + getNativeHandle(digitalActionHandle));\n      }\n    }\n    if (analogActionHandle != null) {\n      controller.getAnalogActionData(handle,analogActionHandle,analogActionData);\n      if (analogActionData.getActive()) {\n        float x=analogActionData.getX();\n        float y=analogActionData.getY();\n        SteamController.SourceMode mode=analogActionData.getMode();\n        if (Math.abs(x) > 0.0001f && Math.abs(y) > 0.001f) {\n          System.out.println(\"  analog action: \" + analogActionData.getX() + \", \"+ analogActionData.getY()+ \", \"+ mode.name());\n        }\n      }\n    }\n  }\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamControllerTest.java",
+        "Start": 1216,
+        "Stop": 3060,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "processUpdate"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Extract common logic into separate methods",
+                    "Change_Diff": "-        if (input.startsWith(\"lobby request \")) {\n+        if (isLobbyRequest(input)) {\n             String[] parameters=input.substring(\"lobby request \".length()).split(\" \");\n             int limit=Integer.parseInt(parameters[0]);\n             System.out.println(\"  - requesting up to \" + limit + \" lobbies\");\n             matchmaking.addRequestLobbyListResultCountFilter(limit);\n             matchmaking.addRequestLobbyListStringFilter(LobbyDataKey,LobbyDataValue,SteamMatchmaking.LobbyComparison.Equal);\n             matchmaking.requestLobbyList();",
+                    "Description": "The `processInput` method contains multiple blocks of code that can be extracted into separate methods to improve readability and maintainability.",
+                    "Start": 10,
+                    "End": 178
+                },
+                {
+                    "Improvement": "Use a switch statement instead of multiple if statements",
+                    "Change_Diff": "-  if (input.equals(\"lobby list\")) {\n-    listLobbies();\n-  }\n-  else if (input.startsWith(\"lobby request \")) {\n-    String[] parameters=input.substring(\"lobby request \".length()).split(\" \");\n-    int limit=Integer.parseInt(parameters[0]);\n-    System.out.println(\"  - requesting up to \" + limit + \" lobbies\");\n-    matchmaking.addRequestLobbyListResultCountFilter(limit);\n-    matchmaking.addRequestLobbyListStringFilter(LobbyDataKey,LobbyDataValue,SteamMatchmaking.LobbyComparison.Equal);\n-    matchmaking.requestLobbyList();\n-  }\n-  else if (input.startsWith(\"lobby create \")) {\n+  switch (input) {\n+    case \"lobby list\":\n+      listLobbies();\n+      break;\n+    case String lobbyRequest when lobbyRequest.startsWith(\"lobby request \"):\n+      handleLobbyRequest(lobbyRequest);\n+      break;\n+    case String lobbyCreate when lobbyCreate.startsWith(\"lobby create \"):\n       int maxMembers=Integer.parseInt(input.substring(\"lobby create \".length()));\n       System.out.println(\"  creating lobby for \" + maxMembers + \" players.\");\n       matchmaking.createLobby(SteamMatchmaking.LobbyType.Public,maxMembers);\n       break;",
+                    "Description": "The multiple if statements used to check the input can be replaced with a switch statement, which improves readability and makes it easier to add new cases in the future.",
+                    "Start": 9,
+                    "End": 179
+                },
+                {
+                    "Improvement": "Use method references instead of lambda expressions",
+                    "Change_Diff": "-    matchmaking.addRequestLobbyListStringFilter(LobbyDataKey,LobbyDataValue,SteamMatchmaking.LobbyComparison.Equal);\n+    matchmaking.addRequestLobbyListStringFilter(LobbyDataKey,LobbyDataValue,SteamMatchmaking.LobbyComparison::Equal);",
+                    "Description": "Where possible, use method references instead of lambda expressions to improve readability and reduce code complexity.",
+                    "Start": 15,
+                    "End": 15
+                }
+            ],
+            "Final code": "@Override\nprotected void processInput(String input) throws SteamException {\n    switch (input) {\n        case \"lobby list\":\n            listLobbies();\n            break;\n        case String lobbyRequest when lobbyRequest.startsWith(\"lobby request \"):\n            handleLobbyRequest(lobbyRequest);\n            break;\n        case String lobbyCreate when lobbyCreate.startsWith(\"lobby create \"):\n            handleLobbyCreate(lobbyCreate);\n            break;\n        case String lobbyJoin when lobbyJoin.startsWith(\"lobby join \"):\n            handleLobbyJoin(lobbyJoin);\n            break;\n        case String lobbyLeave when lobbyLeave.startsWith(\"lobby leave \"):\n            handleLobbyLeave(lobbyLeave);\n            break;\n        case String lobbyInvite when lobbyInvite.startsWith(\"lobby invite \"):\n            handleLobbyInvite(lobbyInvite);\n            break;\n        case String lobbyData when lobbyData.startsWith(\"lobby data \"):\n            handleLobbyData(lobbyData);\n            break;\n        case String lobbyChat when lobbyChat.startsWith(\"lobby chat \"):\n            handleLobbyChat(lobbyChat);\n            break;\n        case String getMemberData when getMemberData.startsWith(\"get lobby member data \"):\n            handleGetLobbyMemberData(getMemberData);\n            break;\n        case String setMemberData when setMemberData.startsWith(\"set lobby member data \"):\n            handleSetLobbyMemberData(setMemberData);\n            break;\n        default:\n            System.err.println(\"Invalid input: \" + input);\n            break;\n    }\n    friends.processInput(input);\n}"
+        }],
+        "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.equals(\"lobby list\")) {\n    listLobbies();\n  }\n else   if (input.startsWith(\"lobby request \")) {\n    String[] parameters=input.substring(\"lobby request \".length()).split(\" \");\n    int limit=Integer.parseInt(parameters[0]);\n    System.out.println(\"  - requesting up to \" + limit + \" lobbies\");\n    matchmaking.addRequestLobbyListResultCountFilter(limit);\n    matchmaking.addRequestLobbyListStringFilter(LobbyDataKey,LobbyDataValue,SteamMatchmaking.LobbyComparison.Equal);\n    matchmaking.requestLobbyList();\n  }\n else   if (input.startsWith(\"lobby create \")) {\n    int maxMembers=Integer.parseInt(input.substring(\"lobby create \".length()));\n    System.out.println(\"  creating lobby for \" + maxMembers + \" players.\");\n    matchmaking.createLobby(SteamMatchmaking.LobbyType.Public,maxMembers);\n  }\n else   if (input.startsWith(\"lobby join \")) {\n    long id=Long.parseLong(input.substring(\"lobby join \".length()),16);\n    if (lobbies.containsKey(id)) {\n      System.out.println(\"  joining lobby \" + Long.toHexString(id));\n      matchmaking.joinLobby(lobbies.get(id));\n    }\n else {\n      System.err.println(\"No lobby found: \" + Long.toHexString(id));\n    }\n  }\n else   if (input.startsWith(\"lobby leave \")) {\n    long id=Long.parseLong(input.substring(\"lobby leave \".length()),16);\n    if (lobbies.containsKey(id)) {\n      System.out.println(\"  leaving lobby \" + Long.toHexString(id));\n      matchmaking.leaveLobby(lobbies.get(id));\n      lobbies.remove(id);\n    }\n else {\n      System.err.println(\"No lobby found: \" + Long.toHexString(id));\n    }\n  }\n else   if (input.startsWith(\"lobby invite \")) {\n    String[] ids=input.substring(\"lobby invite \".length()).split(\" \");\n    if (ids.length == 2) {\n      long lobbyID=Long.parseLong(ids[0],16);\n      int playerAccountID=Integer.parseInt(ids[1]);\n      if (lobbies.containsKey(lobbyID)) {\n        System.out.println(\"  inviting player \" + playerAccountID + \" to lobby \"+ Long.toHexString(lobbyID));\n        if (friends.isFriendAccountID(playerAccountID)) {\n          matchmaking.inviteUserToLobby(lobbies.get(lobbyID),friends.getFriendSteamID(playerAccountID));\n        }\n else {\n          System.err.println(\"No player (friend) found: \" + playerAccountID);\n        }\n      }\n else {\n        System.err.println(\"No lobby found: \" + Long.toHexString(lobbyID));\n      }\n    }\n else {\n      System.err.println(\"Expecting: 'lobby invite <lobbyID> <userID>'\");\n    }\n  }\n else   if (input.startsWith(\"lobby data \")) {\n    long id=Long.parseLong(input.substring(\"lobby data \".length()),16);\n    if (lobbies.containsKey(id)) {\n      SteamID steamIDLobby=lobbies.get(id);\n      int count=matchmaking.getLobbyDataCount(steamIDLobby);\n      System.out.println(\"  \" + count + \" lobby data for \"+ Long.toHexString(id));\n      SteamMatchmakingKeyValuePair pair=new SteamMatchmakingKeyValuePair();\n      for (int i=0; i < count; i++) {\n        if (matchmaking.getLobbyDataByIndex(steamIDLobby,i,pair)) {\n          System.out.println(\"  - \" + pair.getKey() + \" : \"+ pair.getValue());\n        }\n else {\n          System.err.println(\"Error retrieving lobby data #\" + i);\n        }\n      }\n    }\n else {\n      System.err.println(\"No lobby found: \" + Long.toHexString(id));\n    }\n  }\n else   if (input.startsWith(\"lobby chat \")) {\n    String[] content=input.substring(\"lobby chat \".length()).split(\" \");\n    if (content.length == 2) {\n      long lobbyID=Long.parseLong(content[0],16);\n      String message=content[1];\n      if (lobbies.containsKey(lobbyID)) {\n        System.out.println(\"  sending message \\\"\" + message + \"\\\"\");\n        matchmaking.sendLobbyChatMsg(lobbies.get(lobbyID),message);\n      }\n else {\n        System.err.println(\"No lobby found: \" + Long.toHexString(lobbyID));\n      }\n    }\n else {\n      System.err.println(\"Expecting: 'lobby chat <lobbyID> <message>'\");\n    }\n  }\n else   if (input.startsWith(\"get lobby member data \")) {\n    String[] content=input.substring(\"get lobby member data \".length()).split(\" \");\n    if (content.length == 3) {\n      SteamID lobbyId=SteamID.createFromNativeHandle(Long.parseLong(content[0],16));\n      SteamID userId=SteamID.createFromNativeHandle(Long.parseLong(content[1]));\n      String key=content[2];\n      String value=matchmaking.getLobbyMemberData(lobbyId,userId,key);\n      System.out.println(String.format(\"Member data for userId:%s in lobbyId:%s for key:%s has value:%s\",userId.toString(),lobbyId.toString(),key,value));\n    }\n else {\n      System.out.println(\"Expecting: 'get lobby member data <lobbyId> <userId> <key>'\");\n    }\n  }\n else   if (input.startsWith(\"set lobby member data \")) {\n    String[] content=input.substring(\"set lobby member data \".length()).split(\" \");\n    if (content.length == 3) {\n      SteamID lobbyId=SteamID.createFromNativeHandle(Long.parseLong(content[0],16));\n      String key=content[1];\n      String value=content[2];\n      matchmaking.setLobbyMemberData(lobbyId,key,value);\n    }\n else {\n      System.out.println(\"Expecting: 'set lobby member data <lobbyId> <key> <value>'\");\n    }\n  }\n  friends.processInput(input);\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamMatchmakingTest.java",
+        "Start": 6065,
+        "Stop": 11085,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "processInput"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use meaningful variable names",
+                    "Change_Diff": "- void onRequestUGCDetails(long publishedFileID,int result,String title,String description,long fileHandle,long previewFileHandle,String fileName,boolean cachedData,int votesUp,int votesDown,long ownerID,int timeCreated,int timeUpdated) {\n+ void onRequestUGCDetails(long publishedFileID,int result,String title,String description,long fileHandle,long previewFileHandle,String fileName,boolean isCachedData,int votesUp,int votesDown,long ownerID,int timeCreated,int timeUpdated) {",
+                    "Description": "Change the variable name 'cachedData' to 'isCachedData' for improved readability and clarity.",
+                    "Start": 29,
+                    "End": 29
+                },
+                {
+                    "Improvement": "Use a separate class for SteamUGCDetails",
+                    "Change_Diff": "- void onRequestUGCDetails(long publishedFileID,int result,String title,String description,long fileHandle,long previewFileHandle,String fileName,boolean cachedData,int votesUp,int votesDown,long ownerID,int timeCreated,int timeUpdated) {\n+ void onRequestUGCDetails(SteamUGCDetails details) {",
+                    "Description": "Create a separate class for SteamUGCDetails and pass an instance of this class as an argument to the method for improved code organization and abstraction.",
+                    "Start": 29,
+                    "End": 29
+                },
+                {
+                    "Improvement": "Extract method for callback invocation",
+                    "Change_Diff": "- callback.onRequestUGCDetails(details,SteamResult.byValue(result));\n+ invokeCallback(details, result);",
+                    "Description": "Extract the callback invocation to a separate method for improved code clarity and maintainability.",
+                    "Start": 30,
+                    "End": 30
+                }
+            ],
+            "Final code": "void onRequestUGCDetails(SteamUGCDetails details) {\n    callback.invokeCallback(details, result);\n}"
+        }],
+        "Old_Method": "void onRequestUGCDetails(long publishedFileID,int result,String title,String description,long fileHandle,long previewFileHandle,String fileName,boolean cachedData,int votesUp,int votesDown,long ownerID,int timeCreated,int timeUpdated){\n  SteamUGCDetails details=new SteamUGCDetails();\n  details.publishedFileID=publishedFileID;\n  details.result=result;\n  details.title=title;\n  details.description=description;\n  details.fileHandle=fileHandle;\n  details.previewFileHandle=previewFileHandle;\n  details.fileName=fileName;\n  details.votesUp=votesUp;\n  details.votesDown=votesDown;\n  details.ownerID=ownerID;\n  details.timeCreated=timeCreated;\n  details.timeUpdated=timeUpdated;\n  callback.onRequestUGCDetails(details,SteamResult.byValue(result));\n}\n",
+        "File_Path": "steamworks4j/java-wrapper/src/main/java/com/codedisaster/steamworks/SteamUGCCallbackAdapter.java",
+        "Start": 840,
+        "Stop": 1654,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "onRequestUGCDetails"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 1635 [character 866 line 18]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamHTTPTest.java",
+        "Start": 1411,
+        "Stop": 2260,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "onHTTPRequestDataReceived"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Refactor 'p2p send' block into a separate method",
+                    "Change_Diff": "- if (input.startsWith(\"p2p send \")) {\n+ if (isP2PSendCommand(input)) {\n    \n",
+                    "Description": "Extract the block of code that handles 'p2p send' command into a separate method for better organization and reusability.",
+                    "Start": 3,
+                    "End": 18
+                },
+                {
+                    "Improvement": "Refactor 'p2p close' block into a separate method",
+                    "Change_Diff": "- else if (input.startsWith(\"p2p close \")) {\n+ else if (isP2PCloseCommand(input)) {\n    \n",
+                    "Description": "Extract the block of code that handles 'p2p close' command into a separate method for better organization and reusability.",
+                    "Start": 20,
+                    "End": 32
+                },
+                {
+                    "Improvement": "Use switch statement instead of multiple if-else blocks for 'auth ticket' command",
+                    "Change_Diff": "- if (input.startsWith(\"auth ticket \")) {\n+ if (startsWithAuthTicketCommand(input)) {\n    \n",
+                    "Description": "Use a switch statement to handle different 'auth ticket' commands instead of multiple if-else blocks for better readability.",
+                    "Start": 34,
+                    "End": 68
+                },
+                {
+                    "Improvement": "Move 'getAuthTicket' method outside of 'processInput' method",
+                    "Change_Diff": "- if (authCmd.equals(\"get\")) {\n+ if (isGetAuthTicketCommand(authCmd)) {\n    \n",
+                    "Description": "Move the 'getAuthTicket' method outside of the 'processInput' method for better separation of concerns.",
+                    "Start": 52,
+                    "End": 54
+                },
+                {
+                    "Improvement": "Move 'cancelAuthTicket' method outside of 'processInput' method",
+                    "Change_Diff": "- else if (authCmd.equals(\"cancel\")) {\n+ else if (isCancelAuthTicketCommand(authCmd)) {\n    \n",
+                    "Description": "Move the 'cancelAuthTicket' method outside of the 'processInput' method for better separation of concerns.",
+                    "Start": 56,
+                    "End": 58
+                },
+                {
+                    "Improvement": "Move 'broadcastAuthTicket' method outside of 'processInput' method",
+                    "Change_Diff": "- else if (authCmd.equals(\"send\")) {\n+ else if (isSendAuthTicketCommand(authCmd)) {\n    \n",
+                    "Description": "Move the 'broadcastAuthTicket' method outside of the 'processInput' method for better separation of concerns.",
+                    "Start": 60,
+                    "End": 62
+                },
+                {
+                    "Improvement": "Move 'endAuthSession' method outside of 'processInput' method",
+                    "Change_Diff": "- else if (authCmd.equals(\"end\")) {\n+ else if (isEndAuthSessionCommand(authCmd)) {\n    \n",
+                    "Description": "Move the 'endAuthSession' method outside of the 'processInput' method for better separation of concerns.",
+                    "Start": 64,
+                    "End": 66
+                }
+            ],
+            "Final code": "@Override\nprotected void processInput(String input) throws SteamException {\n  if (isP2PSendCommand(input)) {\n    handleP2PSendCommand(input);\n  } else if (isP2PCloseCommand(input)) {\n    handleP2PCloseCommand(input);\n  } else if (startsWithAuthTicketCommand(input)) {\n    handleAuthTicketCommand(input);\n  }\n\n  friends.processInput(input);\n}\n\nprivate boolean isP2PSendCommand(String input) {\n  return input.startsWith(\"p2p send \");\n}\n\nprivate void handleP2PSendCommand(String input) {\n  String[] params = input.substring(\"p2p send \".length()).split(\" \");\n  int receiverID = Integer.parseInt(params[0]);\n  SteamID steamIDReceiver = null;\n  if (remoteUserIDs.containsKey(receiverID)) {\n    steamIDReceiver = remoteUserIDs.get(receiverID);\n  } else if (friends.isFriendAccountID(receiverID)) {\n    steamIDReceiver = friends.getFriendSteamID(receiverID);\n  } else {\n    System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n  }\n  if (steamIDReceiver != null) {\n    packetSendBuffer.clear();\n    for (int i = 1; i < params.length; i++) {\n      byte[] bytes = params[i].getBytes(messageCharset);\n      if (i > 1) {\n        packetSendBuffer.put((byte) 0x20);\n      }\n      packetSendBuffer.put(bytes);\n    }\n    packetSendBuffer.flip();\n    networking.sendP2PPacket(steamIDReceiver, packetSendBuffer, SteamNetworking.P2PSend.Unreliable, defaultChannel);\n  }\n}\n\nprivate boolean isP2PCloseCommand(String input) {\n  return input.startsWith(\"p2p close \");\n}\n\nprivate void handleP2PCloseCommand(String input) {\n  int remoteID = Integer.parseInt(input.substring(\"p2p close \".length()));\n  SteamID steamIDRemote = null;\n  if (remoteUserIDs.containsKey(remoteID)) {\n    steamIDRemote = remoteUserIDs.get(remoteID);\n  } else {\n    System.out.println(\"Error: unknown remote ID \" + remoteID + \" (not connected)\");\n  }\n  if (steamIDRemote != null) {\n    networking.closeP2PSessionWithUser(steamIDRemote);\n    unregisterRemoteSteamID(steamIDRemote);\n  }\n}\n\nprivate boolean startsWithAuthTicketCommand(String input) {\n  return input.startsWith(\"auth ticket \");\n}\n\nprivate void handleAuthTicketCommand(String input) {\n  String authCmd = input.substring(\"auth ticket \".length());\n  switch (authCmd) {\n    case \"get\":\n      getAuthTicket();\n      break;\n    case \"cancel\":\n      cancelAuthTicket();\n      break;\n    case \"send\":\n      broadcastAuthTicket();\n      break;\n    case \"end\":\n      endAuthSession();\n      break;\n  }\n}\n\nprivate boolean isGetAuthTicketCommand(String authCmd) {\n  return authCmd.equals(\"get\");\n}\n\nprivate void getAuthTicket() {\n  // Implementation\n}\n\nprivate boolean isCancelAuthTicketCommand(String authCmd) {\n  return authCmd.equals(\"cancel\");\n}\n\nprivate void cancelAuthTicket() {\n  // Implementation\n}\n\nprivate boolean isSendAuthTicketCommand(String authCmd) {\n  return authCmd.equals(\"send\");\n}\n\nprivate void broadcastAuthTicket() {\n  // Implementation\n}\n\nprivate boolean isEndAuthSessionCommand(String authCmd) {\n  return authCmd.equals(\"end\");\n}\n\nprivate void endAuthSession() {\n  // Implementation\n}"
+        }],
+        "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(\"p2p send \")) {\n    String[] params=input.substring(\"p2p send \".length()).split(\" \");\n    int receiverID=Integer.parseInt(params[0]);\n    SteamID steamIDReceiver=null;\n    if (remoteUserIDs.containsKey(receiverID)) {\n      steamIDReceiver=remoteUserIDs.get(receiverID);\n    }\n else     if (friends.isFriendAccountID(receiverID)) {\n      steamIDReceiver=friends.getFriendSteamID(receiverID);\n    }\n else {\n      System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n    }\n    if (steamIDReceiver != null) {\n      packetSendBuffer.clear();\n      for (int i=1; i < params.length; i++) {\n        byte[] bytes=params[i].getBytes(messageCharset);\n        if (i > 1) {\n          packetSendBuffer.put((byte)0x20);\n        }\n        packetSendBuffer.put(bytes);\n      }\n      packetSendBuffer.flip();\n      networking.sendP2PPacket(steamIDReceiver,packetSendBuffer,SteamNetworking.P2PSend.Unreliable,defaultChannel);\n    }\n  }\n else   if (input.startsWith(\"p2p close \")) {\n    int remoteID=Integer.parseInt(input.substring(\"p2p close \".length()));\n    SteamID steamIDRemote=null;\n    if (remoteUserIDs.containsKey(remoteID)) {\n      steamIDRemote=remoteUserIDs.get(remoteID);\n    }\n else {\n      System.out.println(\"Error: unknown remote ID \" + remoteID + \" (not connected)\");\n    }\n    if (steamIDRemote != null) {\n      networking.closeP2PSessionWithUser(steamIDRemote);\n      unregisterRemoteSteamID(steamIDRemote);\n    }\n  }\n else   if (input.equals(\"p2p list\")) {\n    System.out.println(\"P2P connected users:\");\n    if (remoteUserIDs.size() == 0) {\n      System.out.println(\"  none\");\n    }\n    for (    SteamID steamIDUser : remoteUserIDs.values()) {\n      System.out.println(\"  \" + steamIDUser.getAccountID());\n    }\n  }\n else   if (input.startsWith(\"auth ticket \")) {\n    String authCmd=input.substring(\"auth ticket \".length());\n    if (authCmd.equals(\"get\")) {\n      getAuthTicket();\n    }\n else     if (authCmd.equals(\"cancel\")) {\n      cancelAuthTicket();\n    }\n else     if (authCmd.equals(\"send\")) {\n      broadcastAuthTicket();\n    }\n else     if (authCmd.equals(\"end\")) {\n      endAuthSession();\n    }\n  }\n  friends.processInput(input);\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+        "Start": 5088,
+        "Stop": 7338,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "processInput"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Unterminated string at 4636 [character 3443 line 25]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(\"stats global \")) {\n    String[] cmd=input.substring(\"stats global \".length()).split(\" \");\n    if (cmd.length > 0) {\n      if (cmd[0].equals(\"request\")) {\n        int days=0;\n        if (cmd.length > 1) {\n          days=Integer.parseInt(cmd[1]);\n        }\n        userStats.requestGlobalStats(days);\n      }\n else       if (cmd[0].equals(\"players\")) {\n        userStats.getNumberOfCurrentPlayers();\n      }\n else       if (cmd[0].equals(\"lget\") && cmd.length > 1) {\n        int days=0;\n        if (cmd.length > 2) {\n          days=Integer.parseInt(cmd[2]);\n        }\n        if (days == 0) {\n          long value=userStats.getGlobalStat(cmd[1],-1);\n          System.out.println(\"global stat (L) '\" + cmd[1] + \"' = \"+ value);\n        }\n else {\n          long[] data=new long[days];\n          int count=userStats.getGlobalStatHistory(cmd[1],data);\n          System.out.print(\"global stat history (L) for \" + count + \" of \"+ days+ \" days:\");\n          for (int i=0; i < count; i++) {\n            System.out.print(\" \" + Long.toString(data[i]));\n          }\n          System.out.println();\n        }\n      }\n else       if (cmd[0].equals(\"dget\") && cmd.length > 1) {\n        int days=0;\n        if (cmd.length > 2) {\n          days=Integer.parseInt(cmd[2]);\n        }\n        if (days == 0) {\n          double value=userStats.getGlobalStat(cmd[1],-1.0);\n          System.out.println(\"global stat (D) '\" + cmd[1] + \"' = \"+ value);\n        }\n else {\n          double[] data=new double[days];\n          int count=userStats.getGlobalStatHistory(cmd[1],data);\n          System.out.print(\"global stat history (D) for \" + count + \" of \"+ days+ \" days:\");\n          for (int i=0; i < count; i++) {\n            System.out.print(\" \" + Double.toString(data[i]));\n          }\n          System.out.println();\n        }\n      }\n    }\n  }\n else   if (input.equals(\"stats request\")) {\n    userStats.requestCurrentStats();\n  }\n else   if (input.equals(\"stats store\")) {\n    userStats.storeStats();\n  }\n else   if (input.startsWith(\"achievement set \")) {\n    String achievementName=input.substring(\"achievement set \".length());\n    System.out.println(\"- setting \" + achievementName + \" to 'achieved'\");\n    userStats.setAchievement(achievementName);\n  }\n else   if (input.startsWith(\"achievement clear \")) {\n    String achievementName=input.substring(\"achievement clear \".length());\n    System.out.println(\"- clearing \" + achievementName);\n    userStats.clearAchievement(achievementName);\n  }\n else   if (input.equals(\"file list\")) {\n    int numFiles=remoteStorage.getFileCount();\n    System.out.println(\"Num of files: \" + numFiles);\n    for (int i=0; i < numFiles; i++) {\n      int[] sizes=new int[1];\n      String file=remoteStorage.getFileNameAndSize(i,sizes);\n      boolean exists=remoteStorage.fileExists(file);\n      System.out.println(\"# \" + i + \" : name=\"+ file+ \", size=\"+ sizes[0]+ \", exists=\"+ (exists ? \"yes\" : \"no\"));\n    }\n  }\n else   if (input.startsWith(\"file write \")) {\n    String path=input.substring(\"file write \".length());\n    File file=new File(path);\n    try (FileInputStream in=new FileInputStream(file)){\n      SteamUGCFileWriteStreamHandle remoteFile=remoteStorage.fileWriteStreamOpen(path);\n      if (remoteFile != null) {\n        byte[] bytes=new byte[1024];\n        int bytesRead;\n        while ((bytesRead=in.read(bytes,0,bytes.length)) > 0) {\n          ByteBuffer buffer=ByteBuffer.allocateDirect(bytesRead);\n          buffer.put(bytes,0,bytesRead);\n          buffer.flip();\n          remoteStorage.fileWriteStreamWriteChunk(remoteFile,buffer);\n        }\n        remoteStorage.fileWriteStreamClose(remoteFile);\n      }\n    }\n catch (    IOException e) {\n      e.printStackTrace();\n    }\n  }\n else   if (input.startsWith(\"file delete \")) {\n    String path=input.substring(\"file delete \".length());\n    if (remoteStorage.fileDelete(path)) {\n      System.out.println(\"deleted file '\" + path + \"'\");\n    }\n  }\n else   if (input.startsWith(\"file share \")) {\n    remoteStorage.fileShare(input.substring(\"file share \".length()));\n  }\n else   if (input.startsWith(\"file publish \")) {\n    String[] paths=input.substring(\"file publish \".length()).split(\" \");\n    if (paths.length >= 2) {\n      System.out.println(\"publishing file: \" + paths[0] + \", preview file: \"+ paths[1]);\n      remoteStorage.publishWorkshopFile(paths[0],paths[1],utils.getAppID(),\"Test UGC!\",\"Dummy UGC file published by test application.\",SteamRemoteStorage.PublishedFileVisibility.Private,null,SteamRemoteStorage.WorkshopFileType.Community);\n    }\n  }\n else   if (input.startsWith(\"file republish \")) {\n    String[] paths=input.substring(\"file republish \".length()).split(\" \");\n    if (paths.length >= 3) {\n      System.out.println(\"republishing id: \" + paths[0] + \", file: \"+ paths[1]+ \", preview file: \"+ paths[2]);\n      SteamPublishedFileID fileID=new SteamPublishedFileID(Long.parseLong(paths[0]));\n      SteamPublishedFileUpdateHandle updateHandle=remoteStorage.createPublishedFileUpdateRequest(fileID);\n      if (updateHandle != null) {\n        remoteStorage.updatePublishedFileFile(updateHandle,paths[1]);\n        remoteStorage.updatePublishedFilePreviewFile(updateHandle,paths[2]);\n        remoteStorage.updatePublishedFileTitle(updateHandle,\"Updated Test UGC!\");\n        remoteStorage.updatePublishedFileDescription(updateHandle,\"Dummy UGC file *updated* by test application.\");\n        remoteStorage.commitPublishedFileUpdate(updateHandle);\n      }\n    }\n  }\n else   if (input.equals(\"ugc query\")) {\n    SteamUGCQuery query=ugc.createQueryUserUGCRequest(user.getSteamID().getAccountID(),SteamUGC.UserUGCList.Subscribed,SteamUGC.MatchingUGCType.UsableInGame,SteamUGC.UserUGCListSortOrder.TitleAsc,utils.getAppID(),utils.getAppID(),1);\n    if (query.isValid()) {\n      System.out.println(\"sending UGC query: \" + query.toString());\n      ugc.sendQueryUGCRequest(query);\n    }\n  }\n else   if (input.startsWith(\"ugc download \")) {\n    String name=input.substring(\"ugc download \".length());\n    SteamUGCHandle handle=new SteamUGCHandle(Long.parseLong(name,16));\n    remoteStorage.ugcDownload(handle,0);\n  }\n else   if (input.startsWith(\"ugc subscribe \")) {\n    Long id=Long.parseLong(input.substring(\"ugc subscribe \".length()),16);\n    ugc.subscribeItem(new SteamPublishedFileID(id));\n  }\n else   if (input.startsWith(\"ugc unsubscribe \")) {\n    Long id=Long.parseLong(input.substring(\"ugc unsubscribe \".length()),16);\n    ugc.unsubscribeItem(new SteamPublishedFileID(id));\n  }\n else   if (input.startsWith(\"ugc state \")) {\n    Long id=Long.parseLong(input.substring(\"ugc state \".length()),16);\n    Collection<SteamUGC.ItemState> itemStates=ugc.getItemState(new SteamPublishedFileID(id));\n    System.out.println(\"UGC item states: \" + itemStates.size());\n    for (    SteamUGC.ItemState itemState : itemStates) {\n      System.out.println(\"  \" + itemState.name());\n    }\n  }\n else   if (input.startsWith(\"ugc details \")) {\n    System.out.println(\"requesting UGC details (deprecated API call)\");\n    Long id=Long.parseLong(input.substring(\"ugc details \".length()),16);\n    ugc.requestUGCDetails(new SteamPublishedFileID(id),0);\n    SteamUGCQuery query=ugc.createQueryUGCDetailsRequest(new SteamPublishedFileID(id));\n    if (query.isValid()) {\n      System.out.println(\"sending UGC details query: \" + query.toString());\n      ugc.sendQueryUGCRequest(query);\n    }\n  }\n else   if (input.startsWith(\"ugc info \")) {\n    Long id=Long.parseLong(input.substring(\"ugc info \".length()),16);\n    SteamUGC.ItemInstallInfo installInfo=new SteamUGC.ItemInstallInfo();\n    if (ugc.getItemInstallInfo(new SteamPublishedFileID(id),installInfo)) {\n      System.out.println(\"  folder: \" + installInfo.getFolder());\n      System.out.println(\"  size on disk: \" + installInfo.getSizeOnDisk());\n    }\n    SteamUGC.ItemDownloadInfo downloadInfo=new SteamUGC.ItemDownloadInfo();\n    if (ugc.getItemDownloadInfo(new SteamPublishedFileID(id),downloadInfo)) {\n      System.out.println(\"  bytes downloaded: \" + downloadInfo.getBytesDownloaded());\n      System.out.println(\"  bytes total: \" + downloadInfo.getBytesTotal());\n    }\n  }\n else   if (input.startsWith(\"leaderboard find \")) {\n    String name=input.substring(\"leaderboard find \".length());\n    userStats.findLeaderboard(name);\n  }\n else   if (input.startsWith(\"leaderboard list \")) {\n    String[] params=input.substring(\"leaderboard list \".length()).split(\" \");\n    if (currentLeaderboard != null && params.length >= 2) {\n      userStats.downloadLeaderboardEntries(currentLeaderboard,SteamUserStats.LeaderboardDataRequest.Global,Integer.parseInt(params[0]),Integer.parseInt(params[1]));\n    }\n  }\n else   if (input.startsWith(\"leaderboard users \")) {\n    String[] params=input.substring(\"leaderboard users \".length()).split(\" \");\n    if (currentLeaderboard != null && params.length > 0) {\n      SteamID[] users=new SteamID[params.length];\n      for (int i=0; i < params.length; i++) {\n        users[i]=SteamID.createFromNativeHandle(Long.parseLong(params[i]));\n      }\n      userStats.downloadLeaderboardEntriesForUsers(currentLeaderboard,users);\n    }\n  }\n else   if (input.startsWith(\"leaderboard score \")) {\n    String score=input.substring(\"leaderboard score \".length());\n    if (currentLeaderboard != null) {\n      System.out.println(\"uploading score \" + score + \" to leaderboard \"+ currentLeaderboard.toString());\n      userStats.uploadLeaderboardScore(currentLeaderboard,SteamUserStats.LeaderboardUploadScoreMethod.KeepBest,Integer.parseInt(score),new int[]{});\n    }\n  }\n else   if (input.startsWith(\"apps subscribed \")) {\n    String appId=input.substring(\"apps subscribed \".length());\n    boolean subscribed=apps.isSubscribedApp(Integer.parseInt(appId));\n    System.out.println(\"user described to app #\" + appId + \": \"+ (subscribed ? \"yes\" : \"no\"));\n  }\n else   if (input.startsWith(\"deck \")) {\n    String cmd=input.substring(\"deck \".length());\n    if (cmd.equals(\"status\")) {\n      boolean isDeck=utils.isSteamRunningOnSteamDeck();\n      System.out.println(\"Steam is running on SteamDeck: \" + (isDeck ? \"yes\" : \"no\"));\n    }\n else     if (cmd.equals(\"input\")) {\n      boolean success=utils.showFloatingGamepadTextInput(SteamUtils.FloatingGamepadTextInputMode.ModeSingleLine,0,0,1280,200);\n      System.out.println(\"Show floating gamepad text input: \" + (success ? \"success\" : \"failed\"));\n    }\n  }\n else   if (input.equals(\"auth web\")) {\n    user.getAuthTicketForWebApi();\n  }\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+        "Start": 14999,
+        "Stop": 25402,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "processInput"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Extract constants for magic numbers",
+                    "Change_Diff": "- int[] packetSize=new int[1];\n+ final int PACKET_SIZE = 1;\n+ int[] packetSize = new int[PACKET_SIZE];",
+                    "Description": "Instead of using a magic number '1' in the declaration of 'packetSize', extract it as a constant.",
+                    "Start": 1,
+                    "End": 1
+                },
+                {
+                    "Improvement": "Use meaningful variable names",
+                    "Change_Diff": "- if (networking.isP2PPacketAvailable(defaultChannel,packetSize)) {\n+ if (networking.isP2PPacketAvailable(defaultChannel, packetSize)) {",
+                    "Description": "Add a space before the variable 'packetSize' to improve readability.",
+                    "Start": 2,
+                    "End": 2
+                },
+                {
+                    "Improvement": "Use try-with-resources to automatically close buffers",
+                    "Change_Diff": "- packetReadBuffer.clear();\n+ try (packetReadBuffer) {\n+     packetReadBuffer.clear();",
+                    "Description": "Wrap the 'packetReadBuffer' in a try-with-resources statement to ensure it is automatically closed after its usage.",
+                    "Start": 5,
+                    "End": 5
+                },
+                {
+                    "Improvement": "Extract packet handling logic into separate methods",
+                    "Change_Diff": "- int packetReadSize=networking.readP2PPacket(steamIDSender,packetReadBuffer,defaultChannel);\n+ int packetReadSize = readP2PPacket(networking, steamIDSender, packetReadBuffer, defaultChannel);",
+                    "Description": "Extract the code that reads the P2P packet into a separate method for better organization and reusability.",
+                    "Start": 9,
+                    "End": 9
+                },
+                {
+                    "Improvement": "Use StringBuilder instead of concatenating strings",
+                    "Change_Diff": "- System.out.println(\"Rcv packet: userID=\" + steamIDSender.getAccountID() + \", \"+ bytesReceived+ \" bytes\");\n+ StringBuilder sb = new StringBuilder();\n+ sb.append(\"Rcv packet: userID=\").append(steamIDSender.getAccountID()).append(\", \").append(bytesReceived).append(\" bytes\");\n+ System.out.println(sb.toString());",
+                    "Description": "Use a StringBuilder to concatenate the strings for improved performance.",
+                    "Start": 26,
+                    "End": 26
+                }
+            ],
+            "Final code": "@Override\nprotected void processUpdate() throws SteamException {\n  final int PACKET_SIZE = 1;\n  int[] packetSize = new int[PACKET_SIZE];\n  if (networking.isP2PPacketAvailable(defaultChannel, packetSize)) {\n    SteamID steamIDSender = new SteamID();\n    if (packetSize[0] > packetReadBuffer.capacity()) {\n      throw new SteamException(\"incoming packet larger than read buffer can handle\");\n    }\n    try (packetReadBuffer) {\n      packetReadBuffer.clear();\n      packetReadBuffer.limit(packetSize[0]);\n      int packetReadSize = readP2PPacket(networking, steamIDSender, packetReadBuffer, defaultChannel);\n      if (packetReadSize == 0) {\n        System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but got none\");\n      }\n      else if (packetReadSize < packetSize[0]) {\n        System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but only got \" + packetReadSize);\n      }\n      packetReadBuffer.limit(packetReadSize);\n      if (packetReadSize > 0) {\n        registerRemoteSteamID(steamIDSender);\n        int bytesReceived = packetReadBuffer.limit();\n        StringBuilder sb = new StringBuilder();\n        sb.append(\"Rcv packet: userID=\").append(steamIDSender.getAccountID()).append(\", \").append(bytesReceived).append(\" bytes\");\n        System.out.println(sb.toString());\n        byte[] bytes = new byte[bytesReceived];\n        packetReadBuffer.get(bytes);\n        int magicBytes = checkMagicBytes(packetReadBuffer, AUTH);\n        if (magicBytes > 0) {\n          remoteAuthTicketData.clear();\n          remoteAuthTicketData.put(bytes, magicBytes, bytesReceived - magicBytes);\n          remoteAuthTicketData.flip();\n          System.out.println(\"Auth ticket received: \" + remoteAuthTicketData.toString() + \" [hash: \" + remoteAuthTicketData.hashCode() + \"]\");\n          beginAuthSession(steamIDSender);\n        }\n        else {\n          String message = new String(bytes, messageCharset);\n          System.out.println(\"Rcv message: \\\"\" + message + \"\\\"\");\n        }\n      }\n    }\n  }\n}"
+        }],
+        "Old_Method": "@Override protected void processUpdate() throws SteamException {\n  int[] packetSize=new int[1];\n  if (networking.isP2PPacketAvailable(defaultChannel,packetSize)) {\n    SteamID steamIDSender=new SteamID();\n    if (packetSize[0] > packetReadBuffer.capacity()) {\n      throw new SteamException(\"incoming packet larger than read buffer can handle\");\n    }\n    packetReadBuffer.clear();\n    packetReadBuffer.limit(packetSize[0]);\n    int packetReadSize=networking.readP2PPacket(steamIDSender,packetReadBuffer,defaultChannel);\n    if (packetReadSize == 0) {\n      System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but got none\");\n    }\n else     if (packetReadSize < packetSize[0]) {\n      System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but only got \"+ packetReadSize);\n    }\n    packetReadBuffer.limit(packetReadSize);\n    if (packetReadSize > 0) {\n      registerRemoteSteamID(steamIDSender);\n      int bytesReceived=packetReadBuffer.limit();\n      System.out.println(\"Rcv packet: userID=\" + steamIDSender.getAccountID() + \", \"+ bytesReceived+ \" bytes\");\n      byte[] bytes=new byte[bytesReceived];\n      packetReadBuffer.get(bytes);\n      int magicBytes=checkMagicBytes(packetReadBuffer,AUTH);\n      if (magicBytes > 0) {\n        remoteAuthTicketData.clear();\n        remoteAuthTicketData.put(bytes,magicBytes,bytesReceived - magicBytes);\n        remoteAuthTicketData.flip();\n        System.out.println(\"Auth ticket received: \" + remoteAuthTicketData.toString() + \" [hash: \"+ remoteAuthTicketData.hashCode()+ \"]\");\n        beginAuthSession(steamIDSender);\n      }\n else {\n        String message=new String(bytes,messageCharset);\n        System.out.println(\"Rcv message: \\\"\" + message + \"\\\"\");\n      }\n    }\n  }\n}\n",
+        "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+        "Start": 3102,
+        "Stop": 5085,
+        "Project_Name": "data/projects/steamworks4j",
+        "Method_Name": "processUpdate"
+    }
+]

@@ -1,0 +1,37 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Add explicit exception handling",
+                "Change_Diff": "!System.out.println(\"Job ended: \" + endTime);",
+                "Description": "Add explicit exception handling to handle any potential IOException that may occur during the execution of the job.",
+                "Start": 79,
+                "ExceptionHandlingType": "tryCatch",
+                "End": 79
+            },
+            {
+                "Improvement": "Use try-with-resources for JobClient",
+                "Change_Diff": "-JobClient client=new JobClient(job);\n+try(JobClient client = new JobClient(job)) {",
+                "Description": "Use try-with-resources for the JobClient to automatically close the JobClient resources.",
+                "Start": 80,
+                "ExceptionHandlingType": "tryWithResources",
+                "End": 80
+            },
+            {
+                "Improvement": "Add logging instead of System.out.println",
+                "Change_Diff": "-System.out.println(\"Usage: writer <out-dir>\");\n-ToolRunner.printGenericCommandUsage(System.out);",
+                "Description": "Replace System.out.println statements with logging statements for better maintainability and flexibility.",
+                "Start": 33,
+                "End": 35,
+                "LoggingType": "log4j"
+            }
+        ],
+        "Final code": "public int run(String[] args) throws Exception {\n  if (args.length == 0) {\n    logger.error(\"Usage: writer <out-dir>\");\n    ToolRunner.printGenericCommandUsage(logger);\n    return -1;\n  }\n  Path outDir = new Path(args[0]);\n  JobConf job = new JobConf(getConf());\n  job.setJarByClass(RandomWriter.class);\n  job.setJobName(\"random-writer\");\n  ...\n  JobClient client;\n  try (client = new JobClient(job)) {\n    ClusterStatus cluster = client.getClusterStatus();\n    ...\n    System.out.println(\"Running \" + numMaps + \" maps.\");\n    ...\n    try {\n      JobClient.runJob(job);\n    } catch (IOException e) {\n      logger.error(\"Job execution failed.\", e);\n      return -3;\n    }\n    ...\n  }\n  ...\n  return 0;\n}"
+    }],
+    "Old_Method": "/** \n * This is the main routine for launching a distributed random write job. It runs 10 maps/node and each node writes 1 gig of data to a DFS file. The reduce doesn't do anything.\n * @throws IOException\n */\npublic int run(String[] args) throws Exception {\n  if (args.length == 0) {\n    System.out.println(\"Usage: writer <out-dir>\");\n    ToolRunner.printGenericCommandUsage(System.out);\n    return -1;\n  }\n  Path outDir=new Path(args[0]);\n  JobConf job=new JobConf(getConf());\n  job.setJarByClass(RandomWriter.class);\n  job.setJobName(\"random-writer\");\n  FileOutputFormat.setOutputPath(job,outDir);\n  job.setOutputKeyClass(BytesWritable.class);\n  job.setOutputValueClass(BytesWritable.class);\n  job.setInputFormat(RandomInputFormat.class);\n  job.setMapperClass(Map.class);\n  job.setReducerClass(IdentityReducer.class);\n  job.setOutputFormat(SequenceFileOutputFormat.class);\n  JobClient client=new JobClient(job);\n  ClusterStatus cluster=client.getClusterStatus();\n  int numMapsPerHost=job.getInt(\"test.randomwriter.maps_per_host\",10);\n  long numBytesToWritePerMap=job.getLong(\"test.randomwrite.bytes_per_map\",1 * 1024 * 1024* 1024);\n  if (numBytesToWritePerMap == 0) {\n    System.err.println(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n    return -2;\n  }\n  long totalBytesToWrite=job.getLong(\"test.randomwrite.total_bytes\",numMapsPerHost * numBytesToWritePerMap * cluster.getTaskTrackers());\n  int numMaps=(int)(totalBytesToWrite / numBytesToWritePerMap);\n  if (numMaps == 0 && totalBytesToWrite > 0) {\n    numMaps=1;\n    job.setLong(\"test.randomwrite.bytes_per_map\",totalBytesToWrite);\n  }\n  job.setNumMapTasks(numMaps);\n  System.out.println(\"Running \" + numMaps + \" maps.\");\n  job.setNumReduceTasks(0);\n  Date startTime=new Date();\n  System.out.println(\"Job started: \" + startTime);\n  JobClient.runJob(job);\n  Date endTime=new Date();\n  System.out.println(\"Job ended: \" + endTime);\n  System.out.println(\"The job took \" + (endTime.getTime() - startTime.getTime()) / 1000 + \" seconds.\");\n  return 0;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/RandomWriter.java",
+    "Start": 8237,
+    "Stop": 10671,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "run"
+}

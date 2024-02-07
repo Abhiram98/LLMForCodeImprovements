@@ -1,0 +1,218 @@
+[
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use try-with-resources for RestTemplate",
+                    "Change_Diff": "- RestTemplate rt=restTemplateBuilder.build();\n+ try (RestTemplate rt = restTemplateBuilder.build()) {",
+                    "Description": "Instead of manually creating a RestTemplate instance and handling its resources, use try-with-resources to automatically close the RestTemplate after it is used.",
+                    "Start": 8,
+                    "End": 8
+                },
+                {
+                    "Improvement": "Use ResponseEntity<String> instead of raw ResponseEntity",
+                    "Change_Diff": "- ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n+ ResponseEntity<String> response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);",
+                    "Description": "Specify the type argument for the ResponseEntity to ensure that the response body is interpreted as a String.",
+                    "Start": 11,
+                    "End": 11
+                },
+                {
+                    "Improvement": "Use contains() method instead of comparing to null",
+                    "Change_Diff": "- if (cachedResponse == null) {\n+ if (!this.authCache.containsKey(authRequest)) {",
+                    "Description": "Instead of comparing the cached response to null, use the containsKey() method to check if the cache contains the authentication request.",
+                    "Start": 3,
+                    "End": 3
+                }
+            ],
+            "Final code": "@Override\npublic boolean authorize(String authRequest) {\n  String cachedResponse = this.authCache.get(authRequest);\n  if (!this.authCache.containsKey(authRequest)) {\n    RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    try (RestTemplate rt = restTemplateBuilder.build()) {\n      HttpEntity<String> entity = new HttpEntity<>(authRequest, this.restHeaders);\n      ResponseEntity<String> response = rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\", entity, String.class);\n      if (response.getStatusCode() != HttpStatus.OK) {\n        return false;\n      }\n      cachedResponse = response.getBody().toString();\n      if (response.getStatusCode() == HttpStatus.OK) {\n        this.authCache.putIfAbsent(authRequest, cachedResponse);\n      }\n    }\n  }\n  JSONObject responseObj = new JSONObject(cachedResponse);\n  JSONArray responseDataArr = responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (Object response : responseDataArr) {\n    JSONObject currentResponse = (JSONObject) response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}"
+        }],
+        "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+        "Start": 4347,
+        "Stop": 5782,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "authorize"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Extract method to generate template data",
+                    "Change_Diff": "- Map<String, Object> templateData = generateFreemakerTemplateData(jsonKeyValuePairs);\n+  Map<String, Object> templateData = generateTemplateData(jsonKeyValuePairs);",
+                    "Description": "Extract the code of generating template data into a separate method for better code readability and reusability.",
+                    "Start": 3,
+                    "End": 3
+                },
+                {
+                    "Improvement": "Refactor code to use try-with-resources",
+                    "Change_Diff": "- StringWriter out = new StringWriter();\n+ try (StringWriter out = new StringWriter()) {",
+                    "Description": "Use the try-with-resources statement to automatically close the StringWriter after use.",
+                    "Start": 26,
+                    "End": 26
+                },
+                {
+                    "Improvement": "Extract method to retrieve XACML request from JSONObject",
+                    "Change_Diff": "- xacmlRequest = new JSONObject(out.toString()).get(policyName).toString();\n+ xacmlRequest = getXacmlRequest(out.toString(), policyName);",
+                    "Description": "Extract the code of retrieving XACML request from the JSONObject into a separate method for better code readability and reusability.",
+                    "Start": 28,
+                    "End": 28
+                }
+            ],
+            "Final code": "@Override\npublic String createAuthRequest(String policyName, String jsonKeyValuePairs) {\n  Map<String, Object> templateData = generateTemplateData(jsonKeyValuePairs);\n  String key = Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n  String cachedRequest = this.requestBuilderCache.get(key);\n  if (cachedRequest != null) {\n    return cachedRequest;\n  }\n  String xacmlRequest;\n  try (StringWriter out = new StringWriter()) {\n    Configuration cfg = new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(), \"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template = cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData, out);\n    xacmlRequest = getXacmlRequest(out.toString(), policyName);\n    out.flush();\n  } catch (IOException | TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name: \" + policyName, e);\n  }\n  if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n    throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name: \" + policyName);\n  }\n  return this.requestBuilderCache.putIfAbsent(key, xacmlRequest);\n}"
+        }],
+        "Old_Method": "@Override public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n  Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n  String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n  String cachedRequest=this.requestBuilderCache.get(key);\n  if (cachedRequest != null) {\n    return cachedRequest;\n  }\n  String xacmlRequest;\n  try (StringWriter out=new StringWriter()){\n    Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData,out);\n    xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n    out.flush();\n  }\n catch (  IOException|TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n  }\n  if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n    throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n  }\n  return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+        "Start": 1262,
+        "Stop": 2829,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "createAuthRequest"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [{
+                "Improvement": "Use try-with-resources to handle resource closing",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n+ try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(\"application.properties\")) {\n+     Properties properties = new Properties();\n+     properties.load(inputStream);\n- throw new RuntimeException(e);",
+                "Description": "Instead of manually handling the closing of the resource, use try-with-resources to handle it automatically.",
+                "Start": 3,
+                "End": 12
+            }],
+            "Final code": "public WebSecurityConfig(){\n  try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(\"application.properties\")) {\n    Properties properties = new Properties();\n    properties.load(inputStream);\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  } catch (IOException e) {\n    throw new RuntimeException(e);\n  }\n}"
+        }],
+        "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+        "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+        "Start": 4171,
+        "Stop": 4889,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "WebSecurityConfig"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Remove unnecessary null check",
+                    "Change_Diff": "- if (cachedObject != null) {\n+ if (this.apiResourceListCache.containsKey(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\")) {",
+                    "Description": "Instead of checking if `cachedObject` is not null, directly check if `apiResourceListCache` contains the key `XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"`.",
+                    "Start": 2,
+                    "End": 2
+                },
+                {
+                    "Improvement": "Remove redundant creation of RestTemplateBuilder",
+                    "Change_Diff": "- RestTemplateBuilder restTemplateBuilder = new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n+ RestTemplate rt = new RestTemplate(new HttpComponentsClientHttpRequestFactory(this.httpClient));",
+                    "Description": "Instead of creating a separate `RestTemplateBuilder` and then building a `RestTemplate` using that builder, directly create a `RestTemplate` with the desired `HttpComponentsClientHttpRequestFactory`.",
+                    "Start": 4,
+                    "End": 4
+                },
+                {
+                    "Improvement": "Use ResponseEntity<String> instead of raw ResponseEntity",
+                    "Change_Diff": "- ResponseEntity response = rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", String.class, entity);\n+ ResponseEntity<String> response = rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", String.class, entity);",
+                    "Description": "Specify the generic type `String` for the `ResponseEntity` to improve code clarity and avoid unchecked type warnings.",
+                    "Start": 13,
+                    "End": 13
+                },
+                {
+                    "Improvement": "Use containsKey() instead of get() != null check",
+                    "Change_Diff": "- if (this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\") != null) {\n+ if (this.apiResourceListCache.containsKey(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\")) {",
+                    "Description": "Instead of checking if the value returned by `get()` is not null, directly use the `containsKey()` method to check the existence of the key in `apiResourceListCache`.",
+                    "Start": 21,
+                    "End": 21
+                },
+                {
+                    "Improvement": "Simplify JSONObject creation",
+                    "Change_Diff": "- return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", new JSONObject(response.getBody().toString())));\n+ return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", new JSONObject(response.getBody())));",
+                    "Description": "Instead of converting the response body to a string and then creating a `JSONObject` from that string, directly create a `JSONObject` using the response body object.",
+                    "Start": 26,
+                    "End": 26
+                }
+            ],
+            "Final code": "@Override\npublic Optional<JSONObject> getApiResourceList() {\n    JSONObject cachedObject = this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n    if (this.apiResourceListCache.containsKey(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\")) {\n        return Optional.of(cachedObject);\n    }\n    RestTemplate rt = new RestTemplate(new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    HttpEntity<String> entity = new HttpEntity<>(this.restHeaders);\n    ResponseEntity<String> response = rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", String.class, entity);\n    if (response.getStatusCode() != HttpStatus.OK) {\n        return Optional.empty();\n    }\n    return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\", new JSONObject(response.getBody())));\n}"
+        }],
+        "Old_Method": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+        "Start": 5788,
+        "Stop": 6769,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "getApiResourceList"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use a more descriptive name for the method",
+                    "Change_Diff": "- private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n+ private Map<String,Object> generateFreemarkerTemplateData(String jsonKeyValuePairs){",
+                    "Description": "Change the method name from 'generateFreemakerTemplateData' to 'generateFreemarkerTemplateData' to better reflect the purpose of the method.",
+                    "Start": 1,
+                    "End": 1
+                },
+                {
+                    "Improvement": "Extract the logic for handling different property types into separate methods",
+                    "Change_Diff": "",
+                    "Description": "Extract the switch statement logic into separate methods, each handling a specific property type. This will improve code readability and maintainability.",
+                    "Start": 23,
+                    "End": 75
+                },
+                {
+                    "Improvement": "Use a more meaningful variable name for the current property type",
+                    "Change_Diff": "- String[] proTypeArr=value.split(\"\\\\.\",2);\n+ String[] propertyTypeAndValue=value.split(\"\\\\.\",2);",
+                    "Description": "Change the variable name from 'proTypeArr' to 'propertyTypeAndValue' to provide a more descriptive name for the variable.",
+                    "Start": 17,
+                    "End": 17
+                }
+            ],
+            "Final code": "private Map<String,Object> generateFreemarkerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] propertyTypeAndValue=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(propertyTypeAndValue[0]);\n    if (!propertyTypeAndValue[0].isEmpty()) {\n      value=propertyTypeAndValue[1];\n    }\n    switch (propertyType) {\n      case HEADER:\n        value=httpServletRequest.getHeader(value);\n        break;\n      case COOKIE:\n        value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\n        break;\n      case QUERY_PARAM:\n        value=httpServletRequest.getParameter(value);\n        break;\n      case FORM_DATA:\n        value=httpServletRequest.getParameter(value);\n        break;\n      case PATH_PARAM:\n        value=extractPathParam(httpServletRequest,value);\n        break;\n    }\n    templateData.put(key,value);\n  }\n  return templateData;\n}"
+        }],
+        "Old_Method": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\nswitch (propertyType) {\ncase HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\ncase COOKIE:\n  value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\nbreak;\ncase QUERY_PARAM:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase FORM_DATA:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase PATH_PARAM:\nvalue=extractPathParam(httpServletRequest,value);\nbreak;\n}\ntemplateData.put(key,value);\n}\nreturn templateData;\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+        "Start": 2835,
+        "Stop": 4525,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "generateFreemakerTemplateData"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Move property loading logic to a separate method",
+                    "Change_Diff": "@@ -8,7 +8,6 @@ public XacmlAttributeHandler(){\n     TRUST_STORE=properties.getProperty(\"xacml.pdp...",
+                    "Description": "Move the logic for loading properties from the application.properties file to a separate method for better organization and readability.",
+                    "Start": 3,
+                    "End": 11
+                },
+                {
+                    "Improvement": "Handle null value for XACML_PDP_ENTITLEMENT_SERVICE_URL property",
+                    "Change_Diff": "@@ -18,6 +17,9 @@ public XacmlAttributeHandler(){\n          stopApplication();\n       }\n    \n...",
+                    "Description": "Add a check to handle the case where the XACML_PDP_ENTITLEMENT_SERVICE_URL is null in the application.properties file.",
+                    "Start": 13,
+                    "End": 15
+                },
+                {
+                    "Improvement": "Move cache initialization logic to a separate method",
+                    "Change_Diff": "@@ -27,7 +29,13 @@ public XacmlAttributeHandler(){\n          this.apiResourceListCache=cacheManager.getC...",
+                    "Description": "Move the initialization logic for the cache objects to a separate method for better organization and readability.",
+                    "Start": 19,
+                    "End": 27
+                },
+                {
+                    "Improvement": "Move HttpClient initialization logic to a separate method",
+                    "Change_Diff": "@@ -38,7 +46,17 @@ public XacmlAttributeHandler(){\n          logger.error(\"Failed to read trustStore...",
+                    "Description": "Move the initialization logic for creating the HttpClient object to a separate method for better organization and readability.",
+                    "Start": 29,
+                    "End": 39
+                },
+                {
+                    "Improvement": "Move HttpHeaders initialization logic to a separate method",
+                    "Change_Diff": "@@ -56,5 +74,12 @@ public XacmlAttributeHandler(){\n          this.restHeaders.set(\"WSO2-Identity-User...",
+                    "Description": "Move the initialization logic for creating the HttpHeaders object to a separate method for better organization and readability.",
+                    "Start": 41,
+                    "End": 45
+                }
+            ],
+            "Final code": "public XacmlAttributeHandler(){\n  loadProperties();\n  initializeCaches();\n  initializeHttpClient();\n  initializeHttpHeaders();\n  logger.info(\"XacmlAttributeHandler successfully initiated\");\n}\n\nprivate void loadProperties() {\n  try {\n        Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n        XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n        TRUST_STORE=properties.getProperty(\"xacml.pdp.trustStore\");\n        TRUST_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.trustStore.password\");\n        KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n        KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n  }\n  catch(IOException e) {\n        logger.error(\"Failed to read properties from application.properties\",e);\n    stopApplication();\n  }\n  if(XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n    logger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\n    stopApplication();\n  }\n}\n\nprivate void initializeCaches() {\n  CacheManager cacheManager=EhCacheManager.getInstance();\n  this.authCache=cacheManager.getCache(\"authCache\",String.class,String.class,60,100);\n  this.entitlementAttributesCache=cacheManager.getCache(\"entitlementCache\",String.class,JSONObject.class,60,100);\n  this.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\n}\n\nprivate void initializeHttpClient() {\n  try {\n    this.httpClient=HttpClients.custom().setSSLContext(SSLContextBuilder.create().loadKeyMaterial(loadPfx(\"classpath:\".concat(KEY_STORE),KEY_STORE_PASSWORD.toCharArray()),KEY_STORE_PASSWORD.toCharArray()).loadTrustMaterial(ResourceUtils.getFile(\"classpath:\".concat(TRUST_STORE)),TRUST_STORE_PASSWORD.toCharArray()).build()).build();\n  }\n  catch(Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\",e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n}\n\nprivate void initializeHttpHeaders() {\n  this.restHeaders=new HttpHeaders();\n  this.restHeaders.setContentType(MediaType.APPLICATION_JSON);\n  this.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\n  this.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\n}"
+        }],
+        "Old_Method": "public XacmlAttributeHandler(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n    TRUST_STORE=properties.getProperty(\"xacml.pdp.trustStore\");\n    TRUST_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.trustStore.password\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n  }\n catch (  IOException e) {\n    logger.error(\"Failed to read properties from application.properties\",e);\n    stopApplication();\n  }\n  if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n    logger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\n    stopApplication();\n  }\n  CacheManager cacheManager=EhCacheManager.getInstance();\n  this.authCache=cacheManager.getCache(\"authCache\",String.class,String.class,60,100);\n  this.entitlementAttributesCache=cacheManager.getCache(\"entitlementCache\",String.class,JSONObject.class,60,100);\n  this.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\n  try {\n    this.httpClient=HttpClients.custom().setSSLContext(SSLContextBuilder.create().loadKeyMaterial(loadPfx(\"classpath:\".concat(KEY_STORE),KEY_STORE_PASSWORD.toCharArray()),KEY_STORE_PASSWORD.toCharArray()).loadTrustMaterial(ResourceUtils.getFile(\"classpath:\".concat(TRUST_STORE)),TRUST_STORE_PASSWORD.toCharArray()).build()).build();\n  }\n catch (  Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\",e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  this.restHeaders=new HttpHeaders();\n  this.restHeaders.setContentType(MediaType.APPLICATION_JSON);\n  this.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\n  this.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\n  logger.info(\"XacmlAttributeHandler successfully initiated\");\n}\n",
+        "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+        "Start": 1818,
+        "Stop": 4341,
+        "Project_Name": "data/projects/spring-security-abac",
+        "Method_Name": "XacmlAttributeHandler"
+    }
+]

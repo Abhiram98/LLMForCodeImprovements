@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use diamond operator",
+                "Change_Diff": "- final HashSet<Object> permanentElements=new HashSet<Object>();\n+ final HashSet<Object> permanentElements = new HashSet<>();",
+                "Description": "Replace the explicit type on the right-hand side of the assignment with the diamond operator to infer the type from the left-hand side.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use explicit type on collection creation",
+                "Change_Diff": "- final Collection testSetWeak=createSet();\n+ final Collection<Object> testSetWeak = createSet();",
+                "Description": "Specify the type of the collection explicitly when creating it instead of relying on type inference.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Use foreach loop instead of iterator",
+                "Change_Diff": "- for (Object testObject : testSetWeak) {\n+ for (Iterator<Object> iterator = testSetWeak.iterator(); iterator.hasNext();) {\n+ Object testObject = iterator.next();",
+                "Description": "Instead of using a foreach loop to iterate over `testSetWeak`, use an iterator to iterate over it.",
+                "Start": 20,
+                "End": 20
+            }
+        ],
+        "Final code": "@Test\npublic void testIteratorCleanup() {\n    final HashSet<Object> permanentElements = new HashSet<>();\n    final Collection<Object> testSetWeak = createSet();\n    final Random rand = new Random();\n    for (int i = 0; i < numberOfElements; i++) {\n        Object candidate = new Object();\n        if (rand.nextInt() % 3 == 0) {\n            permanentElements.add(candidate);\n        }\n        testSetWeak.add(candidate);\n    }\n    runGC();\n    ConcurrentExecutor.runConcurrent(new Runnable() {\n        @Override\n        public void run() {\n            for (Iterator<Object> iterator = testSetWeak.iterator(); iterator.hasNext();) {\n                Object testObject = iterator.next();\n                System.currentTimeMillis();\n            }\n        }\n    }, numberOfThreads);\n    assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n    for (Object test : testSetWeak) {\n        assertTrue(permanentElements.contains(test));\n    }\n}"
+    }],
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

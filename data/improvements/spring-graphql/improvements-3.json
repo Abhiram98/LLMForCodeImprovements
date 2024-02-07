@@ -1,0 +1,69 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Replace enhanced for loop with stream",
+                "Change_Diff": "- for (QueryByExampleExecutor<?> executor : executors) {\n+ executors.stream().forEach(executor -> {",
+                "Description": "Instead of using an enhanced for loop to iterate over `executors`, use a stream and lambda expression to iterate over them.",
+                "Start": 20,
+                "End": 29
+            },
+            {
+                "Improvement": "Replace enhanced for loop with stream",
+                "Change_Diff": "- for (ReactiveQueryByExampleExecutor<?> executor : reactiveExecutors) {\n+ reactiveExecutors.stream().forEach(executor -> {",
+                "Description": "Instead of using an enhanced for loop to iterate over `reactiveExecutors`, use a stream and lambda expression to iterate over them.",
+                "Start": 32,
+                "End": 41
+            },
+            {
+                "Improvement": "Use method reference instead of lambda expression",
+                "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> single() {\n @Override public DataFetcher<?> single() {",
+                "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                "Start": 48,
+                "End": 60
+            },
+            {
+                "Improvement": "Use method reference instead of lambda expression",
+                "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> single() {\n @Override public DataFetcher<?> single() {",
+                "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                "Start": 67,
+                "End": 79
+            },
+            {
+                "Improvement": "Use method reference instead of lambda expression",
+                "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> many() {\n @Override public DataFetcher<?> many() {",
+                "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                "Start": 81,
+                "End": 93
+            },
+            {
+                "Improvement": "Use method reference instead of lambda expression",
+                "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> many() {\n @Override public DataFetcher<?> many() {",
+                "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                "Start": 100,
+                "End": 112
+            },
+            {
+                "Improvement": "Use method reference instead of lambda expression",
+                "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> scrollable() {\n @Override public DataFetcher<?> scrollable() {",
+                "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                "Start": 114,
+                "End": 126
+            },
+            {
+                "Improvement": "Use method reference instead of lambda expression",
+                "Change_Diff": "- return new DataFetcherFactory() {\n+ return new DataFetcherFactory() {\n @Override public DataFetcher<?> scrollable() {\n @Override public DataFetcher<?> scrollable() {",
+                "Description": "Replace the lambda expression in the `DataFetcherFactory` implementation with a method reference for improved readability.",
+                "Start": 133,
+                "End": 145
+            }
+        ],
+        "Final code": "public static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QueryByExampleExecutor<?>> executors, List<ReactiveQueryByExampleExecutor<?>> reactiveExecutors, @Nullable CursorStrategy<ScrollPosition> cursorStrategy, @Nullable ScrollSubrange defaultScrollSubrange) {\n    Map<String, DataFetcherFactory> factories = new HashMap<>();\n    executors.stream().forEach(executor -> {\n        String typeName = RepositoryUtils.getGraphQlTypeName(executor);\n        if (typeName != null) {\n            Builder<?, ?> builder = customize(executor, builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n            factories.put(typeName, builder::single);\n            factories.put(typeName, builder::many);\n            factories.put(typeName, builder::scrollable);\n        }\n    });\n    reactiveExecutors.stream().forEach(executor -> {\n        String typeName = RepositoryUtils.getGraphQlTypeName(executor);\n        if (typeName != null) {\n            ReactiveBuilder<?, ?> builder = customize(executor, builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n            factories.put(typeName, builder::single);\n            factories.put(typeName, builder::many);\n            factories.put(typeName, builder::scrollable);\n        }\n    });\n    if (logger.isTraceEnabled()) {\n        logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n    }\n    return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}"
+    }],
+    "Old_Method": "/** \n * Return a  {@link RuntimeWiringConfigurer} that installs a{@link graphql.schema.idl.WiringFactory} to find queries with a returntype whose name matches to the domain type name of the given repositories and registers  {@link DataFetcher}s for them. <p><strong>Note:<\/strong> This applies only to top-level queries and repositories annotated with  {@link GraphQlRepository @GraphQlRepository}.\n * @param executors repositories to consider for registration\n * @param reactiveExecutors reactive repositories to consider for registration\n * @param cursorStrategy for decoding cursors in pagination requests;if  {@code null}, then  {@link Builder#cursorStrategy} defaults apply.\n * @param defaultScrollSubrange default parameters for scrolling;if  {@code null}, then  {@link Builder#defaultScrollSubrange} defaults apply.\n * @return the created configurer\n * @since 1.2.0\n */\npublic static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QueryByExampleExecutor<?>> executors,List<ReactiveQueryByExampleExecutor<?>> reactiveExecutors,@Nullable CursorStrategy<ScrollPosition> cursorStrategy,@Nullable ScrollSubrange defaultScrollSubrange){\n  Map<String,DataFetcherFactory> factories=new HashMap<>();\n  for (  QueryByExampleExecutor<?> executor : executors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      Builder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  for (  ReactiveQueryByExampleExecutor<?> executor : reactiveExecutors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      ReactiveBuilder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  if (logger.isTraceEnabled()) {\n    logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n  }\n  return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/query/QueryByExampleDataFetcher.java",
+    "Start": 8299,
+    "Stop": 11102,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "autoRegistrationConfigurer"
+}

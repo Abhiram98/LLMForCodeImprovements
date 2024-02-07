@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Add try-with-resources to handle resource cleanup",
+                "Change_Diff": "- private void doDownload(RandomAccessFile raFile) {\n+ private void doDownload(File file) {\n+     try (RandomAccessFile raFile = new RandomAccessFile(file, \"rw\")) {",
+                "Description": "Instead of manually closing the `RandomAccessFile` and `input` streams, use try-with-resources to handle resource cleanup automatically.",
+                "Start": 0,
+                "End": 0
+            },
+            {
+                "Improvement": "Move the variable definitions closer to their usage",
+                "Change_Diff": "- byte[] buff=new byte[buffSize];\n+ int len;\n+ byte[] buff=new byte[buffSize];",
+                "Description": "Move the variable definition for `len` closer to its usage inside the `while` loop.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Add appropriate exception handling for IOException",
+                "Change_Diff": "- catch (IOException e) {\n+ catch (IOException | FileNotFoundException e) {",
+                "Description": "Add `FileNotFoundException` to the catch block to handle errors related to opening the file.",
+                "Start": 14,
+                "End": 14
+            },
+            {
+                "Improvement": "Use a lock object for synchronization",
+                "Change_Diff": "- synchronized (lock) {\n+ synchronized (this) {",
+                "Description": "Change the synchronization object from `lock` to `this` to ensure proper synchronization.",
+                "Start": 23,
+                "End": 23
+            }
+        ],
+        "Final code": "private void doDownload(File file) {\n    try (RandomAccessFile raFile = new RandomAccessFile(file, \"rw\")) {\n        if (appended && seekBytes > 0) {\n            raFile.seek(seekBytes);\n        }\n        while (status != Status.CANCELED && status != Status.DONE) {\n            if (status == Status.DOWNLOADING) {\n                int len;\n                byte[] buff = new byte[buffSize];\n                while ((len = input.read(buff)) != -1) {\n                    raFile.write(buff, 0, len);\n                    doneBytes += len;\n                    if (status == Status.CANCELED || status == Status.PAUSED) {\n                        break;\n                    }\n                }\n                if (len == -1) {\n                    synchronized (this) {\n                        if (status != Status.CANCELED) {\n                            status = Status.DONE;\n                        }\n                    }\n                }\n            }\n        }\n    } catch (IOException | FileNotFoundException e) {\n        synchronized (this) {\n            if (status != Status.CANCELED) {\n                status = Status.ERROR;\n            }\n        }\n        if (status == Status.ERROR) {\n            fireOnFailure(e);\n        }\n    } finally {\n        closeQuietly(raFile);\n        closeQuietly(input);\n        if (status == Status.CANCELED && !file.delete()) {\n            Platform.logError(\"can not delete canceled file: \" + file);\n        }\n        fireOnComplete();\n    }\n    if (status == Status.DONE) {\n        fireOnSuccess();\n    }\n}"
+    }],
+    "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+    "Start": 6005,
+    "Stop": 7715,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "doDownload"
+}

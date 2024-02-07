@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use constant values instead of hardcoding numbers",
+                "Change_Diff": "- if (element instanceof HtmlBody) {\n-    width=windowWidth - 16;\n+ width = windowWidth - BODY_PADDING;\n+ }\n\n- width=10 + (int)(text.length() * browserVersion.getPixesPerChar() * 0.9);\n+ width = BUTTON_WIDTH + (int)(text.length() * browserVersion.getPixesPerChar() * BUTTON_WIDTH_FACTOR);\n\n- width=154;\n+ width = MAX_INPUT_TEXT_WIDTH;\n\n- width=13;\n+ width = RADIO_BUTTON_WIDTH;\n\n- width=100;\n+ width = TEXTAREA_WIDTH;\n\n- width=((HtmlImage)element).getWidthOrDefault();\n+ width = ((HtmlImage)element).getWidthOrDefault();",
+                "Description": "Replace hardcoded numbers with constant values for better readability and maintainability.",
+                "Start": 48,
+                "End": 48
+            },
+            {
+                "Improvement": "Extract common expressions as variables",
+                "Change_Diff": "- width=element.getVisibleText().length() * browserVersion.getPixesPerChar();\n+ int visibleTextLength = element.getVisibleText().length();\n+ width = visibleTextLength * browserVersion.getPixesPerChar();\n\n- width=(INLINE.equals(display) || StringUtils.isEmpty(styleWidth))\n+ boolean isInlineOrEmptyStyleWidth = (INLINE.equals(display) || StringUtils.isEmpty(styleWidth));\n+ width = isInlineOrEmptyStyleWidth",
+                "Description": "By extracting common expressions as variables, the code becomes more readable and reduces redundancy.",
+                "Start": 33,
+                "End": 34
+            },
+            {
+                "Improvement": "Replace instanceof checks with polymorphism",
+                "Change_Diff": "- if (element instanceof HtmlCanvas) {\n-    return 300;\n- }\n+ width = element.getWidth();",
+                "Description": "Instead of checking if the element is an instance of a specific class, use polymorphism to retrieve the width directly from the element.",
+                "Start": 25,
+                "End": 27
+            },
+            {
+                "Improvement": "Extract long expressions as separate methods",
+                "Change_Diff": "- width=CssPixelValueConverter.pixelValue((DomElement)parent,new CssPixelValueConverter.CssValue(0,windowWidth){\n+ width = calculateParentWidth((DomElement)parent, new CssPixelValueConverter.CssValue(0, windowWidth) {\n",
+                "Description": "Extract the long expression for calculating the parent width as a separate method for better readability and maintainability.",
+                "Start": 39,
+                "End": 39
+            }
+        ],
+        "Final code": "private int getCalculatedWidth() {\n  final Integer cachedWidth = getCachedWidth();\n  if (cachedWidth != null) {\n    return cachedWidth.intValue();\n  }\n  final DomElement element = getDomElement();\n  if (!element.mayBeDisplayed()) {\n    return setCachedWidth(0);\n  }\n  final String display = getDisplay();\n  if (NONE.equals(display)) {\n    return setCachedWidth(0);\n  }\n  final int width;\n  final String styleWidth = getStyleAttribute(Definition.WIDTH, true);\n  final DomNode parent = element.getParentNode();\n  if ((INLINE.equals(display) || StringUtils.isEmpty(styleWidth)) && parent instanceof HtmlElement) {\n    width = element.getWidth();\n  } else if (BLOCK.equals(display)) {\n    width = calculateBlockWidth(element);\n  } else if (isButtonElement(element)) {\n    width = calculateButtonWidth(element);\n  } else if (isInputElement(element)) {\n    width = calculateInputWidth(element);\n  } else if (isRadioButtonOrCheckBoxElement(element)) {\n    width = calculateRadioButtonOrCheckBoxWidth(element);\n  } else if (element instanceof HtmlTextArea) {\n    width = TEXTAREA_WIDTH;\n  } else if (element instanceof HtmlImage) {\n    width = ((HtmlImage) element).getWidthOrDefault();\n  } else {\n    width = getContentWidth();\n  }\n  return setCachedWidth(width);\n}"
+    }],
+    "Old_Method": "private int getCalculatedWidth(){\n  final Integer cachedWidth=getCachedWidth();\n  if (cachedWidth != null) {\n    return cachedWidth.intValue();\n  }\n  final DomElement element=getDomElement();\n  if (!element.mayBeDisplayed()) {\n    return setCachedWidth(0);\n  }\n  final String display=getDisplay();\n  if (NONE.equals(display)) {\n    return setCachedWidth(0);\n  }\n  final int width;\n  final String styleWidth=getStyleAttribute(Definition.WIDTH,true);\n  final DomNode parent=element.getParentNode();\n  if ((INLINE.equals(display) || StringUtils.isEmpty(styleWidth)) && parent instanceof HtmlElement) {\n    if (element instanceof HtmlCanvas) {\n      return 300;\n    }\n    final String cssFloat=getCssFloat();\n    final String position=getStyleAttribute(Definition.POSITION,true);\n    if (\"right\".equals(cssFloat) || \"left\".equals(cssFloat) || ABSOLUTE.equals(position)|| FIXED.equals(position)) {\n      final BrowserVersion browserVersion=getDomElement().getPage().getWebClient().getBrowserVersion();\n      width=element.getVisibleText().length() * browserVersion.getPixesPerChar();\n    }\n else     if (BLOCK.equals(display)) {\n      final int windowWidth=element.getPage().getEnclosingWindow().getInnerWidth();\n      if (element instanceof HtmlBody) {\n        width=windowWidth - 16;\n      }\n else {\n        width=CssPixelValueConverter.pixelValue((DomElement)parent,new CssPixelValueConverter.CssValue(0,windowWidth){\n          @Override public String get(          final ComputedCssStyleDeclaration style){\n            return style.getWidth();\n          }\n        }\n) - (getBorderHorizontal() + getPaddingHorizontal());\n      }\n    }\n else     if (element instanceof HtmlSubmitInput || element instanceof HtmlResetInput || element instanceof HtmlButtonInput|| element instanceof HtmlButton|| element instanceof HtmlFileInput) {\n      final String text=element.asNormalizedText();\n      final BrowserVersion browserVersion=getDomElement().getPage().getWebClient().getBrowserVersion();\n      width=10 + (int)(text.length() * browserVersion.getPixesPerChar() * 0.9);\n    }\n else     if (element instanceof HtmlTextInput || element instanceof HtmlPasswordInput) {\n      final BrowserVersion browserVersion=getDomElement().getPage().getWebClient().getBrowserVersion();\n      if (browserVersion.hasFeature(JS_CLIENTWIDTH_INPUT_TEXT_143)) {\n        return 143;\n      }\n      if (browserVersion.hasFeature(JS_CLIENTWIDTH_INPUT_TEXT_173)) {\n        return 173;\n      }\n      width=154;\n    }\n else     if (element instanceof HtmlRadioButtonInput || element instanceof HtmlCheckBoxInput) {\n      final BrowserVersion browserVersion=getDomElement().getPage().getWebClient().getBrowserVersion();\n      if (browserVersion.hasFeature(JS_CLIENTWIDTH_RADIO_CHECKBOX_10)) {\n        width=10;\n      }\n else {\n        width=13;\n      }\n    }\n else     if (element instanceof HtmlTextArea) {\n      width=100;\n    }\n else     if (element instanceof HtmlImage) {\n      width=((HtmlImage)element).getWidthOrDefault();\n    }\n else {\n      width=getContentWidth();\n    }\n  }\n else   if (AUTO.equals(styleWidth)) {\n    width=element.getPage().getEnclosingWindow().getInnerWidth();\n  }\n else {\n    width=CssPixelValueConverter.pixelValue(element,new CssPixelValueConverter.CssValue(0,element.getPage().getEnclosingWindow().getInnerWidth()){\n      @Override public String get(      final ComputedCssStyleDeclaration style){\n        return style.getStyleAttribute(Definition.WIDTH,true);\n      }\n    }\n);\n  }\n  return setCachedWidth(width);\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/css/ComputedCssStyleDeclaration.java",
+    "Start": 51265,
+    "Stop": 56573,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getCalculatedWidth"
+}

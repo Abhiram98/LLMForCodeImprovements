@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch block instead of @Test(expectedExceptions)",
+                "Change_Diff": "-@Test(expectedExceptions=SketchesArgumentException.class)\n+try {",
+                "Description": "Instead of using @Test(expectedExceptions) annotation, use a try-catch block to handle the expected exception.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add catch block for SketchesArgumentException",
+                "Change_Diff": "+} catch (SketchesArgumentException e) {\n+    // Handle exception\n+}",
+                "Description": "Add a catch block to handle the SketchesArgumentException thrown by the code.",
+                "Start": 18,
+                "End": 18
+            }
+        ],
+        "Final code": "try {\n    final int lgK=5;\n    final int k=1 << lgK;\n    final int u=4 * k;\n    final int memBytes=getMaxIntersectionBytes(k / 2);\n    final byte[] memArr=new byte[memBytes];\n    final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n    final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n    for (int i=0; i < u; i++) {\n        usk1.update(i);\n    }\n    final CompactSketch csk1=usk1.compact(true,null);\n    final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n    inter.intersect(csk1);\n} catch (SketchesArgumentException e) {\n    // Handle exception\n}"
+    }],
+    "Old_Method": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int lgK=5;\n  final int k=1 << lgK;\n  final int u=4 * k;\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/DirectIntersectionTest.java",
+    "Start": 17194,
+    "Stop": 17845,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSizedTooSmall"
+}

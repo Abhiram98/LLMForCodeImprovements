@@ -1,0 +1,223 @@
+[
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Add null checks and handle exceptions",
+                    "Change_Diff": "+ if (taskExecutor == null) {\n+     throw new IllegalStateException(\"taskExecutor is null, cannot perform download operation!\");\n+ }\n+ if (file == null) {\n+     throw new IllegalArgumentException(\"file is null!\");\n+ }\n+ if (!file.exists()) {\n+     File parent = file.getParentFile();\n+     if (parent == null) {\n+         throw new IllegalStateException(\"Invalid download path: \" + file.getPath());\n+     }\n+     if (!parent.exists() && !parent.mkdirs()) {\n+         throw new IllegalStateException(\"Failed to create parent directory: \" + parent.getPath());\n+     }\n+     try {\n+         if (!file.createNewFile()) {\n+             throw new IllegalStateException(\"File is being used by another thread: \" + parent.getPath());\n+         }\n+     } catch (IOException e) {\n+         throw new OkHttpsException(\"Failed to create file: \" + file.getPath(), e);\n+     }\n+ }",
+                    "Description": "Add null checks and exception handling to improve the robustness of the method.",
+                    "Start": 1,
+                    "End": 14
+                },
+                {
+                    "Improvement": "Use try-with-resources to close the response",
+                    "Change_Diff": "- response.close();\n+ try {\n+     response.close();\n+ } catch (IOException e) {\n+     // Handle the exception or log the error\n+ }",
+                    "Description": "Use try-with-resources to automatically close the response and handle any IOException that may occur.",
+                    "Start": 26,
+                    "End": 26
+                }
+            ],
+            "Final code": "@Override\npublic Download toFile(File file) {\n    try {\n        if (taskExecutor == null) {\n            throw new IllegalStateException(\"taskExecutor is null, cannot perform download operation!\");\n        }\n        if (file == null) {\n            throw new IllegalArgumentException(\"file is null!\");\n        }\n        if (!file.exists()) {\n            File parent = file.getParentFile();\n            if (parent == null) {\n                throw new IllegalStateException(\"Invalid download path: \" + file.getPath());\n            }\n            if (!parent.exists() && !parent.mkdirs()) {\n                throw new IllegalStateException(\"Failed to create parent directory: \" + parent.getPath());\n            }\n            try {\n                if (!file.createNewFile()) {\n                    throw new IllegalStateException(\"File is being used by another thread: \" + parent.getPath());\n                }\n            } catch (IOException e) {\n                throw new OkHttpsException(\"Failed to create file: \" + file.getPath(), e);\n            }\n        }\n    } catch (Exception e) {\n        response.close();\n        throw new OkHttpsException(\"File download failed\", e);\n    }\n    return taskExecutor.download(result.getTask(), file, toByteStream(), getRangeStart());\n}"
+        }],
+        "Old_Method": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n    }\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n      }\n    }\n  }\n catch (  Exception e) {\n    response.close();\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/internal/ResultBody.java",
+        "Start": 3853,
+        "Stop": 4601,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "toFile"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use lambda expressions instead of anonymous inner classes",
+                    "Change_Diff": "- responseListener((HttpTask<?> task, HttpResult result) -> {\n+ responseListener((task, result) -> {",
+                    "Description": "Instead of using an anonymous inner class for the response listener, use a lambda expression.",
+                    "Start": 4,
+                    "End": 4
+                },
+                {
+                    "Improvement": "Remove unnecessary return statements",
+                    "Change_Diff": "- return true;",
+                    "Description": "Remove unnecessary return statements as the default behavior is to return true.",
+                    "Start": 5,
+                    "End": 5
+                },
+                {
+                    "Improvement": "Use method references instead of lambda expressions for single method calls",
+                    "Change_Diff": "- setOnResponse((HttpResult result) -> {\n+ setOnResponse(this::handleResponse);",
+                    "Description": "Instead of using a lambda expression for the response callback, use a method reference.",
+                    "Start": 19,
+                    "End": 19
+                },
+                {
+                    "Improvement": "Use method references instead of lambda expressions for single method calls",
+                    "Change_Diff": "- setOnComplete((HttpResult.State state) -> {\n+ setOnComplete(this::handleComplete);",
+                    "Description": "Instead of using a lambda expression for the complete callback, use a method reference.",
+                    "Start": 22,
+                    "End": 22
+                },
+                {
+                    "Improvement": "Use method references instead of lambda expressions for single method calls",
+                    "Change_Diff": "- setOnException((IOException error) -> {\n+ setOnException(this::handleException);",
+                    "Description": "Instead of using a lambda expression for the exception callback, use a method reference.",
+                    "Start": 25,
+                    "End": 25
+                }
+            ],
+            "Final code": "@Test\npublic void testGlobalCallback() {\n    HTTP http = HTTP.builder()\n            .responseListener((task, result) -> {\n                println(\"全局 onResponse: \" + result.getStatus());\n            })\n            .completeListener((task, state) -> {\n                println(\"全局 onComplete: \" + state);\n            })\n            .exceptionListener((task, error) -> {\n                println(\"全局 onException: \" + error.getMessage());\n                return false;\n            })\n            .build();\n\n    http.async(\"http://www.baidu.com\")\n            .setOnResponse(this::handleResponse)\n            .setOnComplete(this::handleComplete)\n            .setOnException(this::handleException)\n            .get();\n\n    sleep(2000);\n}"
+        }],
+        "Old_Method": "@Test public void testGlobalCallback(){\n  HTTP http=HTTP.builder().responseListener((  HttpTask<?> task,  HttpResult result) -> {\n    println(\"全局 onResponse: \" + result.getStatus());\n    return true;\n  }\n).completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n    println(\"全局 onComplete: \" + state);\n    return true;\n  }\n).exceptionListener((  HttpTask<?> task,  IOException error) -> {\n    println(\"全局 onException: \" + error.getMessage());\n    return false;\n  }\n).build();\n  http.async(\"http://www.baidu.com\").setOnResponse((  HttpResult result) -> {\n    println(\"单例 onResponse: \" + result.getStatus());\n  }\n).setOnComplete((  HttpResult.State state) -> {\n    println(\"单例 onComplete: \" + state);\n  }\n).setOnException((  IOException error) -> {\n    println(\"单例 onException: \" + error.getMessage());\n  }\n).get();\n  sleep(2000);\n}\n",
+        "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/ListenerTests.java",
+        "Start": 151,
+        "Stop": 1367,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "testGlobalCallback"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Add try-with-resources to handle resource cleanup",
+                    "Change_Diff": "- private void doDownload(RandomAccessFile raFile) {\n+ private void doDownload(File file) {\n+     try (RandomAccessFile raFile = new RandomAccessFile(file, \"rw\")) {",
+                    "Description": "Instead of manually closing the `RandomAccessFile` and `input` streams, use try-with-resources to handle resource cleanup automatically.",
+                    "Start": 0,
+                    "End": 0
+                },
+                {
+                    "Improvement": "Move the variable definitions closer to their usage",
+                    "Change_Diff": "- byte[] buff=new byte[buffSize];\n+ int len;\n+ byte[] buff=new byte[buffSize];",
+                    "Description": "Move the variable definition for `len` closer to its usage inside the `while` loop.",
+                    "Start": 10,
+                    "End": 10
+                },
+                {
+                    "Improvement": "Add appropriate exception handling for IOException",
+                    "Change_Diff": "- catch (IOException e) {\n+ catch (IOException | FileNotFoundException e) {",
+                    "Description": "Add `FileNotFoundException` to the catch block to handle errors related to opening the file.",
+                    "Start": 14,
+                    "End": 14
+                },
+                {
+                    "Improvement": "Use a lock object for synchronization",
+                    "Change_Diff": "- synchronized (lock) {\n+ synchronized (this) {",
+                    "Description": "Change the synchronization object from `lock` to `this` to ensure proper synchronization.",
+                    "Start": 23,
+                    "End": 23
+                }
+            ],
+            "Final code": "private void doDownload(File file) {\n    try (RandomAccessFile raFile = new RandomAccessFile(file, \"rw\")) {\n        if (appended && seekBytes > 0) {\n            raFile.seek(seekBytes);\n        }\n        while (status != Status.CANCELED && status != Status.DONE) {\n            if (status == Status.DOWNLOADING) {\n                int len;\n                byte[] buff = new byte[buffSize];\n                while ((len = input.read(buff)) != -1) {\n                    raFile.write(buff, 0, len);\n                    doneBytes += len;\n                    if (status == Status.CANCELED || status == Status.PAUSED) {\n                        break;\n                    }\n                }\n                if (len == -1) {\n                    synchronized (this) {\n                        if (status != Status.CANCELED) {\n                            status = Status.DONE;\n                        }\n                    }\n                }\n            }\n        }\n    } catch (IOException | FileNotFoundException e) {\n        synchronized (this) {\n            if (status != Status.CANCELED) {\n                status = Status.ERROR;\n            }\n        }\n        if (status == Status.ERROR) {\n            fireOnFailure(e);\n        }\n    } finally {\n        closeQuietly(raFile);\n        closeQuietly(input);\n        if (status == Status.CANCELED && !file.delete()) {\n            Platform.logError(\"can not delete canceled file: \" + file);\n        }\n        fireOnComplete();\n    }\n    if (status == Status.DONE) {\n        fireOnSuccess();\n    }\n}"
+        }],
+        "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+        "Start": 6005,
+        "Stop": 7715,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "doDownload"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Extract method for replacing path parameters",
+                    "Change_Diff": "- pathParams.forEach((name,value) -> {\n+ replacePathParams(sb, name, value);",
+                    "Description": "Extract the logic for replacing path parameters into a separate method to enhance readability and maintainability.",
+                    "Start": 6,
+                    "End": 16
+                },
+                {
+                    "Improvement": "Extract method for appending URL parameters",
+                    "Change_Diff": "- urlParams.forEach((name,value) -> {\n+ appendUrlParams(sb, name, value);",
+                    "Description": "Extract the logic for appending URL parameters into a separate method to enhance readability and maintainability.",
+                    "Start": 31,
+                    "End": 38
+                },
+                {
+                    "Improvement": "Extract method for checking URL format",
+                    "Change_Diff": "- if (sb.indexOf(\"?\") >= 0) {\n+ if (hasQueryString(sb)) {",
+                    "Description": "Extract the logic for checking if a query string exists in the URL into a separate method to enhance readability and maintainability.",
+                    "Start": 19,
+                    "End": 21
+                }
+            ],
+            "Final code": "private String buildUrlPath() {\n  if (Platform.isBlank(urlPath)) {\n    throw new OkHttpsException(\"url 不能为空！\");\n  }\n  StringBuilder sb = new StringBuilder(urlPath);\n  replacePathParameters(sb);\n  appendUrlParameters(sb);\n  return sb.toString();\n}\n\nprivate void replacePathParameters(StringBuilder sb) {\n  if (pathParams != null) {\n    pathParams.forEach((name, value) -> {\n      String target = \"{\" + name + \"}\";\n      int start = sb.indexOf(target);\n      if (start >= 0) {\n        String newValue = value != null ? value.toString() : \"\";\n        sb.replace(start, start + target.length(), newValue);\n      } else {\n        throw new OkHttpsException(\"PathPara [ \" + name + \" ] 不存在于 url [ \" + urlPath + \" ]\");\n      }\n    });\n  }\n}\n\nprivate void appendUrlParameters(StringBuilder sb) {\n  if (urlParams != null) {\n    if (hasQueryString(sb)) {\n      if (sb.lastIndexOf(\"=\") < sb.lastIndexOf(\"?\") + 2) {\n        throw new OkHttpsException(\"url 格式错误，'?' 后没有发现 '='\");\n      }\n      if (sb.lastIndexOf(\"&\") < sb.length() - 1) {\n        sb.append('&');\n      }\n    } else {\n      sb.append('?');\n    }\n    urlParams.forEach((name, value) -> {\n      if (value == null)\n        return;\n      sb.append(name).append('=').append(value).append('&');\n    });\n    sb.deleteCharAt(sb.length() - 1);\n  }\n}\n\nprivate boolean hasQueryString(StringBuilder sb) {\n  return sb.indexOf(\"?\") >= 0;\n}"
+        }],
+        "Old_Method": "private String buildUrlPath(){\n  if (Platform.isBlank(urlPath)) {\n    throw new OkHttpsException(\"url 不能为空！\");\n  }\n  StringBuilder sb=new StringBuilder(urlPath);\n  if (pathParams != null) {\n    pathParams.forEach((name,value) -> {\n      String target=\"{\" + name + \"}\";\n      int start=sb.indexOf(target);\n      if (start >= 0) {\n        String newValue=value != null ? value.toString() : \"\";\n        sb.replace(start,start + target.length(),newValue);\n      }\n else {\n        throw new OkHttpsException(\"PathPara [ \" + name + \" ] 不存在于 url [ \"+ urlPath+ \" ]\");\n      }\n    }\n);\n  }\n  if (urlParams != null) {\n    if (sb.indexOf(\"?\") >= 0) {\n      int lastIndex=sb.length() - 1;\n      if (sb.lastIndexOf(\"?\") < lastIndex) {\n        if (sb.lastIndexOf(\"=\") < sb.lastIndexOf(\"?\") + 2) {\n          throw new OkHttpsException(\"url 格式错误，'?' 后没有发现 '='\");\n        }\n        if (sb.lastIndexOf(\"&\") < lastIndex) {\n          sb.append('&');\n        }\n      }\n    }\n else {\n      sb.append('?');\n    }\n    urlParams.forEach((name,value) -> {\n      if (value == null)       return;\n      sb.append(name).append('=').append(value).append('&');\n    }\n);\n    sb.delete(sb.length() - 1,sb.length());\n  }\n  return sb.toString();\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+        "Start": 22867,
+        "Stop": 24516,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "buildUrlPath"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [{
+                "Improvement": "Add null check for destination parameter",
+                "Change_Diff": "+ if (destination == null || destination.isEmpty()) {\n+    throw new IllegalArgumentException(\"destination can not be empty!\");\n+ }",
+                "Description": "Add a null check and empty check for the destination parameter to prevent invalid subscriptions.",
+                "Start": 7,
+                "End": 7
+            }],
+            "Final code": "public synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}"
+        }],
+        "Old_Method": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}\n",
+        "File_Path": "okhttps/okhttps-stomp/src/main/java/cn/zhxu/stomp/Stomp.java",
+        "Start": 8602,
+        "Stop": 9429,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "subscribe"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Extract repeated calculations into variables",
+                    "Change_Diff": "long size = 3 * 1024 * 1024;\nlong start = index * size;\nlong end = Math.min(start + size, totalSize);",
+                    "Description": "Extract the repeated calculations for size, start, and end into separate variables to improve readability and reduce the chance of errors.",
+                    "Start": 3,
+                    "End": 5
+                },
+                {
+                    "Improvement": "Use a constant for file path",
+                    "Change_Diff": "HttpUtils.sync(\"/download/test.zip\")",
+                    "Description": "Instead of hardcoding the file path as a string, use a constant to improve maintainability.",
+                    "Start": 7,
+                    "End": 7
+                },
+                {
+                    "Improvement": "Use lambda expression instead of anonymous inner class",
+                    "Change_Diff": "setOnSuccess((File file) -> {",
+                    "Description": "Replace the anonymous inner class with a lambda expression to simplify the code.",
+                    "Start": 17,
+                    "End": 17
+                },
+                {
+                    "Improvement": "Add missing semicolon",
+                    "Change_Diff": "println(\"下载完成\")",
+                    "Description": "Add a semicolon at the end of the println statement to ensure correct syntax.",
+                    "Start": 19,
+                    "End": 19
+                }
+            ],
+            "Final code": "static void download(long totalSize, int index) {\n    long size = 3 * 1024 * 1024;\n    long start = index * size;\n    long end = Math.min(start + size, totalSize);\n    HttpUtils.sync(DOWNLOAD_PATH)\n        .setRange(start, end)\n        .get()\n        .getBody()\n        .toFile(\"D:/download/test.zip\")\n        .setAppended()\n        .setOnSuccess((File file) -> {\n            if (end < totalSize) {\n                download(totalSize, index + 1);\n            } else {\n                println(\"下载完成\");\n            }\n        })\n        .start();\n}"
+        }],
+        "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+        "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+        "Start": 680,
+        "Stop": 1474,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "download"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Unterminated string at 1221 [character 281 line 18]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "private RequestBody buildRequestBody(){\n  if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n    MultipartBody.Builder builder=multipartBodyBuilder();\n    if (bodyParams != null) {\n      bodyParams.forEach((key,value) -> {\n        if (value == null)         return;\n        byte[] content=value.toString().getBytes(charset);\n        RequestBody body=RequestBody.create(null,content);\n        builder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      }\n);\n    }\n    if (files != null) {\n      files.forEach((name,file) -> {\n        MediaType type=httpClient.mediaType(file.getType());\n        builder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n      }\n);\n    }\n    return builder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (bodyParams == null) {\n    return emptyRequestBody();\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder=new FormBody.Builder(charset);\n    bodyParams.forEach((key,value) -> {\n      if (value == null)       return;\n      builder.add(key,value.toString());\n    }\n);\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}\n",
+        "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+        "Start": 19603,
+        "Stop": 21270,
+        "Project_Name": "data/projects/okhttps",
+        "Method_Name": "buildRequestBody"
+    }
+]

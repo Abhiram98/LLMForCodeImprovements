@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Simplify the condition in the if statement",
+                "Change_Diff": "- if (typeName.contains(\"<\")) {\n+ if (typeName.contains(\"<\") && typeName.contains(\">\")) {",
+                "Description": "The condition `typeName.contains(\"<\")` checks if the string `typeName` contains the character `<`. However, this condition may incorrectly trigger if the string contains only the opening bracket `<` without the closing bracket `>`. Update the condition to also check if `typeName` contains the closing bracket `>`.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use ternary operator to simplify assigning value to gicType",
+                "Change_Diff": "- if (typeName.contains(\"<\")) {\n    gicType = typeName.substring(typeName.indexOf(\"<\") + 1, typeName.lastIndexOf(\">\"));\n} else {\n    gicType = typeName;\n}\n+ gicType = typeName.contains(\"<\") ? typeName.substring(typeName.indexOf(\"<\") + 1, typeName.lastIndexOf(\">\")) : typeName;",
+                "Description": "The conditional assignment to `gicType` can be simplified using a ternary operator. Instead of using an if-else statement, the value of `gicType` can be assigned directly in one line using the ternary operator.",
+                "Start": 6,
+                "End": 10
+            },
+            {
+                "Improvement": "Remove redundant check for array",
+                "Change_Diff": "- if (gicType.contains(\"[\")) {\n    gicType = gicType.substring(0, gicType.indexOf(\"[\"));\n}",
+                "Description": "The if statement `if (gicType.contains(\"[\"))` checks if the string `gicType` contains the character `[`. However, this check is redundant since the substring `gicType.substring(0, gicType.indexOf(\"[\"))` will return the original string `gicType` if it does not contain the character `[`. Remove this unnecessary if statement.",
+                "Start": 13,
+                "End": 13
+            },
+            {
+                "Improvement": "Use StringUtils.substringAfterLast instead of manually subtracting from the start index",
+                "Change_Diff": "- return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n+ return StringUtils.substringAfterLast(gicType, \".\").toLowerCase();",
+                "Description": "Instead of manually subtracting from the start index to extract the substring after the last dot (`.`), use the `StringUtils.substringAfterLast` method from the Apache Commons Lang library. This method provides a more concise and readable solution.",
+                "Start": 15,
+                "End": 15
+            }
+        ],
+        "Final code": "private static String getType(String typeName) {\n    String gicType;\n    if (typeName.contains(\"<\") && typeName.contains(\">\")) {\n        gicType = typeName.substring(typeName.indexOf(\"<\") + 1, typeName.lastIndexOf(\">\")\n    } else {\n        gicType = typeName;\n    }\n    gicType = typeName.contains(\"<\") ? typeName.substring(typeName.indexOf(\"<\") + 1, typeName.lastIndexOf(\">\") : typeName;\n    return StringUtils.substringAfterLast(gicType, \".\").toLowerCase();\n}"
+    }],
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

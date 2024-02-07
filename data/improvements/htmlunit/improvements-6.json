@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources statement to automatically close the InputSource",
+                "Change_Diff": "- try (InputSource source=new InputSource(new StringReader(css))){\n+ try (InputSource source=new InputSource(new StringReader(css))){",
+                "Description": "Instead of manually closing the InputSource, use a try-with-resources statement to automatically close it.",
+                "Start": 19,
+                "End": 19
+            },
+            {
+                "Improvement": "Use a constant for LOG.error message",
+                "Change_Diff": "- LOG.error(e.getMessage(),e);\n+ LOG.error(\"Error caching CSS\", e);",
+                "Description": "Use a constant string for the error message when logging an error in caching the CSS.",
+                "Start": 23,
+                "End": 23
+            }
+        ],
+        "Final code": "/**\n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet() {\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n  else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))) {\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n    catch (final IOException e) {\n      LOG.error(\"Error caching CSS\", e);\n    }\n  }\n  return sheet_;\n}"
+    }],
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

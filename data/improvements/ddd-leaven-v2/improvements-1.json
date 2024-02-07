@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Rename 'canNotPurchaseIfOfferChanged' to 'testCannotPurchaseIfOfferChanged'",
+                "Change_Diff": "- @Test public void canNotPurchaseIfOfferChanged(){\n+ @Test public void testCannotPurchaseIfOfferChanged(){",
+                "Description": "Update the method name to better describe the purpose of the test case.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Extract creation of order and products into separate methods",
+                "Change_Diff": "{\n+ \n}\n\nprivate AggregateId createOrderWithProducts() {\n  AggregateId orderId = orderingService.createOrder();\n  orderingService.addProduct(orderId, new AggregateId(\"p1\"), 1);\n  orderingService.addProduct(orderId, new AggregateId(\"p2\"), 20);\n  return orderId;\n}\n\nprivate void addProductToOrder(AggregateId orderId, AggregateId productId, int quantity) {\n  orderingService.addProduct(orderId, productId, quantity);\n}",
+                "Description": "Extract the creation of order and products into separate methods to improve readability and reusability of the code.",
+                "Start": 3,
+                "End": 8
+            },
+            {
+                "Improvement": "Use 'assertEquals' instead of 'Assert.fail' to assert the expected exception",
+                "Change_Diff": "- Assert.fail();\n+ Assert.assertEquals(OfferChangedException.class, assertThrows(OfferChangedException.class, () -> orderingService.confirm(orderId, new OrderDetailsCommand(), offer)));",
+                "Description": "Replace the use of 'Assert.fail' with 'assertEquals' and 'assertThrows' to assert the expected exception in a more clear and concise way.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "@Test\npublic void testCannotPurchaseIfOfferChanged() {\n  AggregateId orderId = createOrderWithProducts();\n  Offer offer = orderingService.calculateOffer(orderId);\n  addProductToOrder(orderId, new AggregateId(\"p2\"), 30);\n\n  Assert.assertEquals(OfferChangedException.class, assertThrows(OfferChangedException.class, () -> orderingService.confirm(orderId, new OrderDetailsCommand(), offer)));\n}\n\nprivate AggregateId createOrderWithProducts() {\n  AggregateId orderId = orderingService.createOrder();\n  orderingService.addProduct(orderId, new AggregateId(\"p1\"), 1);\n  orderingService.addProduct(orderId, new AggregateId(\"p2\"), 20);\n  return orderId;\n}\n\nprivate void addProductToOrder(AggregateId orderId, AggregateId productId, int quantity) {\n  orderingService.addProduct(orderId, productId, quantity);\n}"
+    }],
+    "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+    "Start": 2542,
+    "Stop": 3087,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "canNotPurchaseIfOfferChanged"
+}

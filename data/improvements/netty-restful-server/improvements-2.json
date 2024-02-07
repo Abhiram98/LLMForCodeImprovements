@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- Connection conn=null;\n- PreparedStatement statement=null;\n- ResultSet resultSet=null;\n+ try (Connection conn = JdbcPool.getReadConnection();\n+      PreparedStatement statement = conn.prepareStatement(sql);\n+      ResultSet resultSet = statement.executeQuery()) {",
+                "Description": "Instead of manually managing the connection, statement, and resultset resources, use try-with-resources to automatically handle their closing.",
+                "Start": 12,
+                "End": 20
+            },
+            {
+                "Improvement": "Use parameterized PreparedStatement",
+                "Change_Diff": "- statement=conn.prepareStatement(sql);\n+ statement=conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);",
+                "Description": "Use parameterized statement and set the resultset type and concurrency mode to improve performance.",
+                "Start": 15,
+                "End": 15
+            },
+            {
+                "Improvement": "Use PreparedStatement.setXXX methods to bind parameters",
+                "Change_Diff": "- statement=bindParameters(statement,params);\n+ bindParameters(statement, params);",
+                "Description": "Instead of assigning the result of bindParameters, directly call the method to bind parameters.",
+                "Start": 19,
+                "End": 19
+            }
+        ],
+        "Final code": "public List<A> list(String sql, Object... params) {\n  List<A> beanList = new ArrayList<>();\n  grammarCheck(sql, DMLTypes.SELECT);\n  int paramSize = getParameterNum(sql, params);\n\n  try (Connection conn = JdbcPool.getReadConnection();\n       PreparedStatement statement = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);\n       ResultSet resultSet = statement.executeQuery()) {\n\n    if (paramSize > 0) {\n      bindParameters(statement, params);\n    }\n\n    String[] selectFields = parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields, resultSet));\n    }\n  } catch (Exception e) {\n    logger.error(\"sql error\", e);\n  }\n\n  return beanList;\n}"
+    }],
+    "Old_Method": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,resultSet);\n  }\n  return beanList;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 4628,
+    "Stop": 5587,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "list"
+}

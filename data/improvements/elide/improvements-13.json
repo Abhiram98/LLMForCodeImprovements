@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Rename variables for clarity",
+                "Change_Diff": "- FilterExpression filterExpression=entityProjection.getFilterExpression();\n+ FilterExpression expression=entityProjection.getFilterExpression();",
+                "Description": "Rename 'filterExpression' to 'expression', 'visitor' to 'splitVisitor', and 'constraints' to 'splitConstraints' to improve code readability.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Use early return to simplify code",
+                "Change_Diff": "- if (filterExpression == null) {\n-    whereFilter=null;\n-    havingFilter=null;\n-    return;\n- }\n+ if (expression == null) return;\n",
+                "Description": "Instead of using an if statement to return early when 'filterExpression' is null, use an early return to make the code more concise.",
+                "Start": 6,
+                "End": 9
+            },
+            {
+                "Improvement": "Make 'visitor' variable final",
+                "Change_Diff": "- SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n+ final SplitFilterExpressionVisitor splitVisitor=new SplitFilterExpressionVisitor(queriedTable);",
+                "Description": "Declare the 'visitor' variable as final since it is assigned only once and should not be modified.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Rename 'constraints' variable for clarity",
+                "Change_Diff": "- FilterConstraints constraints=filterExpression.accept(visitor);\n+ FilterConstraints splitConstraints=expression.accept(splitVisitor);",
+                "Description": "Rename 'constraints' to 'splitConstraints' to improve code readability.",
+                "Start": 11,
+                "End": 11
+            }
+        ],
+        "Final code": "private void splitFilters(){\n  FilterExpression expression=entityProjection.getFilterExpression();\n  if (expression == null) return;\n  final SplitFilterExpressionVisitor splitVisitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints splitConstraints=expression.accept(splitVisitor);\n  whereFilter=splitConstraints.getWhereExpression();\n  havingFilter=splitConstraints.getHavingExpression();\n}"
+    }],
+    "Old_Method": "/** \n * Gets whereFilter and havingFilter based on provided filter expression from  {@link EntityProjection}.\n */\nprivate void splitFilters(){\n  FilterExpression filterExpression=entityProjection.getFilterExpression();\n  if (filterExpression == null) {\n    whereFilter=null;\n    havingFilter=null;\n    return;\n  }\n  SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints constraints=filterExpression.accept(visitor);\n  whereFilter=constraints.getWhereExpression();\n  havingFilter=constraints.getHavingExpression();\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/EntityProjectionTranslator.java",
+    "Start": 3706,
+    "Stop": 4367,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "splitFilters"
+}

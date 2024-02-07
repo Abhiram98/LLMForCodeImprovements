@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary if condition",
+                "Change_Diff": "- if (index >= 0) {\n+ if (index >= 0 && index < getInterfaceParameterAnnotations().length) {",
+                "Description": "The if condition `index >= 0` checks if the index is non-negative. However, the subsequent if condition `index < getInterfaceParameterAnnotations().length` already ensures this condition. Therefore, the first if condition is unnecessary and can be removed.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Optimize loop",
+                "Change_Diff": "- for (Annotation[] paramAnns : ifcAnns) {\n+ for (int i = 0; i < ifcAnns.length && i <= index; i++) {\n+     Annotation[] paramAnns = ifcAnns[i];",
+                "Description": "The current loop iterates over the `ifcAnns` array and checks if the index `i` is less than the length of `ifcAnns`. However, since we are only interested in the annotations up to the index, we can optimize the loop by adding an additional condition `i <= index` to stop the iteration once the desired index is reached.",
+                "Start": 12,
+                "End": 12
+            }
+        ],
+        "Final code": "@Override\npublic Annotation[] getParameterAnnotations() {\n    Annotation[] anns = this.combinedAnnotations;\n    if (anns == null) {\n        anns = super.getParameterAnnotations();\n        int index = getParameterIndex();\n        if (index >= 0 && index < getInterfaceParameterAnnotations().length) {\n            for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n                for (int i = 0; i < ifcAnns.length && i <= index; i++) {\n                    Annotation[] paramAnns = ifcAnns[i];\n                    if (paramAnns.length > 0) {\n                        List<Annotation> merged = new ArrayList<>(anns.length + paramAnns.length);\n                        merged.addAll(Arrays.asList(anns));\n                        for (Annotation paramAnn : paramAnns) {\n                            boolean existingType = false;\n                            for (Annotation ann : anns) {\n                                if (ann.annotationType() == paramAnn.annotationType()) {\n                                    existingType = true;\n                                    break;\n                                }\n                            }\n                            if (!existingType) {\n                                merged.add(adaptAnnotation(paramAnn));\n                            }\n                        }\n                        anns = merged.toArray(new Annotation[0]);\n                    }\n                }\n            }\n        }\n        this.combinedAnnotations = anns;\n    }\n    return anns;\n}"
+    }],
+    "Old_Method": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns=this.combinedAnnotations;\n  if (anns == null) {\n    anns=super.getParameterAnnotations();\n    int index=getParameterIndex();\n    if (index >= 0) {\n      for (      Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n        if (index < ifcAnns.length) {\n          Annotation[] paramAnns=ifcAnns[index];\n          if (paramAnns.length > 0) {\n            List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n            merged.addAll(Arrays.asList(anns));\n            for (            Annotation paramAnn : paramAnns) {\n              boolean existingType=false;\n              for (              Annotation ann : anns) {\n                if (ann.annotationType() == paramAnn.annotationType()) {\n                  existingType=true;\n                  break;\n                }\n              }\n              if (!existingType) {\n                merged.add(adaptAnnotation(paramAnn));\n              }\n            }\n            anns=merged.toArray(new Annotation[0]);\n          }\n        }\n      }\n    }\n    this.combinedAnnotations=anns;\n  }\n  return anns;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/HandlerMethod.java",
+    "Start": 12864,
+    "Stop": 13925,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getParameterAnnotations"
+}

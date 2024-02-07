@@ -1,0 +1,127 @@
+[
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use try-catch-finally block for exception handling",
+                    "Change_Diff": "- catch (NoSuchMethodException e) {\n+ catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {",
+                    "Description": "Instead of catching NoSuchMethodException separately, catch all possible exceptions in a single try-catch block.",
+                    "Start": 38,
+                    "End": 47
+                },
+                {
+                    "Improvement": "Move method invocation inside try block",
+                    "Change_Diff": "- try {\n-     result = method.invoke(classObject);\n- } catch (InvocationTargetException e) {\n-     e.printStackTrace();\n-     logger.error(e.getMessage());\n- } catch (IllegalAccessException e) {\n-     logger.error(e.toString());\n+ try {\n+     result = method.invoke(classObject);\n+ }\n+ catch (InvocationTargetException e) {\n+     e.printStackTrace();\n+     logger.error(e.getMessage());\n+ }\n+ catch (IllegalAccessException e) {\n+     logger.error(e.toString());",
+                    "Description": "Move the method invocation inside the try block to ensure that any exceptions thrown during invocation are properly handled.",
+                    "Start": 59,
+                    "End": 69
+                }
+            ],
+            "Final code": "public static Object invoke(String apiName, ApiProtocol apiProtocol) {\n    Class<?> classname;\n    Object classObject;\n    Constructor constructor;\n    Method method;\n    Object result = null;\n    Api api = ApiRoute.apiMap.get(apiName);\n    if (api == null) {\n        return ErrorHandler.error(StatusCode.API_NOT_FOUND);\n    }\n    if (apiProtocol.getBuild() < api.getBuild()) {\n        return ErrorHandler.error(StatusCode.VERSION_IS_TOO_LOW);\n    }\n    if (api.getHttpMethod() != null && !api.getHttpMethod().contains(apiProtocol.getMethod().toString().toLowerCase())) {\n        return ErrorHandler.error(StatusCode.REQUEST_MODE_ERROR);\n    }\n    try {\n        classname = Class.forName(Config.getString(\"resource.package.name\") + \".\" + api.getResource());\n        constructor = classname.getConstructor(ApiProtocol.class);\n        classObject = constructor.newInstance(apiProtocol);\n        method = classname.getMethod(apiProtocol.getMethod().toString().toLowerCase());\n        try {\n            result = method.invoke(classObject);\n        } catch (InvocationTargetException e) {\n            e.printStackTrace();\n            logger.error(e.getMessage());\n        } catch (IllegalAccessException e) {\n            logger.error(e.toString());\n        }\n    } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException | ClassNotFoundException e) {\n        logger.error(e.getMessage());\n        return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n    }\n    return result;\n}"
+        }],
+        "Old_Method": "/** \n * invoke api resource method by apiName, but the request apiProtocol should observe routeMap regulations\n * @param apiName\n * @param apiProtocol\n * @return\n */\npublic static Object invoke(String apiName,ApiProtocol apiProtocol){\n  Class<?> classname;\n  Object classObject;\n  Constructor constructor;\n  Method method;\n  Object result=null;\n  Api api=ApiRoute.apiMap.get(apiName);\n  if (api == null) {\n    return ErrorHandler.error(StatusCode.API_NOT_FOUND);\n  }\n  if (apiProtocol.getBuild() < api.getBuild()) {\n    return ErrorHandler.error(StatusCode.VERSION_IS_TOO_LOW);\n  }\n  if (api.getHttpMethod() != null && !api.getHttpMethod().contains(apiProtocol.getMethod().toString().toLowerCase())) {\n    return ErrorHandler.error(StatusCode.REQUEST_MODE_ERROR);\n  }\n  try {\n    classname=Class.forName(Config.getString(\"resource.package.name\") + \".\" + api.getResource());\n    constructor=classname.getConstructor(ApiProtocol.class);\n    classObject=constructor.newInstance(apiProtocol);\n  }\n catch (  NoSuchMethodException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  ClassNotFoundException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  InvocationTargetException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  InstantiationException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  IllegalAccessException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\n  try {\n    method=classname.getMethod(apiProtocol.getMethod().toString().toLowerCase());\n  }\n catch (  NoSuchMethodException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\n  try {\n    result=method.invoke(classObject);\n  }\n catch (  InvocationTargetException e) {\n    e.printStackTrace();\n    logger.error(e.getMessage());\n  }\ncatch (  IllegalAccessException e) {\n    logger.error(e.toString());\n  }\n  return result;\n}\n",
+        "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/ApiHandler.java",
+        "Start": 1180,
+        "Stop": 3713,
+        "Project_Name": "data/projects/netty-restful-server",
+        "Method_Name": "invoke"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [{
+                "Improvement": "Use try-with-resources statement",
+                "Change_Diff": "",
+                "Description": "Use try-with-resources statement to automatically close the Connection, PreparedStatement, and ResultSet.",
+                "Start": 7,
+                "End": 33
+            }],
+            "Final code": "public static String getValue(String sql,Object... params){\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  String res=null;\n  try (Connection conn=JdbcPool.getReadConnection();\n    PreparedStatement statement=conn.prepareStatement(sql)){\n    if (paramSize > 0) {\n      bindParameters(statement,params);\n    }\n    try (ResultSet rs=statement.executeQuery()){\n      if (rs.next()) {\n        res=rs.getString(1);\n      }\n    }\n  }\n  catch (  SQLException e) {\n    logger.error(\"sql error\",e);\n  }\n  return res;\n}"
+        }],
+        "Old_Method": "public static String getValue(String sql,Object... params){\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet rs=null;\n  String res=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    rs=statement.executeQuery();\n    if (rs.next()) {\n      res=rs.getString(1);\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,rs);\n  }\n  return res;\n}\n",
+        "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/Mysql.java",
+        "Start": 4994,
+        "Stop": 5866,
+        "Project_Name": "data/projects/netty-restful-server",
+        "Method_Name": "getValue"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use try-with-resources",
+                    "Change_Diff": "- Connection conn=null;\n- PreparedStatement statement=null;\n- ResultSet resultSet=null;\n+ try (Connection conn = JdbcPool.getReadConnection();\n+      PreparedStatement statement = conn.prepareStatement(sql);\n+      ResultSet resultSet = statement.executeQuery()) {",
+                    "Description": "Instead of manually managing the connection, statement, and resultset resources, use try-with-resources to automatically handle their closing.",
+                    "Start": 12,
+                    "End": 20
+                },
+                {
+                    "Improvement": "Use parameterized PreparedStatement",
+                    "Change_Diff": "- statement=conn.prepareStatement(sql);\n+ statement=conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);",
+                    "Description": "Use parameterized statement and set the resultset type and concurrency mode to improve performance.",
+                    "Start": 15,
+                    "End": 15
+                },
+                {
+                    "Improvement": "Use PreparedStatement.setXXX methods to bind parameters",
+                    "Change_Diff": "- statement=bindParameters(statement,params);\n+ bindParameters(statement, params);",
+                    "Description": "Instead of assigning the result of bindParameters, directly call the method to bind parameters.",
+                    "Start": 19,
+                    "End": 19
+                }
+            ],
+            "Final code": "public List<A> list(String sql, Object... params) {\n  List<A> beanList = new ArrayList<>();\n  grammarCheck(sql, DMLTypes.SELECT);\n  int paramSize = getParameterNum(sql, params);\n\n  try (Connection conn = JdbcPool.getReadConnection();\n       PreparedStatement statement = conn.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);\n       ResultSet resultSet = statement.executeQuery()) {\n\n    if (paramSize > 0) {\n      bindParameters(statement, params);\n    }\n\n    String[] selectFields = parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields, resultSet));\n    }\n  } catch (Exception e) {\n    logger.error(\"sql error\", e);\n  }\n\n  return beanList;\n}"
+        }],
+        "Old_Method": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,resultSet);\n  }\n  return beanList;\n}\n",
+        "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+        "Start": 4628,
+        "Stop": 5587,
+        "Project_Name": "data/projects/netty-restful-server",
+        "Method_Name": "list"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Replace null check with null-safe operator",
+                    "Change_Diff": "- if (null == instance) {\n+ if (instance == null) {",
+                    "Description": "Instead of using null == instance, use the null-safe operator instance == null.",
+                    "Start": 4,
+                    "End": 4
+                },
+                {
+                    "Improvement": "Handle NumberFormatException specifically",
+                    "Change_Diff": "-  Exception e) {\n+  NumberFormatException e) {",
+                    "Description": "Catch NumberFormatException specifically to handle parsing errors.",
+                    "Start": 9,
+                    "End": 9
+                },
+                {
+                    "Improvement": "Remove unnecessary printStackTrace",
+                    "Change_Diff": "-  e.printStackTrace();\n+  // handle exception accordingly",
+                    "Description": "Remove the printStackTrace and handle the exception accordingly.",
+                    "Start": 10,
+                    "End": 10
+                }
+            ],
+            "Final code": "public static int getInt(String str){\n  try {\n    if (instance == null) {\n      getInstance();\n    }\n    return Integer.parseInt(properties.getProperty(str));\n  }\n catch (NumberFormatException e) {\n    // handle exception accordingly\n    return 0;\n  }\n}"
+        }],
+        "Old_Method": "public static int getInt(String str){\n  try {\n    if (null == instance) {\n      getInstance();\n    }\n    return Integer.parseInt(properties.getProperty(str));\n  }\n catch (  Exception e) {\n    e.printStackTrace();\n    return 0;\n  }\n}\n",
+        "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/Config.java",
+        "Start": 722,
+        "Stop": 1026,
+        "Project_Name": "data/projects/netty-restful-server",
+        "Method_Name": "getInt"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 746 [character 13 line 13]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "/** \n * 根据 fieldMap 里字段名和 bean 属性名的对应关系,根据查询字段取出对应的属性名 然后通过反射设置值\n * @param selectFields\n * @param resultSet\n * @return\n */\n@SuppressWarnings(\"unchecked\") public A resultSet(String[] selectFields,ResultSet resultSet){\n  A bean=null;\n  try {\n    bean=(A)Class.forName(clazz.getName()).newInstance();\n    for (int i=0; i < selectFields.length; i++) {\n      int j=i + 1;\n      if (!fieldMap.containsKey(selectFields[i])) {\n        continue;\n      }\n      Field field=fieldMap.get(selectFields[i]);\n      field.setAccessible(true);\n      Class fieldClass=field.getType();\n      if (fieldClass == String.class) {\n        field.set(bean,resultSet.getString(j));\n      }\n else       if (fieldClass == int.class || fieldClass == Integer.class) {\n        field.set(bean,resultSet.getInt(j));\n      }\n else       if (fieldClass == float.class || fieldClass == Float.class) {\n        field.set(bean,resultSet.getFloat(j));\n      }\n else       if (fieldClass == double.class || fieldClass == Double.class) {\n        field.set(bean,resultSet.getDouble(j));\n      }\n else       if (fieldClass == long.class || fieldClass == Long.class) {\n        field.set(bean,resultSet.getLong(j));\n      }\n else       if (fieldClass == Date.class) {\n        field.set(bean,resultSet.getDate(j));\n      }\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"resultSet parse error\",e);\n  }\ncatch (  IllegalAccessException|ClassNotFoundException|InstantiationException e) {\n    e.printStackTrace();\n  }\n  return bean;\n}\n",
+        "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+        "Start": 1900,
+        "Stop": 3717,
+        "Project_Name": "data/projects/netty-restful-server",
+        "Method_Name": "resultSet"
+    }
+]

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Replace null check with null-safe operator",
+                "Change_Diff": "- if (null == instance) {\n+ if (instance == null) {",
+                "Description": "Instead of using null == instance, use the null-safe operator instance == null.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Handle NumberFormatException specifically",
+                "Change_Diff": "-  Exception e) {\n+  NumberFormatException e) {",
+                "Description": "Catch NumberFormatException specifically to handle parsing errors.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Remove unnecessary printStackTrace",
+                "Change_Diff": "-  e.printStackTrace();\n+  // handle exception accordingly",
+                "Description": "Remove the printStackTrace and handle the exception accordingly.",
+                "Start": 10,
+                "End": 10
+            }
+        ],
+        "Final code": "public static int getInt(String str){\n  try {\n    if (instance == null) {\n      getInstance();\n    }\n    return Integer.parseInt(properties.getProperty(str));\n  }\n catch (NumberFormatException e) {\n    // handle exception accordingly\n    return 0;\n  }\n}"
+    }],
+    "Old_Method": "public static int getInt(String str){\n  try {\n    if (null == instance) {\n      getInstance();\n    }\n    return Integer.parseInt(properties.getProperty(str));\n  }\n catch (  Exception e) {\n    e.printStackTrace();\n    return 0;\n  }\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/Config.java",
+    "Start": 722,
+    "Stop": 1026,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "getInt"
+}

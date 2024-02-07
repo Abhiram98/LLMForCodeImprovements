@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Replace anonymous inner classes with lambda expressions",
+                "Change_Diff": "- annotations.put(ColumnMeta.class,new ColumnMeta(){\n+ annotations.put(ColumnMeta.class,(ColumnMeta) () -> measure.getFriendlyName());",
+                "Description": "Instead of using anonymous inner classes, use lambda expressions for improved readability and conciseness.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use method references instead of lambda expressions",
+                "Change_Diff": "- Class.forName(measure.getMaker()).asSubclass(MetricProjectionMaker.class);\n+ Class.forName(measure.getMaker()).asSubclass(MetricProjectionMaker.class)::new;",
+                "Description": "Replace lambda expression with a method reference when creating an instance of `MetricProjectionMaker`.",
+                "Start": 48,
+                "End": 48
+            }
+        ],
+        "Final code": "private static Map<Class<? extends Annotation>,Annotation> buildAnnotations(Measure measure){\n  Map<Class<? extends Annotation>,Annotation> annotations=new HashMap<>();\n  annotations.put(ColumnMeta.class,(ColumnMeta) () -> measure.getFriendlyName());\n  annotations.put(MetricFormula.class,(MetricFormula) () -> {\n    \n    \n    return (StringUtils.isEmpty(measure.getMaker()) ? DefaultMetricProjectionMaker.class : Class.forName(measure.getMaker()).asSubclass(MetricProjectionMaker.class)::new);});\n  String readPermission=measure.getReadAccess();\n  if (StringUtils.isNotEmpty(readPermission)) {\n    annotations.put(ReadPermission.class,(ReadPermission) () -> readPermission);\n  }\n  return annotations;\n}"
+    }],
+    "Old_Method": "private static Map<Class<? extends Annotation>,Annotation> buildAnnotations(Measure measure){\n  Map<Class<? extends Annotation>,Annotation> annotations=new HashMap<>();\n  annotations.put(ColumnMeta.class,new ColumnMeta(){\n    @Override public Class<? extends Annotation> annotationType(){\n      return ColumnMeta.class;\n    }\n    @Override public String friendlyName(){\n      return measure.getFriendlyName();\n    }\n    @Override public String description(){\n      return measure.getDescription();\n    }\n    @Override public String category(){\n      return measure.getCategory();\n    }\n    @Override public TableSource tableSource(){\n      return buildTableSource(null);\n    }\n    @Override public String[] tags(){\n      return measure.getTags().toArray(new String[0]);\n    }\n    @Override public String[] values(){\n      return new String[0];\n    }\n    @Override public boolean isHidden(){\n      return measure.getHidden() != null && measure.getHidden();\n    }\n    @Override public String filterTemplate(){\n      return measure.getFilterTemplate();\n    }\n    @Override public CardinalitySize size(){\n      return CardinalitySize.UNKNOWN;\n    }\n  }\n);\n  annotations.put(MetricFormula.class,new MetricFormula(){\n    @Override public ArgumentDefinition[] arguments(){\n      return getArgumentDefinitions(measure.getArguments());\n    }\n    @Override public Class<? extends Annotation> annotationType(){\n      return MetricFormula.class;\n    }\n    @Override public String value(){\n      if (measure.getDefinition() != null) {\n        return trimColumnReferences(measure.getDefinition());\n      }\n else {\n        return \"\";\n      }\n    }\n    @Override public Class<? extends MetricProjectionMaker> maker(){\n      if (StringUtils.isEmpty(measure.getMaker())) {\n        return DefaultMetricProjectionMaker.class;\n      }\n      try {\n        return Class.forName(measure.getMaker()).asSubclass(MetricProjectionMaker.class);\n      }\n catch (      ClassNotFoundException e) {\n        throw new IllegalStateException(e);\n      }\n    }\n  }\n);\n  String readPermission=measure.getReadAccess();\n  if (StringUtils.isNotEmpty(readPermission)) {\n    annotations.put(ReadPermission.class,new ReadPermission(){\n      @Override public Class<? extends Annotation> annotationType(){\n        return ReadPermission.class;\n      }\n      @Override public String expression(){\n        return readPermission;\n      }\n    }\n);\n  }\n  return annotations;\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/dynamic/TableType.java",
+    "Start": 16885,
+    "Stop": 20168,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "buildAnnotations"
+}

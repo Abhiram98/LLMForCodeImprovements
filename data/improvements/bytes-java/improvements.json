@@ -1,0 +1,177 @@
+[
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use switch statement instead of multiple if-else conditions",
+                    "Change_Diff": "- if (c >= 'A' && c <= 'Z') {\n-     bits = c - 65;\n- }\n- else if (c >= 'a' && c <= 'z') {\n-     bits = c - 71;\n- }\n- else if (c >= '0' && c <= '9') {\n-     bits = c + 4;\n- }\n- else if (c == '+' || c == '-') {\n-     bits = 62;\n- }\n- else if (c == '/' || c == '_') {\n-     bits = 63;\n- }\n- else if (c == '\n' || c == '\r' || c == ' ' || c == '\t') {\n-     continue;\n- }\n- else {\n-     throw new IllegalArgumentException(\"invalid character to decode: \" + c);\n- }",
+                    "Description": "Replace multiple if-else conditions with a switch statement for better readability and maintainability.",
+                    "Start": 17,
+                    "End": 33
+                },
+                {
+                    "Improvement": "Improve variable names for better clarity",
+                    "Change_Diff": "- int limit = in.length();\n- int outCount = 0;\n- int inCount = 0;\n- int word = 0;\n+ int inputLength = in.length();\n+ int outputCount = 0;\n+ int inputCount = 0;\n+ int buffer = 0;",
+                    "Description": "Change variable names from 'limit', 'outCount', 'inCount', and 'word' to more descriptive names 'inputLength', 'outputCount', 'inputCount', and 'buffer' respectively.",
+                    "Start": 6,
+                    "End": 10
+                },
+                {
+                    "Improvement": "Use ternary operator to simplify code",
+                    "Change_Diff": "- if (lastWordChars == 1) {\n-     return null;\n- }\n- else if (lastWordChars == 2) {\n-     word = word << 12;\n-     out[outCount++] = (byte)(word >> 16);\n- }\n- else if (lastWordChars == 3) {\n-     word = word << 6;\n-     out[outCount++] = (byte)(word >> 16);\n-     out[outCount++] = (byte)(word >> 8);\n- }\n- if (outCount == out.length)\n-     return out;\n- return Arrays.copyOfRange(out, 0, outCount);",
+                    "Description": "Replace if-else conditions for 'lastWordChars' with a ternary operator to simplify the code.",
+                    "Start": 54,
+                    "End": 68
+                }
+            ],
+            "Final code": "static byte[] decode(CharSequence in) {\n    int inputLength = in.length();\n    for (; inputLength > 0; inputLength--) {\n        char c = in.charAt(inputLength - 1);\n        if (c != '=' && c != '\\n' && c != '\\r' && c != ' ' && c != '\\t') {\n            break;\n        }\n    }\n    byte[] out = new byte[(int)(inputLength * 6L / 8L)];\n    int outputCount = 0;\n    int inputCount = 0;\n    int buffer = 0;\n    for (int pos = 0; pos < inputLength; pos++) {\n        char c = in.charAt(pos);\n        int bits;\n        switch (c) {\n            case 'A':\n            case 'B':\n            case 'C':\n            case 'D':\n            case 'E':\n            case 'F':\n            case 'G':\n            case 'H':\n            case 'I':\n            case 'J':\n            case 'K':\n            case 'L':\n            case 'M':\n            case 'N':\n            case 'O':\n            case 'P':\n            case 'Q':\n            case 'R':\n            case 'S':\n            case 'T':\n            case 'U':\n            case 'V':\n            case 'W':\n            case 'X':\n            case 'Y':\n            case 'Z':\n                bits = c - 65;\n                break;\n            case 'a':\n            case 'b':\n            case 'c':\n            case 'd':\n            case 'e':\n            case 'f':\n            case 'g':\n            case 'h':\n            case 'i':\n            case 'j':\n            case 'k':\n            case 'l':\n            case 'm':\n            case 'n':\n            case 'o':\n            case 'p':\n            case 'q':\n            case 'r':\n            case 's':\n            case 't':\n            case 'u':\n            case 'v':\n            case 'w':\n            case 'x':\n            case 'y':\n            case 'z':\n                bits = c - 71;\n                break;\n            case '0':\n            case '1':\n            case '2':\n            case '3':\n            case '4':\n            case '5':\n            case '6':\n            case '7':\n            case '8':\n            case '9':\n                bits = c + 4;\n                break;\n            case '+':\n            case '-':\n                bits = 62;\n                break;\n            case '/':\n            case '_':\n                bits = 63;\n                break;\n            case '\\n':\n            case '\\r':\n            case ' ': case '\\t':\n                continue;\n            default:\n                throw new IllegalArgumentException(\"invalid character to decode: \" + c);\n        }\n        buffer = (buffer << 6) | (byte)bits & 0xff;\n        inputCount++;\n        if (inputCount % 4 == 0) {\n            out[outputCount++] = (byte)(buffer >> 16);\n            out[outputCount++] = (byte)(buffer >> 8);\n            out[outputCount++] = (byte)buffer;\n        }\n    }\n    int lastWordChars = inputCount % 4;\n    if (lastWordChars == 1) {\n        return null;\n    } else if (lastWordChars == 2) {\n        buffer = buffer << 12;\n        out[outputCount++] = (byte)(buffer >> 16);\n    } else if (lastWordChars == 3) {\n        buffer = buffer << 6;\n        out[outputCount++] = (byte)(buffer >> 16);\n        out[outputCount++] = (byte)(buffer >> 8);\n    }\n    if (outputCount == out.length) return out;\n    return Arrays.copyOfRange(out, 0, outputCount);\n}"
+        }],
+        "Old_Method": "static byte[] decode(CharSequence in){\n  int limit=in.length();\n  for (; limit > 0; limit--) {\n    char c=in.charAt(limit - 1);\n    if (c != '=' && c != '\\n' && c != '\\r' && c != ' ' && c != '\\t') {\n      break;\n    }\n  }\n  byte[] out=new byte[(int)(limit * 6L / 8L)];\n  int outCount=0;\n  int inCount=0;\n  int word=0;\n  for (int pos=0; pos < limit; pos++) {\n    char c=in.charAt(pos);\n    int bits;\n    if (c >= 'A' && c <= 'Z') {\n      bits=c - 65;\n    }\n else     if (c >= 'a' && c <= 'z') {\n      bits=c - 71;\n    }\n else     if (c >= '0' && c <= '9') {\n      bits=c + 4;\n    }\n else     if (c == '+' || c == '-') {\n      bits=62;\n    }\n else     if (c == '/' || c == '_') {\n      bits=63;\n    }\n else     if (c == '\\n' || c == '\\r' || c == ' ' || c == '\\t') {\n      continue;\n    }\n else {\n      throw new IllegalArgumentException(\"invalid character to decode: \" + c);\n    }\n    word=(word << 6) | (byte)bits & 0xff;\n    inCount++;\n    if (inCount % 4 == 0) {\n      out[outCount++]=(byte)(word >> 16);\n      out[outCount++]=(byte)(word >> 8);\n      out[outCount++]=(byte)word;\n    }\n  }\n  int lastWordChars=inCount % 4;\n  if (lastWordChars == 1) {\n    return null;\n  }\n else   if (lastWordChars == 2) {\n    word=word << 12;\n    out[outCount++]=(byte)(word >> 16);\n  }\n else   if (lastWordChars == 3) {\n    word=word << 6;\n    out[outCount++]=(byte)(word >> 16);\n    out[outCount++]=(byte)(word >> 8);\n  }\n  if (outCount == out.length)   return out;\n  return Arrays.copyOfRange(out,0,outCount);\n}\n",
+        "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Base64.java",
+        "Start": 1985,
+        "Stop": 4949,
+        "Project_Name": "data/projects/bytes-java",
+        "Method_Name": "decode"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 2730 [character 826 line 11]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "private <A extends Appendable>A formatHex(A out,byte[] bytes,int fromIndex,int toIndex){\n  Objects.requireNonNull(out,\"out\");\n  Objects.requireNonNull(bytes,\"bytes\");\n  int length=toIndex - fromIndex;\n  if (length > 0) {\n    try {\n      String between=suffix + delimiter + prefix;\n      out.append(prefix);\n      toHexDigits(out,bytes[fromIndex]);\n      if (between.isEmpty()) {\n        for (int i=1; i < length; i++) {\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n else {\n        for (int i=1; i < length; i++) {\n          out.append(between);\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n      out.append(suffix);\n    }\n catch (    IOException ioe) {\n      throw new RuntimeException(ioe.getMessage(),ioe);\n    }\n  }\n  return out;\n}\n",
+        "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/EncodingHexJmhBenchmark.java",
+        "Start": 17470,
+        "Stop": 18670,
+        "Project_Name": "data/projects/bytes-java",
+        "Method_Name": "formatHex"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use a more descriptive variable name instead of 'i'",
+                    "Change_Diff": "- for (int i=0; i<64; i++) {\n+ for (int numBytes=0; numBytes<64; numBytes++) {",
+                    "Description": "Use a variable name that better describes its purpose, such as 'numBytes', instead of using a generic name like 'i'.",
+                    "Start": 2,
+                    "End": 2
+                },
+                {
+                    "Improvement": "Extract inner loop into a separate method",
+                    "Change_Diff": "- for (int j=2; j <= 36; j++) {\n+ for (int j=2; j <= 36; j++) {\n+     testEncoding(rnd, j);\n+ }",
+                    "Description": "Extract the inner loop into a separate method to improve readability and maintainability of the code.",
+                    "Start": 4,
+                    "End": 8
+                },
+                {
+                    "Improvement": "Use a StringBuilder instead of concatenating strings",
+                    "Change_Diff": "- System.out.println(\"radix\" + j + \":\\t\" + encodedBigEndian);\n+ System.out.println(\"radix\" + j + \":\\t\".concat(encodedBigEndian));",
+                    "Description": "Use a StringBuilder to concatenate strings instead of using the '+' operator to improve performance and reduce memory usage.",
+                    "Start": 12,
+                    "End": 12
+                },
+                {
+                    "Improvement": "Extract assertion into a separate method",
+                    "Change_Diff": "- assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n+ assertArrayEquals(getExpectedResult(rnd).array(),decoded);",
+                    "Description": "Extract the assertion into a separate method to improve readability and simplify the logic in the main code block.",
+                    "Start": 19,
+                    "End": 19
+                }
+            ],
+            "Final code": "@Test\npublic void encodeDecodeRadix() {\n    int leadingZeroHits = 0;\n    int encodings = 0;\n    for (int numBytes = 0; numBytes < 64; numBytes++) {\n        Bytes rnd = Bytes.random(numBytes % 256);\n        System.out.println(\"\\n\\nNEW TEST: \" + numBytes + \" bytes\\n\");\n        testAllEncodings(rnd);\n    }\n    System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings + \" encodings\");\n}\n\nprivate void testAllEncodings(Bytes rnd) {\n    int leadingZeroHits = 0;\n    int encodings = 0;\n    for (int j = 2; j <= 36; j++) {\n        encodings++;\n        BinaryToTextEncoding.EncoderDecoder encoding = new BinaryToTextEncoding.BaseRadixNumber(j);\n        String encodedBigEndian = encoding.encode(rnd.array(), ByteOrder.BIG_ENDIAN);\n        byte[] decoded = encoding.decode(encodedBigEndian);\n        System.out.println(\"radix\" + j + \":\\t\".concat(encodedBigEndian));\n        System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n        System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n        assertArrayEquals(getExpectedResult(rnd).array(), decoded);\n    }\n}\n\nprivate Bytes getExpectedResult(Bytes rnd) {\n    if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        return rnd;\n    } else {\n        leadingZeroHits++;\n        return rnd.resize(rnd.length() - 1);\n    }\n}"
+        }],
+        "Old_Method": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n      String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n      byte[] decoded=encoding.decode(encodedBigEndian);\n      System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n      System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n      System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n      if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        assertArrayEquals(rnd.array(),decoded);\n      }\n else {\n        leadingZeroHits++;\n        assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n      }\n    }\n  }\n  System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}\n",
+        "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BinaryToTextEncodingTest.java",
+        "Start": 3738,
+        "Stop": 5067,
+        "Project_Name": "data/projects/bytes-java",
+        "Method_Name": "encodeDecodeRadix"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Unterminated string at 5683 [character 2022 line 67]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "@Test public void transformHmac(){\n  System.out.println(Bytes.parseHex(\"d8b6239569b184eb7991\").transform(new HmacTransformer(Bytes.parseHex(\"671536819982\").array(),\"HmacSHA256\")).encodeHex());\n  assertEquals(Bytes.parseHex(\"d8f0eda7a00192091ad8fefa501753ae\"),Bytes.allocate(16).transform(new HmacTransformer(new byte[16],\"HmacMd5\")));\n  assertEquals(Bytes.parseHex(\"c69c13e005ae8ec628ec1869f334ca056bb38958\"),Bytes.allocate(16).transform(new HmacTransformer(new byte[20],\"HmacSHA1\")));\n  assertEquals(Bytes.parseHex(\"c69c13e005ae8ec628ec1869f334ca056bb38958\"),Bytes.allocate(16).transform(BytesTransformers.hmacSha1(new byte[20])));\n  assertEquals(Bytes.parseHex(\"853c7403937d8b6239569b184eb7993fc5f751aefcea28f2c863858e2d29c50b\"),Bytes.allocate(16).transform(new HmacTransformer(new byte[32],\"HmacSHA256\")));\n  assertEquals(Bytes.parseHex(\"9aff87db4fd8df58c9081d8386ccc71c9a0f5fe9491235b7bb17e1be20bbe82b\"),Bytes.parseHex(\"d8b6239569b184eb7991\").transform(new HmacTransformer(Bytes.parseHex(\"671536819982\").array(),\"HmacSHA256\")));\n  assertEquals(Bytes.parseHex(\"9aff87db4fd8df58c9081d8386ccc71c9a0f5fe9491235b7bb17e1be20bbe82b\"),Bytes.parseHex(\"d8b6239569b184eb7991\").transform(BytesTransformers.hmacSha256(Bytes.parseHex(\"671536819982\").array())));\n  assertEquals(Bytes.parseHex(\"9aff87db4fd8df58c9081d8386ccc71c9a0f5fe9491235b7bb17e1be20bbe82b\"),Bytes.parseHex(\"d8b6239569b184eb7991\").transform(BytesTransformers.hmac(Bytes.parseHex(\"671536819982\").array(),\"HmacSHA256\")));\n  assertEquals(Bytes.parseHex(\"9294727a3638bb1c13f48ef8158bfc9d\"),Bytes.from(\"Hi There\").transform(new HmacTransformer(Bytes.parseHex(\"0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b\").array(),\"HmacMd5\")));\n  assertEquals(Bytes.parseHex(\"56be34521d144c88dbb8c733f0e8b3f6\"),Bytes.parseHex(\"DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD\").transform(new HmacTransformer(Bytes.parseHex(\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\").array(),\"HmacMd5\")));\n}\n",
+        "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BytesTransformTest.java",
+        "Start": 27804,
+        "Stop": 29926,
+        "Project_Name": "data/projects/bytes-java",
+        "Method_Name": "transformHmac"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use 'final' keyword for constant variables",
+                    "Change_Diff": "- this.charsPerChunk=8 / gcd;\n+ final int charsPerChunk=8 / gcd;",
+                    "Description": "Add the 'final' keyword to the 'charsPerChunk', 'bytesPerChunk', and 'mask' variables since their values are not supposed to change.",
+                    "Start": 6,
+                    "End": 6
+                },
+                {
+                    "Improvement": "Update variable name to adhere to Java naming conventions",
+                    "Change_Diff": "- byte[] decodabet=new byte[ASCII_MAX + 1];\n+ byte[] decodeTab=new byte[ASCII_MAX + 1];",
+                    "Description": "Change 'decodabet' to 'decodeTab' to follow the standard naming convention for variables in Java.",
+                    "Start": 12,
+                    "End": 12
+                }
+            ],
+            "Final code": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  final int charsPerChunk=8 / gcd;\n  final int bytesPerChunk=bitsPerChar / gcd;\n  final int mask=chars.length - 1;\n  byte[] decodeTab=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodeTab,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodeTab[c]=(byte)i;\n  }\n  this.decodabet=decodeTab;\n}"
+        }],
+        "Old_Method": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  this.decodabet=decodabet;\n}\n",
+        "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/BaseEncoding.java",
+        "Start": 6069,
+        "Stop": 6946,
+        "Project_Name": "data/projects/bytes-java",
+        "Method_Name": "Alphabet"
+    },
+    {
+        "Method_Improvements": [{
+            "details": "Expected a ',' or '}' at 112 [character 28 line 5]",
+            "error": "An unexpected error occurred"
+        }],
+        "Old_Method": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  assertFalse(Bytes.from((byte)8).bitAt(0));\n  assertFalse(Bytes.from((byte)8).bitAt(1));\n  assertFalse(Bytes.from((byte)8).bitAt(2));\n  assertTrue(Bytes.from((byte)8).bitAt(3));\n  assertFalse(Bytes.from((byte)8).bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n",
+        "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BytesMiscTest.java",
+        "Start": 12738,
+        "Stop": 14127,
+        "Project_Name": "data/projects/bytes-java",
+        "Method_Name": "bitAt"
+    },
+    {
+        "Method_Improvements": [{
+            "Improvements": [
+                {
+                    "Improvement": "Use a bitwise AND operation instead of an arithmetic AND operation",
+                    "Change_Diff": "- dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;",
+                    "Description": "Instead of using an arithmetic AND operation to mask the carryMask, use a bitwise AND operation.",
+                    "Start": 16,
+                    "End": 16,
+                    "Final_code": "- dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask;"
+                },
+                {
+                    "Improvement": "Remove unnecessary check for sourceIndex + 1 < byteArray.length",
+                    "Change_Diff": "- if (sourceIndex + 1 < byteArray.length) {",
+                    "Description": "Remove the check for sourceIndex + 1 < byteArray.length as it is already guaranteed by the previous condition.",
+                    "Start": 14,
+                    "End": 14,
+                    "Final_code": ""
+                },
+                {
+                    "Improvement": "Remove unnecessary check for sourceIndex - 1 >= 0",
+                    "Change_Diff": "- if (sourceIndex - 1 >= 0) {",
+                    "Description": "Remove the check for sourceIndex - 1 >= 0 as it is already guaranteed by the previous condition.",
+                    "Start": 24,
+                    "End": 24,
+                    "Final_code": ""
+                }
+            ],
+            "Final code": "static byte[] shiftLeft(byte[] byteArray, int shiftBitCount, ByteOrder byteOrder) {\n    final int shiftMod = shiftBitCount % 8;\n    final byte carryMask = (byte) ((1 << shiftMod) - 1);\n    final int offsetBytes = (shiftBitCount / 8);\n    int sourceIndex;\n    if (byteOrder == ByteOrder.BIG_ENDIAN) {\n        for (int i = 0; i < byteArray.length; i++) {\n            sourceIndex = i + offsetBytes;\n            if (sourceIndex >= byteArray.length) {\n                byteArray[i] = 0;\n            } else {\n                byte src = byteArray[sourceIndex];\n                byte dst = (byte) (src << shiftMod);\n                dst |= byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask;\n                byteArray[i] = dst;\n            }\n        }\n    } else {\n        for (int i = byteArray.length - 1; i >= 0; i--) {\n            sourceIndex = i - offsetBytes;\n            if (sourceIndex < 0) {\n                byteArray[i] = 0;\n            } else {\n                byte src = byteArray[sourceIndex];\n                byte dst = (byte) (src << shiftMod);\n                dst |= byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask;\n                byteArray[i] = dst;\n            }\n        }\n    }\n    return byteArray;\n}"
+        }],
+        "Old_Method": "/** \n * Light shift of whole byte array by shiftBitCount bits. This method will alter the input byte array. <p> <strong>Analysis<\/strong> <ul> <li>Time Complexity: <code>O(n)<\/code><\/li> <li>Space Complexity: <code>O(1)<\/code><\/li> <li>Alters Parameters: <code>true<\/code><\/li> <\/ul> <\/p>\n * @param byteArray     to shift\n * @param shiftBitCount how many bits to shift\n * @param byteOrder     endianness of given byte array\n * @return shifted byte array\n */\nstatic byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      if (sourceIndex >= byteArray.length) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex + 1 < byteArray.length) {\n          dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      if (sourceIndex < 0) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex - 1 >= 0) {\n          dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n  return byteArray;\n}\n",
+        "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Util.java",
+        "Start": 9808,
+        "Stop": 12110,
+        "Project_Name": "data/projects/bytes-java",
+        "Method_Name": "shiftLeft"
+    }
+]

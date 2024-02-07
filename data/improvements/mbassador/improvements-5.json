@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": [{
+        "Improvements": [
+            {
+                "Improvement": "Avoid unnecessary exception catching and rethrowing",
+                "Change_Diff": "- catch (Exception e) {\n+ catch (RuntimeException e) {",
+                "Description": "Instead of catching the general `Exception` and throwing a new `RuntimeException`, catch the more specific `RuntimeException` directly.",
+                "Start": 29,
+                "End": 29
+            },
+            {
+                "Improvement": "Avoid unnecessary variable assignment",
+                "Change_Diff": "- int length = messageHandlers.length;\n- if (length == 0) {\n+ if (messageHandlers.length == 0) {",
+                "Description": "You can avoid assigning the length of `messageHandlers` to a separate variable `length` and directly use `messageHandlers.length` in the `if` statement.",
+                "Start": 21,
+                "End": 23
+            }
+        ],
+        "Final code": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      if (messageHandlers.length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[messageHandlers.length];\n      MessageHandler messageHandler;\n      for (int i=0; i < messageHandlers.length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n    else {\n      for (Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n  catch (RuntimeException e) {\n    throw e;\n  }\n}"
+    }],
+    "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+    "Start": 3620,
+    "Stop": 5539,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "subscribe"
+}
