@@ -1,5 +1,6 @@
 package org.mal.utils;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.Configurations;
 import org.mal.FileIO;
@@ -26,5 +27,23 @@ public class SelectedProjects {
         }
         return projectNames;
 
+    }
+    public static Integer getTotalMethodCount(){
+        List<String> projectNames = getProjectNames();
+        int count = 0;
+        assert projectNames != null;
+        for(String pname: projectNames){
+            try {
+                JSONArray arr = FileIO.readJSONArrayFromFile(
+                        Configurations.DATA_FOLDER,
+                        "selected_methods_" + pname + ".json");
+                count += arr.length();
+
+            }catch (IOException e){
+                System.out.println("Can't find "+pname);
+            }
+
+        }
+        return count;
     }
 }

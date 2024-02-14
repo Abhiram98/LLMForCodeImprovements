@@ -11,11 +11,12 @@ public class runGPTMain {
 
 //        File projectDir = new File(Configurations.PROJECT_REPOSITORY);
         List<String> projectNames = SelectedProjects.getProjectNames();
-        for (String name: projectNames){
-            System.out.println("Running: "+ name);
-            runProject rp = new runProject(name);
+        for (String name : projectNames) {
+            System.out.println("Running: " + name);
+            runProject rp = new runProject(name, 1, 1);
             rp.run();
         }
+
 
 
     }

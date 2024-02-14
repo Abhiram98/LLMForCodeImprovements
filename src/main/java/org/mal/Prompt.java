@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Prompt {
+
+    public static String SYSTEM_MSG = "You are an expert Java programmer.";
     public static String getPrompt(String code) {
         StringBuilder sb = new StringBuilder();
         sb.append("Please provide suggestions to improve the following Java method. Ensure that your recommendations are " +

@@ -205,7 +205,8 @@ public class ApplyChanges {
             JSONObject ob = (JSONObject) o;
             improvedCode.append(ob.getString("Final code"));
         }
-        return new Improvement(improvedCode.toString(), startC, startE, filePath);
+        return new Improvement(improvedCode.toString(), startC, startE, filePath,
+                "", "");
     }
 
     private void improveFile(String filePath, String newContent) {

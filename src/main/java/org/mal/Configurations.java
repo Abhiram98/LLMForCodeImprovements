@@ -9,4 +9,6 @@ public class Configurations {
     public static String PROJECT_META_FILE = "selected_projects_20.json";
     public static String JAVA_HOME_RESOLVER = "data/java_home_paths.json";
     public static String OUTPUT_REGEX = "improvements-\\d+.json";
+    public static String LLM_PY_QUERY_FILE = "src/main/python/query_llm.py";
+    public static Integer MAX_ITERATIONS = 20;
 }
