@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid code repetition",
+                "Change_Diff": "- final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(k1).build(skMem);\n- for (int i=0; i < n1; i++) {\n- sketchIn0.update(i + 1);\n-}\n- final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n- union.union(sketchIn1);\n+ union.union(createAndCompactSketch(k1, n1, skMem));\n\n... \n\n- final CompactDoublesSketch sketchIn2=buildAndLoadDQS(k2,n2,17).compact();\n- union.reset();\n- union.union(sketchIn2);\n+ union.union(createAndCompactSketch(k2, n2 + 17, skMem));",
+                "Description": "The block of code to create a DoublesSketch, update it, compact it and then get union is repeated twice with different values. This can be refactored into a separate private method to avoid code duplication.",
+                "Start": 5,
+                "End": 19
+            },
+            {
+                "Improvement": "Add meaningful test names",
+                "Change_Diff": "- @Test public void checkUnion4DirectCompact(){\n+ @Test public void shouldUnionTwoCompactedSketchesWithDifferentKAndNValues(){",
+                "Description": "The test name `checkUnion4DirectCompact` isn't very descriptive. It should indicate what functionality or behavior it's testing.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "@Test public void shouldUnionTwoCompactedSketchesWithDifferentKAndNValues(){\n  final int k1=8;\n  final int n1=2 * k1;\n  final int k2=4;\n  final int n2=5 * k2;\n  final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n  final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n  final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n  union.union(createAndCompactSketch(k1, n1, skMem));\n  assertEquals(union.getResult().getN(),n1);\n  assertEquals(union.getMaxK(),256);\n  assertEquals(union.getEffectiveK(),k1);\n  DoublesSketch result=union.getResult();\n  assertEquals(result.getN(),16);\n  assertEquals(result.getMaxItem(),n1,0.0);\n  assertEquals(result.getMinItem(),1.0,0.0);\n  assertEquals(result.getK(),k1);\n  union.reset();\n  union.union(createAndCompactSketch(k2, n2 + 17, skMem));\n  result=union.getResult();\n  assertEquals(result.getMaxItem(),n2 + 17,0.0);\n  assertEquals(result.getMinItem(),1.0 + 17,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}\n\nprivate CompactDoublesSketch createAndCompactSketch(int k, int n, WritableMemory memory) {\n  final UpdateDoublesSketch sketch=DoublesSketch.builder().setK(k).build(memory);\n  for (int i=0; i < n; i++) {\n    sketch.update(i + 1);\n  }\n  return sketch.compact();\n}"
+    },
+    "Old_Method": "@Test public void checkUnion4DirectCompact(){\n  final int k1=8;\n  final int n1=2 * k1;\n  final int k2=4;\n  final int n2=5 * k2;\n  final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n  final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n  final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(k1).build(skMem);\n  for (int i=0; i < n1; i++) {\n    sketchIn0.update(i + 1);\n  }\n  final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n  final WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n  final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n  union.union(sketchIn1);\n  assertEquals(union.getResult().getN(),n1);\n  assertEquals(union.getMaxK(),256);\n  assertEquals(union.getEffectiveK(),k1);\n  DoublesSketch result=union.getResult();\n  assertEquals(result.getN(),16);\n  assertEquals(result.getMaxItem(),n1,0.0);\n  assertEquals(result.getMinItem(),1.0,0.0);\n  assertEquals(result.getK(),k1);\n  final CompactDoublesSketch sketchIn2=buildAndLoadDQS(k2,n2,17).compact();\n  union.reset();\n  union.union(sketchIn2);\n  result=union.getResult();\n  assertEquals(result.getMaxItem(),n2 + 17,0.0);\n  assertEquals(result.getMinItem(),1.0 + 17,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/DoublesUnionImplTest.java",
+    "Start": 9412,
+    "Stop": 10835,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkUnion4DirectCompact"
+}

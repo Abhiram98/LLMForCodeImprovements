@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace System.err.println with Logger",
+                "Change_Diff": "- System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but got none\");\n- System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but only got \"+ packetReadSize);\n+ LOGGER.error(\"Rcv packet: expected {} bytes, but got none\", packetSize[0]);\n+ LOGGER.error(\"Rcv packet: expected {} bytes, but only got {}\", packetSize[0], packetReadSize);",
+                "Description": "The use of System.err.println is not recommended in real-world applications. It is always better to use a Logger because it can be configured to output log information to various targets.",
+                "Start": 15,
+                "End": 16
+            },
+            {
+                "Improvement": "Replace System.out.println with Logger",
+                "Change_Diff": "- System.out.println(\"Rcv packet: userID=\" + steamIDSender.getAccountID() + \", \"+ bytesReceived+ \" bytes\");\n- System.out.println(\"Auth ticket received: \" + remoteAuthTicketData.toString() + \" [hash: \"+ remoteAuthTicketData.hashCode()+ \"]\");\n- System.out.println(\"Rcv message: \\\"\" + message + \"\\\"\");\n+ LOGGER.info(\"Rcv packet: userID={}, {} bytes\", steamIDSender.getAccountID(), bytesReceived);\n+ LOGGER.info(\"Auth ticket received: {} [hash: {}]\", remoteAuthTicketData.toString(), remoteAuthTicketData.hashCode());\n+ LOGGER.info(\"Rcv message: \\\"{}\\\"\", message);",
+                "Description": "Similar to the previous point, replace System.out.println with Logger. This allows more flexibility in controlling output and levels of logging.",
+                "Start": 22,
+                "End": 31
+            },
+            {
+                "Improvement": "Use try-catch for exception handling",
+                "Change_Diff": "- if (packetSize[0] > packetReadBuffer.capacity()) {\n- throw new SteamException(\"incoming packet larger than read buffer can handle\");\n+ try {\n+   if (packetSize[0] > packetReadBuffer.capacity()) {\n+       throw new SteamException(\"incoming packet larger than read buffer can handle\");\n+   }\n+ } catch (SteamException e) {\n+   LOGGER.error(\"incoming packet larger than read buffer can handle\", e);\n+ }",
+                "Description": "It's good practice to handle exceptions properly. In this case, when packet size is greater than buffer capacity, instead of throwing an exception, handle it gracefully.",
+                "Start": 6,
+                "End": 8
+            }
+        ],
+        "Final code": "@Override protected void processUpdate() throws SteamException {\n  int[] packetSize=new int[1];\n  if (networking.isP2PPacketAvailable(defaultChannel,packetSize)) {\n    SteamID steamIDSender=new SteamID();\n    try {\n      if (packetSize[0] > packetReadBuffer.capacity()) {\n        throw new SteamException(\"incoming packet larger than read buffer can handle\");\n      }\n    } catch (SteamException e) {\n      LOGGER.error(\"incoming packet larger than read buffer can handle\", e);\n      return;\n    }\n    packetReadBuffer.clear();\n    packetReadBuffer.limit(packetSize[0]);\n    int packetReadSize=networking.readP2PPacket(steamIDSender,packetReadBuffer,defaultChannel);\n    if (packetReadSize == 0) {\n      LOGGER.error(\"Rcv packet: expected {} bytes, but got none\", packetSize[0]);\n    } else if (packetReadSize < packetSize[0]) {\n      LOGGER.error(\"Rcv packet: expected {} bytes, but only got {}\", packetSize[0], packetReadSize);\n    }\n    packetReadBuffer.limit(packetReadSize);\n    if (packetReadSize > 0) {\n      registerRemoteSteamID(steamIDSender);\n      int bytesReceived=packetReadBuffer.limit();\n      LOGGER.info(\"Rcv packet: userID={}, {} bytes\", steamIDSender.getAccountID(), bytesReceived);\n      byte[] bytes=new byte[bytesReceived];\n      packetReadBuffer.get(bytes);\n      int magicBytes=checkMagicBytes(packetReadBuffer,AUTH);\n      if (magicBytes > 0) {\n        remoteAuthTicketData.clear();\n        remoteAuthTicketData.put(bytes,magicBytes,bytesReceived - magicBytes);\n        remoteAuthTicketData.flip();\n        LOGGER.info(\"Auth ticket received: {} [hash: {}]\", remoteAuthTicketData.toString(), remoteAuthTicketData.hashCode());\n        beginAuthSession(steamIDSender);\n      } else {\n        String message=new String(bytes,messageCharset);\n        LOGGER.info(\"Rcv message: \\\"{}\\\"\", message);\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void processUpdate() throws SteamException {\n  int[] packetSize=new int[1];\n  if (networking.isP2PPacketAvailable(defaultChannel,packetSize)) {\n    SteamID steamIDSender=new SteamID();\n    if (packetSize[0] > packetReadBuffer.capacity()) {\n      throw new SteamException(\"incoming packet larger than read buffer can handle\");\n    }\n    packetReadBuffer.clear();\n    packetReadBuffer.limit(packetSize[0]);\n    int packetReadSize=networking.readP2PPacket(steamIDSender,packetReadBuffer,defaultChannel);\n    if (packetReadSize == 0) {\n      System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but got none\");\n    }\n else     if (packetReadSize < packetSize[0]) {\n      System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but only got \"+ packetReadSize);\n    }\n    packetReadBuffer.limit(packetReadSize);\n    if (packetReadSize > 0) {\n      registerRemoteSteamID(steamIDSender);\n      int bytesReceived=packetReadBuffer.limit();\n      System.out.println(\"Rcv packet: userID=\" + steamIDSender.getAccountID() + \", \"+ bytesReceived+ \" bytes\");\n      byte[] bytes=new byte[bytesReceived];\n      packetReadBuffer.get(bytes);\n      int magicBytes=checkMagicBytes(packetReadBuffer,AUTH);\n      if (magicBytes > 0) {\n        remoteAuthTicketData.clear();\n        remoteAuthTicketData.put(bytes,magicBytes,bytesReceived - magicBytes);\n        remoteAuthTicketData.flip();\n        System.out.println(\"Auth ticket received: \" + remoteAuthTicketData.toString() + \" [hash: \"+ remoteAuthTicketData.hashCode()+ \"]\");\n        beginAuthSession(steamIDSender);\n      }\n else {\n        String message=new String(bytes,messageCharset);\n        System.out.println(\"Rcv message: \\\"\" + message + \"\\\"\");\n      }\n    }\n  }\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+    "Start": 3102,
+    "Stop": 5085,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processUpdate"
+}

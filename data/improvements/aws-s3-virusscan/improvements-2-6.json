@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract string constants",
+                "Change_Diff": "- \"https://\" + bucketName + \".s3.\"+ bucketRegion+ \".amazonaws.com/\"+ stackName\n+ BASE_URL_FORMAT\n\n- Config.Key.TEMPLATE_DIR\n+ TEMPLATE_DIR_KEY\n\n- Config.Key.BUCKET_NAME\n+ BUCKET_NAME_KEY\n\n- Config.Key.BUCKET_REGION\n+ BUCKET_REGION_KEY\n\n- \"retain\"\n+ RETAIN_POLICY",
+                "Description": "Several strings are used multiple times in the code, such as the URL format and the configuration keys. These could be extracted into constant variables to avoid potential typing errors and to make the code easier to change in the future.",
+                "Start": 5,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract complex expressions into methods",
+                "Change_Diff": "- AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build()\n+ createS3Client(bucketRegion)\n\n- readFile(dir + template,StandardCharsets.UTF_8)\n+ readFile(dir, template)",
+                "Description": "The expressions to read the file and to create the Amazon S3 client are quite complex and used multiple times. These could be extracted into separate methods to make the code easier to read and to avoid code duplication.",
+                "Start": 10,
+                "End": 17
+            }
+        ],
+        "Final code": "private static final String BASE_URL_FORMAT = \"https://%s.s3.%s.amazonaws.com/%s\";\nprivate static final Config.Key TEMPLATE_DIR_KEY = Config.Key.TEMPLATE_DIR;\nprivate static final Config.Key BUCKET_NAME_KEY = Config.Key.BUCKET_NAME;\nprivate static final Config.Key BUCKET_REGION_KEY = Config.Key.BUCKET_REGION;\nprivate static final String RETAIN_POLICY = \"retain\";\n\nprotected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  if (Config.has(TEMPLATE_DIR_KEY)) {\n    final String dir=Config.get(TEMPLATE_DIR_KEY);\n    if (Config.has(BUCKET_NAME_KEY)) {\n      final String bucketName=Config.get(BUCKET_NAME_KEY);\n      final String bucketRegion=Config.get(BUCKET_REGION_KEY);\n      final AmazonS3 s3local=createS3Client(bucketRegion);\n      s3local.putObject(bucketName,stackName,new File(dir + template));\n      req=req.withTemplateURL(String.format(BASE_URL_FORMAT, bucketName, bucketRegion, stackName));\n    }\n else {\n      final String body=readFile(dir, template);\n      req=req.withTemplateBody(body);\n    }\n  }\n else {\n    req=req.withTemplateURL(\"https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/\" + template);\n  }\n  if (Config.get(Config.Key.FAILURE_POLICY).equals(RETAIN_POLICY)) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}\n\nprivate AmazonS3 createS3Client(String region) {\n  return AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(region).build();\n}\n\nprivate String readFile(String directory, String filename) {\n  return new String(Files.readAllBytes(Paths.get(directory, filename)), StandardCharsets.UTF_8);\n}"
+    },
+    "Old_Method": "protected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  if (Config.has(Config.Key.TEMPLATE_DIR)) {\n    final String dir=Config.get(Config.Key.TEMPLATE_DIR);\n    if (Config.has(Config.Key.BUCKET_NAME)) {\n      final String bucketName=Config.get(Config.Key.BUCKET_NAME);\n      final String bucketRegion=Config.get(Config.Key.BUCKET_REGION);\n      final AmazonS3 s3local=AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build();\n      s3local.putObject(bucketName,stackName,new File(dir + template));\n      req=req.withTemplateURL(\"https://\" + bucketName + \".s3.\"+ bucketRegion+ \".amazonaws.com/\"+ stackName);\n    }\n else {\n      final String body=readFile(dir + template,StandardCharsets.UTF_8);\n      req=req.withTemplateBody(body);\n    }\n  }\n else {\n    req=req.withTemplateURL(\"https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/\" + template);\n  }\n  if (Config.get(Config.Key.FAILURE_POLICY).equals(\"retain\")) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+    "Start": 1185,
+    "Stop": 2820,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "createStack"
+}

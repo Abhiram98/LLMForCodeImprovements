@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Null check for 'name'",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n+ if (name != null && cookie.getName().equals(name)) {",
+                "Description": "Before using 'name' in the equals method, it would be better to check if 'name' is null. This will prevent a NullPointerException from being thrown if 'name' is null.",
+                "Start": 1,
+                "End": 10
+            },
+            {
+                "Improvement": "Use a boolean for flagging",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n-   cookie.setValue(\"\");\n-   cookie.setPath(\"/\");\n-   cookie.setMaxAge(0);\n-   response.addCookie(cookie);\n+ boolean isCookieFound = cookie.getName().equals(name);\n+ if(isCookieFound) break;\n}\nif(isCookieFound) {\n   cookie.setValue(\"\");\n   cookie.setPath(\"/\");\n   cookie.setMaxAge(0);\n   response.addCookie(cookie);\n}",
+                "Description": "Instead of setting the cookie properties and adding it to the response inside the if statement, use a boolean to flag whether the cookie was found and then perform these operations after the loop. This way, the loop can be escaped as soon as the target cookie is found, making the process more efficient.",
+                "Start": 5,
+                "End": 9
+            }
+        ],
+        "Final code": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  if(name == null) return;\n  Cookie[] cookies=request.getCookies();\n  boolean isCookieFound = false;\n  Cookie targetCookie = null;\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        targetCookie = cookie;\n        isCookieFound = true;\n        break;\n      }\n    }\n  }\n  if(isCookieFound) {\n    targetCookie.setValue(\"\");\n    targetCookie.setPath(\"/\");\n    targetCookie.setMaxAge(0);\n    response.addCookie(targetCookie);\n  }\n}"
+    },
+    "Old_Method": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (    Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        cookie.setValue(\"\");\n        cookie.setPath(\"/\");\n        cookie.setMaxAge(0);\n        response.addCookie(cookie);\n      }\n    }\n  }\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/util/CookieUtils.java",
+    "Start": 1016,
+    "Stop": 1537,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "deleteCookie"
+}

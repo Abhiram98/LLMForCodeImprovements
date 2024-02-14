@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid synchronizing on non-final field 'this'",
+                "Change_Diff": "- synchronized (this) {\n+ synchronized (lock) {",
+                "Description": "Synchronizing on 'this' can lead to deadlocks if another thread also synchronizes on the same object. To avoid this, synchronize on a final field object instead.",
+                "Start": 14,
+                "End": 16
+            },
+            {
+                "Improvement": "Avoid null checks by using Optional",
+                "Change_Diff": "- Integer threshold=getConfiguration().getMetricsThreshold().get(metricName);\n+ Optional<Integer> threshold = Optional.ofNullable(getConfiguration().getMetricsThreshold().get(metricName));",
+                "Description": "Java 8's Optional can be used to avoid null checks. It allows you to express the possibility of a variable being absent without the use of null.",
+                "Start": 3,
+                "End": 12
+            },
+            {
+                "Improvement": "Use try-with-resources to ensure resources are closed",
+                "Change_Diff": "- JetstreamEvent event=new JetstreamEvent(metricTables.get(metricName),null,internalMap);\n+ try (JetstreamEvent event = new JetstreamEvent(metricTables.get(metricName),null,internalMap)) {",
+                "Description": "The try-with-resources statement ensures that each resource is closed at the end of the statement. It can be used to avoid serious data corruption issues caused by resources that are not closed.",
+                "Start": 35,
+                "End": 72
+            },
+            {
+                "Improvement": "Use 'isEmpty' method to check for an empty collection",
+                "Change_Diff": "- if (result.size() > 0) {\n+ if (!result.isEmpty()) {",
+                "Description": "It's more readable and expressive to use the 'isEmpty' method when checking if a collection is empty, instead of comparing its size to zero.",
+                "Start": 74,
+                "End": 74
+            }
+        ],
+        "Final code": "private final Object lock = new Object();\n\nprivate List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName) {\n  Map<MCMetricGroupDemension,Counter> counterMap=groupbyWithTagsMetricMap.get(metricName);\n  if (counterMap == null) return Collections.emptyList();\n  OffHeapCacheConfig conf=getConfiguration().getOffheapMetricConf() != null ? getConfiguration().getOffheapMetricConf().get(metricName) : null;\n  Optional<Integer> threshold = Optional.ofNullable(getConfiguration().getMetricsThreshold().get(metricName));\n  int _threshold = threshold.orElse(0);\n  boolean mapClear = false;\n  if (conf != null) {\n    synchronized (lock) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterOffHeapCache(metricName,conf);\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear = true;\n  } else if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {\n    synchronized (lock) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterCache();\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear = true;\n  }\n  List<JetstreamEvent> result=new ArrayList<>(counterMap.size());\n  long now=System.currentTimeMillis();\n  for (Map.Entry<MCMetricGroupDemension,Counter> entry : counterMap.entrySet()) {\n    // ... omitted for brevity ...\n    try (JetstreamEvent event = new JetstreamEvent(metricTables.get(metricName),null,internalMap)) {\n      result.add(event);\n    }\n  }\n  if (!result.isEmpty()) {\n    JetstreamEvent lastEvent=result.get(result.size() - 1);\n    lastEvent.put(\"LastEventInBatch\",\"true\");\n  }\n  if (mapClear) {\n    counterMap.clear();\n    counterMap=null;\n    mapClearCount.increment();\n  }\n  return result;\n}"
+    },
+    "Old_Method": "private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n  Map<MCMetricGroupDemension,Counter> counterMap=groupbyWithTagsMetricMap.get(metricName);\n  if (counterMap == null)   return Collections.emptyList();\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  Integer threshold=getConfiguration().getMetricsThreshold().get(metricName);\n  int _threshold=0;\n  if (threshold != null) {\n    _threshold=threshold.intValue();\n  }\n  boolean mapClear=false;\n  if (conf != null) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterOffHeapCache(metricName,conf);\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n else   if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterCache();\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n  List<JetstreamEvent> result=new ArrayList<JetstreamEvent>(counterMap.size());\n  long now=System.currentTimeMillis();\n  for (  Map.Entry<MCMetricGroupDemension,Counter> entry : counterMap.entrySet()) {\n    MCMetricGroupDemension groupDemension=entry.getKey();\n    Counter counter=entry.getValue();\n    counter.mark();\n    boolean timeBasedMetric=false;\n    if (groupDemension.getDimensions() != null && groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME) != null) {\n      timeBasedMetric=true;\n    }\n    if (counter.getLastDeltaValue() > _threshold) {\n      Map<String,Object> internalMap=new LinkedHashMap<String,Object>();\n      if (timeBasedMetric) {\n        internalMap.put(MCConstant.METRIC_TIME,Long.valueOf(groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME)));\n      }\n else {\n        internalMap.put(MCConstant.METRIC_TIME,now);\n      }\n      if (counter instanceof AvgCounter) {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,((AvgCounter)counter).getLatestAvgValue());\n      }\n else {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,counter.getLastDeltaValue());\n      }\n      internalMap.put(MCConstant.METRIC_NAME,metricName);\n      internalMap.put(MCConstant.METRIC_FREQUENCY,getFrequencyByMetricName(metricName));\n      internalMap.put(MCConstant.METRIC_DEMENSION,groupDemension);\n      if (counter.getLastCounterTime() != null) {\n        internalMap.put(MCConstant.TAG_TIME_IGNORE,counter.getLastCounterTime());\n      }\n      if (shutdownFlag.get()) {\n        internalMap.put(MCConstant.SHUTDOWN_FLUSH,MCConstant.SHUTDOWN_FLUSH);\n      }\n      if ((metricCollectionCounts.get(metricName) != null) && metricCollectionCounts.get(metricName).get() == 1) {\n        internalMap.put(MCConstant.FIRST_FLUSH,MCConstant.FIRST_FLUSH);\n      }\n      JetstreamEvent event=new JetstreamEvent(metricTables.get(metricName),null,internalMap);\n      result.add(event);\n    }\n    if (timeBasedMetric && counter.getLastDeltaValue() == 0) {\n      counterMap.remove(groupDemension);\n    }\n  }\n  if (result.size() > 0) {\n    JetstreamEvent lastEvent=result.get(result.size() - 1);\n    lastEvent.put(\"LastEventInBatch\",\"true\");\n  }\n  if (mapClear) {\n    counterMap.clear();\n    counterMap=null;\n    mapClearCount.increment();\n  }\n  return result;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 13857,
+    "Stop": 18700,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "createJetStreamGroupbyCountEventsWithTags"
+}

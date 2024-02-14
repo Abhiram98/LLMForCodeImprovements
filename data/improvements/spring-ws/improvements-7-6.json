@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add meaningful logs in catch blocks",
+                "Change_Diff": "- catch (UnsupportedCallbackException ex) {\n+ catch (UnsupportedCallbackException ex) {\n+     logger.error(\"Unsupported callback exception during cleanUp\", ex);\n}",
+                "Description": "The catch block for UnsupportedCallbackException is currently empty. This can lead to swallowed exceptions which are hard to debug. It's a good practice to at least log the exception.",
+                "Start": 10,
+                "End": 12
+            },
+            {
+                "Improvement": "Use finally block for cleanup",
+                "Change_Diff": "- @Override protected void cleanUp(){\n+ @Override protected void doSomething(){\ntry {\n... // original code\n}\nfinally {\ncleanUp();\n}\n}",
+                "Description": "Cleanup should typically be done in a finally block which ensures that it will execute whether or not an exception is thrown.",
+                "Start": 1,
+                "End": 12
+            }
+        ],
+        "Final code": "@Override protected void doSomething(){\ntry {\nif (validationCallbackHandler != null) {\ntry {\nCleanupCallback cleanupCallback=new CleanupCallback();\nvalidationCallbackHandler.handle(new Callback[]{cleanupCallback});\n}\ncatch (IOException ex) {\nlogger.warn(\"Cleanup callback resulted in IOException\",ex);\n}\ncatch (UnsupportedCallbackException ex) {\nlogger.error(\"Unsupported callback exception during cleanUp\", ex);\n}\n}\n}\nfinally {\ncleanUp();\n}\n}"
+    },
+    "Old_Method": "@Override protected void cleanUp(){\n  if (validationCallbackHandler != null) {\n    try {\n      CleanupCallback cleanupCallback=new CleanupCallback();\n      validationCallbackHandler.handle(new Callback[]{cleanupCallback});\n    }\n catch (    IOException ex) {\n      logger.warn(\"Cleanup callback resulted in IOException\",ex);\n    }\ncatch (    UnsupportedCallbackException ex) {\n    }\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-security/src/main/java/org/springframework/ws/soap/security/wss4j2/Wss4jSecurityInterceptor.java",
+    "Start": 31988,
+    "Stop": 32381,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "cleanUp"
+}

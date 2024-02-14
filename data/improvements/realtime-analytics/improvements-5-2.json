@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use String.format instead of StringBuilder",
+                "Change_Diff": "- StringBuilder builder=new StringBuilder();\n- builder.append(\"InternalOffHeapManagerInfo:\");\n...\n- return builder.toString();\n+ String result = \"InternalOffHeapManagerInfo:\";\n...\n+ return result;",
+                "Description": "Instead of using `StringBuilder` to concatenate strings, `String.format` can be used to make the code more readable and maintainable. It allows you to construct a string with placeholders, making your code cleaner and easier to understand.",
+                "Start": 3,
+                "End": 27
+            },
+            {
+                "Improvement": "Null check before accessing methods",
+                "Change_Diff": "- OffHeapMemoryManager manager=entry.getValue();\n- if (manager != null) {\n- builder.append(\"[\");\n- builder.append(\"FreeMemory:\");\n- builder.append(manager.getFreeMemory());\n...\n- builder.append(\"]\");\n+ OffHeapMemoryManager manager=entry.getValue();\n+ if (manager == null) { continue; }\n+ String managerInfo = String.format(\"MemoryManager-%s:[FreeMemory:%s;MaxMemory:%s;ReservedMemory:%s;UsedMemory:%s;OutOfMeomoryErrorCount:%s]\", entry.getKey(), manager.getFreeMemory(), manager.getMaxMemory(), manager.getReservedMemory(), manager.getUsedMemory(), manager.getOOMErrorCount());\n+ result += managerInfo;",
+                "Description": "In the current code, there is a null check on `manager` object after accessing its methods. It would be better to do the null check before accessing methods to avoid potential NullPointerException.",
+                "Start": 6,
+                "End": 24
+            }
+        ],
+        "Final code": "public String getInternalOffHeapManagerInfo(){\n  String result = \"InternalOffHeapManagerInfo:\";\n  Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n  for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n    OffHeapMemoryManager manager=entry.getValue();\n    if (manager == null) { continue; }\n    String managerInfo = String.format(\"MemoryManager-%s:[FreeMemory:%s;MaxMemory:%s;ReservedMemory:%s;UsedMemory:%s;OutOfMeomoryErrorCount:%s]\", entry.getKey(), manager.getFreeMemory(), manager.getMaxMemory(), manager.getReservedMemory(), manager.getUsedMemory(), manager.getOOMErrorCount());\n    result += managerInfo;\n  }\n  return result;\n}"
+    },
+    "Old_Method": "public String getInternalOffHeapManagerInfo(){\n  StringBuilder builder=new StringBuilder();\n  builder.append(\"InternalOffHeapManagerInfo:\");\n  Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n  for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n    builder.append(\"MemoryManager-\");\n    builder.append(entry.getKey());\n    builder.append(\":\");\n    OffHeapMemoryManager manager=entry.getValue();\n    if (manager != null) {\n      builder.append(\"[\");\n      builder.append(\"FreeMemory:\");\n      builder.append(manager.getFreeMemory());\n      builder.append(\";\");\n      builder.append(\"MaxMemory:\");\n      builder.append(manager.getMaxMemory());\n      builder.append(\";\");\n      builder.append(\"ReservedMemory:\");\n      builder.append(manager.getReservedMemory());\n      builder.append(\";\");\n      builder.append(\"UsedMemory:\");\n      builder.append(manager.getUsedMemory());\n      builder.append(\";\");\n      builder.append(\"OutOfMeomoryErrorCount:\");\n      builder.append(manager.getOOMErrorCount());\n      builder.append(\"]\");\n    }\n  }\n  return builder.toString();\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 27123,
+    "Stop": 28572,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getInternalOffHeapManagerInfo"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract error messages to constants",
+                "Change_Diff": "- System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n+ System.out.println(ERROR_INVALID_PARAMETERS);\n\n- System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n+ System.out.println(ERROR_INVALID_MESSAGE_ENVELOPE);\n\n- System.out.println(\"Message envelope configured but message types defined for handler\");\n+ System.out.println(ERROR_EMPTY_MESSAGE_TYPES);",
+                "Description": "Instead of hardcoding the error messages, we should extract them to constants. This will make the code cleaner and easier to manage.",
+                "Start": 5,
+                "End": 14
+            },
+            {
+                "Improvement": "Reduce calls to ReflectionUtils.getAnnotation",
+                "Change_Diff": "- if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n+ Handler handlerAnnotation = ReflectionUtils.getAnnotation(handler,Handler.class);\n+ if (handler == null || handlerAnnotation == null) {\n\n- Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n+ Enveloped envelope=handlerAnnotation;",
+                "Description": "Currently, ReflectionUtils.getAnnotation is called twice for the same handler. We can store the result in a variable and reuse it, reducing unnecessary method calls.",
+                "Start": 2,
+                "End": 9
+            }
+        ],
+        "Final code": "private static final String ERROR_INVALID_PARAMETERS = \"Found no or more than one parameter in messageHandler. A messageHandler must define exactly one parameter\";\nprivate static final String ERROR_INVALID_MESSAGE_ENVELOPE = \"Message envelope configured but no subclass of MessageEnvelope found as parameter\";\nprivate static final String ERROR_EMPTY_MESSAGE_TYPES = \"Message envelope configured but message types defined for handler\";\n\nprivate boolean isValidMessageHandler(Method handler){\n  Handler handlerAnnotation = ReflectionUtils.getAnnotation(handler,Handler.class);\n  if (handler == null || handlerAnnotation == null) {\n    return false;\n  }\n  if (handler.getParameterTypes().length != 1) {\n    System.out.println(ERROR_INVALID_PARAMETERS);\n    return false;\n  }\n  Enveloped envelope=handlerAnnotation;\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n    System.out.println(ERROR_INVALID_MESSAGE_ENVELOPE);\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    System.out.println(ERROR_EMPTY_MESSAGE_TYPES);\n    return false;\n  }\n  return true;\n}"
+    },
+    "Old_Method": "private boolean isValidMessageHandler(Method handler){\n  if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n    return false;\n  }\n  if (handler.getParameterTypes().length != 1) {\n    System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n    return false;\n  }\n  Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n    System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    System.out.println(\"Message envelope configured but message types defined for handler\");\n    return false;\n  }\n  return true;\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/listener/MetadataReader.java",
+    "Start": 5330,
+    "Stop": 6449,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "isValidMessageHandler"
+}

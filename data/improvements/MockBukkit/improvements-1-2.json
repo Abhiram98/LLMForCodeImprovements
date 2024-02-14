@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Rename method to better reflect its functionality",
+                "Change_Diff": "- private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event){\n+ private void callRegisteredEventListener(@NotNull RegisteredListener registration,@NotNull Event event){",
+                "Description": "The method name 'callRegisteredListener' is not very descriptive. It can be renamed to 'callRegisteredEventListener' to better reflect its functionality.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Remove unnecessary else statement",
+                "Change_Diff": "- else {\n-      throw new EventHandlerException(ex);\n-    }\n+ throw new EventHandlerException(ex);",
+                "Description": "The 'else' statement is unnecessary, as the 'throw' statement inside the 'if' block would terminate the method anyway. Removing the 'else' statement would make the code cleaner.",
+                "Start": 16,
+                "End": 18
+            },
+            {
+                "Improvement": "Use a more meaningful variable name",
+                "Change_Diff": "- throw r;\n+ throw runtimeException;",
+                "Description": "The variable 'r' is not meaningful. Renaming it to 'runtimeException' would make the code more readable.",
+                "Start": 15,
+                "End": 15
+            },
+            {
+                "Improvement": "Casting exception without checking type",
+                "Change_Diff": "- if (ex instanceof RuntimeException) {\n+ if (ex instanceof RuntimeException) {\n+      RuntimeException runtimeException = (RuntimeException) ex;",
+                "Description": "You are casting Throwable to RuntimeException without checking if it's indeed a RuntimeException. It might lead to ClassCastException.",
+                "Start": 14,
+                "End": 14
+            }
+        ],
+        "Final code": "private void callRegisteredEventListener(@NotNull RegisteredListener registration,@NotNull Event event){\n  Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n  Preconditions.checkNotNull(event,\"Event cannot be null\");\n  if (!registration.getPlugin().isEnabled()) {\n    return;\n  }\n  try {\n    registration.callEvent(event);\n  }\n catch (  EventException eventException) {\n    Throwable ex=eventException.getCause();\n    if (!(event instanceof ServerExceptionEvent)) {\n      String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n      callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n    }\n    if (ex instanceof RuntimeException) {\n      RuntimeException runtimeException = (RuntimeException) ex;\n      throw runtimeException;\n    }\n    throw new EventHandlerException(ex);\n  }\n}"
+    },
+    "Old_Method": "private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event){\n  Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n  Preconditions.checkNotNull(event,\"Event cannot be null\");\n  if (!registration.getPlugin().isEnabled()) {\n    return;\n  }\n  try {\n    registration.callEvent(event);\n  }\n catch (  EventException eventException) {\n    Throwable ex=eventException.getCause();\n    if (!(event instanceof ServerExceptionEvent)) {\n      String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n      callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n    }\n    if (ex instanceof RuntimeException) {\n      throw r;\n    }\n else {\n      throw new EventHandlerException(ex);\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/plugin/PluginManagerMock.java",
+    "Start": 18429,
+    "Stop": 19391,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "callRegisteredListener"
+}

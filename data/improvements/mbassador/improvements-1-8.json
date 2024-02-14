@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use 'final' keyword with Object candidate",
+                "Change_Diff": "- Object candidate=new Object();\n+ final Object candidate=new Object();",
+                "Description": "The 'candidate' object should be declared as final inside the loop since it is accessed in an anonymous inner class. This is required as per Java language rules. In Java, only final local variables are accessible inside anonymous inner classes.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Avoid unnecessary calls to System.currentTimeMillis()",
+                "Change_Diff": "- System.currentTimeMillis();\n+ //System.currentTimeMillis();",
+                "Description": "The call to System.currentTimeMillis() in the anonymous inner class does not seem to be achieving anything. Unless it is necessary for some unmentioned reason, it should be removed to avoid unnecessary method calls.",
+                "Start": 15,
+                "End": 15
+            },
+            {
+                "Improvement": "Improve assertion message",
+                "Change_Diff": "- assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n+ assertTrue(\"Invalid size of testSetWeak\", permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);",
+                "Description": "When the assertion fails, it should provide a meaningful error message to help diagnose the problem. This is especially useful when the test is run in a CI/CD environment where the developer might not have direct access to the runtime details.",
+                "Start": 19,
+                "End": 19
+            }
+        ],
+        "Final code": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    final Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (Object testObject : testSetWeak) {\n        //System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(\"Invalid size of testSetWeak\", permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid creating RestTemplate for every request",
+                "Change_Diff": "- RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n- RestTemplate rt=restTemplateBuilder.build();",
+                "Description": "RestTemplate instances are thread-safe and reusable. It is not necessary to create a new instance for each request. Instead, create an instance during application startup and reuse it across all requests.",
+                "Start": 5,
+                "End": 6
+            },
+            {
+                "Improvement": "Avoid unnecessary conditional check",
+                "Change_Diff": "- if (response.getStatusCode() == HttpStatus.OK) {\n-   this.authCache.putIfAbsent(authRequest,cachedResponse);\n- }",
+                "Description": "Checking for response status code to be HttpStatus.OK is done twice, once before storing the response in cache, once after. It is unnecessary and can be done just once after receiving the response.",
+                "Start": 11,
+                "End": 14
+            },
+            {
+                "Improvement": "Use method references",
+                "Change_Diff": "- RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n+ RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(HttpComponentsClientHttpRequestFactory::new);",
+                "Description": "Java 8 introduced method references, which are a shorthand way of writing certain types of lambda expressions. They provide a compact and clear way to refer to an existing method by name.",
+                "Start": 5,
+                "End": 5
+            }
+        ],
+        "Final code": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    this.authCache.putIfAbsent(authRequest,cachedResponse);\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}"
+    },
+    "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 4347,
+    "Stop": 5782,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "authorize"
+}

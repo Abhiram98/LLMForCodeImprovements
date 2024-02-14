@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace RuntimeException with a more specific exception",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new IllegalStateException(\"Failed to load properties\", e);",
+                "Description": "Instead of throwing a generic RuntimeException, throw a more specific exception, such as IllegalStateException. This gives more information about the error and makes it easier to debug.",
+                "Start": 12,
+                "End": 12
+            },
+            {
+                "Improvement": "Use final for constants",
+                "Change_Diff": "- KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n+ final String KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\"); \n- KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n+ final String KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n- CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n+ final String CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n- CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n+ final String CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n- IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n+ final String IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n- ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n+ final String ISSUER_ID=properties.getProperty(\"idp.issuerid\");",
+                "Description": "It's a good practice to declare constants as final. This ensures they can't be modified later, which could potentially cause bugs.",
+                "Start": 3,
+                "End": 9
+            }
+        ],
+        "Final code": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    final String KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    final String KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    final String CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    final String CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    final String IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    final String ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (IOException e) {\n    throw new IllegalStateException(\"Failed to load properties\", e);\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

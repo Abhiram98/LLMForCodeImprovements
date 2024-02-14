@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "/** \n * Perform one tick on the server.\n */\npublic synchronized void performOneTick(){\n  currentTick++;\n  List<ScheduledTask> oldTasks=scheduledTasks.getCurrentTaskList();\n  for (  ScheduledTask task : oldTasks) {\n    if (task.getScheduledTick() == currentTick && !task.isCancelled()) {\n      if (task.isSync()) {\n        wrapTask(task).run();\n      }\n else {\n        pool.submit(wrapTask(task));\n        task.submitted();\n      }\n      if (task instanceof RepeatingTask) {\n        if (!task.isCancelled()) {\n          repeatingTask.updateScheduledTick();\n          scheduledTasks.addTask(task);\n        }\n      }\n else {\n        task.cancel();\n      }\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMock.java",
+    "Start": 4806,
+    "Stop": 5483,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "performOneTick"
+}

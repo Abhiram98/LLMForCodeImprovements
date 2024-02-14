@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant code",
+                "Change_Diff": "- byte[] byteArray=refSk.toByteArray();\n- Memory heapROMem=Memory.wrap(byteArray);\n- testSk=(CompactSketch)Sketch.heapify(heapROMem);\n- checkByRange(refSk,testSk,u,ordered);",
+                "Description": "The same operation is being performed twice, which is unnecessary. The code block where the byteArray is created and the checkByRange method is called can be removed as it is already being done before.",
+                "Start": 12,
+                "End": 16
+            },
+            {
+                "Improvement": "Improve error handling",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ System.err.println(\"Exception occurred: \" + e.getMessage());",
+                "Description": "Instead of just throwing a RuntimeException when an exception occurs, it would be better to log the exception message to understand the cause of the exception.",
+                "Start": 24,
+                "End": 26
+            }
+        ],
+        "Final code": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    System.err.println(\"Exception occurred: \" + e.getMessage());\n  }\n}"
+    },
+    "Old_Method": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/CompactSketchTest.java",
+    "Start": 1975,
+    "Stop": 3351,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkHeapifyWrap"
+}

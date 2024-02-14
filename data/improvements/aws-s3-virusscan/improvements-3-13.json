@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for resource management",
+                "Change_Diff": "-try {\n-this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n-try {\n-this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n...\n-} catch (final RuntimeException e) {\n...\n-} finally {\n-this.deleteStack(context,stackName);\n-}\n-} finally {\n-this.deleteStack(context,vpcStackName);\n-}\n+\n+try (this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n+    this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n...",
+                "Description": "Instead of using nested try-catch blocks, use try-with-resources which ensures that each resource is closed at the end of the statement.",
+                "Start": 6,
+                "End": 36
+            },
+            {
+                "Improvement": "Improve exception handling",
+                "Change_Diff": "-catch (final RuntimeException e) {\n...\n+catch (final SpecificException e) {\n...",
+                "Description": "Rather than catching a generic RuntimeException, catch specific exceptions which are likely to occur in the context of the try block. This allows for better error messages and makes debugging easier.",
+                "Start": 24,
+                "End": 32
+            }
+        ],
+        "Final code": "@Test public void test(){\n final Context context=new Context();\n final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n final String stackName=\"s3-virusscan-\" + this.random8String();\n final String bucketName=\"s3-virusscan-\" + this.random8String();\n final InfectedFileCache cache=new InfectedFileCache();\n try (this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n...\n } catch (final SpecificException e) {\n final List<String> objects=this.listBucket(bucketName,100);\n System.out.println(\"Remaining objects:\");\n for (final String object : objects) {\n System.out.println(object);\n }\n throw e;\n } finally {\n this.deleteBucket(context,bucketName);\n }\n}"
+    },
+    "Old_Method": "@Test public void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n        this.retry(context,() -> {\n          final long count=this.countBucket(bucketName);\n          if (count != 0) {\n            throw new RuntimeException(\"there are \" + count + \" infected files left\");\n          }\n          return false;\n        }\n);\n      }\n catch (      final RuntimeException e) {\n        final List<String> objects=this.listBucket(bucketName,100);\n        System.out.println(\"Remaining objects:\");\n        for (        final String object : objects) {\n          System.out.println(object);\n        }\n        throw e;\n      }\n finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestRealworldFiles.java",
+    "Start": 247,
+    "Stop": 2293,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "test"
+}

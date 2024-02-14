@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Move RestTemplateBuilder initialization to constructor or as a class level variable",
+                "Change_Diff": "- RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n- RestTemplate rt=restTemplateBuilder.build();\n+ RestTemplate rt;",
+                "Description": "RestTemplateBuilder initialization does not need to happen each time this method is called. It can be moved to the constructor or initialized as a class level variable.",
+                "Start": 5,
+                "End": 7
+            },
+            {
+                "Improvement": "Avoid checking for response status twice",
+                "Change_Diff": "- if (response.getStatusCode() == HttpStatus.OK) {\n  this.authCache.putIfAbsent(authRequest,cachedResponse);\n}",
+                "Description": "It is unnecessary to check if the response status is OK twice in this method. You can remove the second check as the first one already covers it.",
+                "Start": 12,
+                "End": 14
+            },
+            {
+                "Improvement": "Simplify JSONObject creation",
+                "Change_Diff": "- JSONObject responseObj=new JSONObject(cachedResponse);\n- JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n+ JSONArray responseDataArr=new JSONObject(cachedResponse).getJSONArray(\"Response\");",
+                "Description": "Instead of creating a new JSONObject from the string response, you can directly get the body of the ResponseEntity as JSONObject and then get the JSONArray.",
+                "Start": 16,
+                "End": 17
+            },
+            {
+                "Improvement": "Use equalsIgnoreCase instead of equals",
+                "Change_Diff": "- if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n+ if (!currentResponse.getString(\"Decision\").equalsIgnoreCase(\"Permit\")) {",
+                "Description": "In case the 'Decision' value is not always in the same case, it would be better to use equalsIgnoreCase instead of equals when comparing Strings.",
+                "Start": 25,
+                "End": 25
+            }
+        ],
+        "Final code": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    this.authCache.putIfAbsent(authRequest,cachedResponse);\n  }\n  JSONArray responseDataArr=new JSONObject(cachedResponse).getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equalsIgnoreCase(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}"
+    },
+    "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 4347,
+    "Stop": 5782,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "authorize"
+}

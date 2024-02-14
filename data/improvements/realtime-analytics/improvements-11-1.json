@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Remove code redundancy by creating a method to check and initialize attributes",
+            "Change_Diff": "- if (subSession.getDynamicAttributes() == null) {\n    subSession.setDynamicAttributes(new HashMap<String,Object>());\n  }\n  if (subSession.getInitialAttributes() == null) {\n    subSession.setInitialAttributes(new HashMap<String,Object>());\n  }",
+            "Description": "Instead of checking and initializing both dynamic and initial attributes separately for `subSession`, you can create a private helper method. This method will accept a Map<String, Object> as its parameter and will return a new HashMap<String,Object>() if the provided map is null.",
+            "Start": 5,
+            "End": 8
+        }],
+        "Final code": "public void process(SubSession subSession, Session session, JetstreamEvent event) {\n  context.setCurrentSession(subSession);\n  context.setMainSession(session);\n  context.setEvent(event);\n  subSession.setDynamicAttributes(checkAndInitializeAttributes(subSession.getDynamicAttributes()));\n  subSession.setInitialAttributes(checkAndInitializeAttributes(subSession.getInitialAttributes()));\n  sessionVariable.resetAttributes(subSession.getDynamicAttributes());\n  sessionVariable.resetSessionData(subSession, session);\n  metadataVariable.resetAttributes(subSession.getInitialAttributes());\n  parentMetadataVariable.resetAttributes(session.getInitialAttributes());\n  parentSessionVariable.resetAttributes(session.getDynamicAttributes());\n  parentSessionVariable.resetSessionData(session, session);\n  processEPL(event);\n}\n\nprivate Map<String, Object> checkAndInitializeAttributes(Map<String, Object> attributes) {\n  if (attributes == null) {\n    return new HashMap<String, Object>();\n  }\n  return attributes;\n}"
+    },
+    "Old_Method": "public void process(SubSession subSession,Session session,JetstreamEvent event){\n  context.setCurrentSession(subSession);\n  context.setMainSession(session);\n  context.setEvent(event);\n  if (subSession.getDynamicAttributes() == null) {\n    subSession.setDynamicAttributes(new HashMap<String,Object>());\n  }\n  if (subSession.getInitialAttributes() == null) {\n    subSession.setInitialAttributes(new HashMap<String,Object>());\n  }\n  sessionVariable.resetAttributes(subSession.getDynamicAttributes());\n  sessionVariable.resetSessionData(subSession,session);\n  metadataVariable.resetAttributes(subSession.getInitialAttributes());\n  parentMetadataVariable.resetAttributes(session.getInitialAttributes());\n  parentSessionVariable.resetAttributes(session.getDynamicAttributes());\n  parentSessionVariable.resetSessionData(session,session);\n  processEPL(event);\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 24361,
+    "Stop": 25325,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "process"
+}

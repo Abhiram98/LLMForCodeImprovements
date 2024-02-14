@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use optional instead of returning null",
+                "Change_Diff": "- return null;\n+ return Optional.empty();",
+                "Description": "When an exception is caught, the method returns null. This can lead to null pointer exceptions later in the code. Instead, return an Optional<GeoInfo> to clearly indicate that the method might not always return a value.",
+                "Start": 24,
+                "End": 24
+            },
+            {
+                "Improvement": "Avoid catching general Exception",
+                "Change_Diff": "- catch (Exception ex) {\n+ catch (UnknownHostException | IOException ex) {",
+                "Description": "Catching general Exception may mask other unexpected issues. Instead, catch the specific exceptions that you expect to be thrown.",
+                "Start": 23,
+                "End": 23
+            },
+            {
+                "Improvement": "Make method public and change its name",
+                "Change_Diff": "- private GeoInfo _getGeoInfo(String ipAddress){\n+ public Optional<GeoInfo> getGeoInfo(String ipAddress){",
+                "Description": "The method is private, which means it can't be reused elsewhere in the code. If it's likely to be useful in other contexts, consider making it public. Also, its name starts with an underscore, which is not standard Java naming conventions. Consider changing it to a standard camelCase name like 'getGeoInfo'.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Return early to decrease indentation",
+                "Change_Diff": "- if (ipAddress == null) {\n-    return geoInfo;\n-  }\n+ if (ipAddress == null) {\n+    return Optional.of(geoInfo);\n+ }",
+                "Description": "Instead of wrapping the main logic of the method in an if statement, consider using a guard clause to return early if the ipAddress is null. This will decrease the level of indentation in your code, making it easier to read.",
+                "Start": 3,
+                "End": 5
+            }
+        ],
+        "Final code": "public Optional<GeoInfo> getGeoInfo(String ipAddress){\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return Optional.of(geoInfo);\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return Optional.of(geoInfo);\n  } catch (UnknownHostException | IOException ex) {\n    return Optional.empty();\n  }\n}"
+    },
+    "Old_Method": "private GeoInfo _getGeoInfo(String ipAddress){\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return geoInfo;\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return geoInfo;\n  }\n catch (  Exception ex) {\n    return null;\n  }\n}\n",
+    "File_Path": "realtime-analytics/collector/src/main/java/com/ebay/pulsar/collector/udf/GeoEnrichmentUtil.java",
+    "Start": 1289,
+    "Stop": 2470,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "_getGeoInfo"
+}

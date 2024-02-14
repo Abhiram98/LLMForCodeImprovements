@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "@Test public void testSyncPublicationSyncHandlers() throws Exception {\n  ListenerFactory listeners=new ListenerFactory().create(InstancesPerListener,Listeners.synchronous()).create(InstancesPerListener,Listeners.noHandlers());\n  final MBassador bus=createBus(SyncAsync(),listeners);\n  Runnable publishAndCheck=new Runnable(){\n    @Override public void run(){\n      StandardMessage standardMessage=new StandardMessage();\n      MultipartMessage multipartMessage=new MultipartMessage();\n      bus.post(standardMessage).now();\n      bus.post(multipartMessage).now();\n      bus.post(MessageTypes.Simple).now();\n      assertEquals(InstancesPerListener,standardMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n      assertEquals(InstancesPerListener,multipartMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n    }\n  }\n;\n  ConcurrentExecutor.runConcurrent(publishAndCheck,1);\n  MessageTypes.resetAll();\n  ConcurrentExecutor.runConcurrent(publishAndCheck,ConcurrentUnits);\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(IMessageListener.DefaultListener.class));\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(MessagesTypeListener.DefaultListener.class));\n  bus.shutdown();\n  pause(200);\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/SyncAsyncTest.java",
+    "Start": 762,
+    "Stop": 2358,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testSyncPublicationSyncHandlers"
+}

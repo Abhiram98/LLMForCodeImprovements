@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for Connection, PreparedStatement and ResultSet",
+                "Change_Diff": "- Connection conn=null;\n- PreparedStatement statement=null;\n- ResultSet resultSet=null;\n- try {\n-   conn=JdbcPool.getReadConnection();\n-   statement=conn.prepareStatement(sql);\n+ try (Connection conn = JdbcPool.getReadConnection();\n+       PreparedStatement statement = conn.prepareStatement(sql)) {\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n-   resultSet=statement.executeQuery();\n-   String[] selectFields=parseSelectFields(sql);\n-   while (resultSet.next()) {\n-     beanList.add(resultSet(selectFields,resultSet));\n-   }\n+   try (ResultSet resultSet = statement.executeQuery()) {\n+       String[] selectFields=parseSelectFields(sql);\n+       while (resultSet.next()) {\n+         beanList.add(resultSet(selectFields,resultSet));\n+       }\n+   }",
+                "Description": "Instead of manually closing resources in the finally block, you should use try-with-resources. This will make your code cleaner, less error-prone and ensure that resources are closed even when an exception occurs.",
+                "Start": 5,
+                "End": 29
+            },
+            {
+                "Improvement": "Throw RuntimeException in catch block",
+                "Change_Diff": "- logger.error(\"sql error\",e);\n+ throw new RuntimeException(\"sql error\", e);",
+                "Description": "The method currently only logs the error and continues execution. Depending on the use case, it might be more appropriate to throw a RuntimeException to stop further execution and alert the caller about the problem.",
+                "Start": 23,
+                "End": 25
+            }
+        ],
+        "Final code": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  try (Connection conn = JdbcPool.getReadConnection();\n       PreparedStatement statement = conn.prepareStatement(sql)) {\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    try (ResultSet resultSet = statement.executeQuery()) {\n      String[] selectFields=parseSelectFields(sql);\n      while (resultSet.next()) {\n        beanList.add(resultSet(selectFields,resultSet));\n      }\n    }\n  } catch (Exception e) {\n    throw new RuntimeException(\"sql error\", e);\n  }\n  return beanList;\n}"
+    },
+    "Old_Method": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,resultSet);\n  }\n  return beanList;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 4628,
+    "Stop": 5587,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "list"
+}

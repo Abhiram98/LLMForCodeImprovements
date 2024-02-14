@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Combine all catch blocks into one",
+                "Change_Diff": "- catch (  NoSuchMethodException e) {\n+ catch (  Exception e) {",
+                "Description": "Instead of having multiple catch blocks for each type of exception, combine them into one block. This will make the code cleaner and more maintainable. Also, each catch block is doing virtually the same thing, so there's no need to have them separated.",
+                "Start": 26,
+                "End": 41
+            },
+            {
+                "Improvement": "Remove printStackTrace",
+                "Change_Diff": "- e.printStackTrace();",
+                "Description": "Remove the e.printStackTrace() call from your catch block. This method call prints a stack trace to the console or some other standard error output stream. It's generally a good idea to avoid this kind of output, since it's often not very helpful and can clutter up your logs.",
+                "Start": 47,
+                "End": 47
+            }
+        ],
+        "Final code": "public static Object invoke(String apiName,ApiProtocol apiProtocol){\n  Class<?> classname;\n  Object classObject;\n  Constructor constructor;\n  Method method;\n  Object result=null;\n  Api api=ApiRoute.apiMap.get(apiName);\n  if (api == null) {\n    return ErrorHandler.error(StatusCode.API_NOT_FOUND);\n  }\n  if (apiProtocol.getBuild() < api.getBuild()) {\n    return ErrorHandler.error(StatusCode.VERSION_IS_TOO_LOW);\n  }\n  if (api.getHttpMethod() != null && !api.getHttpMethod().contains(apiProtocol.getMethod().toString().toLowerCase())) {\n    return ErrorHandler.error(StatusCode.REQUEST_MODE_ERROR);\n  }\n  try {\n    classname=Class.forName(Config.getString(\"resource.package.name\") + \".\" + api.getResource());\n    constructor=classname.getConstructor(ApiProtocol.class);\n    classObject=constructor.newInstance(apiProtocol);\n    method=classname.getMethod(apiProtocol.getMethod().toString().toLowerCase());\n    result=method.invoke(classObject);\n  }\n catch (  Exception e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\n  return result;\n}"
+    },
+    "Old_Method": "/** \n * invoke api resource method by apiName, but the request apiProtocol should observe routeMap regulations\n * @param apiName\n * @param apiProtocol\n * @return\n */\npublic static Object invoke(String apiName,ApiProtocol apiProtocol){\n  Class<?> classname;\n  Object classObject;\n  Constructor constructor;\n  Method method;\n  Object result=null;\n  Api api=ApiRoute.apiMap.get(apiName);\n  if (api == null) {\n    return ErrorHandler.error(StatusCode.API_NOT_FOUND);\n  }\n  if (apiProtocol.getBuild() < api.getBuild()) {\n    return ErrorHandler.error(StatusCode.VERSION_IS_TOO_LOW);\n  }\n  if (api.getHttpMethod() != null && !api.getHttpMethod().contains(apiProtocol.getMethod().toString().toLowerCase())) {\n    return ErrorHandler.error(StatusCode.REQUEST_MODE_ERROR);\n  }\n  try {\n    classname=Class.forName(Config.getString(\"resource.package.name\") + \".\" + api.getResource());\n    constructor=classname.getConstructor(ApiProtocol.class);\n    classObject=constructor.newInstance(apiProtocol);\n  }\n catch (  NoSuchMethodException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  ClassNotFoundException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  InvocationTargetException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  InstantiationException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\ncatch (  IllegalAccessException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\n  try {\n    method=classname.getMethod(apiProtocol.getMethod().toString().toLowerCase());\n  }\n catch (  NoSuchMethodException e) {\n    logger.error(e.getMessage());\n    return ErrorHandler.error(StatusCode.API_SERVER_ERROR);\n  }\n  try {\n    result=method.invoke(classObject);\n  }\n catch (  InvocationTargetException e) {\n    e.printStackTrace();\n    logger.error(e.getMessage());\n  }\ncatch (  IllegalAccessException e) {\n    logger.error(e.toString());\n  }\n  return result;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/ApiHandler.java",
+    "Start": 1180,
+    "Stop": 3713,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "invoke"
+}

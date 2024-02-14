@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Include variable description comments",
+                "Change_Diff": "+ // lgK is the base-2 logarithm of k\n  final int lgK=5;\n+ // k is the actual number of nominal entries\n  final int k=1 << lgK;\n+ // u is the number of updates to be applied to the sketch\n  final int u=4 * k;\n+ // memBytes represents the maximum required storage bytes for intersection\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n+ // memArr is the byte array wrapped by WritableMemory\n  final byte[] memArr=new byte[memBytes];\n+ // iMem is the writable memory used for intersection operation\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n+ // usk1 is the UpdateSketch\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();",
+                "Description": "Including comments that briefly describe what each variable is used for would make the code easier to understand.",
+                "Start": 3,
+                "End": 8
+            },
+            {
+                "Improvement": "Include a try-catch block",
+                "Change_Diff": "+ // Attempt to perform intersection operation\ntry {\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n+ } catch (Exception e) {\n+   // Handle the exception\n+   e.printStackTrace();\n+ }",
+                "Description": "Including a try-catch block would allow any potential exceptions to be caught and handled gracefully.",
+                "Start": 9,
+                "End": 16
+            }
+        ],
+        "Final code": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  // lgK is the base-2 logarithm of k\n  final int lgK=5;\n  // k is the actual number of nominal entries\n  final int k=1 << lgK;\n  // u is the number of updates to be applied to the sketch\n  final int u=4 * k;\n  // memBytes represents the maximum required storage bytes for intersection\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  // memArr is the byte array wrapped by WritableMemory\n  final byte[] memArr=new byte[memBytes];\n  // iMem is the writable memory used for intersection operation\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  // usk1 is the UpdateSketch\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  // Attempt to perform intersection operation\ntry {\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n} catch (Exception e) {\n  // Handle the exception\n  e.printStackTrace();\n}\n}"
+    },
+    "Old_Method": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int lgK=5;\n  final int k=1 << lgK;\n  final int u=4 * k;\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/DirectIntersectionTest.java",
+    "Start": 17194,
+    "Stop": 17845,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSizedTooSmall"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid reassigning variables unnecessarily",
+                "Change_Diff": "- DoublesSketch result=union.getResult();\n- assertEquals(result.getN(),16);\n+ assertEquals(union.getResult().getN(),16);\n...\n- result=union.getResult();\n- assertEquals(result.getMaxItem(),n2 + 17,0.0);\n+ assertEquals(union.getResult().getMaxItem(),n2 + 17,0.0);",
+                "Description": "The variable `result` is reassigned multiple times in the code. Instead of reassigning the variable, you can use it directly where it's needed.",
+                "Start": 19,
+                "End": 32
+            },
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- final int k1=8;\n+ final int sketchCapacity1=8;\n- final int n1=2 * k1;\n+ final int sketchSize1=2 * sketchCapacity1;\n- final int k2=4;\n+ final int sketchCapacity2=4;\n- final int n2=5 * k2;\n+ final int sketchSize2=5 * sketchCapacity2;",
+                "Description": "The variable names `k1`, `n1`, `k2`, `n2` are not very descriptive. Changing them to more descriptive names would make the code easier to understand.",
+                "Start": 2,
+                "End": 5
+            }
+        ],
+        "Final code": "@Test public void checkUnion4DirectCompact(){\n  final int sketchCapacity1=8;\n  final int sketchSize1=2 * sketchCapacity1;\n  final int sketchCapacity2=4;\n  final int sketchSize2=5 * sketchCapacity2;\n  final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n  final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n  final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(sketchCapacity1).build(skMem);\n  for (int i=0; i < sketchSize1; i++) {\n    sketchIn0.update(i + 1);\n  }\n  final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n  final WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n  final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n  union.union(sketchIn1);\n  assertEquals(union.getResult().getN(),sketchSize1);\n  assertEquals(union.getMaxK(),256);\n  assertEquals(union.getEffectiveK(),sketchCapacity1);\n  assertEquals(union.getResult().getN(),16);\n  assertEquals(union.getResult().getMaxItem(),sketchSize1,0.0);\n  assertEquals(union.getResult().getMinItem(),1.0,0.0);\n  assertEquals(union.getResult().getK(),sketchCapacity1);\n  final CompactDoublesSketch sketchIn2=buildAndLoadDQS(sketchCapacity2,sketchSize2,17).compact();\n  union.reset();\n  union.union(sketchIn2);\n  assertEquals(union.getResult().getMaxItem(),sketchSize2 + 17,0.0);\n  assertEquals(union.getResult().getMinItem(),1.0 + 17,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}"
+    },
+    "Old_Method": "@Test public void checkUnion4DirectCompact(){\n  final int k1=8;\n  final int n1=2 * k1;\n  final int k2=4;\n  final int n2=5 * k2;\n  final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n  final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n  final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(k1).build(skMem);\n  for (int i=0; i < n1; i++) {\n    sketchIn0.update(i + 1);\n  }\n  final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n  final WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n  final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n  union.union(sketchIn1);\n  assertEquals(union.getResult().getN(),n1);\n  assertEquals(union.getMaxK(),256);\n  assertEquals(union.getEffectiveK(),k1);\n  DoublesSketch result=union.getResult();\n  assertEquals(result.getN(),16);\n  assertEquals(result.getMaxItem(),n1,0.0);\n  assertEquals(result.getMinItem(),1.0,0.0);\n  assertEquals(result.getK(),k1);\n  final CompactDoublesSketch sketchIn2=buildAndLoadDQS(k2,n2,17).compact();\n  union.reset();\n  union.union(sketchIn2);\n  result=union.getResult();\n  assertEquals(result.getMaxItem(),n2 + 17,0.0);\n  assertEquals(result.getMinItem(),1.0 + 17,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/DoublesUnionImplTest.java",
+    "Start": 9412,
+    "Stop": 10835,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkUnion4DirectCompact"
+}

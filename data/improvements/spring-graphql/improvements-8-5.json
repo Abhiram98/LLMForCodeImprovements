@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < parameters.length; i++) {\n- MethodParameter parameter=parameters[i];\n+ for (MethodParameter parameter : parameters) {",
+                "Description": "Instead of using a traditional for loop to iterate over `parameters`, use an enhanced for loop. This makes the code more readable and less prone to off-by-one errors.",
+                "Start": 16,
+                "End": 16
+            },
+            {
+                "Improvement": "Avoid Negations in Conditionals",
+                "Change_Diff": "- else if (annot.annotationType().equals(Validated.class)) {\n- ...\n}\n+ if (annot.annotationType().equals(Validated.class)) {\n+ ...\n} else if (merged.isPresent(Valid.class) || merged.isPresent(Constraint.class)) {\n+ requiresMethodValidation=true;\n+}",
+                "Description": "Instead of negating the condition in the if statement, swap the if and else blocks. This improves readability as our brains find it easier to understand positive logic.",
+                "Start": 21,
+                "End": 23
+            }
+        ],
+        "Final code": "/** \n * Create a validation callback for the given  {@link HandlerMethod}, possibly  {@code null} if the method or the method parameters do not have{@link Validated},  {@link Valid}, or  {@link Constraint} annotations.\n */\n@Nullable public BiConsumer<Object,Object[]> getValidationHelperFor(HandlerMethod handlerMethod){\n  boolean requiresMethodValidation=false;\n  Class<?>[] methodValidationGroups=null;\n  Validated validatedAnnotation=findAnnotation(handlerMethod,Validated.class);\n  if (validatedAnnotation != null) {\n    requiresMethodValidation=true;\n    methodValidationGroups=validatedAnnotation.value();\n  }\n else   if (findAnnotation(handlerMethod,Valid.class) != null) {\n    requiresMethodValidation=true;\n  }\n  BiConsumer<Object,Object[]> parameterValidator=null;\n  MethodParameter[] parameters=handlerMethod.getMethodParameters();\n  for (MethodParameter parameter : parameters) {\n    for (Annotation annot : parameter.getParameterAnnotations()) {\n      MergedAnnotations merged=MergedAnnotations.from(annot);\n      if (annot.annotationType().equals(Validated.class)) {\n        Class<?>[] groups=((Validated)annot).value();\n        parameterValidator=(parameterValidator != null ? parameterValidator.andThen(new MethodParameterValidator(i,groups)) : new MethodParameterValidator(i,groups));\n      } else if (merged.isPresent(Valid.class) || merged.isPresent(Constraint.class)) {\n        requiresMethodValidation=true;\n      }\n    }\n  }\n  BiConsumer<Object,Object[]> result=(requiresMethodValidation ? new HandlerMethodValidator(handlerMethod,methodValidationGroups) : null);\n  if (parameterValidator != null) {\n    return (result != null ? result.andThen(parameterValidator) : parameterValidator);\n  }\n  return result;\n}"
+    },
+    "Old_Method": "/** \n * Create a validation callback for the given  {@link HandlerMethod}, possibly  {@code null} if the method or the method parameters do not have{@link Validated},  {@link Valid}, or  {@link Constraint} annotations.\n */\n@Nullable public BiConsumer<Object,Object[]> getValidationHelperFor(HandlerMethod handlerMethod){\n  boolean requiresMethodValidation=false;\n  Class<?>[] methodValidationGroups=null;\n  Validated validatedAnnotation=findAnnotation(handlerMethod,Validated.class);\n  if (validatedAnnotation != null) {\n    requiresMethodValidation=true;\n    methodValidationGroups=validatedAnnotation.value();\n  }\n else   if (findAnnotation(handlerMethod,Valid.class) != null) {\n    requiresMethodValidation=true;\n  }\n  BiConsumer<Object,Object[]> parameterValidator=null;\n  MethodParameter[] parameters=handlerMethod.getMethodParameters();\n  for (int i=0; i < parameters.length; i++) {\n    MethodParameter parameter=parameters[i];\n    for (    Annotation annot : parameter.getParameterAnnotations()) {\n      MergedAnnotations merged=MergedAnnotations.from(annot);\n      if (merged.isPresent(Valid.class) || merged.isPresent(Constraint.class)) {\n        requiresMethodValidation=true;\n      }\n else       if (annot.annotationType().equals(Validated.class)) {\n        Class<?>[] groups=((Validated)annot).value();\n        parameterValidator=(parameterValidator != null ? parameterValidator.andThen(new MethodParameterValidator(i,groups)) : new MethodParameterValidator(i,groups));\n      }\n    }\n  }\n  BiConsumer<Object,Object[]> result=(requiresMethodValidation ? new HandlerMethodValidator(handlerMethod,methodValidationGroups) : null);\n  if (parameterValidator != null) {\n    return (result != null ? result.andThen(parameterValidator) : parameterValidator);\n  }\n  return result;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/annotation/support/ValidationHelper.java",
+    "Start": 2068,
+    "Stop": 3894,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getValidationHelperFor"
+}

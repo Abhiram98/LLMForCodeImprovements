@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract Magic Numbers",
+                "Change_Diff": "- int k=256;\n+ final int K=256;\n- int n=1000000;\n+ final int N=1000000;\n- if ((item % 4) == 0) {\n+ final int DIVISOR=4;\n+ if ((item % DIVISOR) == 0) {\n- for (int q=1; q <= 99; q++) {\n+ final int NUM_PHI_VALUES=99;\n+ for (int q=1; q <= NUM_PHI_VALUES; q++) {\n- double nominal=(1e6 * q) / 100.0;\n+ final double NOMINAL_MULTIPLIER=1e6;\n+ final double NOMINAL_DIVISOR=100.0;\n+ double nominal=(NOMINAL_MULTIPLIER * q) / NOMINAL_DIVISOR;",
+                "Description": "There are several magic numbers in the code (256, 1000000, 4, 99, 10000.0, 100, 0.01, 500000, 0.5). It's better to extract these numbers as constant variables to improve readability and maintainability.",
+                "Start": 1,
+                "End": 45
+            },
+            {
+                "Improvement": "Merge Duplicate Code",
+                "Change_Diff": "- for (int q=1; q <= 99; q++) {\n- double nominal=(1e6 * q) / 100.0;\n- double reported=splitPoints[q - 1];\n- assertTrue(reported >= (nominal - 10000.0));\n- assertTrue(reported <= (nominal + 10000.0));\n- }\n- for (int q=1; q <= 100; q++) {\n- double phi=q / 100.0;\n- subtotal+=pmfResult[q - 1];\n- assertTrue(subtotal >= (phi - 0.01));\n- assertTrue(subtotal <= (phi + 0.01));\n- }\n+ for (int q=1; q <= NUM_PHI_VALUES; q++) {\n+ double nominal=(NOMINAL_MULTIPLIER * q) / NOMINAL_DIVISOR;\n+ double reported=splitPoints[q - 1];\n+ assertTrue(reported >= (nominal - 10000.0));\n+ assertTrue(reported <= (nominal + 10000.0));\n+ double phi=q / 100.0;\n+ subtotal+=pmfResult[q - 1];\n+ assertTrue(subtotal >= (phi - 0.01));\n+ assertTrue(subtotal <= (phi + 0.01));\n+ }",
+                "Description": "The for loops that check `assertTrue(reported >= (nominal - 10000.0));` and `assertTrue(reported <= (nominal + 10000.0));` as well as `assertTrue(subtotal >= (phi - 0.01));` and `assertTrue(subtotal <= (phi + 0.01));` are duplicated. These can be merged into a single loop to reduce redundancy.",
+                "Start": 28,
+                "End": 44
+            }
+        ],
+        "Final code": "@Test public void checkEndToEnd(){\n  final int K=256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(K).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(K).build();\n  final int N=1000000;\n  final int DIVISOR=4;\n  for (int item=N; item >= 1; item--) {\n    if ((item % DIVISOR) == 0) {\n      qs.update(item);\n    } else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),N);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  final int NUM_PHI_VALUES=99;\n  double[] phiArr=new double[NUM_PHI_VALUES];\n  for (int q=1; q <= NUM_PHI_VALUES; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  final double NOMINAL_MULTIPLIER=1e6;\n  final double NOMINAL_DIVISOR=100.0;\n  for (int q=1; q <= NUM_PHI_VALUES; q++) {\n    double nominal=(NOMINAL_MULTIPLIER * q) / NOMINAL_DIVISOR;\n    double reported=splitPoints[q - 1];\n    assertTrue(reported >= (nominal - 10000.0));\n    assertTrue(reported <= (nominal + 10000.0));\n    double phi=q / 100.0;\n    subtotal+=pmfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal=cdfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  assertEquals(result.getRank(500000),0.5,0.01);\n}"
+    },
+    "Old_Method": "@Test public void checkEndToEnd(){\n  int k=256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(k).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(k).build();\n  int n=1000000;\n  for (int item=n; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    }\n else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),n);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  int numPhiValues=99;\n  double[] phiArr=new double[numPhiValues];\n  for (int q=1; q <= 99; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  for (int q=1; q <= 99; q++) {\n    double nominal=(1e6 * q) / 100.0;\n    double reported=splitPoints[q - 1];\n    assertTrue(reported >= (nominal - 10000.0));\n    assertTrue(reported <= (nominal + 10000.0));\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  double subtotal=0.0;\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal+=pmfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal=cdfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  assertEquals(result.getRank(500000),0.5,0.01);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/HeapUpdateDoublesSketchTest.java",
+    "Start": 2693,
+    "Stop": 4396,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkEndToEnd"
+}

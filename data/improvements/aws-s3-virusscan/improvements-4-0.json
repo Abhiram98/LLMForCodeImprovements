@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch block to handle possible exceptions",
+                "Change_Diff": "- ObjectListing objectListing=s3.listObjects(name);\n-    while (true) {\n-      count+=objectListing.getObjectSummaries().size();\n-      if (objectListing.isTruncated()) {\n-        objectListing=s3.listNextBatchOfObjects(objectListing);\n-      }\n-   else {\n-        break;\n-      }\n-    }\n+    try {\n+      ObjectListing objectListing=s3.listObjects(name);\n+      while (true) {\n+        count+=objectListing.getObjectSummaries().size();\n+        if (objectListing.isTruncated()) {\n+          objectListing=s3.listNextBatchOfObjects(objectListing);\n+        }\n+     else {\n+          break;\n+        }\n+      }\n+    } catch (AmazonS3Exception e) {\n+      e.printStackTrace();\n+    }",
+                "Description": "The listObjects and listNextBatchOfObjects methods can throw an AmazonS3Exception. Therefore, it is recommended to use a try-catch block to handle these possible exceptions.",
+                "Start": 3,
+                "End": 12
+            },
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- ObjectListing objectListing=s3.listObjects(name);\n+ ObjectListing objectListing=s3Bucket.listObjects(name);",
+                "Description": "Using descriptive variable names makes the code easier to understand. It would be better to rename the variable 's3' to something more descriptive like 's3Bucket'.",
+                "Start": 3,
+                "End": 12
+            }
+        ],
+        "Final code": "protected long countBucket(final String name){\n  long count=0;\n  try {\n    ObjectListing objectListing=s3Bucket.listObjects(name);\n    while (true) {\n      count+=objectListing.getObjectSummaries().size();\n      if (objectListing.isTruncated()) {\n        objectListing=s3Bucket.listNextBatchOfObjects(objectListing);\n      }\n   else {\n        break;\n      }\n    }\n  } catch (AmazonS3Exception e) {\n    e.printStackTrace();\n  }\n  return count;\n}"
+    },
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

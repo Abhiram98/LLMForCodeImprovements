@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- int k=256;\n- UpdateDoublesSketch qs=DoublesSketch.builder().setK(k).build();\n- UpdateDoublesSketch qs2=DoublesSketch.builder().setK(k).build();\n- int n=1000000;\n+ int sketchSize=256;\n+ UpdateDoublesSketch firstSketch=DoublesSketch.builder().setK(sketchSize).build();\n+ UpdateDoublesSketch secondSketch=DoublesSketch.builder().setK(sketchSize).build();\n+ int totalItems=1000000;",
+                "Description": "Using meaningful variable names will make the code easier to understand and maintain. For example, instead of using `qs` and `qs2`, names like `firstSketch` and `secondSketch` could be used. Similarly, instead of `n`, `totalItems` could be used. Instead of `k`, `sketchSize` could be used.",
+                "Start": 2,
+                "End": 6
+            },
+            {
+                "Improvement": "Remove duplicate code",
+                "Change_Diff": "- for (int q=1; q <= 99; q++) {\n-    double nominal=(1e6 * q) / 100.0;\n-    double reported=splitPoints[q - 1];\n-    assertTrue(reported >= (nominal - 10000.0));\n-    assertTrue(reported <= (nominal + 10000.0));\n-  }\n-  double[] pmfResult=result.getPMF(splitPoints);\n-  double subtotal=0.0;\n-  for (int q=1; q <= 100; q++) {\n-    double phi=q / 100.0;\n-    subtotal+=pmfResult[q - 1];\n-    assertTrue(subtotal >= (phi - 0.01));\n-    assertTrue(subtotal <= (phi + 0.01));\n-  }\n-  double[] cdfResult=result.getCDF(splitPoints);\n-  for (int q=1; q <= 100; q++) {\n-    double phi=q / 100.0;\n-    subtotal=cdfResult[q - 1];\n-    assertTrue(subtotal >= (phi - 0.01));\n-    assertTrue(subtotal <= (phi + 0.01));\n-  }\n+ validateValues(splitPoints);\n+ validateValues(pmfResult);\n+ validateValues(cdfResult);",
+                "Description": "The same validation checks are repeated three times for different variables (`splitPoints`, `pmfResult`, `cdfResult`). It would be cleaner to extract this into a separate method.",
+                "Start": 23,
+                "End": 38
+            }
+        ],
+        "Final code": "@Test public void checkEndToEnd(){\n  int sketchSize=256;\n  UpdateDoublesSketch firstSketch=DoublesSketch.builder().setK(sketchSize).build();\n  UpdateDoublesSketch secondSketch=DoublesSketch.builder().setK(sketchSize).build();\n  int totalItems=1000000;\n  for (int item=totalItems; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      firstSketch.update(item);\n    }\n else {\n      secondSketch.update(item);\n    }\n  }\n  assertEquals(firstSketch.getN() + secondSketch.getN(),totalItems);\n  DoublesUnion union=DoublesUnion.heapify(firstSketch);\n  union.union(secondSketch);\n  DoublesSketch result=union.getResult();\n  int numPhiValues=99;\n  double[] phiArr=new double[numPhiValues];\n  for (int q=1; q <= 99; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  validateValues(splitPoints);\n  double[] pmfResult=result.getPMF(splitPoints);\n  validateValues(pmfResult);\n  double[] cdfResult=result.getCDF(splitPoints);\n  validateValues(cdfResult);\n  assertEquals(result.getRank(500000),0.5,0.01);\n}\n\nprivate void validateValues(double[] values) {\n  double subtotal=0.0;\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal+=values[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n}"
+    },
+    "Old_Method": "@Test public void checkEndToEnd(){\n  int k=256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(k).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(k).build();\n  int n=1000000;\n  for (int item=n; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    }\n else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),n);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  int numPhiValues=99;\n  double[] phiArr=new double[numPhiValues];\n  for (int q=1; q <= 99; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  for (int q=1; q <= 99; q++) {\n    double nominal=(1e6 * q) / 100.0;\n    double reported=splitPoints[q - 1];\n    assertTrue(reported >= (nominal - 10000.0));\n    assertTrue(reported <= (nominal + 10000.0));\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  double subtotal=0.0;\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal+=pmfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal=cdfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  assertEquals(result.getRank(500000),0.5,0.01);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/HeapUpdateDoublesSketchTest.java",
+    "Start": 2693,
+    "Stop": 4396,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkEndToEnd"
+}

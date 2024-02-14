@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional for null check",
+                "Change_Diff": "- String baseRoute=baseUrl == null ? \"\" : baseUrl;\n+ String baseRoute = Optional.ofNullable(baseUrl).orElse(\"\");",
+                "Description": "Instead of checking if `baseUrl` is null, use `Optional.ofNullable` to provide a default value.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Extract version and path extraction to separate method",
+                "Change_Diff": "Diff too complex to represent, please refer to the final code",
+                "Description": "The logic to extract the version and path from the input `path` is complex and makes the `resolve` method hard to read. This logic should be extracted to a separate method.",
+                "Start": 11,
+                "End": 46
+            },
+            {
+                "Improvement": "Early return when API version is invalid",
+                "Change_Diff": "Diff too complex to represent, please refer to the final code",
+                "Description": "If the API version is invalid, you should return early to avoid unnecessary computation.",
+                "Start": 47,
+                "End": 54
+            },
+            {
+                "Improvement": "Use StringBuilder for string concatenation",
+                "Change_Diff": "- if (baseRoute.length() > 0 && baseRoute.charAt(baseRoute.length() - 1) == '/') {\n    baseRoute=baseRoute + apiVersionString;\n}\nelse {\n    baseRoute=baseRoute + \"/\" + apiVersionString;\n}\n+ StringBuilder baseRouteBuilder = new StringBuilder(baseRoute);\nif (baseRouteBuilder.length() > 0 && baseRouteBuilder.charAt(baseRouteBuilder.length() - 1) == '/') {\n    baseRouteBuilder.append(apiVersionString);\n} else {\n    baseRouteBuilder.append('/').append(apiVersionString);\n}\nbaseRoute = baseRouteBuilder.toString();",
+                "Description": "String concatenation in Java is costly as it creates a new String object. A more efficient way is to use `StringBuilder`.",
+                "Start": 61,
+                "End": 66
+            }
+        ],
+        "Final code": "public Route resolve(String mediaType, String baseUrl, String path, Map<String, List<String>> headers, Map<String, List<String>> parameters) {\n    String baseRoute = Optional.ofNullable(baseUrl).orElse(\"\");\n    VersionPath versionPath = extractVersionAndPath(path);\n    String apiVersion = versionPath.getApiVersion();\n    String route = versionPath.getPath();\n    if (!apiVersionValidator.isValidApiVersion(apiVersion)) {\n        return Route.builder().apiVersion(NO_VERSION).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n    }\n    if (route.length() > 0 && route.charAt(0) == '/') {\n        route = route.substring(1);\n    }\n    StringBuilder baseRouteBuilder = new StringBuilder(baseRoute);\n    if (baseRouteBuilder.length() > 0 && baseRouteBuilder.charAt(baseRouteBuilder.length() - 1) == '/') {\n        baseRouteBuilder.append(apiVersion);\n    } else {\n        baseRouteBuilder.append('/').append(apiVersion);\n    }\n    baseRoute = baseRouteBuilder.toString();\n    return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}"
+    },
+    "Old_Method": "@Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n  String baseRoute=baseUrl == null ? \"\" : baseUrl;\n  String route=path;\n  String apiVersion=NO_VERSION;\n  String apiVersionString=\"\";\n  int versionStart=-1;\n  int versionEnd=-1;\n  int pathStart=-1;\n  int pathEnd=-1;\n  int find=path.indexOf('/',0);\n  if (find != -1) {\n    if (find == 0) {\n      versionStart=1;\n      int findEnd=path.indexOf('/',1);\n      if (findEnd != -1) {\n        versionEnd=findEnd;\n        pathStart=findEnd;\n        pathEnd=path.length();\n      }\n else {\n        versionEnd=path.length();\n      }\n    }\n else {\n      versionStart=0;\n      versionEnd=find;\n      pathStart=find;\n      pathEnd=path.length();\n    }\n  }\n else {\n    versionStart=0;\n    versionEnd=path.length();\n  }\n  if (versionStart != -1 && versionEnd != -1) {\n    apiVersion=path.substring(versionStart,versionEnd);\n    apiVersionString=apiVersion;\n  }\n  if (!apiVersion.isEmpty() && !this.versionPrefix.isEmpty()) {\n    if (apiVersion.startsWith(this.versionPrefix)) {\n      apiVersion=apiVersion.substring(this.versionPrefix.length());\n    }\n  }\n  if (!apiVersion.isEmpty()) {\n    if (!apiVersionValidator.isValidApiVersion(apiVersion)) {\n      apiVersion=NO_VERSION;\n      pathStart=0;\n      pathEnd=path.length();\n      apiVersionString=\"\";\n    }\n  }\n  if (pathStart != -1 && pathEnd != -1) {\n    route=path.substring(pathStart,pathEnd);\n  }\n else {\n    route=\"\";\n  }\n  if (route.length() > 0 && route.charAt(0) == '/') {\n    route=route.substring(1);\n  }\n  if (baseRoute.length() > 0 && baseRoute.charAt(baseRoute.length() - 1) == '/') {\n    baseRoute=baseRoute + apiVersionString;\n  }\n else {\n    baseRoute=baseRoute + \"/\" + apiVersionString;\n  }\n  return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/core/request/route/PathRouteResolver.java",
+    "Start": 730,
+    "Stop": 3402,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "resolve"
+}

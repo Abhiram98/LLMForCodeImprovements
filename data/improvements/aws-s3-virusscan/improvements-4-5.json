@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch for error handling",
+                "Change_Diff": "+ try {\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n+ } catch (AmazonServiceException e) {\n+   System.err.println(e.getErrorMessage());\n+   System.exit(1);\n+ }",
+                "Description": "The method makes use of S3 services which might throw exceptions. It is recommended to use try-catch blocks for error handling to ensure that the program doesn't crash when an exception occurs.",
+                "Start": 2,
+                "End": 11
+            },
+            {
+                "Improvement": "Extract method for bucket object count",
+                "Change_Diff": "- count+=objectListing.getObjectSummaries().size();\n- if (objectListing.isTruncated()) {\n-   objectListing=s3.listNextBatchOfObjects(objectListing);\n- }\n else {\n-   break;\n- }\n+ count += getBucketObjectCount(objectListing);",
+                "Description": "The operation of counting the objects in a bucket is repeated twice, which violates the DRY (Don't Repeat Yourself) principle. This operation can be extracted into a separate method.",
+                "Start": 3,
+                "End": 9
+            }
+        ],
+        "Final code": "protected long countBucket(final String name){\n  long count=0;\n  try {\n    ObjectListing objectListing=s3.listObjects(name);\n    while (true) {\n      count += getBucketObjectCount(objectListing);\n    }\n  } catch (AmazonServiceException e) {\n    System.err.println(e.getErrorMessage());\n    System.exit(1);\n  }\n  return count;\n}\n\nprivate int getBucketObjectCount(ObjectListing objectListing) {\n  int count = objectListing.getObjectSummaries().size();\n  if (objectListing.isTruncated()) {\n    objectListing=s3.listNextBatchOfObjects(objectListing);\n  } else {\n    break;\n  }\n  return count;\n}"
+    },
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

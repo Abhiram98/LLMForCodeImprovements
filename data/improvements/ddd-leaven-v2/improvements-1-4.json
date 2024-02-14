@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- new AggregateId(\"p1\"),1);\n- new AggregateId(\"p2\"),20);\n+ new AggregateId(\"firstProduct\"),1);\n+ new AggregateId(\"secondProduct\"),20);",
+                "Description": "Instead of using generic names like 'p1' and 'p2' for AggregateId, use more descriptive names which indicate their purpose or usage. This improves the readability of the code.",
+                "Start": 3,
+                "End": 4
+            },
+            {
+                "Improvement": "Handle exceptions properly",
+                "Change_Diff": "- catch (  OfferChangedExcpetion e) {\n  }\n+ catch (OfferChangedExcpetion e) {\n+   e.printStackTrace();\n+ }",
+                "Description": "Instead of leaving the catch block empty, exceptions should be properly logged or handled to avoid silent failure. It will help in debugging in case the exception occurs.",
+                "Start": 12,
+                "End": 14
+            },
+            {
+                "Improvement": "Use AssertJ for assertions",
+                "Change_Diff": "- Assert.fail();\n+ fail(\"Exception was expected\");\n- try {\n- orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n+ assertThatThrownBy(() -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer))",
+                "Description": "AssertJ provides a rich set of assertions, which are more readable and can provide more detailed error messages. It's better to use AssertJ's assertThatThrownBy function to check if exception is thrown.",
+                "Start": 10,
+                "End": 11
+            }
+        ],
+        "Final code": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"firstProduct\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"secondProduct\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"secondProduct\"),30);\n  assertThatThrownBy(() -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer)).isInstanceOf(OfferChangedException.class);\n}"
+    },
+    "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+    "Start": 2542,
+    "Stop": 3087,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "canNotPurchaseIfOfferChanged"
+}

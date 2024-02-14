@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "protected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  if (Config.has(Config.Key.TEMPLATE_DIR)) {\n    final String dir=Config.get(Config.Key.TEMPLATE_DIR);\n    if (Config.has(Config.Key.BUCKET_NAME)) {\n      final String bucketName=Config.get(Config.Key.BUCKET_NAME);\n      final String bucketRegion=Config.get(Config.Key.BUCKET_REGION);\n      final AmazonS3 s3local=AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build();\n      s3local.putObject(bucketName,stackName,new File(dir + template));\n      req=req.withTemplateURL(\"https://\" + bucketName + \".s3.\"+ bucketRegion+ \".amazonaws.com/\"+ stackName);\n    }\n else {\n      final String body=readFile(dir + template,StandardCharsets.UTF_8);\n      req=req.withTemplateBody(body);\n    }\n  }\n else {\n    req=req.withTemplateURL(\"https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/\" + template);\n  }\n  if (Config.get(Config.Key.FAILURE_POLICY).equals(\"retain\")) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+    "Start": 1185,
+    "Stop": 2820,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "createStack"
+}

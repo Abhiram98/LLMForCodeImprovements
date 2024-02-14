@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java Optionals to handle potential null values",
+                "Change_Diff": "- if (actionMap.isEmpty()) {\n+ if (Optional.ofNullable(actionMap).orElse(Collections.emptyMap()).isEmpty()) {",
+                "Description": "In order to protect against potential null values in the `actionMap`, use Java Optionals. This will ensure that the method can handle null values gracefully without triggering a NullPointerException.",
+                "Start": 12,
+                "End": 12
+            },
+            {
+                "Improvement": "Remove else statement to reduce nesting",
+                "Change_Diff": "- else {\n+ \n-    for (    Map.Entry<URI,Object> entry : actionMap.entrySet()) {\n+    for (Map.Entry<URI,Object> entry : actionMap.entrySet()) {",
+                "Description": "Removing the 'else' statement will reduce the complexity of the code and make it easier to read and understand. After checking if the actionMap is empty, you can simply return; if it's not, the code will continue to execute the loop.",
+                "Start": 15,
+                "End": 19
+            }
+        ],
+        "Final code": "protected void registerEndpoints(Map<URI,Object> actionMap) throws BeansException {\n  if (Optional.ofNullable(actionMap).orElse(Collections.emptyMap()).isEmpty()) {\n    logger.warn(\"Neither 'actionMap' nor 'mappings' set on SimpleActionEndpointMapping\");\n    return;\n  }\n  \n  for (Map.Entry<URI,Object> entry : actionMap.entrySet()) {\n    URI action=entry.getKey();\n    Object endpoint=entry.getValue();\n    if (endpoint instanceof String) {\n      endpoint=((String)endpoint).trim();\n    }\n    registerEndpoint(action,endpoint);\n  }\n}"
+    },
+    "Old_Method": "/** \n * Register all endpoints specified in the action map.\n * @param actionMap Map with action URIs as keys and endppint beans or bean names as values\n * @throws BeansException if an endpoint couldn't be registered\n * @throws IllegalStateException if there is a conflicting endpoint registered\n */\nprotected void registerEndpoints(Map<URI,Object> actionMap) throws BeansException {\n  if (actionMap.isEmpty()) {\n    logger.warn(\"Neither 'actionMap' nor 'mappings' set on SimpleActionEndpointMapping\");\n  }\n else {\n    for (    Map.Entry<URI,Object> entry : actionMap.entrySet()) {\n      URI action=entry.getKey();\n      Object endpoint=entry.getValue();\n      if (endpoint instanceof String) {\n        endpoint=((String)endpoint).trim();\n      }\n      registerEndpoint(action,endpoint);\n    }\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/main/java/org/springframework/ws/soap/addressing/server/SimpleActionEndpointMapping.java",
+    "Start": 4019,
+    "Stop": 4866,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "registerEndpoints"
+}

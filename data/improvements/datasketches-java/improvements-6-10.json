@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Add comments for code readability",
+            "Change_Diff": "+ //lgK is the logarithm base 2 of the number of nominal entries\n  final int lgK=5;\n+ //k is the number of nominal entries\n  final int k=1 << lgK;\n+ //u is the universe size\n  final int u=4 * k;\n+ //memBytes is the maximum number of bytes for an intersection\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n+ //memArr is the memory array\n  final byte[] memArr=new byte[memBytes];\n+ //iMem is the writable memory wrap of memArr\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n+ //usk1 is an update sketch\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n+ //Updating usk1 with the elements from the universe\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n+ //csk1 is a compact sketch\n  final CompactSketch csk1=usk1.compact(true,null);\n+ //inter is an intersection operation\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n+ //Intersecting inter with csk1\n  inter.intersect(csk1);",
+            "Description": "Adding comments to your code would make it easier for other developers to understand what each section of your code is doing.",
+            "Start": 1,
+            "End": 13
+        }],
+        "Final code": "@Test(expectedExceptions=SketchesArgumentException.class)\npublic void checkSizedTooSmall(){\n  //lgK is the logarithm base 2 of the number of nominal entries\n  final int lgK=5;\n  //k is the number of nominal entries\n  final int k=1 << lgK;\n  //u is the universe size\n  final int u=4 * k;\n  //memBytes is the maximum number of bytes for an intersection\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  //memArr is the memory array\n  final byte[] memArr=new byte[memBytes];\n  //iMem is the writable memory wrap of memArr\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  //usk1 is an update sketch\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  //Updating usk1 with the elements from the universe\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  //csk1 is a compact sketch\n  final CompactSketch csk1=usk1.compact(true,null);\n  //inter is an intersection operation\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  //Intersecting inter with csk1\n  inter.intersect(csk1);\n}"
+    },
+    "Old_Method": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int lgK=5;\n  final int k=1 << lgK;\n  final int u=4 * k;\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/DirectIntersectionTest.java",
+    "Start": 17194,
+    "Stop": 17845,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSizedTooSmall"
+}

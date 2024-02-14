@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop",
+                "Change_Diff": "- for (int x=0; x < size; ++x) { ... }\n+ for (ColumnName column : ColumnName.values()) {...}",
+                "Description": "Enhanced for loop is simpler and more readable. It eliminates the possibility of bugs related to indexes. It can be used when you don't need to know the index of the current element.",
+                "Start": 3,
+                "End": 27
+            },
+            {
+                "Improvement": "Refactor the method to smaller methods",
+                "Change_Diff": "- private DancingLinks<ColumnName> makeModel(){ ... }\n+ private void addColumnConstraints(DancingLinks<ColumnName> model) {...}\n+ private void addRowConstraints(DancingLinks<ColumnName> model) {...}\n+ private void addCellConstraints(DancingLinks<ColumnName> model) {...}\n+ private void addRows(DancingLinks<ColumnName> model) {...}",
+                "Description": "The method makeModel is doing too many things. It is adding several types of columns and rows to the model. It would be better to split it into smaller methods, each handling one type of column or row. This would make the method easier to understand and maintain.",
+                "Start": 2,
+                "End": 39
+            },
+            {
+                "Improvement": "Remove magic number",
+                "Change_Diff": "- boolean[] rowValues=new boolean[size * size * 4];\n+ final int NUMBER_OF_CONSTRAINTS = 4;\n+ boolean[] rowValues=new boolean[size * size * NUMBER_OF_CONSTRAINTS];",
+                "Description": "There's a magic number '4' in this code. It would be better to replace it with a named constant for better readability and maintainability.",
+                "Start": 31,
+                "End": 31
+            }
+        ],
+        "Final code": "private DancingLinks<ColumnName> makeModel(){\n  final int NUMBER_OF_CONSTRAINTS = 4;\n  boolean[] rowValues=new boolean[size * size * NUMBER_OF_CONSTRAINTS];\n  DancingLinks<ColumnName> model=new DancingLinks<ColumnName>();\n  addColumnConstraints(model);\n  addRowConstraints(model);\n  addCellConstraints(model);\n  addRows(model, rowValues);\n  return model;\n}\n\nprivate void addColumnConstraints(DancingLinks<ColumnName> model) {...}\nprivate void addRowConstraints(DancingLinks<ColumnName> model) {...}\nprivate void addCellConstraints(DancingLinks<ColumnName> model) {...}\nprivate void addRows(DancingLinks<ColumnName> model, boolean[] rowValues) {...}"
+    },
+    "Old_Method": "private DancingLinks<ColumnName> makeModel(){\n  DancingLinks<ColumnName> model=new DancingLinks<ColumnName>();\n  for (int x=0; x < size; ++x) {\n    for (int num=1; num <= size; ++num) {\n      model.addColumn(new ColumnConstraint(num,x));\n    }\n  }\n  for (int y=0; y < size; ++y) {\n    for (int num=1; num <= size; ++num) {\n      model.addColumn(new RowConstraint(num,y));\n    }\n  }\n  for (int x=0; x < squareYSize; ++x) {\n    for (int y=0; y < squareXSize; ++y) {\n      for (int num=1; num <= size; ++num) {\n        model.addColumn(new SquareConstraint(num,x,y));\n      }\n    }\n  }\n  for (int x=0; x < size; ++x) {\n    for (int y=0; y < size; ++y) {\n      model.addColumn(new CellConstraint(x,y));\n    }\n  }\n  boolean[] rowValues=new boolean[size * size * 4];\n  for (int x=0; x < size; ++x) {\n    for (int y=0; y < size; ++y) {\n      if (board[y][x] == -1) {\n        for (int num=1; num <= size; ++num) {\n          model.addRow(generateRow(rowValues,x,y,num));\n        }\n      }\n else {\n        model.addRow(generateRow(rowValues,x,y,board[y][x]));\n      }\n    }\n  }\n  return model;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Sudoku.java",
+    "Start": 8366,
+    "Stop": 10077,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "makeModel"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code duplication",
+                "Change_Diff": "- expression=new HasMemberPredicate(paths,null);\n- fn=expression.accept(visitor);\n- assertFalse(fn.test(author));\n- expression=new HasNoMemberPredicate(paths,null);\n- fn=expression.accept(visitor);\n- assertTrue(fn.test(author));\n... (repeated 3 times)\n\n+ testPredicate(paths, null, false, true);",
+                "Description": "The creation and testing of the HasMemberPredicate and HasNoMemberPredicate expressions are done multiple times with minor differences. This code can be abstracted into a helper method to reduce duplication.",
+                "Start": 6,
+                "End": 31
+            },
+            {
+                "Improvement": "Use assertNotEquals instead of assertFalse and assertTrue",
+                "Change_Diff": "- assertFalse(fn.test(author));\n- assertTrue(fn.test(author));\n... (repeated 3 times)\n\n+ assertNotEquals(fn.test(author), true);\n+ assertEquals(fn.test(author), false);",
+                "Description": "Instead of using assertFalse and assertTrue to assert the return values of fn.test(author), use assertNotEquals and assertEquals. This provides clearer error messages when tests fail.",
+                "Start": 8,
+                "End": 31
+            }
+        ],
+        "Final code": "@Test public void hasMemberPredicateToManyNullTest() throws Exception {\n  author=new Author();\n  author.setId(1L);\n  Book book=new Book();\n  book.setId(1L);\n  book.setLanguage(\"en\");\n  Book book2=new Book();\n  book2.setId(2L);\n  book2.setLanguage(\"de\");\n  author.getBooks().add(book2);\n  PathElement bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n  Path paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n  testPredicate(paths, null, false, true);\n  testPredicate(paths, \"null\", false, true);\n  book2.setLanguage(null);\n  testPredicate(paths, null, true, false);\n  testPredicate(paths, \"null\", true, false);\n}\n\nprivate void testPredicate(Path paths, String value, boolean hasMemberExpected, boolean hasNoMemberExpected) {\n  expression=new HasMemberPredicate(paths,value);\n  fn=expression.accept(visitor);\n  assertNotEquals(fn.test(author), hasMemberExpected);\n  expression=new HasNoMemberPredicate(paths,value);\n  fn=expression.accept(visitor);\n  assertEquals(fn.test(author), hasNoMemberExpected);\n}"
+    },
+    "Old_Method": "@Test public void hasMemberPredicateToManyNullTest() throws Exception {\n  author=new Author();\n  author.setId(1L);\n  Book book=new Book();\n  book.setId(1L);\n  book.setLanguage(\"en\");\n  Book book2=new Book();\n  book2.setId(2L);\n  book2.setLanguage(\"de\");\n  author.getBooks().add(book2);\n  PathElement bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n  Path paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n  expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  book2.setLanguage(null);\n  expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n}\n",
+    "File_Path": "elide/elide-core/src/test/java/com/yahoo/elide/core/filter/expression/InMemoryFilterExecutorTest.java",
+    "Start": 10344,
+    "Stop": 12059,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "hasMemberPredicateToManyNullTest"
+}

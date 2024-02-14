@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce nesting by returning early",
+                "Change_Diff": "- if (tags == null || tags.isEmpty()) {\n+ if (tags == null || tags.isEmpty()) return new MCMetricGroupDemension(metricName,groupId);",
+                "Description": "If the 'tags' variable is null or empty, there's no need to continue with the rest of the code. We can return immediately to reduce nesting and increase readability.",
+                "Start": 20,
+                "End": 23
+            },
+            {
+                "Improvement": "Use try-with-resources for OffHeapCacheConfig",
+                "Change_Diff": "- OffHeapCacheConfig conf=null;\n+ try (OffHeapCacheConfig conf = getConfiguration().getOffheapMetricConf().get(metricName)) {",
+                "Description": "As a best practice and to ensure the OffHeapCacheConfig object is properly closed and resources are freed, use the try-with-resources statement.",
+                "Start": 5,
+                "End": 9
+            }
+        ],
+        "Final code": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n  Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n  try (OffHeapCacheConfig conf = getConfiguration().getOffheapMetricConf().get(metricName)) {\n    if (counters == null) {\n      synchronized (this) {\n        if (counters == null) {\n          if (conf != null) {\n            counters=CacheManager.getCounterOffHeapCache(metricName,conf);\n          }\n          else {\n            counters=CacheManager.getCounterCache();\n          }\n          groupbyWithTagsMetricMap.put(metricName,counters);\n        }\n      }\n    }\n    MCMetricGroupDemension groupDemension=null;\n    String tag_time=null;\n    if (tags == null || tags.isEmpty()) return new MCMetricGroupDemension(metricName,groupId);\n    if (tags.containsKey(MCConstant.TAG_TIME_IGNORE)) {\n      tag_time=tags.remove(MCConstant.TAG_TIME_IGNORE);\n    }\n    groupDemension=new MCMetricGroupDemension(metricName,groupId,tags);\n    Counter counter=counters.get(groupDemension);\n    if (counter == null) {\n      if (isAvg) {\n        counter=new AvgCounter();\n      }\n      else {\n        counter=new Counter();\n      }\n      if (conf == null) {\n        counters.put(groupDemension,counter);\n      }\n    }\n    if (tag_time != null) {\n      counter.setLastCounterTime(tag_time);\n    }\n    if (isAvg) {\n      ((AvgCounter)counter).inc(count,total);\n    }\n    else {\n      if (count != null) {\n        counter.inc(count);\n      }\n      else {\n        counter.inc();\n      }\n    }\n    if (conf != null) {\n      counters.put(groupDemension,counter);\n    }\n    return counter;\n  }\n}"
+    },
+    "Old_Method": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n  Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  if (counters == null) {\nsynchronized (this) {\n      if (counters == null) {\n        if (conf != null) {\n          counters=CacheManager.getCounterOffHeapCache(metricName,conf);\n        }\n else {\n          counters=CacheManager.getCounterCache();\n        }\n        groupbyWithTagsMetricMap.put(metricName,counters);\n      }\n    }\n  }\n  MCMetricGroupDemension groupDemension=null;\n  String tag_time=null;\n  if (tags == null || tags.isEmpty()) {\n    groupDemension=new MCMetricGroupDemension(metricName,groupId);\n  }\n else {\n    if (tags.containsKey(MCConstant.TAG_TIME_IGNORE)) {\n      tag_time=tags.remove(MCConstant.TAG_TIME_IGNORE);\n    }\n    groupDemension=new MCMetricGroupDemension(metricName,groupId,tags);\n  }\n  Counter counter=counters.get(groupDemension);\n  if (counter == null) {\n    if (isAvg) {\n      counter=new AvgCounter();\n    }\n else {\n      counter=new Counter();\n    }\n    if (conf == null) {\n      counters.put(groupDemension,counter);\n    }\n  }\n  if (tag_time != null) {\n    counter.setLastCounterTime(tag_time);\n  }\n  if (isAvg) {\n    ((AvgCounter)counter).inc(count,total);\n  }\n else {\n    if (count != null) {\n      counter.inc(count);\n    }\n else {\n      counter.inc();\n    }\n  }\n  if (conf != null) {\n    counters.put(groupDemension,counter);\n  }\n  return counter;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 9927,
+    "Stop": 12300,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getCounterByMetricDemensionAndInc"
+}

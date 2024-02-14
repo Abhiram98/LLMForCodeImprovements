@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Dependency Injection for Properties",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n+ @Autowired\n+ private Environment env;",
+                "Description": "Instead of manually loading the properties file, use Spring's dependency injection to inject a Properties instance into the class. This makes the code easier to test and allows Spring to manage the lifecycle of the Properties object.",
+                "Start": 2,
+                "End": 10
+            },
+            {
+                "Improvement": "Use Specific Exceptions",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new IllegalStateException(\"Unable to load properties file\", e);",
+                "Description": "Instead of throwing a general RuntimeException, throw a more specific exception, such as an IllegalStateException. This gives more information about the type of error.",
+                "Start": 13,
+                "End": 13
+            }
+        ],
+        "Final code": "public WebSecurityConfig(@Autowired Environment env){\n  try {\n    KEY_STORE=env.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=env.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=env.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=env.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=env.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=env.getProperty(\"idp.issuerid\");\n  }\n catch (  Exception e) {\n    throw new IllegalStateException(\"Unable to load properties file\", e);\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

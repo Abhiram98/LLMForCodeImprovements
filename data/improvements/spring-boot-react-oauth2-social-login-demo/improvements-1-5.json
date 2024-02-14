@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid calling oAuth2UserRequest.getClientRegistration().getRegistrationId() multiple times",
+                "Change_Diff": "- OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n+ String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n+ OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());",
+                "Description": "Instead of calling oAuth2UserRequest.getClientRegistration().getRegistrationId() multiple times, assign it to a variable at the beginning of the method and use that variable instead. This makes the code cleaner and may improve performance as well.",
+                "Start": 2,
+                "End": 11
+            },
+            {
+                "Improvement": "Use map function of Optional",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-    user=userOptional.get();\n-    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n-      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n-    }\n-    user=updateExistingUser(user,oAuth2UserInfo);\n-  }\n- else {\n-    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n-  }\n+ user = userOptional.map(user -> {\n+   if (!user.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n+     throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n+   }\n+   return updateExistingUser(user, oAuth2UserInfo);\n+ }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));",
+                "Description": "Instead of checking if userOptional.isPresent() and then getting the value, you can use the map function of Optional which applies the changes only if the value is present.",
+                "Start": 7,
+                "End": 11
+            }
+        ],
+        "Final code": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId,oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user = userOptional.map(user -> {\n   if (!user.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n     throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n   }\n   return updateExistingUser(user, oAuth2UserInfo);\n }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}"
+    },
+    "Old_Method": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/oauth2/CustomOAuth2UserService.java",
+    "Start": 1883,
+    "Stop": 3147,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "processOAuth2User"
+}

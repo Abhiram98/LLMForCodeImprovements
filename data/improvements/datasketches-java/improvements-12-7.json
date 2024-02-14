@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated try-catch blocks into a separate method",
+                "Change_Diff": "- try { ... } catch (IllegalArgumentException e) {...} + invokeAndExpectFailure(() -> sketch.getMinItem());",
+                "Description": "The try-catch blocks which expect an IllegalArgumentException are repeated numerous times in the code. This redundancy can be minimized by extracting this functionality into a separate method. This change will make the code shorter, more readable, and easier to maintain.",
+                "Start": 10,
+                "End": 43
+            },
+            {
+                "Improvement": "Use 'assertThrows' for JUnit tests",
+                "Change_Diff": "- try { ... } catch (IllegalArgumentException e) {...} + assertThrows(IllegalArgumentException.class, () -> sketch.getMinItem());",
+                "Description": "Instead of manually creating a try-catch block and calling 'fail()' in the try block, we can use JUnit's 'assertThrows' method. This method asserts that a certain type of exception is thrown when a lambda expression (containing the code expected to raise an exception) is executed. It makes the intent of the code clearer and reduces verbosity.",
+                "Start": 10,
+                "End": 43
+            }
+        ],
+        "Final code": "@Test public void empty(){\n  final ItemsSketch<String> sketch=ItemsSketch.getInstance(String.class,128,Comparator.naturalOrder());\n  assertNotNull(sketch);\n  sketch.update(null);\n  assertTrue(sketch.isEmpty());\n  assertEquals(sketch.getN(),0);\n  assertEquals(sketch.getNumRetained(),0);\n  assertThrows(IllegalArgumentException.class, () -> sketch.getMinItem());\n  assertThrows(IllegalArgumentException.class, () -> sketch.getMaxItem());\n  assertThrows(IllegalArgumentException.class, () -> sketch.getQuantile(0.5));\n  assertThrows(IllegalArgumentException.class, () -> sketch.getQuantiles(new double[]{0.0,1.0}));\n  final byte[] byteArr=sketch.toByteArray(new ArrayOfStringsSerDe());\n  assertEquals(byteArr.length,8);\n  assertThrows(IllegalArgumentException.class, () -> sketch.getPMF(new String[0]));\n  assertThrows(IllegalArgumentException.class, () -> sketch.getCDF(new String[0]));\n  assertThrows(IllegalArgumentException.class, () -> sketch.getRank(\"a\"));\n}"
+    },
+    "Old_Method": "@Test public void empty(){\n  final ItemsSketch<String> sketch=ItemsSketch.getInstance(String.class,128,Comparator.naturalOrder());\n  assertNotNull(sketch);\n  sketch.update(null);\n  assertTrue(sketch.isEmpty());\n  assertEquals(sketch.getN(),0);\n  assertEquals(sketch.getNumRetained(),0);\n  try {\n    sketch.getMinItem();\n    fail();\n  }\n catch (  IllegalArgumentException e) {\n  }\n  try {\n    sketch.getMaxItem();\n    fail();\n  }\n catch (  IllegalArgumentException e) {\n  }\n  try {\n    sketch.getQuantile(0.5);\n    fail();\n  }\n catch (  IllegalArgumentException e) {\n  }\n  try {\n    sketch.getQuantiles(new double[]{0.0,1.0});\n    fail();\n  }\n catch (  IllegalArgumentException e) {\n  }\n  final byte[] byteArr=sketch.toByteArray(new ArrayOfStringsSerDe());\n  assertEquals(byteArr.length,8);\n  try {\n    sketch.getPMF(new String[0]);\n    fail();\n  }\n catch (  IllegalArgumentException e) {\n  }\n  try {\n    sketch.getCDF(new String[0]);\n    fail();\n  }\n catch (  IllegalArgumentException e) {\n  }\n  try {\n    sketch.getRank(\"a\");\n    fail();\n  }\n catch (  IllegalArgumentException e) {\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/ItemsSketchTest.java",
+    "Start": 2142,
+    "Stop": 3166,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "empty"
+}

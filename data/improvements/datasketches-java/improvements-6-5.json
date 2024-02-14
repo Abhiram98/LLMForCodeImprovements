@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Better Variable Naming",
+                "Change_Diff": "- final int lgK=5;\n- final int k=1 << lgK;\n- final int u=4 * k;\n- final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n- final CompactSketch csk1=usk1.compact(true,null);\n- final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n+ final int logEntries=5;\n+ final int entries=1 << logEntries;\n+ final int updateTimes=4 * entries;\n+ final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(entries).build();\n+ final CompactSketch compactSketch=updateSketch.compact(true,null);\n+ final Intersection intersection=SetOperation.builder().buildIntersection(iMem);",
+                "Description": "Instead of using cryptic names like 'lgK', 'k', 'u', 'usk1', 'csk1', 'inter', use more meaningful names that express their role/purpose in the code.",
+                "Start": 2,
+                "End": 14
+            },
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < u; i++) {\n-    usk1.update(i);\n+ IntStream.range(0, updateTimes).forEach(updateSketch::update);",
+                "Description": "In place of the traditional for loop for updating the sketch, use an IntStream from Java 8. This allows for a more readable and declarative style of programming.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int logEntries=5;\n  final int entries=1 << logEntries;\n  final int updateTimes=4 * entries;\n  final int memBytes=getMaxIntersectionBytes(entries / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(entries).build();\n  IntStream.range(0, updateTimes).forEach(updateSketch::update);\n  final CompactSketch compactSketch=updateSketch.compact(true,null);\n  final Intersection intersection=SetOperation.builder().buildIntersection(iMem);\n  intersection.intersect(compactSketch);\n}"
+    },
+    "Old_Method": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int lgK=5;\n  final int k=1 << lgK;\n  final int u=4 * k;\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/DirectIntersectionTest.java",
+    "Start": 17194,
+    "Stop": 17845,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSizedTooSmall"
+}

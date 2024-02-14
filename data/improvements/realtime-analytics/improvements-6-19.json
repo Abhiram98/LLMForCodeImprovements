@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract nested logic to separate methods",
+                "Change_Diff": "- while ((event=localQueue.poll()) != null) {...}\n- try {...} catch (InterruptedException e) {...}\n- if (REFRESH_EVENT == event) {...}\n- else if (RESET_EVENT == event) {...}\n- else if (CONFIG_REFRESH_EVENT == event) {...}\n- try {...} catch (Throwable ex) {...}\n+ processLocalQueue();\n+ processResponseQueue();\n+ processRequestQueue();\n+ processSpecialEvents(event);\n+ processNormalEvents(event);",
+                "Description": "The method run() is doing too many things, which makes it hard to understand and maintain. Extracting the logic for processing different types of events and handling exceptions into separate methods would increase modularity and readability.",
+                "Start": 2,
+                "End": 79
+            },
+            {
+                "Improvement": "Remove redundant checks",
+                "Change_Diff": "- if (m == null || m.isEmpty()) {...}\n- else if (m.size() == 1) {...}\n+ if (m == null || m.isEmpty()) {...}\n+ else {...}",
+                "Description": "The check if (m == null || m.isEmpty()) is followed by if (m.size() == 1) which is redundant. If m is null or empty, m.size() would not be 1. Thus the redundancy can be removed.",
+                "Start": 60,
+                "End": 64
+            }
+        ],
+        "Final code": "@Override public void run(){\n  while (running) {\n    JetstreamEvent event;\n    processLocalQueue();\n    try {\n      event = processResponseQueue();\n      if (event == null) {\n        event = processRequestQueue();\n      }\n    } catch (InterruptedException e) {\n      continue;\n    }\n    processSpecialEvents(event);\n    try {\n      processNormalEvents(event);\n    } catch (Throwable ex) {\n      exceptionCounter.incrementAndGet();\n      errorManager.registerError(ex,event,ErrorType.Unexpected);\n    }\n  }\n}\n\nprivate void processLocalQueue() {...}\nprivate JetstreamEvent processResponseQueue() {...}\nprivate JetstreamEvent processRequestQueue() throws InterruptedException {...}\nprivate void processSpecialEvents(JetstreamEvent event) {...}\nprivate void processNormalEvents(JetstreamEvent event) {...}"
+    },
+    "Old_Method": "@Override public void run(){\n  while (running) {\n    JetstreamEvent event;\n    while ((event=localQueue.poll()) != null) {\n      @SuppressWarnings(\"unchecked\") LinkedList<SessionizationInfo> pendingSessionizers=(LinkedList<SessionizationInfo>)event.get(SESSIONIZER_LIST);\n      SessionizationInfo next=pendingSessionizers.removeFirst();\n      if (pendingSessionizers.isEmpty()) {\n        event.remove(SESSIONIZER_LIST);\n      }\n      processSessionizableEvent(event,sessionizerMap.get(next.getName()),next);\n    }\n    try {\n      event=responseQueue.poll();\n      if (event == null) {\n        event=requestQueue.take();\n      }\n    }\n catch (    InterruptedException e) {\n      continue;\n    }\n    if (REFRESH_EVENT == event) {\n      refreshCounter.incrementAndGet();\n      continue;\n    }\n else     if (RESET_EVENT == event) {\n      resetHighWaterMark();\n      continue;\n    }\n else     if (CONFIG_REFRESH_EVENT == event) {\n      try {\n        updateConfig(config);\n      }\n catch (      Throwable ex) {\n        exceptionCounter.incrementAndGet();\n        errorManager.registerError(ex,ErrorType.Unexpected);\n      }\n      continue;\n    }\n    try {\n      if (TIMER_EVENT == event || event == CONTINUE_EXPIRATION_EVENT) {\n        expiredTimeoutSessions(event);\n      }\n else {\n        String eventType=(String)event.get(JS_EVENT_TYPE);\n        if (!interEventTypes.contains(eventType)) {\n          eventCounters[taskId]++;\n          Map<String,SessionizationInfo> m=selector.process(event);\n          if (m == null || m.isEmpty()) {\n            bypassEventCounter++;\n            sendRawEvent(event);\n          }\n else           if (m.size() == 1) {\n            Entry<String,SessionizationInfo> entry=m.entrySet().iterator().next();\n            event.put(CURRENT_SESSIOIZERINFO,entry.getValue());\n            processSessionizableEvent(event,sessionizerMap.get(entry.getKey()),entry.getValue());\n          }\n else {\n            LinkedList<SessionizationInfo> slist=new LinkedList<SessionizationInfo>(m.values());\n            event.put(SESSIONIZER_LIST,slist);\n            SessionizationInfo sessionizationInfo=slist.removeFirst();\n            event.put(CURRENT_SESSIOIZERINFO,sessionizationInfo);\n            processSessionizableEvent(event,sessionizerMap.get(sessionizationInfo.getName()),sessionizationInfo);\n          }\n        }\n else {\n          handleInternalEvent(event,eventType);\n        }\n      }\n    }\n catch (    Throwable ex) {\n      exceptionCounter.incrementAndGet();\n      errorManager.registerError(ex,event,ErrorType.Unexpected);\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 32821,
+    "Stop": 36449,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "run"
+}

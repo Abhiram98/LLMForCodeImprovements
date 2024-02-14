@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional to avoid null checks",
+                "Change_Diff": "For example: \n- if (event.get(MCConstant.METRIC_DEMENSION) != null) {...}\n+ Optional.ofNullable(event.get(MCConstant.METRIC_DEMENSION)).ifPresent(value -> {...});",
+                "Description": "Java 8 introduces a new class called java.util.Optional that can help you handle null values properly, avoiding Null Pointer Exception. It's a much more elegant way to handle null values.",
+                "Start": 2,
+                "End": 63
+            },
+            {
+                "Improvement": "Use try-with-resources to ensure resource is closed",
+                "Change_Diff": "For example: \n- try {...}\n catch (Exception ex) {...}\n+ try (Resource res = getResource()) {...}\n catch (Exception ex) {...}",
+                "Description": "Try-with-resources in Java 7 and above ensures that each resource is closed at the end of the statement. You should use it whenever you are working with a resource that needs to be closed, to prevent resource leaks.",
+                "Start": 1,
+                "End": 109
+            },
+            {
+                "Improvement": "Use constants instead of hard-coded strings",
+                "Change_Diff": "For example: \n- if (event.get(\"SomeString\") != null) {...}\n+ private static final String SOME_STRING = \"SomeString\";\n...\n if (event.get(SOME_STRING) != null) {...}",
+                "Description": "Hard-coded strings make your code harder to maintain. It's a good practice to extract them as constants, especially when they are used multiple times in your code. This way, if you need to change the string, you only have to change it in one place.",
+                "Start": 1,
+                "End": 109
+            },
+            {
+                "Improvement": "Use Logger to print the stack trace",
+                "Change_Diff": "For example: \n- LOGGER.error(\"Error publising metrics in MetricCassandraCollector:\" + ex.getMessage());\n+ LOGGER.error(\"Error publising metrics in MetricCassandraCollector:\", ex);",
+                "Description": "Printing the stack trace using printStackTrace() is not recommended, because it prints to standard error and you can't control its output. It's better to use a Logger, which you can configure to output to different places (console, file, etc.).",
+                "Start": 107,
+                "End": 107
+            }
+        ],
+        "Final code": "The final code with improvements applied is not provided. The improvements are provided in the form of suggestions and their examples. The actual implementation of these improvements will depend on the specific requirements and context of the code."
+    },
+    "Old_Method": "@Override public void run(){\n  try {\n    String metricName=(String)event.get(MCConstant.METRIC_NAME);\n    String columnFamilyName=event.getEventType().toLowerCase();\n    String groupId=null;\n    Map<String,String> tags=null;\n    if (event.get(MCConstant.METRIC_DEMENSION) != null) {\n      MCMetricGroupDemension groupDemension=(MCMetricGroupDemension)event.get(MCConstant.METRIC_DEMENSION);\n      groupId=groupDemension.getGroupId();\n      if (event.get(MCConstant.TAG_TIME_IGNORE) != null) {\n        tags=new HashMap<String,String>(groupDemension.getDimensions());\n        tags.put(MCConstant.TAG_TIME_IGNORE,(String)event.get(MCConstant.TAG_TIME_IGNORE));\n      }\n else {\n        tags=groupDemension.getDimensions();\n      }\n    }\n    if (groupId == null) {\n      if (event.get(MCConstant.GROUP_ID) != null) {\n        groupId=(String)event.get(MCConstant.GROUP_ID);\n      }\n else {\n        groupId=metricName;\n      }\n    }\n    long count=0;\n    if (event.get(MCConstant.AGGREGATED_COUNT) != null) {\n      count=(Long)event.get(MCConstant.AGGREGATED_COUNT);\n    }\n else {\n      count=(Long)event.get(MCConstant.METRIC_COUNT);\n    }\n    long metricTime=(Long)event.get(MCConstant.METRIC_TIME);\n    if (event.get(MCConstant.SHUTDOWN_FLUSH) == null && (event.get(MCConstant.FIRST_FLUSH) == null)) {\n      metricTime=(metricTime / 60000) * 60000;\n    }\n    boolean counterTable=columnFamilyName.contains(COUNTER_TABLE);\n    if (counterTable) {\n      if (tags == null) {\n        tags=new HashMap<String,String>();\n        tags.put(MCCounterHelper.TAG_METRICTIME,String.valueOf(event.get(MCConstant.METRIC_TIME)));\n      }\n      Calendar c=Calendar.getInstance();\n      c.setTimeInMillis(metricTime);\n    }\n    if (metricColumnFamily.get(metricName) == null || !metricColumnFamily.get(metricName).equals(columnFamilyName)) {\n      if (counterTable) {\n        if (updatestmtMap.get(columnFamilyName) == null) {\n          if (tags != null && tags.size() > 0) {\n            prepareStatementsForUpdate(columnFamilyName,tags);\n          }\n else {\n            prepareStatementsForUpdate(columnFamilyName,null);\n          }\n        }\n      }\n else {\n        if (stmtMap.get(columnFamilyName) == null) {\n          if (tags != null && tags.size() > 0) {\n            prepareStatements(columnFamilyName,tags);\n          }\n else {\n            prepareStatements(columnFamilyName,null);\n          }\n        }\n      }\n      metricColumnFamily.put(metricName,columnFamilyName);\n    }\n    if (config.getBatchSize() > 1) {\n      MetricCounter metric=new MetricCounter(metricName,groupId,tags,count,metricTime);\n      meticCounters.add(metric);\n      int counterSize=meticCounters.size();\n      if (counterSize >= config.getBatchSize()) {\n        publishToCassandraInBatch();\n      }\n else       if (event.get(LASTEVENTINBATCH) != null) {\n        ePLBatchCount.increment();\n        publishToCassandraInBatch();\n      }\n    }\n else {\n      if (event.get(LASTEVENTINBATCH) != null) {\n        ePLBatchCount.increment();\n      }\n      int parameterSize=4;\n      if (tags != null) {\n        parameterSize=4 + tags.size();\n      }\n      Object[] paramterValues=new Object[parameterSize];\n      if (counterTable) {\n        paramterValues[0]=count;\n        paramterValues[1]=metricName;\n        paramterValues[2]=groupId;\n        paramterValues[3]=new Date(metricTime);\n        int i=1;\n        if (tags != null) {\n          for (          Map.Entry<String,String> entry : tags.entrySet()) {\n            paramterValues[3 + i]=entry.getValue();\n            i++;\n          }\n        }\n      }\n else {\n        paramterValues[0]=metricName;\n        paramterValues[1]=groupId;\n        paramterValues[2]=new Date(metricTime);\n        int i=1;\n        if (tags != null) {\n          for (          Map.Entry<String,String> entry : tags.entrySet()) {\n            paramterValues[2 + i]=entry.getValue();\n            i++;\n          }\n        }\n        paramterValues[parameterSize - 1]=Long.valueOf(count).intValue();\n      }\n      publishToCassandra(paramterValues,event);\n    }\n  }\n catch (  Exception ex) {\n    LOGGER.error(\"Error publising metrics in MetricCassandraCollector:\" + ex.getMessage());\n    cassandraErrorCount.increment();\n    if (event.get(JetstreamReservedKeys.MessageAffinityKey.toString()) == null) {\n      event.put(JetstreamReservedKeys.MessageAffinityKey.toString(),(String)event.get(MCConstant.METRIC_NAME));\n    }\n    getAdviceListener().retry(event,RetryEventCode.MSG_RETRY,ex.getMessage());\n    eventSentToAdviceListener.increment();\n    registerError(ex);\n  }\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MetricCassandraCollector.java",
+    "Start": 10962,
+    "Stop": 19825,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "run"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive code into a method",
+                "Change_Diff": "- assertEquals(1,history.getLength());\n- assertEquals(0,history.getIndex());\n- assertEquals(urlA,page.getUrl());\n- page=page.getAnchorByName(\"b\").click();\n...\n+ assertHistoryAndNavigate(history, 1, 0, urlA, page, \"b\")",
+                "Description": "Several parts of the code are repetitive, specifically the block of code where the page is updated, and history length, index, and URL are asserted. This can be refactored into a separate method.",
+                "Start": 13,
+                "End": 48
+            },
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- final String urlA=URL_FIRST + \"HistoryTest_a.html\";\n- final String urlB=URL_FIRST + \"HistoryTest_b.html\";\n- final String urlBX=URL_FIRST + \"HistoryTest_b.html#x\";\n- final String urlC=URL_FIRST + \"HistoryTest_c.html\";\n+ final String urlHistoryTestA=URL_FIRST + \"HistoryTest_a.html\";\n+ final String urlHistoryTestB=URL_FIRST + \"HistoryTest_b.html\";\n+ final String urlHistoryTestBX=URL_FIRST + \"HistoryTest_b.html#x\";\n+ final String urlHistoryTestC=URL_FIRST + \"HistoryTest_c.html\";",
+                "Description": "The variable names 'urlA', 'urlB', etc. are not very descriptive. It would be better to rename them to something more meaningful, like 'urlHistoryTestA', 'urlHistoryTestB', etc.",
+                "Start": 7,
+                "End": 10
+            }
+        ],
+        "Final code": "public void go() throws Exception {\n  final WebClient client=getWebClient();\n  final TopLevelWindow window=(TopLevelWindow)client.getCurrentWindow();\n  final History history=window.getHistory();\n  final String urlHistoryTestA=URL_FIRST + \"HistoryTest_a.html\";\n  final String urlHistoryTestB=URL_FIRST + \"HistoryTest_b.html\";\n  final String urlHistoryTestBX=URL_FIRST + \"HistoryTest_b.html#x\";\n  final String urlHistoryTestC=URL_FIRST + \"HistoryTest_c.html\";\n  HtmlPage page=client.getPage(urlHistoryTestA);\n  assertHistoryAndNavigate(history, 1, 0, urlHistoryTestA, page, \"b\");\n  assertHistoryAndNavigate(history, 2, 1, urlHistoryTestB, page, \"x\");\n  assertHistoryAndNavigate(history, 3, 2, urlHistoryTestBX, page, \"minusTwo\");\n  assertHistoryAndNavigate(history, 3, 0, urlHistoryTestA, page, \"plusOne\");\n  assertHistoryAndNavigate(history, 3, 1, urlHistoryTestB, page, \"c\");\n  assertHistoryAndNavigate(history, 3, 2, urlHistoryTestC, page, \"minusOne\");\n  assertHistoryAndNavigate(history, 3, 1, urlHistoryTestB, page, \"plusTwo\");\n}\n\nprivate void assertHistoryAndNavigate(History history, int expectedLength, int expectedIndex, String expectedUrl, HtmlPage page, String anchorName) throws IOException {\n  assertEquals(expectedLength, history.getLength());\n  assertEquals(expectedIndex, history.getIndex());\n  assertEquals(expectedUrl, page.getUrl());\n  page = page.getAnchorByName(anchorName).click();\n}"
+    },
+    "Old_Method": "/** \n * @throws Exception if an error occurs\n */\n@Test public void go() throws Exception {\n  final WebClient client=getWebClient();\n  final TopLevelWindow window=(TopLevelWindow)client.getCurrentWindow();\n  final History history=window.getHistory();\n  final String urlA=URL_FIRST + \"HistoryTest_a.html\";\n  final String urlB=URL_FIRST + \"HistoryTest_b.html\";\n  final String urlBX=URL_FIRST + \"HistoryTest_b.html#x\";\n  final String urlC=URL_FIRST + \"HistoryTest_c.html\";\n  HtmlPage page=client.getPage(urlA);\n  assertEquals(1,history.getLength());\n  assertEquals(0,history.getIndex());\n  assertEquals(urlA,page.getUrl());\n  page=page.getAnchorByName(\"b\").click();\n  assertEquals(2,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n  page=page.getAnchorByName(\"x\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(2,history.getIndex());\n  assertEquals(urlBX,page.getUrl());\n  page=page.getAnchorByName(\"minusTwo\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(0,history.getIndex());\n  assertEquals(urlA,page.getUrl());\n  page=page.getAnchorByName(\"plusOne\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n  page=page.getAnchorByName(\"c\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(2,history.getIndex());\n  assertEquals(urlC,page.getUrl());\n  page=page.getAnchorByName(\"minusOne\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n  page=page.getAnchorByName(\"plusTwo\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n}\n",
+    "File_Path": "htmlunit/src/test/java/org/htmlunit/javascript/host/HistoryTest.java",
+    "Start": 3595,
+    "Stop": 5645,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "go"
+}

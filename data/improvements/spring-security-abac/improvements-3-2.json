@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use a constant for repeated string",
+                "Change_Diff": "+ String url = XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\";\n- this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n+ this.apiResourceListCache.get(url);",
+                "Description": "The string `XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"` is used multiple times in the code. It's better to define it as a constant at the start of the method to avoid potential mistakes and improve readability.",
+                "Start": 2,
+                "End": 10
+            },
+            {
+                "Improvement": "Ensure non-null response body",
+                "Change_Diff": "+ if (response.getBody() == null) {\n+     return Optional.empty();\n+ }\n- new JSONObject(response.getBody().toString())",
+                "Description": "Before calling `response.getBody().toString()`, it's better to check if response body is null to avoid NullPointerException.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "@Override public Optional<JSONObject> getApiResourceList(){\n  String url = XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\";\n  JSONObject cachedObject=this.apiResourceListCache.get(url);\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(url, String.class, entity);\n  if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(url, new JSONObject(response.getBody().toString())));\n}"
+    },
+    "Old_Method": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 5788,
+    "Stop": 6769,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "getApiResourceList"
+}

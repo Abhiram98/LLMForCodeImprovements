@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "+ /**\n+  * This method tests the invocation of the MimeMarshaller\n+  * @throws Exception\n+  */\n ",
+                "Description": "The method lacks documentation, which makes it difficult for other programmers to understand its purpose. Add a JavaDoc comment at the beginning of the method to explain what the method does, its parameters, and its return value.",
+                "Start": 0,
+                "End": 0
+            },
+            {
+                "Improvement": "Split the method into smaller parts",
+                "Change_Diff": "N/A",
+                "Description": "The method is too long and does many things, which makes it difficult to understand and maintain. Consider breaking it down into smaller methods, each with a single responsibility.",
+                "Start": 1,
+                "End": 28
+            },
+            {
+                "Improvement": "Use meaningful names",
+                "Change_Diff": "- factoryMock\n+ mockMessageFactory\n- endpoint\n+ marshallingEndpoint",
+                "Description": "Using meaningful names for variables and methods makes your code more readable and maintainable. For instance, 'factoryMock' could be renamed to 'mockMessageFactory' and 'endpoint' to 'marshallingEndpoint'.",
+                "Start": 2,
+                "End": 25
+            }
+        ],
+        "Final code": "    /**\n     * This method tests the invocation of the MimeMarshaller\n     * @throws Exception\n     */\n    @Test public void testInvokeMimeMarshaller() throws Exception {\n      MimeUnmarshaller unmarshaller=createMock(MimeUnmarshaller.class);\n      MimeMarshaller marshaller=createMock(MimeMarshaller.class);\n      MimeMessage request=createMock(\"request\",MimeMessage.class);\n      MimeMessage response=createMock(\"response\",MimeMessage.class);\n      extractPayload(request, response);\n      marshalResponse(unmarshaller, marshaller, request, response);\n      verifyMocks(unmarshaller, marshaller, request, response);\n    }\n\n    private void extractPayload(MimeMessage request, MimeMessage response) throws Exception {\n      Source requestSource=new StringSource(\"<request/>\");\n      expect(request.getPayloadSource()).andReturn(requestSource);\n      expect(mockMessageFactory.createWebServiceMessage()).andReturn(response);\n      expect(unmarshaller.unmarshal(eq(requestSource),isA(MimeContainer.class))).andReturn(42L);\n    }\n\n    private void marshalResponse(MimeUnmarshaller unmarshaller, MimeMarshaller marshaller, MimeMessage request, MimeMessage response) throws Exception {\n      Result responseResult=new StringResult();\n      expect(response.getPayloadResult()).andReturn(responseResult);\n      marshaller.marshal(eq(\"result\"),eq(responseResult),isA(MimeContainer.class));\n      replay(mockMessageFactory,unmarshaller,marshaller,request,response);\n    }\n\n    private void verifyMocks(MimeUnmarshaller unmarshaller, MimeMarshaller marshaller, MimeMessage request, MimeMessage response) {\n      context=new DefaultMessageContext(request,mockMessageFactory);\n      marshallingEndpoint.invoke(context);\n      assertThat(response).isNotNull();\n      verify(mockMessageFactory,unmarshaller,marshaller,request,response);\n    }"
+    },
+    "Old_Method": "@Test public void testInvokeMimeMarshaller() throws Exception {\n  MimeUnmarshaller unmarshaller=createMock(MimeUnmarshaller.class);\n  MimeMarshaller marshaller=createMock(MimeMarshaller.class);\n  MimeMessage request=createMock(\"request\",MimeMessage.class);\n  MimeMessage response=createMock(\"response\",MimeMessage.class);\n  Source requestSource=new StringSource(\"<request/>\");\n  expect(request.getPayloadSource()).andReturn(requestSource);\n  expect(factoryMock.createWebServiceMessage()).andReturn(response);\n  expect(unmarshaller.unmarshal(eq(requestSource),isA(MimeContainer.class))).andReturn(42L);\n  Result responseResult=new StringResult();\n  expect(response.getPayloadResult()).andReturn(responseResult);\n  marshaller.marshal(eq(\"result\"),eq(responseResult),isA(MimeContainer.class));\n  replay(factoryMock,unmarshaller,marshaller,request,response);\n  AbstractMarshallingPayloadEndpoint endpoint=new AbstractMarshallingPayloadEndpoint(){\n    @Override protected Object invokeInternal(    Object requestObject) throws Exception {\n      assertThat(requestObject).isEqualTo(42L);\n      return \"result\";\n    }\n  }\n;\n  endpoint.setMarshaller(marshaller);\n  endpoint.setUnmarshaller(unmarshaller);\n  endpoint.afterPropertiesSet();\n  context=new DefaultMessageContext(request,factoryMock);\n  endpoint.invoke(context);\n  assertThat(response).isNotNull();\n  verify(factoryMock,unmarshaller,marshaller,request,response);\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/test/java/org/springframework/ws/server/endpoint/MarshallingPayloadEndpointTest.java",
+    "Start": 6056,
+    "Stop": 7507,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "testInvokeMimeMarshaller"
+}

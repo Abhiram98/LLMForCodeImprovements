@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid nested if-else statements",
+                "Change_Diff": "- if (!(event instanceof ServerExceptionEvent)) {\n...\n}\nif (ex instanceof RuntimeException) {\n...\n}\nelse {\n...\n}\n+ if (event instanceof ServerExceptionEvent) { return; }\nif (ex instanceof RuntimeException) {...}\nthrow new EventHandlerException(ex);",
+                "Description": "In the catch block, there is a nested if-else statement. It is recommended to avoid nested if-else as it makes the code harder to read and understand. It would be better to use separate if statements with return or continue statements to exit the flow if a condition is met.",
+                "Start": 11,
+                "End": 19
+            },
+            {
+                "Improvement": "Correct the RuntimeException throw statement",
+                "Change_Diff": "- throw r;\n+ throw (RuntimeException) ex;",
+                "Description": "The RuntimeException is thrown with the variable 'r' which is not defined anywhere in this method. It should be 'ex' instead of 'r'.",
+                "Start": 17,
+                "End": 17
+            }
+        ],
+        "Final code": "private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event) {\n    Preconditions.checkNotNull(registration, \"Listener cannot be null\");\n    Preconditions.checkNotNull(event, \"Event cannot be null\");\n    if (!registration.getPlugin().isEnabled()) {\n        return;\n    }\n    try {\n        registration.callEvent(event);\n    } catch (EventException eventException) {\n        Throwable ex = eventException.getCause();\n        if (event instanceof ServerExceptionEvent) { return; }\n        String msg = \"Could not pass event \" + event.getEventName() + \" to \" + registration.getPlugin().getDescription().getFullName();\n        callEvent(new ServerExceptionEvent(new ServerEventException(msg, ex, registration.getPlugin(), registration.getListener(), event)));\n        if (ex instanceof RuntimeException) {\n            throw (RuntimeException) ex;\n        }\n        throw new EventHandlerException(ex);\n    }\n}"
+    },
+    "Old_Method": "private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event){\n  Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n  Preconditions.checkNotNull(event,\"Event cannot be null\");\n  if (!registration.getPlugin().isEnabled()) {\n    return;\n  }\n  try {\n    registration.callEvent(event);\n  }\n catch (  EventException eventException) {\n    Throwable ex=eventException.getCause();\n    if (!(event instanceof ServerExceptionEvent)) {\n      String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n      callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n    }\n    if (ex instanceof RuntimeException) {\n      throw r;\n    }\n else {\n      throw new EventHandlerException(ex);\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/plugin/PluginManagerMock.java",
+    "Start": 18429,
+    "Stop": 19391,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "callRegisteredListener"
+}

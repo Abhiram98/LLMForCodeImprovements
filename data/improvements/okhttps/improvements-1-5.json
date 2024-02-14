@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract Lambda Expressions into Separate Methods",
+                "Change_Diff": "- responseListener((  HttpTask<?> task,  HttpResult result) -> {\n- completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n- exceptionListener((  HttpTask<?> task,  IOException error) -> {\n+ responseListener(this::globalResponseListener)\n+ completeListener(this::globalCompleteListener)\n+ exceptionListener(this::globalExceptionListener)",
+                "Description": "To improve readability, it would be better to extract the lambda expressions into separate methods. This would make the code cleaner, more modular and easier to maintain.",
+                "Start": 2,
+                "End": 21
+            },
+            {
+                "Improvement": "Extract String Messages into Constants",
+                "Change_Diff": "- println(\"全局 onResponse: \" + result.getStatus());\n- println(\"全局 onComplete: \" + state);\n- println(\"全局 onException: \" + error.getMessage());\n+ println(GLOBAL_ON_RESPONSE + result.getStatus());\n+ println(GLOBAL_ON_COMPLETE + state);\n+ println(GLOBAL_ON_EXCEPTION + error.getMessage());",
+                "Description": "The hardcoded string messages in the println statements could be extracted into constants at the top of the class. This would make it easier to change the messages in the future, and also makes the code cleaner and more readable.",
+                "Start": 3,
+                "End": 21
+            }
+        ],
+        "Final code": "@Test public void testGlobalCallback(){\n  HTTP http=HTTP.builder()\n  .responseListener(this::globalResponseListener)\n  .completeListener(this::globalCompleteListener)\n  .exceptionListener(this::globalExceptionListener)\n  .build();\n  \n  http.async(\"http://www.baidu.com\")\n  .setOnResponse((  HttpResult result) -> {\n    println(ON_RESPONSE + result.getStatus());\n  })\n  .setOnComplete((  HttpResult.State state) -> {\n    println(ON_COMPLETE + state);\n  })\n  .setOnException((  IOException error) -> {\n    println(ON_EXCEPTION + error.getMessage());\n  })\n  .get();\n  \n  sleep(2000);\n}\n\nprivate boolean globalResponseListener(HttpTask<?> task, HttpResult result) {\n  println(GLOBAL_ON_RESPONSE + result.getStatus());\n  return true;\n}\n\nprivate boolean globalCompleteListener(HttpTask<?> task, HttpResult.State state) {\n  println(GLOBAL_ON_COMPLETE + state);\n  return true;\n}\n\nprivate boolean globalExceptionListener(HttpTask<?> task, IOException error) {\n  println(GLOBAL_ON_EXCEPTION + error.getMessage());\n  return false;\n}"
+    },
+    "Old_Method": "@Test public void testGlobalCallback(){\n  HTTP http=HTTP.builder().responseListener((  HttpTask<?> task,  HttpResult result) -> {\n    println(\"全局 onResponse: \" + result.getStatus());\n    return true;\n  }\n).completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n    println(\"全局 onComplete: \" + state);\n    return true;\n  }\n).exceptionListener((  HttpTask<?> task,  IOException error) -> {\n    println(\"全局 onException: \" + error.getMessage());\n    return false;\n  }\n).build();\n  http.async(\"http://www.baidu.com\").setOnResponse((  HttpResult result) -> {\n    println(\"单例 onResponse: \" + result.getStatus());\n  }\n).setOnComplete((  HttpResult.State state) -> {\n    println(\"单例 onComplete: \" + state);\n  }\n).setOnException((  IOException error) -> {\n    println(\"单例 onException: \" + error.getMessage());\n  }\n).get();\n  sleep(2000);\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/ListenerTests.java",
+    "Start": 151,
+    "Stop": 1367,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "testGlobalCallback"
+}

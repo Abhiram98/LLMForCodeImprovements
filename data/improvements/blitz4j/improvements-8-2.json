@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of Java's built-in logging system instead of printStackTrace",
+                "Change_Diff": "- e.printStackTrace();\n+ LOGGER.log(Level.SEVERE, \"An error occurred\", e);",
+                "Description": "Instead of using e.printStackTrace(), you should use Java's built-in logging system. This provides more control over the output and can be configured to provide different levels of output (info, debug, error, etc.). It also provides additional information such as the time and class where the error occurred.",
+                "Start": 76,
+                "End": 78
+            },
+            {
+                "Improvement": "Use try-with-resources for Stopwatch",
+                "Change_Diff": "- Stopwatch s=processTimeTracer.start();\n+ try (Stopwatch s = processTimeTracer.start()) {",
+                "Description": "The Stopwatch usage can be improved by using a try-with-resources statement. A try-with-resources statement ensures that each resource is closed at the end of the statement. This is particularly useful in cases where you are working with resources which need to be closed explicitly to avoid memory leaks.",
+                "Start": 57,
+                "End": 58
+            },
+            {
+                "Improvement": "Replace magic numbers with named constants",
+                "Change_Diff": "- Thread.sleep(SLEEP_TIME_MS);\n+ Thread.sleep(DEFAULT_SLEEP_TIME_MS);",
+                "Description": "In your code, you're using magic numbers like SLEEP_TIME_MS or RETRY_EXECUTION_TIMEOUT_MS. These should be replaced with named constants to improve code readability and maintenance.",
+                "Start": 7,
+                "End": 7
+            }
+        ],
+        "Final code": "/** \n * Process messages from the queue, after grouping them into batches. \n */\npublic void run(){\n  int batchSize=0;\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(DEFAULT_SLEEP_TIME_MS);\n      }\n catch (InterruptedException ignore) {\n      }\n      continue;\n    }\n    try {\n      if (batch.size() < stream.maxMessages) {\n        long now=System.nanoTime();\n        final long firstTime=now;\n        do {\n          if (stream.queue.drainTo(batch,stream.maxMessages - batch.size()) <= 0) {\n            long maxWait=firstTime + stream.maxDelay - now;\n            if (maxWait <= 0) {\n              break;\n            }\n            Object nextMessage=null;\n            try {\n              nextMessage=stream.queue.poll(maxWait,TimeUnit.NANOSECONDS);\n            }\n catch (InterruptedException ignore) {\n            }\n            if (nextMessage == null) {\n              break;\n            }\n            batch.add(nextMessage);\n            now=System.nanoTime();\n          }\n        }\n while (batch.size() < stream.maxMessages);\n      }\n      batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        }\n catch (Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        try (Stopwatch s = processTimeTracer.start()) {\n        boolean retryExecution=false;\n        do {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          }\n catch (RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        }\n while (retryExecution);\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    }\n catch (Throwable e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        LOGGER.log(Level.SEVERE, \"An error occurred\", e);\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Process messages from the queue, after grouping them into batches. \n */\npublic void run(){\n  int batchSize=0;\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    try {\n      if (batch.size() < stream.maxMessages) {\n        long now=System.nanoTime();\n        final long firstTime=now;\n        do {\n          if (stream.queue.drainTo(batch,stream.maxMessages - batch.size()) <= 0) {\n            long maxWait=firstTime + stream.maxDelay - now;\n            if (maxWait <= 0) {\n              break;\n            }\n            Object nextMessage=null;\n            try {\n              nextMessage=stream.queue.poll(maxWait,TimeUnit.NANOSECONDS);\n            }\n catch (            InterruptedException ignore) {\n            }\n            if (nextMessage == null) {\n              break;\n            }\n            batch.add(nextMessage);\n            now=System.nanoTime();\n          }\n        }\n while (batch.size() < stream.maxMessages);\n      }\n      batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        }\n catch (        Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        Stopwatch s=processTimeTracer.start();\n        boolean retryExecution=false;\n        do {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          }\n catch (          RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        }\n while (retryExecution);\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    }\n catch (    Throwable e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        e.printStackTrace();\n      }\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 14783,
+    "Stop": 18103,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "run"
+}

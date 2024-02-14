@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=1, t=values.size(); i < t; i++) {\n-     b.append(\",\");\n-     b.append(values.get(i));\n+ for (Object val : values) {\n+     b.append(\",\").append(val.toString());",
+                "Description": "Instead of using a traditional for loop to iterate over the list values, use an enhanced for loop. This makes the code cleaner and easier to read.",
+                "Start": 9,
+                "End": 12
+            },
+            {
+                "Improvement": "Use String.join method instead of manual concatenation",
+                "Change_Diff": "- StringBuilder b=new StringBuilder();\n- b.append(values.get(0));\n- for (int i=1, t=values.size(); i < t; i++) {\n-     b.append(\",\");\n-     b.append(values.get(i));\n- }\n- return b.toString();\n+ return String.join(\",\", values.stream().map(Object::toString).collect(Collectors.toList()));",
+                "Description": "It is more efficient to use String.join method for concatenating sequence of strings with a delimiter. It can improve the performance and readability of the code.",
+                "Start": 7,
+                "End": 13
+            }
+        ],
+        "Final code": "private static Object normalizeValue(Object value) {\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values = (List<Object>) value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    return String.join(\",\", values.stream().map(Object::toString).collect(Collectors.toList()));\n  }\n  else {\n    return value;\n  }\n}"
+    },
+    "Old_Method": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    StringBuilder b=new StringBuilder();\n    b.append(values.get(0));\n    for (int i=1, t=values.size(); i < t; i++) {\n      b.append(\",\");\n      b.append(values.get(i));\n    }\n    return b.toString();\n  }\n else {\n    return value;\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 4288,
+    "Stop": 4905,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "normailizeValue"
+}

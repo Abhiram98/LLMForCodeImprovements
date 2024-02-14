@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor to remove duplicate code",
+                "Change_Diff": "- final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n- final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n+ final String cssContent = getTextContent();\n+ final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(cssContent);\n+ final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n- final String css=getTextContent();\n+ final String css=cssContent;",
+                "Description": "The code `getTextContent()` and `getPage().getWebResponse().getWebRequest().getUrl().toExternalForm()` is called twice in the method. To avoid unnecessary method calls and improve performance, call these methods once and store the results in variables.",
+                "Start": 7,
+                "End": 16
+            },
+            {
+                "Improvement": "Adding Null Check",
+                "Change_Diff": "- final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n+ final String uri=(getPage() != null && getPage().getWebResponse() != null && getPage().getWebResponse().getWebRequest() != null && getPage().getWebResponse().getWebRequest().getUrl() != null) ? getPage().getWebResponse().getWebRequest().getUrl().toExternalForm() : \"\";",
+                "Description": "The method `getPage().getWebResponse().getWebRequest().getUrl().toExternalForm()` might return null resulting in a NullPointerException. To prevent this, add a null check before using it.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final String cssContent = getTextContent();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(cssContent);\n  final String uri=(getPage() != null && getPage().getWebResponse() != null && getPage().getWebResponse().getWebRequest() != null && getPage().getWebResponse().getWebRequest().getUrl() != null) ? getPage().getWebResponse().getWebRequest().getUrl().toExternalForm() : \"\";\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    try (InputSource source=new InputSource(new StringReader(cssContent))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(cssContent,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

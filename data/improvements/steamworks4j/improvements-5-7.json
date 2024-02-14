@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor printing statements to use Logger",
+                "Change_Diff": "- System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n+ logger.info(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n\n- System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n+ logger.info(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n\n- System.out.println(\"- failed reading request data!\");\n+ logger.warning(\"- failed reading request data!\");\n\n- System.out.println(\"- releasing request\");\n+ logger.info(\"- releasing request\");",
+                "Description": "Instead of using `System.out.println` statements to log the information, use a logger such as `java.util.logging.Logger`. Loggers provide more flexibility with different levels of severity and can be configured to output log information to various targets.",
+                "Start": 3,
+                "End": 14
+            },
+            {
+                "Improvement": "Add error message to Exception",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.severe(\"Exception occurred while getting HTTP Streaming Response Body Data: \" + e.getMessage());\n+ e.printStackTrace();",
+                "Description": "Instead of just printing the stack trace when a `SteamException` occurs, also print a message that gives more context about the error.",
+                "Start": 12,
+                "End": 12
+            }
+        ],
+        "Final code": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  Logger logger = Logger.getLogger(this.getClass().getName());\n  logger.info(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      logger.info(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n    else {\n      logger.warning(\"- failed reading request data!\");\n    }\n  }\n  catch (SteamException e) {\n    logger.severe(\"Exception occurred while getting HTTP Streaming Response Body Data: \" + e.getMessage());\n    e.printStackTrace();\n  }\n  logger.info(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}"
+    },
+    "Old_Method": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamHTTPTest.java",
+    "Start": 1411,
+    "Stop": 2260,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onHTTPRequestDataReceived"
+}

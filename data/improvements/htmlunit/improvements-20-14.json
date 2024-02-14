@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < realArgs.length; i++) {\n+ for (Object arg : args) {",
+                "Description": "Instead of using a traditional for loop to iterate over `args`, use an enhanced for loop. This can make the code cleaner and easier to read.",
+                "Start": 14,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract method invocation into separate method",
+                "Change_Diff": "- return method.invoke(applet,realArgs);\n+ return invokeMethod(applet, method, realArgs);",
+                "Description": "The method invocation within the anonymous inner class is quite complex and makes the method long and hard to read. It would be better to extract this into a separate method.",
+                "Start": 21,
+                "End": 27
+            }
+        ],
+        "Final code": "private void createAppletMethodAndProperties() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  final Applet applet=appletNode.getApplet();\n  if (applet == null) {\n    return;\n  }\n  for (  final Method method : applet.getClass().getMethods()) {\n    final Function f=new BaseFunction(){\n      @Override public Object call(      final Context cx,      final Scriptable scope,      final Scriptable thisObj,      final Object[] args){\n        final Object[] realArgs=new Object[method.getParameterTypes().length];\n        int i = 0;\n        for (Object arg : args) {\n          if (i >= realArgs.length) {\n            break;\n          }\n          realArgs[i]=Context.jsToJava(arg,method.getParameterTypes()[i]);\n          i++;\n        }\n        try {\n          return invokeMethod(applet, method, realArgs);\n        }\n catch (        final Exception e) {\n          throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n        }\n      }\n    };\n    ScriptableObject.defineProperty(this,method.getName(),f,ScriptableObject.READONLY);\n  }\n}\n\nprivate Object invokeMethod(Applet applet, Method method, Object[] realArgs) throws Exception {\n  try {\n    return method.invoke(applet, realArgs);\n  } catch (final Exception e) {\n    throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n  }\n}"
+    },
+    "Old_Method": "private void createAppletMethodAndProperties() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  final Applet applet=appletNode.getApplet();\n  if (applet == null) {\n    return;\n  }\n  for (  final Method method : applet.getClass().getMethods()) {\n    final Function f=new BaseFunction(){\n      @Override public Object call(      final Context cx,      final Scriptable scope,      final Scriptable thisObj,      final Object[] args){\n        final Object[] realArgs=new Object[method.getParameterTypes().length];\n        for (int i=0; i < realArgs.length; i++) {\n          final Object arg;\n          if (i > args.length) {\n            arg=null;\n          }\n else {\n            arg=Context.jsToJava(args[i],method.getParameterTypes()[i]);\n          }\n          realArgs[i]=arg;\n        }\n        try {\n          return method.invoke(applet,realArgs);\n        }\n catch (        final Exception e) {\n          throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n        }\n      }\n    }\n;\n    ScriptableObject.defineProperty(this,method.getName(),f,ScriptableObject.READONLY);\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/html/HTMLObjectElement.java",
+    "Start": 3134,
+    "Stop": 4723,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "createAppletMethodAndProperties"
+}

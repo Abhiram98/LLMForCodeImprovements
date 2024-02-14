@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated String.format() into a method",
+                "Change_Diff": "- sb.append(String.format(\"%10.1f\",combBuf[i]));\n+ sb.append(format(combBuf[i]));",
+                "Description": "There are multiple instances in the code where `String.format()` is used with the same format string, \"%10.1f\". This can be extracted into a method to avoid repetition and make the code more readable.",
+                "Start": 12,
+                "End": 23
+            },
+            {
+                "Improvement": "Extract repeated logic for appending to StringBuilder into a method",
+                "Change_Diff": "- sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n+ append(sb, LS, \"### Quantiles \", skName, \" DATA DETAIL: \", LS);",
+                "Description": "There are several places in the code where a string is appended to the StringBuilder `sb` with `append()`. This can be extracted into a method to avoid repetition and make the code more readable.",
+                "Start": 6,
+                "End": 23
+            }
+        ],
+        "Final code": "private static String getDataDetail(final DoublesSketch sketchIn){\n  final DoublesSketch sketch=sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n  final StringBuilder sb=new StringBuilder();\n  final String skName=sketch.getClass().getSimpleName();\n  append(sb, LS, \"### Quantiles \", skName, \" DATA DETAIL: \", LS);\n  final int k=sketch.getK();\n  final long n=sketch.getN();\n  final int bbCount=sketch.getBaseBufferCount();\n  final long bitPattern=sketch.getBitPattern();\n  final double[] combBuf=sketch.getCombinedBuffer();\n  sb.append(\"   BaseBuffer   : \");\n  for (int i=0; i < bbCount; i++) {\n    sb.append(format(combBuf[i]));\n  }\n  sb.append(LS);\n  final int combBufSize=combBuf.length;\n  if (n >= (2 * k)) {\n    sb.append(\"   Valid | Level\");\n    for (int j=2 * k; j < combBufSize; j++) {\n      if ((j % k) == 0) {\n        final int levelNum=(j / k) - 2;\n        final String validLvl=((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n        final String lvl=String.format(\"%5d\",levelNum);\n        append(sb, LS, \"   \", validLvl, \" \", lvl, \": \");\n      }\n      sb.append(format(combBuf[j]));\n    }\n    sb.append(LS);\n  }\n  append(sb, \"### END DATA DETAIL\", LS);\n  return sb.toString();\n}\n\nprivate static void append(StringBuilder sb, String... values) {\n  for (String value : values) {\n    sb.append(value);\n  }\n}\n\nprivate static String format(double value) {\n  return String.format(\"%10.1f\", value);\n}"
+    },
+    "Old_Method": "private static String getDataDetail(final DoublesSketch sketchIn){\n  final DoublesSketch sketch=sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n  final StringBuilder sb=new StringBuilder();\n  final String skName=sketch.getClass().getSimpleName();\n  sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n  final int k=sketch.getK();\n  final long n=sketch.getN();\n  final int bbCount=sketch.getBaseBufferCount();\n  final long bitPattern=sketch.getBitPattern();\n  final double[] combBuf=sketch.getCombinedBuffer();\n  sb.append(\"   BaseBuffer   : \");\n  for (int i=0; i < bbCount; i++) {\n    sb.append(String.format(\"%10.1f\",combBuf[i]));\n  }\n  sb.append(LS);\n  final int combBufSize=combBuf.length;\n  if (n >= (2 * k)) {\n    sb.append(\"   Valid | Level\");\n    for (int j=2 * k; j < combBufSize; j++) {\n      if ((j % k) == 0) {\n        final int levelNum=(j / k) - 2;\n        final String validLvl=((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n        final String lvl=String.format(\"%5d\",levelNum);\n        sb.append(LS).append(\"   \").append(validLvl).append(\" \").append(lvl).append(\": \");\n      }\n      sb.append(String.format(\"%10.1f\",combBuf[j]));\n    }\n    sb.append(LS);\n  }\n  sb.append(\"### END DATA DETAIL\").append(LS);\n  return sb.toString();\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/quantiles/DoublesUtil.java",
+    "Start": 7871,
+    "Stop": 9398,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "getDataDetail"
+}

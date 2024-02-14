@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  Jedis jedis=null;\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  }\n  finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}\n",
+    "File_Path": "web/cache/src/main/java/com/aitongyi/web/cache/CacheService.java",
+    "Start": 1034,
+    "Stop": 1334,
+    "Project_Name": "data/projects/web",
+    "Method_Name": "del"
+}

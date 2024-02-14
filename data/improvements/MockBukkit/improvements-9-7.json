@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary @SuppressWarnings annotation",
+                "Change_Diff": "- @SuppressWarnings(\"unchecked\") @Override @Deprecated(since=\"1.13\") public boolean setGameRuleValue(@Nullable String rule,@NotNull String value){\n+ @Override @Deprecated(since=\"1.13\") public boolean setGameRuleValue(@Nullable String rule,@NotNull String value){",
+                "Description": "The @SuppressWarnings annotation is used to suppress compiler warnings for certain rules. However, in this case, it doesn't seem to be suppressing any specific warnings, and its 'unchecked' value is not needed. It's a good practice to only use this annotation when necessary.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Improve code readability by avoiding deep nesting",
+                "Change_Diff": "- if (rule == null) {\n+ if (rule == null || gameRule == null) {\n  return false;\n}\n\n- if (gameRule == null) {\n-   return false;\n- }",
+                "Description": "The code is deeply nested, which can make it hard to read. We can improve this by returning early when conditions are not met, which would remove the need for else statements.",
+                "Start": 3,
+                "End": 30
+            },
+            {
+                "Improvement": "Avoid using hard-coded strings",
+                "Change_Diff": "- if (gameRule.getType().equals(Boolean.class) && (value.equalsIgnoreCase(\"true\") || value.equalsIgnoreCase(\"false\"))) {\n+ final String TRUE = \"true\";\n+ final String FALSE = \"false\";\n+ if (gameRule.getType().equals(Boolean.class) && (value.equalsIgnoreCase(TRUE) || value.equalsIgnoreCase(FALSE))) {",
+                "Description": "Hard-coded strings can lead to potential issues, such as mistyping the string or difficulties with localization. Instead, consider defining these as constants.",
+                "Start": 14,
+                "End": 14
+            }
+        ],
+        "Final code": "@Override @Deprecated(since=\"1.13\") public boolean setGameRuleValue(@Nullable String rule,@NotNull String value){\n  if (rule == null) {\n    return false;\n  }\n  GameRule<?> gameRule=GameRule.getByName(rule);\n  if (gameRule == null) {\n    return false;\n  }\n  final String TRUE = \"true\";\n  final String FALSE = \"false\";\n  if (gameRule.getType().equals(Boolean.class) && (value.equalsIgnoreCase(TRUE) || value.equalsIgnoreCase(FALSE))) {\n    WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n    if (!event.callEvent()) {\n      return false;\n    }\n    return setGameRule((GameRule<Boolean>)gameRule,value.equalsIgnoreCase(TRUE));\n  }\n  if (gameRule.getType().equals(Integer.class)) {\n    try {\n      int intValue=Integer.parseInt(value);\n      WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n      if (!event.callEvent()) {\n        return false;\n      }\n      return setGameRule((GameRule<Integer>)gameRule,intValue);\n    }\n    catch (NumberFormatException e) {\n      return false;\n    }\n  }\n  return false;\n}"
+    },
+    "Old_Method": "@SuppressWarnings(\"unchecked\") @Override @Deprecated(since=\"1.13\") public boolean setGameRuleValue(@Nullable String rule,@NotNull String value){\n  if (rule == null) {\n    return false;\n  }\n  GameRule<?> gameRule=GameRule.getByName(rule);\n  if (gameRule == null) {\n    return false;\n  }\n  if (gameRule.getType().equals(Boolean.class) && (value.equalsIgnoreCase(\"true\") || value.equalsIgnoreCase(\"false\"))) {\n    WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n    if (!event.callEvent()) {\n      return false;\n    }\n    return setGameRule((GameRule<Boolean>)gameRule,value.equalsIgnoreCase(\"true\"));\n  }\n else   if (gameRule.getType().equals(Integer.class)) {\n    try {\n      int intValue=Integer.parseInt(value);\n      WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n      if (!event.callEvent()) {\n        return false;\n      }\n      return setGameRule((GameRule<Integer>)gameRule,intValue);\n    }\n catch (    NumberFormatException e) {\n      return false;\n    }\n  }\n else {\n    return false;\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/WorldMock.java",
+    "Start": 60111,
+    "Stop": 61224,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "setGameRuleValue"
+}

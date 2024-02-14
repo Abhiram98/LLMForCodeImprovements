@@ -1,0 +1,48 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use isEmpty() method instead of ArrayUtils.isEmpty()",
+                "Change_Diff": "- if (ArrayUtils.isEmpty(tags)) {\n+ if (tags.length == 0) {",
+                "Description": "In Java, you can use the .length property to check if an array is empty. This is more standard and does not rely on external libraries like ArrayUtils.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use isEmpty() method instead of CollectionUtil.isEmpty()",
+                "Change_Diff": "- if (CollectionUtil.isEmpty(apiDocList)) {\n+ if (apiDocList.isEmpty()) {",
+                "Description": "In Java, you can use the isEmpty() method to check if a collection is empty. This is more standard and does not rely on external libraries like CollectionUtil.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use isEmpty() method instead of CollectionUtil.isEmpty()",
+                "Change_Diff": "- List<ApiMethodDoc> list=CollectionUtil.isEmpty(v.getList()) ? new ArrayList<>() : v.getList();\n+ List<ApiMethodDoc> list=v.getList().isEmpty() ? new ArrayList<>() : v.getList();",
+                "Description": "In Java, you can use the isEmpty() method to check if a collection is empty. This is more standard and does not rely on external libraries like CollectionUtil.",
+                "Start": 17,
+                "End": 17
+            },
+            {
+                "Improvement": "Remove unnecessary copy of map",
+                "Change_Diff": "- Map<String,ApiDoc> allMap=new HashMap<>(copyMap);\n- allMap.forEach((k,v) -> {\n+ copyMap.forEach((k,v) -> {",
+                "Description": "The allMap is just a copy of copyMap. Its unnecessary to create a new map from copyMap. You can use copyMap directly.",
+                "Start": 27,
+                "End": 42
+            },
+            {
+                "Improvement": "Use isEmpty() method instead of ArrayUtils.isEmpty()",
+                "Change_Diff": "- if (ArrayUtils.isEmpty(tags)) {\n+ if (tags.length == 0) {",
+                "Description": "In Java, you can use the .length property to check if an array is empty. This is more standard and does not rely on external libraries like ArrayUtils.",
+                "Start": 33,
+                "End": 33
+            }
+        ],
+        "Final code": "default List<ApiDoc> handleTagsApiDoc(List<ApiDoc> apiDocList){\n  if (apiDocList.isEmpty()) {\n    return Collections.emptyList();\n  }\n  Map<String,ApiDoc> copyMap=new HashMap<>();\n  apiDocList.forEach(doc -> {\n    String[] tags=doc.getTags();\n    if (tags.length == 0) {\n      tags=new String[]{doc.getPackageName() + \".\" + doc.getName()};\n    }\n    for (    String tag : tags) {\n      tag=StringUtil.trim(tag);\n      copyMap.computeIfPresent(tag,(k,v) -> {\n        List<ApiMethodDoc> list=v.getList().isEmpty() ? new ArrayList<>() : v.getList();\n        list.addAll(doc.getList());\n        v.setList(list);\n        return v;\n      }\n);\n      copyMap.putIfAbsent(tag,doc);\n    }\n  }\n);\n  copyMap.forEach((k,v) -> {\n    List<ApiMethodDoc> methodDocList=v.getList();\n    methodDocList.forEach(method -> {\n      String[] tags=method.getTags();\n      if (tags.length == 0) {\n        return;\n      }\n      for (      String tag : tags) {\n        tag=StringUtil.trim(tag);\n        copyMap.computeIfPresent(tag,(k1,v2) -> {\n          method.setOrder(v2.getList().size() + 1);\n          v2.getList().add(method);\n          return v2;\n        }\n);\n        copyMap.putIfAbsent(tag,ApiDoc.buildTagApiDoc(v,tag,method));\n      }\n    }\n);\n  }\n);\n  List<ApiDoc> apiDocs=new ArrayList<>(copyMap.values());\n  int index=apiDocs.size() - 1;\n  for (  ApiDoc apiDoc : apiDocs) {\n    if (apiDoc.getOrder() == null) {\n      apiDoc.setOrder(index++);\n    }\n  }\n  apiDocs.sort(Comparator.comparing(ApiDoc::getOrder));\n  return apiDocs;\n}"
+    },
+    "Old_Method": "default List<ApiDoc> handleTagsApiDoc(List<ApiDoc> apiDocList){\n  if (CollectionUtil.isEmpty(apiDocList)) {\n    return Collections.emptyList();\n  }\n  Map<String,ApiDoc> copyMap=new HashMap<>();\n  apiDocList.forEach(doc -> {\n    String[] tags=doc.getTags();\n    if (ArrayUtils.isEmpty(tags)) {\n      tags=new String[]{doc.getPackageName() + \".\" + doc.getName()};\n    }\n    for (    String tag : tags) {\n      tag=StringUtil.trim(tag);\n      copyMap.computeIfPresent(tag,(k,v) -> {\n        List<ApiMethodDoc> list=CollectionUtil.isEmpty(v.getList()) ? new ArrayList<>() : v.getList();\n        list.addAll(doc.getList());\n        v.setList(list);\n        return v;\n      }\n);\n      copyMap.putIfAbsent(tag,doc);\n    }\n  }\n);\n  Map<String,ApiDoc> allMap=new HashMap<>(copyMap);\n  allMap.forEach((k,v) -> {\n    List<ApiMethodDoc> methodDocList=v.getList();\n    methodDocList.forEach(method -> {\n      String[] tags=method.getTags();\n      if (ArrayUtils.isEmpty(tags)) {\n        return;\n      }\n      for (      String tag : tags) {\n        tag=StringUtil.trim(tag);\n        copyMap.computeIfPresent(tag,(k1,v2) -> {\n          method.setOrder(v2.getList().size() + 1);\n          v2.getList().add(method);\n          return v2;\n        }\n);\n        copyMap.putIfAbsent(tag,ApiDoc.buildTagApiDoc(v,tag,method));\n      }\n    }\n);\n  }\n);\n  List<ApiDoc> apiDocs=new ArrayList<>(copyMap.values());\n  int index=apiDocs.size() - 1;\n  for (  ApiDoc apiDoc : apiDocs) {\n    if (apiDoc.getOrder() == null) {\n      apiDoc.setOrder(index++);\n    }\n  }\n  apiDocs.sort(Comparator.comparing(ApiDoc::getOrder));\n  return apiDocs;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/template/IRestDocTemplate.java",
+    "Start": 9408,
+    "Stop": 11532,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "handleTagsApiDoc"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary print statements",
+                "Change_Diff": "- System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n- System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n- System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n- System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n- System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");",
+                "Description": "In a test case, print statements are usually not required. In this case, the print statements are used for debugging purposes and should be removed. If the test fails, the assert statements should give enough information to debug the issue.",
+                "Start": 5,
+                "End": 18
+            },
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- Bytes rnd=Bytes.random(i % 256);\n+ Bytes randomBytes=Bytes.random(i % 256);\n\n- for (int j=2; j <= 36; j++) {\n+ for (int radix=2; radix <= 36; radix++) {",
+                "Description": "Variable names should be descriptive to make the code more readable. For instance, 'rnd' could be 'randomBytes' and 'j' could be 'radix'. This makes it easier to understand what these variables represent at a glance.",
+                "Start": 4,
+                "End": 18
+            }
+        ],
+        "Final code": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes randomBytes=Bytes.random(i % 256);\n    for (int radix=2; radix <= 36; radix++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(radix);\n      String encodedBigEndian=encoding.encode(randomBytes.array(),ByteOrder.BIG_ENDIAN);\n      byte[] decoded=encoding.decode(encodedBigEndian);\n      if (randomBytes.length() <= 0 || randomBytes.byteAt(0) != 0) {\n        assertArrayEquals(randomBytes.array(),decoded);\n      }\n      else {\n        leadingZeroHits++;\n        assertArrayEquals(randomBytes.resize(randomBytes.length() - 1).array(),decoded);\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n      String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n      byte[] decoded=encoding.decode(encodedBigEndian);\n      System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n      System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n      System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n      if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        assertArrayEquals(rnd.array(),decoded);\n      }\n else {\n        leadingZeroHits++;\n        assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n      }\n    }\n  }\n  System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BinaryToTextEncodingTest.java",
+    "Start": 3738,
+    "Stop": 5067,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "encodeDecodeRadix"
+}

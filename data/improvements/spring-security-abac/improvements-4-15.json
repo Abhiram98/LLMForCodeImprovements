@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repeated code into a method",
+                "Change_Diff": "- value=httpServletRequest.getParameter(value);\n- value=httpServletRequest.getParameter(value);\n+ value=getRequestParam(httpServletRequest, value);",
+                "Description": "The same logic for getting the value from the request is repeated for QUERY_PARAM and FORM_DATA. This code can be refactored into a method to reduce duplication",
+                "Start": 15,
+                "End": 20
+            },
+            {
+                "Improvement": "Add null check for the cookies",
+                "Change_Diff": "- value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\n+ Cookie[] cookies = httpServletRequest.getCookies();\n+ value = cookies != null ? GeneralUtils.extractValuesFromCookies(cookies).get(value) : null;",
+                "Description": "The cookies from the request could be null. There should be a null check before using it to prevent NullPointerException",
+                "Start": 13,
+                "End": 13
+            }
+        ],
+        "Final code": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\n    switch (propertyType) {\n      case HEADER:\n        value=httpServletRequest.getHeader(value);\n        break;\n      case COOKIE:\n        Cookie[] cookies = httpServletRequest.getCookies();\n        value = cookies != null ? GeneralUtils.extractValuesFromCookies(cookies).get(value) : null;\n        break;\n      case QUERY_PARAM:\n      case FORM_DATA:\n        value=getRequestParam(httpServletRequest, value);\n        break;\n      case PATH_PARAM:\n        value=extractPathParam(httpServletRequest,value);\n        break;\n    }\n    templateData.put(key,value);\n  }\n  return templateData;\n}\n\nprivate String getRequestParam(HttpServletRequest request, String param) {\n  return request.getParameter(param);\n}"
+    },
+    "Old_Method": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\nswitch (propertyType) {\ncase HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\ncase COOKIE:\n  value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\nbreak;\ncase QUERY_PARAM:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase FORM_DATA:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase PATH_PARAM:\nvalue=extractPathParam(httpServletRequest,value);\nbreak;\n}\ntemplateData.put(key,value);\n}\nreturn templateData;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 2835,
+    "Stop": 4525,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "generateFreemakerTemplateData"
+}

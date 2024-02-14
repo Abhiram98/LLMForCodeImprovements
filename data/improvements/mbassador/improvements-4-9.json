@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Logger instead of System.out.println",
+                "Change_Diff": "- System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n- System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n- System.out.println(\"Message envelope configured but message types defined for handler\");\n+ logger.warn(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n+ logger.warn(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n+ logger.warn(\"Message envelope configured but message types defined for handler\");",
+                "Description": "Using a logger instead of `System.out.println()` is better for performance and it gives more flexibility, e.g., different log levels. Moreover, you can turn logging on or off in different parts of the application without having to change the code.",
+                "Start": 7,
+                "End": 13
+            },
+            {
+                "Improvement": "Avoid multiple calls to handler.getParameterTypes()",
+                "Change_Diff": "- if (handler.getParameterTypes().length != 1) {\n- if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n+ Class<?>[] parameterTypes = handler.getParameterTypes();\n+ if (parameterTypes.length != 1) {\n+ if (envelope != null && !MessageEnvelope.class.isAssignableFrom(parameterTypes[0])) {",
+                "Description": "Rather than calling `handler.getParameterTypes()` multiple times, which can be costly, call it once and store the result in a variable.",
+                "Start": 6,
+                "End": 10
+            }
+        ],
+        "Final code": "private boolean isValidMessageHandler(Method handler){\n  if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n    return false;\n  }\n  Class<?>[] parameterTypes = handler.getParameterTypes();\n  if (parameterTypes.length != 1) {\n    logger.warn(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n    return false;\n  }\n  Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(parameterTypes[0])) {\n    logger.warn(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    logger.warn(\"Message envelope configured but message types defined for handler\");\n    return false;\n  }\n  return true;\n}"
+    },
+    "Old_Method": "private boolean isValidMessageHandler(Method handler){\n  if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n    return false;\n  }\n  if (handler.getParameterTypes().length != 1) {\n    System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n    return false;\n  }\n  Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n    System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    System.out.println(\"Message envelope configured but message types defined for handler\");\n    return false;\n  }\n  return true;\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/listener/MetadataReader.java",
+    "Start": 5330,
+    "Stop": 6449,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "isValidMessageHandler"
+}

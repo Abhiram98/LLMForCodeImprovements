@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method visibility modifier",
+                "Change_Diff": "- Alphabet(char[] chars){\n+ public Alphabet(char[] chars){",
+                "Description": "The method should have a visibility modifier to specify its visibility. In this case, we assume it should be public.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add comments for better understanding",
+                "Change_Diff": "+ // Assigning passed array to the class variable after null checking\n  this.chars=Objects.requireNonNull(chars);\n+ // Calculating bits per character based on the length of character array\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n+ // Calculating characters and bytes per chunk based on greatest common divisor\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n+ // Creating a mask based on the length of character array\n  this.mask=chars.length - 1;\n+ // Preparing the decodabet array\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n+ // Populating the decodabet array\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n+ // Assigning the decodabet array to the class variable\n  this.decodabet=decodabet;",
+                "Description": "Adding comments to explain what each line or block of code does can make it easier for others to understand your code.",
+                "Start": 2,
+                "End": 16
+            }
+        ],
+        "Final code": "public Alphabet(char[] chars){\n  // Assigning passed array to the class variable after null checking\n  this.chars=Objects.requireNonNull(chars);\n  // Calculating bits per character based on the length of character array\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  // Calculating characters and bytes per chunk based on greatest common divisor\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  // Creating a mask based on the length of character array\n  this.mask=chars.length - 1;\n  // Preparing the decodabet array\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  // Populating the decodabet array\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  // Assigning the decodabet array to the class variable\n  this.decodabet=decodabet;\n}"
+    },
+    "Old_Method": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  this.decodabet=decodabet;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/BaseEncoding.java",
+    "Start": 6069,
+    "Stop": 6946,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "Alphabet"
+}

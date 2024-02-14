@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants for property keys",
+                "Change_Diff": "- properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n+ properties.getProperty(XACML_PDP_URL_ENTITLEMENT_SERVICE);",
+                "Description": "Instead of using strings directly to get properties, define them as constants at the top of your class. This will reduce the chance of making a typo, make the code easier to read and maintain, and allow the keys to be reused if necessary.",
+                "Start": 3,
+                "End": 8
+            },
+            {
+                "Improvement": "Add null check for all properties",
+                "Change_Diff": "- if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n+ if (anyPropertyIsNull()) {",
+                "Description": "Currently, you're only checking if the 'XACML_PDP_ENTITLEMENT_SERVICE_URL' property is null. It would be better to check all properties for null values to prevent Null Pointer Exceptions.",
+                "Start": 14,
+                "End": 18
+            },
+            {
+                "Improvement": "Extract complex operation into separate method",
+                "Change_Diff": "- this.httpClient=HttpClients.custom()...\n+ this.httpClient = createHttpClient();",
+                "Description": "The operation of creating the HttpClient is a bit complex and makes the constructor harder to read. You should extract this operation into a separate method.",
+                "Start": 23,
+                "End": 27
+            }
+        ],
+        "Final code": "public static final String XACML_PDP_URL_ENTITLEMENT_SERVICE = \"xacml.pdp.url.entitlement.service\";\n\npublic XacmlAttributeHandler(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(XACML_PDP_URL_ENTITLEMENT_SERVICE);\n    // ... similar changes for other properties\n  }\n catch (IOException e) {\n    logger.error(\"Failed to read properties from application.properties\",e);\n    stopApplication();\n  }\n  if (anyPropertyIsNull()) {\n    logger.error(\"One or more properties are null in application.properties\");\n    stopApplication();\n  }\n  // ... other code remains the same\n  try {\n    this.httpClient = createHttpClient();\n  }\n catch (Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\",e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  // ... other code remains the same\n}"
+    },
+    "Old_Method": "public XacmlAttributeHandler(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n    TRUST_STORE=properties.getProperty(\"xacml.pdp.trustStore\");\n    TRUST_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.trustStore.password\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n  }\n catch (  IOException e) {\n    logger.error(\"Failed to read properties from application.properties\",e);\n    stopApplication();\n  }\n  if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n    logger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\n    stopApplication();\n  }\n  CacheManager cacheManager=EhCacheManager.getInstance();\n  this.authCache=cacheManager.getCache(\"authCache\",String.class,String.class,60,100);\n  this.entitlementAttributesCache=cacheManager.getCache(\"entitlementCache\",String.class,JSONObject.class,60,100);\n  this.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\n  try {\n    this.httpClient=HttpClients.custom().setSSLContext(SSLContextBuilder.create().loadKeyMaterial(loadPfx(\"classpath:\".concat(KEY_STORE),KEY_STORE_PASSWORD.toCharArray()),KEY_STORE_PASSWORD.toCharArray()).loadTrustMaterial(ResourceUtils.getFile(\"classpath:\".concat(TRUST_STORE)),TRUST_STORE_PASSWORD.toCharArray()).build()).build();\n  }\n catch (  Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\",e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  this.restHeaders=new HttpHeaders();\n  this.restHeaders.setContentType(MediaType.APPLICATION_JSON);\n  this.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\n  this.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\n  logger.info(\"XacmlAttributeHandler successfully initiated\");\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 1818,
+    "Stop": 4341,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "XacmlAttributeHandler"
+}

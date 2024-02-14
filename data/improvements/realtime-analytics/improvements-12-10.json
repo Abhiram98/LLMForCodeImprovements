@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder for first value as well",
+                "Change_Diff": "- b.append(values.get(0));\n+ b.append(values.get(0).toString());",
+                "Description": "To make the code more consistent and readable, use the StringBuilder for appending the first value of the list as well.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Use String.join() instead of manually appending with StringBuilder",
+                "Change_Diff": "- for (int i=1, t=values.size(); i < t; i++) {\n-      b.append(\",\");\n-      b.append(values.get(i));\n-    }\n-    return b.toString();\n+ return String.join(\",\", values);",
+                "Description": "The String.join() function can be used to directly join list elements with a delimiter. This will make the code more readable and efficient.",
+                "Start": 7,
+                "End": 11
+            }
+        ],
+        "Final code": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    return String.join(\",\", values);\n  }\n else {\n    return value;\n  }\n}"
+    },
+    "Old_Method": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    StringBuilder b=new StringBuilder();\n    b.append(values.get(0));\n    for (int i=1, t=values.size(); i < t; i++) {\n      b.append(\",\");\n      b.append(values.get(i));\n    }\n    return b.toString();\n  }\n else {\n    return value;\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 4288,
+    "Stop": 4905,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "normailizeValue"
+}

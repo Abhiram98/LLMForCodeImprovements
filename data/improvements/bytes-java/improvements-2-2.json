@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove System.out.println statements",
+                "Change_Diff": "- System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n- System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n- System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n- System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n- System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");",
+                "Description": "Using System.out.println statements is not a good practice in production code since it can clutter the console and make debugging more difficult. It is better to use a logger for this purpose",
+                "Start": 5,
+                "End": 14
+            },
+            {
+                "Improvement": "Use try-catch block",
+                "Change_Diff": "+ try {\n    encodings++;\n    BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n    String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n    byte[] decoded=encoding.decode(encodedBigEndian);\n} catch (Exception e) {\n    e.printStackTrace();\n}\n",
+                "Description": "It's always good to handle exceptions that might occur during the execution of your program. Here, use a try-catch block to handle potential exceptions that might occur during the encoding and decoding process",
+                "Start": 8,
+                "End": 16
+            }
+        ],
+        "Final code": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    for (int j=2; j <= 36; j++) {\n      try {\n        encodings++;\n        BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n        String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n        byte[] decoded=encoding.decode(encodedBigEndian);\n        if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n          assertArrayEquals(rnd.array(),decoded);\n        }\n else {\n          leadingZeroHits++;\n          assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n        }\n      } catch (Exception e) {\n        e.printStackTrace();\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n      String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n      byte[] decoded=encoding.decode(encodedBigEndian);\n      System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n      System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n      System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n      if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        assertArrayEquals(rnd.array(),decoded);\n      }\n else {\n        leadingZeroHits++;\n        assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n      }\n    }\n  }\n  System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BinaryToTextEncodingTest.java",
+    "Start": 3738,
+    "Stop": 5067,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "encodeDecodeRadix"
+}

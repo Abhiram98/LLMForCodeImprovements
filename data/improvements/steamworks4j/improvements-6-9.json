@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract magic strings and numbers into constants",
+                "Change_Diff": "- if (input.startsWith(\"p2p send \")) {\n+ if (input.startsWith(P2P_SEND_CMD)) {\n\n- String[] params=input.substring(\"p2p send \".length()).split(\" \");\n+ String[] params=input.substring(P2P_SEND_CMD.length()).split(\" \");",
+                "Description": "There are several magic strings and numbers in the method. These should be extracted into named constants to increase readability and maintainability of the code.",
+                "Start": 2,
+                "End": 63
+            },
+            {
+                "Improvement": "Extract repeated code into separate method",
+                "Change_Diff": "- int receiverID=Integer.parseInt(params[0]);\n- SteamID steamIDReceiver=null;\n- if (remoteUserIDs.containsKey(receiverID)) {\n-   steamIDReceiver=remoteUserIDs.get(receiverID);\n- }\n- else if (friends.isFriendAccountID(receiverID)) {\n-   steamIDReceiver=friends.getFriendSteamID(receiverID);\n- }\n- else {\n-   System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n- }\n+ SteamID steamIDReceiver = getSteamID(receiverID);",
+                "Description": "The code for getting a SteamID based on the receiverID or remoteID is repeated twice. This should be extracted into a separate method to avoid code duplication.",
+                "Start": 5,
+                "End": 17
+            }
+        ],
+        "Final code": "private static final String P2P_SEND_CMD = \"p2p send \";\n\n@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(P2P_SEND_CMD)) {\n    String[] params=input.substring(P2P_SEND_CMD.length()).split(\" \");\n    int receiverID=Integer.parseInt(params[0]);\n    SteamID steamIDReceiver = getSteamID(receiverID);\n    if (steamIDReceiver != null) {\n      packetSendBuffer.clear();\n      for (int i=1; i < params.length; i++) {\n        byte[] bytes=params[i].getBytes(messageCharset);\n        if (i > 1) {\n          packetSendBuffer.put((byte)0x20);\n        }\n        packetSendBuffer.put(bytes);\n      }\n      packetSendBuffer.flip();\n      networking.sendP2PPacket(steamIDReceiver,packetSendBuffer,SteamNetworking.P2PSend.Unreliable,defaultChannel);\n    }\n  }\n  // ... rest of the code\n}\n\nprivate SteamID getSteamID(int id) {\n  SteamID steamID=null;\n  if (remoteUserIDs.containsKey(id)) {\n    steamID=remoteUserIDs.get(id);\n  }\n  else if (friends.isFriendAccountID(id)) {\n    steamID=friends.getFriendSteamID(id);\n  }\n  else {\n    System.out.println(\"Error: unknown userID \" + id + \" (no friend, not connected)\");\n  }\n  return steamID;\n}"
+    },
+    "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(\"p2p send \")) {\n    String[] params=input.substring(\"p2p send \".length()).split(\" \");\n    int receiverID=Integer.parseInt(params[0]);\n    SteamID steamIDReceiver=null;\n    if (remoteUserIDs.containsKey(receiverID)) {\n      steamIDReceiver=remoteUserIDs.get(receiverID);\n    }\n else     if (friends.isFriendAccountID(receiverID)) {\n      steamIDReceiver=friends.getFriendSteamID(receiverID);\n    }\n else {\n      System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n    }\n    if (steamIDReceiver != null) {\n      packetSendBuffer.clear();\n      for (int i=1; i < params.length; i++) {\n        byte[] bytes=params[i].getBytes(messageCharset);\n        if (i > 1) {\n          packetSendBuffer.put((byte)0x20);\n        }\n        packetSendBuffer.put(bytes);\n      }\n      packetSendBuffer.flip();\n      networking.sendP2PPacket(steamIDReceiver,packetSendBuffer,SteamNetworking.P2PSend.Unreliable,defaultChannel);\n    }\n  }\n else   if (input.startsWith(\"p2p close \")) {\n    int remoteID=Integer.parseInt(input.substring(\"p2p close \".length()));\n    SteamID steamIDRemote=null;\n    if (remoteUserIDs.containsKey(remoteID)) {\n      steamIDRemote=remoteUserIDs.get(remoteID);\n    }\n else {\n      System.out.println(\"Error: unknown remote ID \" + remoteID + \" (not connected)\");\n    }\n    if (steamIDRemote != null) {\n      networking.closeP2PSessionWithUser(steamIDRemote);\n      unregisterRemoteSteamID(steamIDRemote);\n    }\n  }\n else   if (input.equals(\"p2p list\")) {\n    System.out.println(\"P2P connected users:\");\n    if (remoteUserIDs.size() == 0) {\n      System.out.println(\"  none\");\n    }\n    for (    SteamID steamIDUser : remoteUserIDs.values()) {\n      System.out.println(\"  \" + steamIDUser.getAccountID());\n    }\n  }\n else   if (input.startsWith(\"auth ticket \")) {\n    String authCmd=input.substring(\"auth ticket \".length());\n    if (authCmd.equals(\"get\")) {\n      getAuthTicket();\n    }\n else     if (authCmd.equals(\"cancel\")) {\n      cancelAuthTicket();\n    }\n else     if (authCmd.equals(\"send\")) {\n      broadcastAuthTicket();\n    }\n else     if (authCmd.equals(\"end\")) {\n      endAuthSession();\n    }\n  }\n  friends.processInput(input);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+    "Start": 5088,
+    "Stop": 7338,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processInput"
+}

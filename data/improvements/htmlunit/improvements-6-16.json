@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive method calls",
+                "Change_Diff": "- final Cache cache=getPage().getWebClient().getCache();\n- final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n- final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n+ final WebClient webClient = getPage().getWebClient();\n+ final Cache cache = webClient.getCache();\n+ final String textContent = getTextContent();\n+ final CSSStyleSheetImpl cached = cache.getCachedStyleSheet(textContent);\n+ final String uri = webClient.getWebResponse().getWebRequest().getUrl().toExternalForm();",
+                "Description": "The method calls to `getPage().getWebClient().getCache()`, `getPage().getWebResponse().getWebRequest().getUrl().toExternalForm()`, and `getTextContent()` are called more than once. Instead of calling these methods multiple times, we can store the return values in local variables at the beginning of the method. This will make the code cleaner and slightly more efficient.",
+                "Start": 5,
+                "End": 11
+            },
+            {
+                "Improvement": "Separation of concerns",
+                "Change_Diff": "- if (cached != null) {\n-   sheet_=new CssStyleSheet(this,cached,uri);\n- }\n- else {\n-   final String css=getTextContent();\n-   try (InputSource source=new InputSource(new StringReader(css))){\n-     sheet_=new CssStyleSheet(this,source,uri);\n-     cache.cache(css,sheet_.getWrappedSheet());\n-   }\n- catch (final IOException e) {\n-     LOG.error(e.getMessage(),e);\n-   }\n- }\n+ initSheet(cached, uri, cache);",
+                "Description": "The current method `getSheet()` is handling two responsibilities: getting the sheet and initializing it if it doesn't exist. We could refactor the initialization logic into a separate private method `initSheet()`. This will make each method simpler and easier to understand.",
+                "Start": 5,
+                "End": 16
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n\n  final WebClient webClient = getPage().getWebClient();\n  final Cache cache = webClient.getCache();\n  final String textContent = getTextContent();\n  final CSSStyleSheetImpl cached = cache.getCachedStyleSheet(textContent);\n  final String uri = webClient.getWebResponse().getWebRequest().getUrl().toExternalForm();\n\n  initSheet(cached, uri, cache);\n\n  return sheet_;\n}\n\nprivate void initSheet(CSSStyleSheetImpl cached, String uri, Cache cache) {\n  if (cached != null) {\n    sheet_ = new CssStyleSheet(this, cached, uri);\n  } else {\n    String css = getTextContent();\n    try (InputSource source = new InputSource(new StringReader(css))) {\n      sheet_ = new CssStyleSheet(this, source, uri);\n      cache.cache(css, sheet_.getWrappedSheet());\n    } catch (IOException e) {\n      LOG.error(e.getMessage(), e);\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

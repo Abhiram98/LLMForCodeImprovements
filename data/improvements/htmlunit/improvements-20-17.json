@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Separate Concerns",
+                "Change_Diff": "- private void createAppletMethodAndProperties() throws Exception {\n+ private Applet getApplet() throws Exception {\n+ ...\n+ private Function createFunctionFromMethod(Method method, Applet applet) {\n+ ...\n+ private void definePropertyForMethod(Method method, Function function) {\n+ ...",
+                "Description": "The method 'createAppletMethodAndProperties' does too many things, it retrieves the applet, iterates over the methods of the applet's class, and defines properties in the scriptable object. These responsibilities should be separated into different smaller methods to follow the Single Responsibility Principle.",
+                "Start": 1,
+                "End": 34
+            },
+            {
+                "Improvement": "Handle exceptions properly",
+                "Change_Diff": "- throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n+ log.error(\"An error occurred while invoking method\", e);\n+ throw JavaScriptEngine.throwAsScriptRuntimeEx(e);",
+                "Description": "Instead of just throwing JavaScriptEngine.throwAsScriptRuntimeEx(e), we should also log the exception for debugging purposes. It will make it easier to identify and fix issues in the future.",
+                "Start": 28,
+                "End": 30
+            }
+        ],
+        "Final code": "private Applet getApplet() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  return appletNode.getApplet();\n}\n\nprivate Function createFunctionFromMethod(Method method, Applet applet) {\n  return new BaseFunction(){\n      @Override public Object call( final Context cx, final Scriptable scope, final Scriptable thisObj, final Object[] args){\n        final Object[] realArgs=new Object[method.getParameterTypes().length];\n        for (int i=0; i < realArgs.length; i++) {\n          final Object arg;\n          if (i > args.length) {\n            arg=null;\n          }\n else {\n            arg=Context.jsToJava(args[i],method.getParameterTypes()[i]);\n          }\n          realArgs[i]=arg;\n        }\n        try {\n          return method.invoke(applet,realArgs);\n        }\n catch ( final Exception e) {\n          log.error(\"An error occurred while invoking method\", e);\n          throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n        }\n      }\n    };\n}\n\nprivate void definePropertyForMethod(Method method, Function function) {\n  ScriptableObject.defineProperty(this,method.getName(),function,ScriptableObject.READONLY);\n}\n\nprivate void createAppletMethodAndProperties() throws Exception {\n  final Applet applet = getApplet();\n  if (applet == null) {\n    return;\n  }\n  for (final Method method : applet.getClass().getMethods()) {\n    final Function f = createFunctionFromMethod(method, applet);\n    definePropertyForMethod(method, f);\n  }\n}"
+    },
+    "Old_Method": "private void createAppletMethodAndProperties() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  final Applet applet=appletNode.getApplet();\n  if (applet == null) {\n    return;\n  }\n  for (  final Method method : applet.getClass().getMethods()) {\n    final Function f=new BaseFunction(){\n      @Override public Object call(      final Context cx,      final Scriptable scope,      final Scriptable thisObj,      final Object[] args){\n        final Object[] realArgs=new Object[method.getParameterTypes().length];\n        for (int i=0; i < realArgs.length; i++) {\n          final Object arg;\n          if (i > args.length) {\n            arg=null;\n          }\n else {\n            arg=Context.jsToJava(args[i],method.getParameterTypes()[i]);\n          }\n          realArgs[i]=arg;\n        }\n        try {\n          return method.invoke(applet,realArgs);\n        }\n catch (        final Exception e) {\n          throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n        }\n      }\n    }\n;\n    ScriptableObject.defineProperty(this,method.getName(),f,ScriptableObject.READONLY);\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/html/HTMLObjectElement.java",
+    "Start": 3134,
+    "Stop": 4723,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "createAppletMethodAndProperties"
+}

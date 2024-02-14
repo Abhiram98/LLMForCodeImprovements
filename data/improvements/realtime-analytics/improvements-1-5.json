@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional to handle possible null values",
+                "Change_Diff": "- if (getConfiguration().getOffheapMetricConf() != null) {\n-     conf=getConfiguration().getOffheapMetricConf().get(metricName);\n- }\n+ conf = Optional.ofNullable(getConfiguration().getOffheapMetricConf()).map(conf -> conf.get(metricName)).orElse(null);",
+                "Description": "In multiple places, null checks are used before taking some action. We can simplify this by using Optional and its methods to handle possible null values.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Reduce the number of nested if-else statements",
+                "Change_Diff": "- if (counter == null) {\n-     if (isAvg) {\n-         counter=new AvgCounter();\n-     }\n-     else {\n-         counter=new Counter();\n-     }\n-     if (conf == null) {\n-         counters.put(groupDemension,counter);\n-     }\n- }\n+ if (counter != null) return counter;\n+ counter = isAvg ? new AvgCounter() : new Counter();\n+ if (conf == null) counters.put(groupDemension,counter);",
+                "Description": "There are many nested if-else statements in this method. We can reduce this by using guard clauses. This will make the code easier to read and understand.",
+                "Start": 11,
+                "End": 32
+            }
+        ],
+        "Final code": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n    Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n    OffHeapCacheConfig conf = Optional.ofNullable(getConfiguration().getOffheapMetricConf()).map(conf -> conf.get(metricName)).orElse(null);\n    ...\n    Counter counter=counters.get(groupDemension);\n    if (counter != null) return counter;\n    counter = isAvg ? new AvgCounter() : new Counter();\n    if (conf == null) counters.put(groupDemension,counter);\n    ...\n    return counter;\n}"
+    },
+    "Old_Method": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n  Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  if (counters == null) {\nsynchronized (this) {\n      if (counters == null) {\n        if (conf != null) {\n          counters=CacheManager.getCounterOffHeapCache(metricName,conf);\n        }\n else {\n          counters=CacheManager.getCounterCache();\n        }\n        groupbyWithTagsMetricMap.put(metricName,counters);\n      }\n    }\n  }\n  MCMetricGroupDemension groupDemension=null;\n  String tag_time=null;\n  if (tags == null || tags.isEmpty()) {\n    groupDemension=new MCMetricGroupDemension(metricName,groupId);\n  }\n else {\n    if (tags.containsKey(MCConstant.TAG_TIME_IGNORE)) {\n      tag_time=tags.remove(MCConstant.TAG_TIME_IGNORE);\n    }\n    groupDemension=new MCMetricGroupDemension(metricName,groupId,tags);\n  }\n  Counter counter=counters.get(groupDemension);\n  if (counter == null) {\n    if (isAvg) {\n      counter=new AvgCounter();\n    }\n else {\n      counter=new Counter();\n    }\n    if (conf == null) {\n      counters.put(groupDemension,counter);\n    }\n  }\n  if (tag_time != null) {\n    counter.setLastCounterTime(tag_time);\n  }\n  if (isAvg) {\n    ((AvgCounter)counter).inc(count,total);\n  }\n else {\n    if (count != null) {\n      counter.inc(count);\n    }\n else {\n      counter.inc();\n    }\n  }\n  if (conf != null) {\n    counters.put(groupDemension,counter);\n  }\n  return counter;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 9927,
+    "Stop": 12300,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getCounterByMetricDemensionAndInc"
+}

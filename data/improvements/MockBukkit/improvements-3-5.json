@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract inner Consumer class to a named class",
+                "Change_Diff": "- new Consumer<>(){\n  int executions=0;\n  @Override public void accept(          BukkitTask bukkitTask){\n    if (mainThread != Thread.currentThread()) {\n      notPrimaryThread.set(true);\n    }\n    executions++;\n    if (executions == toExecute) {\n      executed.incrementAndGet();\n      bukkitTask.cancel();\n    }\n  }\n}\n+ new TaskTimerConsumer(mainThread, toExecute, executed, notPrimaryThread)",
+                "Description": "The anonymous Consumer class within the registerMultipleTimerTasksAsynchronously method could be extracted into a separate named class for easier testing, readability, and reusability. This could be placed within the same class file, or in its own file. The new class should have a constructor that accepts the mainThread, toExecute, executed, and notPrimaryThread variables, and use these in the overridden accept method.",
+                "Start": 7,
+                "End": 18
+            },
+            {
+                "Improvement": "Replace while loops with awaitility",
+                "Change_Diff": "- while (!completed.get()) {\n  checkTimeout(startTime,thread);\n  scheduler.performOneTick();\n  Thread.yield();\n}\nwhile (executed.get() < toExecute) {\n  checkTimeout(startTime);\n  scheduler.performOneTick();\n}\n+ Awaitility.await().until(completed::get);\n+ Awaitility.await().until(() -> executed.get() >= toExecute);",
+                "Description": "The while loops that wait for certain conditions to be met before proceeding can be replaced with the Awaitility library, which provides a more readable and robust way to wait for conditions. This can make the code easier to understand and more reliable.",
+                "Start": 27,
+                "End": 33
+            }
+        ],
+        "Final code": "@Test void registerMultipleTimerTasksAsynchronously(){\n  final int toExecute=100;\n  final Thread mainThread=Thread.currentThread();\n  AtomicInteger executed=new AtomicInteger();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      for (int i=0; i < toExecute && !Thread.interrupted(); i++) {\n        scheduler.runTaskTimer(null,new TaskTimerConsumer(mainThread, toExecute, executed, notPrimaryThread),0,1);\n      }\n    }\n    finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  Awaitility.await().until(completed::get);\n  Awaitility.await().until(() -> executed.get() >= toExecute);\n  assertEquals(toExecute,executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n\nclass TaskTimerConsumer implements Consumer<BukkitTask> {\n  private final Thread mainThread;\n  private final int toExecute;\n  private final AtomicInteger executed;\n  private final AtomicBoolean notPrimaryThread;\n  private int executions = 0;\n\n  TaskTimerConsumer(Thread mainThread, int toExecute, AtomicInteger executed, AtomicBoolean notPrimaryThread) {\n    this.mainThread = mainThread;\n    this.toExecute = toExecute;\n    this.executed = executed;\n    this.notPrimaryThread = notPrimaryThread;\n  }\n\n  @Override\n  public void accept(BukkitTask bukkitTask) {\n    if (mainThread != Thread.currentThread()) {\n      notPrimaryThread.set(true);\n    }\n    executions++;\n    if (executions == toExecute) {\n      executed.incrementAndGet();\n      bukkitTask.cancel();\n    }\n  }\n}"
+    },
+    "Old_Method": "@Test void registerMultipleTimerTasksAsynchronously(){\n  final int toExecute=100;\n  final Thread mainThread=Thread.currentThread();\n  AtomicInteger executed=new AtomicInteger();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      for (int i=0; i < toExecute && !Thread.interrupted(); i++) {\n        scheduler.runTaskTimer(null,new Consumer<>(){\n          int executions=0;\n          @Override public void accept(          BukkitTask bukkitTask){\n            if (mainThread != Thread.currentThread()) {\n              notPrimaryThread.set(true);\n            }\n            executions++;\n            if (executions == toExecute) {\n              executed.incrementAndGet();\n              bukkitTask.cancel();\n            }\n          }\n        }\n,0,1);\n      }\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (executed.get() < toExecute) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertEquals(toExecute,executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n",
+    "File_Path": "MockBukkit/src/test/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMockTest.java",
+    "Start": 17739,
+    "Stop": 19060,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "registerMultipleTimerTasksAsynchronously"
+}

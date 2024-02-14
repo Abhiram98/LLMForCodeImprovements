@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- for (int i=0; i < values.length; ++i) {\n+ for (int columnIndex=0; columnIndex < values.length; ++columnIndex) {\n- ColumnHeader<ColumnName> top=columns.get(i);\n+ ColumnHeader<ColumnName> currentColumnHeader=columns.get(columnIndex);\n- Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n+ Node<ColumnName> newNode=new Node<ColumnName>(null,null,bottom,currentColumnHeader,currentColumnHeader);",
+                "Description": "Variable names should be self-explanatory. Instead of using 'i', use 'columnIndex' to represent current column index in the array, 'values'. Rename 'top' to 'currentColumnHeader' and 'node' to 'newNode' for more clarity.",
+                "Start": 6,
+                "End": 9
+            },
+            {
+                "Improvement": "Avoid null checks inside loop",
+                "Change_Diff": "- Node<ColumnName> prev=null;\n+ Node<ColumnName> prev = values[0] ? new Node<ColumnName>(null,null,columns.get(0).up,columns.get(0),columns.get(0)) : null;",
+                "Description": "Checking whether 'prev' is null inside loop can be avoided by initializing it to the first element if the first element in 'values' is true. This can improve performance by reducing unnecessary checks inside the loop.",
+                "Start": 11,
+                "End": 19
+            }
+        ],
+        "Final code": "public void addRow(boolean[] values){\n  Node<ColumnName> prev = values[0] ? new Node<ColumnName>(null,null,columns.get(0).up,columns.get(0),columns.get(0)) : null;\n  for (int columnIndex=0; columnIndex < values.length; ++columnIndex) {\n    if (values[columnIndex]) {\n      ColumnHeader<ColumnName> currentColumnHeader=columns.get(columnIndex);\n      currentColumnHeader.size+=1;\n      Node<ColumnName> bottom=currentColumnHeader.up;\n      Node<ColumnName> newNode=new Node<ColumnName>(null,null,bottom,currentColumnHeader,currentColumnHeader);\n      bottom.down=newNode;\n      currentColumnHeader.up=newNode;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        newNode.left=prev;\n        newNode.right=front;\n        prev.right=newNode;\n        front.left=newNode;\n      }\n else {\n        newNode.left=newNode;\n        newNode.right=newNode;\n      }\n      prev=newNode;\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Add a row to the table.\n * @param values the columns that are satisfied by this row\n */\npublic void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n      bottom.down=node;\n      top.up=node;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        node.left=prev;\n        node.right=front;\n        prev.right=node;\n        front.left=node;\n      }\n else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/DancingLinks.java",
+    "Start": 5022,
+    "Stop": 6050,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "addRow"
+}

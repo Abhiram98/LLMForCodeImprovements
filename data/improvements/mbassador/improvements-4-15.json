@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Replace System.out.println with Logger",
+            "Change_Diff": "- System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n+ logger.error(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n\n- System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n+ logger.error(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n\n- System.out.println(\"Message envelope configured but message types defined for handler\");\n+ logger.error(\"Message envelope configured but message types defined for handler\")",
+            "Description": "System.out.println statements are not usually used in production code, they have been replaced with more flexible and configurable logging statements using Logger. This will allow for better control over log output and provide the ability to enable or disable logging at runtime.",
+            "Start": 5,
+            "End": 16
+        }],
+        "Final code": "private boolean isValidMessageHandler(Method handler){\n  if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n    return false;\n  }\n  if (handler.getParameterTypes().length != 1) {\n    logger.error(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n    return false;\n  }\n  Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n    logger.error(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    logger.error(\"Message envelope configured but message types defined for handler\");\n    return false;\n  }\n  return true;\n}"
+    },
+    "Old_Method": "private boolean isValidMessageHandler(Method handler){\n  if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n    return false;\n  }\n  if (handler.getParameterTypes().length != 1) {\n    System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n    return false;\n  }\n  Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n    System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    System.out.println(\"Message envelope configured but message types defined for handler\");\n    return false;\n  }\n  return true;\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/listener/MetadataReader.java",
+    "Start": 5330,
+    "Stop": 6449,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "isValidMessageHandler"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce nested conditions and loops",
+                "Change_Diff": "- for (MethodParameter parameter : handlerMethod.getMethodParameters()) {\n      if (!batchMapping) {...}\n      else {...}\n  }\n\n+ resolveTypeNameForNonBatchMapping(handlerMethod);\n+ resolveTypeNameForBatchMapping(handlerMethod);",
+                "Description": "Nested conditions and loops make the code harder to read and understand. We can avoid the nested condition in the for loop by separating the code into two different methods, one for batchMapping and one for non-batchMapping.",
+                "Start": 33,
+                "End": 46
+            },
+            {
+                "Improvement": "Extract repeated code into methods",
+                "Change_Diff": "- if (annotation instanceof SchemaMapping) {...}\n  else {...}\n\n+ resolveMappingInfoFromAnnotation(annotation);",
+                "Description": "The code to extract typeName and field from annotation is repeated twice for SchemaMapping and BatchMapping. This can be extracted into a separate method.",
+                "Start": 14,
+                "End": 27
+            }
+        ],
+        "Final code": "@Nullable private MappingInfo getMappingInfo(Method method,Object handler,Class<?> handlerType){\n  Set<Annotation> annotations=AnnotatedElementUtils.findAllMergedAnnotations(method,new LinkedHashSet<>(Arrays.asList(BatchMapping.class,SchemaMapping.class)));\n  if (annotations.isEmpty()) {\n    return null;\n  }\n  if (annotations.size() != 1) {\n    throw new IllegalArgumentException(\"Expected either @BatchMapping or @SchemaMapping, not both: \" + method.toGenericString());\n  }\n  boolean batchMapping=false;\n  int batchSize=-1;\n  HandlerMethod handlerMethod=createHandlerMethod(method,handler,handlerType);\n  Annotation annotation=annotations.iterator().next();\n  MappingInfo mappingInfo = resolveMappingInfoFromAnnotation(annotation);\n  if (!StringUtils.hasText(mappingInfo.getTypeName())) {\n    SchemaMapping mapping=AnnotatedElementUtils.findMergedAnnotation(handlerType,SchemaMapping.class);\n    if (mapping != null) {\n      mappingInfo.setTypeName(mapping.typeName());\n    }\n  }\n  if (!StringUtils.hasText(mappingInfo.getTypeName())) {\n    if (!mappingInfo.isBatchMapping()) {\n        resolveTypeNameForNonBatchMapping(handlerMethod, mappingInfo);\n    }\n    else {\n        resolveTypeNameForBatchMapping(handlerMethod, mappingInfo);\n    }\n  }\n  Assert.hasText(mappingInfo.getTypeName(),\"No parentType specified, and a source/parent method argument was also not found: \" + handlerMethod.getShortLogMessage());\n  return mappingInfo;\n}"
+    },
+    "Old_Method": "@Nullable private MappingInfo getMappingInfo(Method method,Object handler,Class<?> handlerType){\n  Set<Annotation> annotations=AnnotatedElementUtils.findAllMergedAnnotations(method,new LinkedHashSet<>(Arrays.asList(BatchMapping.class,SchemaMapping.class)));\n  if (annotations.isEmpty()) {\n    return null;\n  }\n  if (annotations.size() != 1) {\n    throw new IllegalArgumentException(\"Expected either @BatchMapping or @SchemaMapping, not both: \" + method.toGenericString());\n  }\n  String typeName;\n  String field;\n  boolean batchMapping=false;\n  int batchSize=-1;\n  HandlerMethod handlerMethod=createHandlerMethod(method,handler,handlerType);\n  Annotation annotation=annotations.iterator().next();\n  if (annotation instanceof SchemaMapping) {\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n  }\n else {\n    BatchMapping mapping=(BatchMapping)annotation;\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n    batchMapping=true;\n    batchSize=mapping.maxBatchSize();\n  }\n  if (!StringUtils.hasText(typeName)) {\n    SchemaMapping mapping=AnnotatedElementUtils.findMergedAnnotation(handlerType,SchemaMapping.class);\n    if (mapping != null) {\n      typeName=mapping.typeName();\n    }\n  }\n  if (!StringUtils.hasText(typeName)) {\n    for (    MethodParameter parameter : handlerMethod.getMethodParameters()) {\n      if (!batchMapping) {\n        Assert.state(this.argumentResolvers != null,\"`argumentResolvers` is not initialized\");\n        HandlerMethodArgumentResolver resolver=this.argumentResolvers.getArgumentResolver(parameter);\n        if (resolver instanceof SourceMethodArgumentResolver) {\n          typeName=parameter.getParameterType().getSimpleName();\n          break;\n        }\n      }\n else {\n        if (Collection.class.isAssignableFrom(parameter.getParameterType())) {\n          typeName=parameter.nested().getNestedParameterType().getSimpleName();\n          break;\n        }\n      }\n    }\n  }\n  Assert.hasText(typeName,\"No parentType specified, and a source/parent method argument was also not found: \" + handlerMethod.getShortLogMessage());\n  return new MappingInfo(typeName,field,batchMapping,batchSize,handlerMethod);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/annotation/support/AnnotatedControllerConfigurer.java",
+    "Start": 16586,
+    "Stop": 18892,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getMappingInfo"
+}

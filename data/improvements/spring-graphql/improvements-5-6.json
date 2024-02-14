@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java Streams API",
+                "Change_Diff": "- for (Object arg : args) {\n-     Mono<Object> argMono=(arg instanceof Mono ? (Mono<Object>)arg : Mono.justOrEmpty(arg));\n-     monoList.add(argMono.defaultIfEmpty(NO_VALUE));\n- }\n+ Arrays.stream(args)\n+       .map(arg -> (arg instanceof Mono ? (Mono<Object>)arg : Mono.justOrEmpty(arg)).defaultIfEmpty(NO_VALUE))\n+       .collect(Collectors.toList());",
+                "Description": "Instead of using a traditional for loop to convert args to Mono and add to the list, use Streams API to make the code more readable and concise.",
+                "Start": 4,
+                "End": 8
+            },
+            {
+                "Improvement": "Use Java Streams API for null replacement",
+                "Change_Diff": "- for (int i=0; i < values.length; i++) {\n-   if (values[i] == NO_VALUE) {\n-     values[i]=null;\n-   }\n- }\n+ return Arrays.stream(values)\n+       .map(value -> value == NO_VALUE ? null : value)\n+       .toArray();",
+                "Description": "Instead of using a traditional for loop to replace NO_VALUE with null, use Streams API to make the code more readable and concise.",
+                "Start": 10,
+                "End": 14
+            }
+        ],
+        "Final code": "protected Mono<Object[]> toArgsMono(Object[] args){\n  List<Mono<Object>> monoList = Arrays.stream(args)\n      .map(arg -> (arg instanceof Mono ? (Mono<Object>)arg : Mono.justOrEmpty(arg)).defaultIfEmpty(NO_VALUE))\n      .collect(Collectors.toList());\n  return Mono.zip(monoList, values -> Arrays.stream(values)\n      .map(value -> value == NO_VALUE ? null : value)\n      .toArray());\n}"
+    },
+    "Old_Method": "/** \n * Use this method to resolve the arguments asynchronously. This is only useful when at least one of the values is a  {@link Mono}\n */\n@SuppressWarnings(\"unchecked\") protected Mono<Object[]> toArgsMono(Object[] args){\n  List<Mono<Object>> monoList=new ArrayList<>();\n  for (  Object arg : args) {\n    Mono<Object> argMono=(arg instanceof Mono ? (Mono<Object>)arg : Mono.justOrEmpty(arg));\n    monoList.add(argMono.defaultIfEmpty(NO_VALUE));\n  }\n  return Mono.zip(monoList,values -> {\n    for (int i=0; i < values.length; i++) {\n      if (values[i] == NO_VALUE) {\n        values[i]=null;\n      }\n    }\n    return values;\n  }\n);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/InvocableHandlerMethodSupport.java",
+    "Start": 4964,
+    "Stop": 5600,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "toArgsMono"
+}

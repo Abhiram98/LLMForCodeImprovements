@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace multiple try-catch blocks with a single try-catch block",
+                "Change_Diff": "- try {\n this.createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");\n try {...} finally {...}\n} finally {...}\n- try {...} finally {...}\n- try {...} finally {...}\n+ try {\n this.createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");\n...\n} catch (Exception e) {\n throw new RuntimeException(\"Error message\", e);\n}",
+                "Description": "The code has multiple nested try-catch blocks, which makes it harder to read and understand. Instead, we can use a single try-catch block and throw exceptions with different messages depending on the error",
+                "Start": 5,
+                "End": 36
+            },
+            {
+                "Improvement": "Use descriptive error messages",
+                "Change_Diff": "- throw new RuntimeException(\"virus.txt must be deleted\");\n+ throw new RuntimeException(\"The file 'virus.txt' was not deleted as expected.\");\n- throw new RuntimeException(\"no-virus.txt must be existing\");\n+ throw new RuntimeException(\"The file 'no-virus.txt' was not found in the bucket.\");",
+                "Description": "The error messages are not very descriptive, which makes it harder to understand what went wrong when an error occurs. We should use more descriptive error messages",
+                "Start": 19,
+                "End": 29
+            }
+        ],
+        "Final code": "@Test public void testWithFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n    this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n    this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n    this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n    this.retry(context,() -> {\n      if (this.doesObjectExist(bucketName,\"virus.txt\") == true) {\n        throw new RuntimeException(\"The file 'virus.txt' was not deleted as expected.\");\n      }\n      return false;\n    }\n);\n    this.retry(context,() -> {\n      if (this.doesObjectExist(bucketName,\"no-virus.txt\") == false) {\n        throw new RuntimeException(\"The file 'no-virus.txt' was not found in the bucket.\");\n      }\n      return true;\n    }\n);\n    this.deleteObject(context,bucketName,\"no-virus.txt\");\n    this.deleteBucket(context,bucketName);\n    this.deleteStack(context,stackName);\n    this.deleteStack(context,vpcStackName);\n  } catch (Exception e) {\n    throw new RuntimeException(\"Error message\", e);\n  }\n}"
+    },
+    "Old_Method": "@Test public void testWithFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n        this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"virus.txt\") == true) {\n            throw new RuntimeException(\"virus.txt must be deleted\");\n          }\n          return false;\n        }\n);\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"no-virus.txt\") == false) {\n            throw new RuntimeException(\"no-virus.txt must be existing\");\n          }\n          return true;\n        }\n);\n        this.deleteObject(context,bucketName,\"no-virus.txt\");\n      }\n  finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestEicarFile.java",
+    "Start": 3987,
+    "Stop": 6025,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "testWithFileDeletion"
+}

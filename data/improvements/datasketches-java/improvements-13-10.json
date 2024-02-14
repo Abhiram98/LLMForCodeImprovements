@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid code duplication",
+                "Change_Diff": "- CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n- checkByRange(refSk,testSk,u,ordered);\n- byte[] byteArray=refSk.toByteArray();\n- Memory heapROMem=Memory.wrap(byteArray);\n- testSk=(CompactSketch)Sketch.heapify(heapROMem);\n- checkByRange(refSk,testSk,u,ordered);\n+ createCompactSketchAndCheckRange(srcMem, refSk, u, ordered);\n+ createCompactSketchAndCheckRange(heapROMem, refSk, u, ordered);",
+                "Description": "The lines of code to create a `CompactSketch` object and to call the `checkByRange` method are duplicated. This process can be extracted into a separate method that takes a `Memory` object as a parameter. This will make the code cleaner and easier to maintain.",
+                "Start": 10,
+                "End": 20
+            },
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n+ try (WritableHandle wdh=WritableMemory.allocateDirect(bytes); WritableMemory directMem=wdh.getWritable()){",
+                "Description": "The `WritableHandle` object is being manually closed, but Java 7 introduced the try-with-resources statement for automatic resource management. It can be used here to ensure that the `WritableHandle` resource is closed automatically.",
+                "Start": 21,
+                "End": 30
+            }
+        ],
+        "Final code": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  createCompactSketchAndCheckRange(srcMem, refSk, u, ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  createCompactSketchAndCheckRange(heapROMem, refSk, u, ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes); WritableMemory directMem=wdh.getWritable()){\n    refSk=usk.compact(ordered,directMem);\n    createCompactSketchAndCheckRange(directMem, refSk, u, ordered);\n    createCompactSketchAndCheckRange(directMem, refSk, u, ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n\nprivate void createCompactSketchAndCheckRange(Memory memory, CompactSketch refSk, int u, boolean ordered) {\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(memory);\n  checkByRange(refSk,testSk,u,ordered);\n}"
+    },
+    "Old_Method": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/CompactSketchTest.java",
+    "Start": 1975,
+    "Stop": 3351,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkHeapifyWrap"
+}

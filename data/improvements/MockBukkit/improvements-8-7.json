@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract magic number to constant",
+                "Change_Diff": "- scheduler.runTaskLater(null,bukkitTask -> {\n+ scheduler.runTaskLater(null,bukkitTask -> {\n+ static final int DELAY = 1;",
+                "Description": "The magic number '1' in 'scheduler.runTaskLater' function call should be extracted to a constant for better readability and maintainability.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Extract repetitive code to a method",
+                "Change_Diff": "- while (!completed.get()) {\n-    checkTimeout(startTime,thread);\n-    scheduler.performOneTick();\n-    Thread.yield();\n-  }\n-  while (!executed.get()) {\n-    checkTimeout(startTime);\n-    scheduler.performOneTick();\n-  }\n+ performTicksUntilCompleted(startTime, thread, completed);\n+ performTicksUntilExecuted(startTime, executed);",
+                "Description": "The code block that checks for the timeout and performs one tick of the scheduler is repeated, and should be moved into a separate method to avoid code duplication.",
+                "Start": 21,
+                "End": 28
+            }
+        ],
+        "Final code": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        static final int DELAY = 1;\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,DELAY);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  performTicksUntilCompleted(startTime, thread, completed);\n  performTicksUntilExecuted(startTime, executed);\n  assertTrue(executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n\nprivate void performTicksUntilCompleted(long startTime, Thread thread, AtomicBoolean completed) {\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n}\n\nprivate void performTicksUntilExecuted(long startTime, AtomicBoolean executed) {\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n}"
+    },
+    "Old_Method": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,1);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertTrue(executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n",
+    "File_Path": "MockBukkit/src/test/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMockTest.java",
+    "Start": 14506,
+    "Stop": 15448,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "registerOneTasksAsynchronously"
+}

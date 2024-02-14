@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Stream API for improved performance and readability",
+                "Change_Diff": "- apiDocList.forEach(doc -> { ... } ... apiDocs.sort(Comparator.comparing(ApiDoc::getOrder));\n+ return apiDocList.stream() ... .sorted(Comparator.comparing(ApiDoc::getOrder)).collect(Collectors.toList());",
+                "Description": "Java 8's Stream API provides a more readable and potentially more efficient way to perform operations on collections. The current method is using a combination of traditional for-each loops and the Collection.forEach method. It can be simplified and improved by fully utilizing the Stream API.",
+                "Start": 5,
+                "End": 45
+            },
+            {
+                "Improvement": "Remove unnecessary creation of HashMap",
+                "Change_Diff": "- Map<String,ApiDoc> allMap=new HashMap<>(copyMap);\n+ // Removed above line",
+                "Description": "There's an unnecessary creation of 'allMap' HashMap which is just a copy of another HashMap 'copyMap'. We can eliminate this redundancy by using 'copyMap' directly.",
+                "Start": 26,
+                "End": 26
+            }
+        ],
+        "Final code": "default List<ApiDoc> handleTagsApiDoc(List<ApiDoc> apiDocList){\n  if (CollectionUtil.isEmpty(apiDocList)) {\n    return Collections.emptyList();\n  }\n  Map<String,ApiDoc> copyMap=new HashMap<>();\n  apiDocList.stream().forEach(doc -> {\n    String[] tags=doc.getTags();\n    if (ArrayUtils.isEmpty(tags)) {\n      tags=new String[]{doc.getPackageName() + \".\" + doc.getName()};\n    }\n    Arrays.stream(tags).forEach(tag -> {\n      tag=StringUtil.trim(tag);\n      copyMap.computeIfPresent(tag,(k,v) -> {\n        List<ApiMethodDoc> list=CollectionUtil.isEmpty(v.getList()) ? new ArrayList<>() : v.getList();\n        list.addAll(doc.getList());\n        v.setList(list);\n        return v;\n      }\n);\n      copyMap.putIfAbsent(tag,doc);\n    });\n  }\n);\n  copyMap.forEach((k,v) -> {\n    List<ApiMethodDoc> methodDocList=v.getList();\n    methodDocList.forEach(method -> {\n      String[] tags=method.getTags();\n      if (ArrayUtils.isEmpty(tags)) {\n        return;\n      }\n      Arrays.stream(tags).forEach(tag -> {\n        tag=StringUtil.trim(tag);\n        copyMap.computeIfPresent(tag,(k1,v2) -> {\n          method.setOrder(v2.getList().size() + 1);\n          v2.getList().add(method);\n          return v2;\n        }\n);\n        copyMap.putIfAbsent(tag,ApiDoc.buildTagApiDoc(v,tag,method));\n      });\n    });\n  }\n);\n  List<ApiDoc> apiDocs=copyMap.values().stream().collect(Collectors.toList());\n  int index=apiDocs.size() - 1;\n  for (ApiDoc apiDoc : apiDocs) {\n    if (apiDoc.getOrder() == null) {\n      apiDoc.setOrder(index++);\n    }\n  }\n  return apiDocs.stream().sorted(Comparator.comparing(ApiDoc::getOrder)).collect(Collectors.toList());\n}"
+    },
+    "Old_Method": "default List<ApiDoc> handleTagsApiDoc(List<ApiDoc> apiDocList){\n  if (CollectionUtil.isEmpty(apiDocList)) {\n    return Collections.emptyList();\n  }\n  Map<String,ApiDoc> copyMap=new HashMap<>();\n  apiDocList.forEach(doc -> {\n    String[] tags=doc.getTags();\n    if (ArrayUtils.isEmpty(tags)) {\n      tags=new String[]{doc.getPackageName() + \".\" + doc.getName()};\n    }\n    for (    String tag : tags) {\n      tag=StringUtil.trim(tag);\n      copyMap.computeIfPresent(tag,(k,v) -> {\n        List<ApiMethodDoc> list=CollectionUtil.isEmpty(v.getList()) ? new ArrayList<>() : v.getList();\n        list.addAll(doc.getList());\n        v.setList(list);\n        return v;\n      }\n);\n      copyMap.putIfAbsent(tag,doc);\n    }\n  }\n);\n  Map<String,ApiDoc> allMap=new HashMap<>(copyMap);\n  allMap.forEach((k,v) -> {\n    List<ApiMethodDoc> methodDocList=v.getList();\n    methodDocList.forEach(method -> {\n      String[] tags=method.getTags();\n      if (ArrayUtils.isEmpty(tags)) {\n        return;\n      }\n      for (      String tag : tags) {\n        tag=StringUtil.trim(tag);\n        copyMap.computeIfPresent(tag,(k1,v2) -> {\n          method.setOrder(v2.getList().size() + 1);\n          v2.getList().add(method);\n          return v2;\n        }\n);\n        copyMap.putIfAbsent(tag,ApiDoc.buildTagApiDoc(v,tag,method));\n      }\n    }\n);\n  }\n);\n  List<ApiDoc> apiDocs=new ArrayList<>(copyMap.values());\n  int index=apiDocs.size() - 1;\n  for (  ApiDoc apiDoc : apiDocs) {\n    if (apiDoc.getOrder() == null) {\n      apiDoc.setOrder(index++);\n    }\n  }\n  apiDocs.sort(Comparator.comparing(ApiDoc::getOrder));\n  return apiDocs;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/template/IRestDocTemplate.java",
+    "Start": 9408,
+    "Stop": 11532,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "handleTagsApiDoc"
+}

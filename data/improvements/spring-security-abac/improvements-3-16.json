@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Move RestTemplate instantiation outside the method",
+                "Change_Diff": "- RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n- RestTemplate rt=restTemplateBuilder.build();\n+ RestTemplate rt;",
+                "Description": "The RestTemplate instance can be reused across different requests in the same class, so it's better to move it outside the method scope and create it only once. This can improve the performance of your application as a new instance of RestTemplate won't be created each time this method is called.",
+                "Start": 6,
+                "End": 8
+            },
+            {
+                "Improvement": "Handle possible null pointer exception",
+                "Change_Diff": "- return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n+ return response.getBody() != null ? Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString()))) : Optional.empty();",
+                "Description": "The method `getBody()` can potentially return null, which would cause a Null Pointer Exception when `toString()` is called. To prevent this, a null check should be added.",
+                "Start": 12,
+                "End": 12
+            }
+        ],
+        "Final code": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplate rt;\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return response.getBody() != null ? Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString()))) : Optional.empty();\n}"
+    },
+    "Old_Method": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 5788,
+    "Stop": 6769,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "getApiResourceList"
+}

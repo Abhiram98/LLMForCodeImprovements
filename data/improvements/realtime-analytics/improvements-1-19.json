@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Simplify nested conditionals",
+                "Change_Diff": "- if (counters == null) {\nsynchronized (this) {\nif (counters == null) {\nif (conf != null) {\ncounters=CacheManager.getCounterOffHeapCache(metricName,conf);\n}\nelse {\ncounters=CacheManager.getCounterCache();\n}\ngroupbyWithTagsMetricMap.put(metricName,counters);\n}\n}\n+ if (counters == null) {\nsynchronized (this) {\nif (counters == null) {\ncounters = (conf != null) ? CacheManager.getCounterOffHeapCache(metricName,conf) : CacheManager.getCounterCache();\ngroupbyWithTagsMetricMap.put(metricName,counters);\n}\n}\n",
+                "Description": "Nested conditionals can be difficult to read and understand. The if-else statements can be simplified to reduce complexity and increase readability.",
+                "Start": 5,
+                "End": 18
+            },
+            {
+                "Improvement": "Avoid null checks by using Optional",
+                "Change_Diff": "- if (tags == null || tags.isEmpty()) {\ngroupDemension=new MCMetricGroupDemension(metricName,groupId);\n}\nelse {\nif (tags.containsKey(MCConstant.TAG_TIME_IGNORE)) {\ntag_time=tags.remove(MCConstant.TAG_TIME_IGNORE);\n}\ngroupDemension=new MCMetricGroupDemension(metricName,groupId,tags);\n}\n+ groupDemension = Optional.ofNullable(tags).filter(t -> !t.isEmpty()).map(t -> {\nif (t.containsKey(MCConstant.TAG_TIME_IGNORE)) {\ntag_time=t.remove(MCConstant.TAG_TIME_IGNORE);\n}\nreturn new MCMetricGroupDemension(metricName,groupId,t);\n}).orElseGet(() -> new MCMetricGroupDemension(metricName,groupId));",
+                "Description": "The null checks for 'tags' and 'conf' can be avoided by using Java 8's Optional. This will make the code much cleaner and safer.",
+                "Start": 20,
+                "End": 33
+            },
+            {
+                "Improvement": "Use ternary operator instead of if-else statements",
+                "Change_Diff": "- if (isAvg) {\ncounter=new AvgCounter();\n}\nelse {\ncounter=new Counter();\n}\n+ counter = isAvg ? new AvgCounter() : new Counter();",
+                "Description": "Use of the ternary operator instead of if-else statements can simplify the code and improve readability.",
+                "Start": 35,
+                "End": 44
+            }
+        ],
+        "Final code": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\nMap<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\nOffHeapCacheConfig conf=getConfiguration().getOffheapMetricConf() != null ? getConfiguration().getOffheapMetricConf().get(metricName) : null;\nif (counters == null) {\nsynchronized (this) {\nif (counters == null) {\ncounters = (conf != null) ? CacheManager.getCounterOffHeapCache(metricName,conf) : CacheManager.getCounterCache();\ngroupbyWithTagsMetricMap.put(metricName,counters);\n}\n}\n}\nMCMetricGroupDemension groupDemension = Optional.ofNullable(tags).filter(t -> !t.isEmpty()).map(t -> {\nif (t.containsKey(MCConstant.TAG_TIME_IGNORE)) {\ntag_time=t.remove(MCConstant.TAG_TIME_IGNORE);\n}\nreturn new MCMetricGroupDemension(metricName,groupId,t);\n}).orElseGet(() -> new MCMetricGroupDemension(metricName,groupId));\nCounter counter=counters.get(groupDemension);\nif (counter == null) {\ncounter = isAvg ? new AvgCounter() : new Counter();\ncounters.put(groupDemension,counter);\n}\nif (tag_time != null) {\ncounter.setLastCounterTime(tag_time);\n}\nif (isAvg) {\n((AvgCounter)counter).inc(count,total);\n}\nelse {\ncounter.inc(count);\n}\nif (conf != null) {\ncounters.put(groupDemension,counter);\n}\nreturn counter;\n}"
+    },
+    "Old_Method": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n  Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  if (counters == null) {\nsynchronized (this) {\n      if (counters == null) {\n        if (conf != null) {\n          counters=CacheManager.getCounterOffHeapCache(metricName,conf);\n        }\n else {\n          counters=CacheManager.getCounterCache();\n        }\n        groupbyWithTagsMetricMap.put(metricName,counters);\n      }\n    }\n  }\n  MCMetricGroupDemension groupDemension=null;\n  String tag_time=null;\n  if (tags == null || tags.isEmpty()) {\n    groupDemension=new MCMetricGroupDemension(metricName,groupId);\n  }\n else {\n    if (tags.containsKey(MCConstant.TAG_TIME_IGNORE)) {\n      tag_time=tags.remove(MCConstant.TAG_TIME_IGNORE);\n    }\n    groupDemension=new MCMetricGroupDemension(metricName,groupId,tags);\n  }\n  Counter counter=counters.get(groupDemension);\n  if (counter == null) {\n    if (isAvg) {\n      counter=new AvgCounter();\n    }\n else {\n      counter=new Counter();\n    }\n    if (conf == null) {\n      counters.put(groupDemension,counter);\n    }\n  }\n  if (tag_time != null) {\n    counter.setLastCounterTime(tag_time);\n  }\n  if (isAvg) {\n    ((AvgCounter)counter).inc(count,total);\n  }\n else {\n    if (count != null) {\n      counter.inc(count);\n    }\n else {\n      counter.inc();\n    }\n  }\n  if (conf != null) {\n    counters.put(groupDemension,counter);\n  }\n  return counter;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 9927,
+    "Stop": 12300,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getCounterByMetricDemensionAndInc"
+}

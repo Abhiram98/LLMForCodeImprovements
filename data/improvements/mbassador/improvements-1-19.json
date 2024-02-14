@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of java.util.concurrent package instead of custom thread handling",
+                "Change_Diff": "- ConcurrentExecutor.runConcurrent(new Runnable(){\n-    @Override public void run(){\n-        for (Object testObject : testSetWeak) {\n-            System.currentTimeMillis();\n-        }\n-    }\n- },numberOfThreads);\n+ ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);\n+ executor.submit(() -> {\n+     for (Object testObject : testSetWeak) {\n+         System.currentTimeMillis();\n+     }\n+ });\n+ executor.shutdown();",
+                "Description": "Java provides a concurrent package that has useful classes for handling multi-threaded scenarios. We can replace the custom 'ConcurrentExecutor.runConcurrent' method with an 'ExecutorService' from the concurrent package. This will make the code more standard and reliable.",
+                "Start": 12,
+                "End": 19
+            },
+            {
+                "Improvement": "Remove unnecessary currentTimeMillis call",
+                "Change_Diff": "- System.currentTimeMillis();",
+                "Description": "The 'System.currentTimeMillis()' call in the loop seems unnecessary as it doesn't contribute to the logic. It should be removed to improve performance.",
+                "Start": 14,
+                "End": 14
+            }
+        ],
+        "Final code": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ExecutorService executor=Executors.newFixedThreadPool(numberOfThreads);\n  executor.submit(() -> {\n    for (Object testObject : testSetWeak) {\n    }\n  });\n  executor.shutdown();\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

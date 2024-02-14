@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constructor to initialize ApiConfig",
+                "Change_Diff": "- @Deprecated ApiConfig config=new ApiConfig();\n- config.setServerUrl('http://127.0.0.1:8899');\n- config.setOpenUrl('http://localhost:7700/api');\n- config.setAppToken('be4211613a734b45888c075741680e49');\n- config.setDebugEnvName('测试环境');\n- config.setInlineEnum(true);\n- config.setStyle('randomLight');\n- config.setCreateDebugPage(false);\n- config.setAllInOne(true);\n- config.setCoverOld(false);\n- config.setOutPath('D:\\smart-doc\\docs\\jmx1');\n- config.setFramework(FrameworkEnum.SPRING.getFramework());\n- config.setSourceCodePaths(SourceCodePath.builder().setDesc('本项目代码').setPath('D:\\smart-doc\\test-project'));\n- config.setPackageFilters('com.power.doc.controller.*');\n- config.setBaseDir('D:\\smart-doc\\test-project\\smart-doc-example-cn-master');\n- config.setCodePath('/src/main/java');\n+ ApiConfig config = new ApiConfig('http://127.0.0.1:8899','http://localhost:7700/api','be4211613a734b45888c075741680e49','测试环境',true,'randomLight',false,true,false,'D:\\smart-doc\\docs\\jmx1',FrameworkEnum.SPRING.getFramework(),SourceCodePath.builder().setDesc('本项目代码').setPath('D:\\smart-doc\\test-project'),'com.power.doc.controller.*','D:\\smart-doc\\test-project\\smart-doc-example-cn-master', '/src/main/java');",
+                "Description": "Instead of manually setting each field of the ApiConfig object one by one, use a constructor to initialize all the fields at once.",
+                "Start": 7,
+                "End": 22
+            },
+            {
+                "Improvement": "Remove unnecessary use of 'Deprecated' annotation",
+                "Change_Diff": "- @Deprecated @Test public void testMdBuilderControllersApi1(){\n+ @Test public void testMdBuilderControllersApi1(){",
+                "Description": "The 'Deprecated' annotation is used to indicate that a method is obsolete and should not be used. However, it doesn't seem to serve any purpose in this test method and can be removed.",
+                "Start": 6,
+                "End": 6
+            }
+        ],
+        "Final code": "@Test public void testMdBuilderControllersApi1(){\n    ApiConfig config = new ApiConfig('http://127.0.0.1:8899','http://localhost:7700/api','be4211613a734b45888c075741680e49','测试环境',true,'randomLight',false,true,false,'D:\\smart-doc\\docs\\jmx1',FrameworkEnum.SPRING.getFramework(),SourceCodePath.builder().setDesc('本项目代码').setPath('D:\\smart-doc\\test-project'),'com.power.doc.controller.*','D:\\smart-doc\\test-project\\smart-doc-example-cn-master', '/src/main/java');\n    long start=System.currentTimeMillis();\n    ApiDocBuilder.buildApiDoc(config);\n    long end=System.currentTimeMillis();\n    DateTimeUtil.printRunTime(end,start);\n}"
+    },
+    "Old_Method": "/** \n * test markdown\n */\n@Deprecated @Test public void testMdBuilderControllersApi1(){\n  @Deprecated ApiConfig config=new ApiConfig();\n  config.setServerUrl(\"http://127.0.0.1:8899\");\n  config.setOpenUrl(\"http://localhost:7700/api\");\n  config.setAppToken(\"be4211613a734b45888c075741680e49\");\n  config.setDebugEnvName(\"测试环境\");\n  config.setInlineEnum(true);\n  config.setStyle(\"randomLight\");\n  config.setCreateDebugPage(false);\n  config.setAllInOne(true);\n  config.setCoverOld(false);\n  config.setOutPath(\"D:\\\\smart-doc\\\\docs\\\\jmx1\");\n  config.setFramework(FrameworkEnum.SPRING.getFramework());\n  config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\\\smart-doc\\\\test-project\"));\n  config.setPackageFilters(\"com.power.doc.controller.*\");\n  config.setBaseDir(\"D:\\\\smart-doc\\\\test-project\\\\smart-doc-example-cn-master\");\n  config.setCodePath(\"/src/main/java\");\n  long start=System.currentTimeMillis();\n  ApiDocBuilder.buildApiDoc(config);\n  long end=System.currentTimeMillis();\n  DateTimeUtil.printRunTime(end,start);\n}\n",
+    "File_Path": "smart-doc/src/test/java/com/ly/doc/ApiDocTest.java",
+    "Start": 3797,
+    "Stop": 5156,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "testMdBuilderControllersApi1"
+}

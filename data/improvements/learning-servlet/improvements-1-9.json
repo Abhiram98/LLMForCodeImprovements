@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use try-with-resources to automatically close resources",
+            "Change_Diff": "- InputStream fis=new FileInputStream(new File(\"/Users/ray/IdeaProjects/LearningServlet/myservlet04/src/banana.png\"));\n- byte[] buf=new byte[1024];\n- int len;\n- OutputStream fos=resp.getOutputStream();\n- resp.setContentType(\"image/webp\");\n- while ((len=fis.read(buf)) != -1) {\n-   fos.write(buf,0,len);\n- }\n- fis.close();\n- fos.close();\n+ try (InputStream fis = new FileInputStream(new File(\"/Users/ray/IdeaProjects/LearningServlet/myservlet04/src/banana.png\"));\n+ OutputStream fos = resp.getOutputStream()) {\n+   byte[] buf = new byte[1024];\n+   int len;\n+   resp.setContentType(\"image/webp\");\n+   while ((len = fis.read(buf)) != -1) {\n+     fos.write(buf, 0, len);\n+   }\n+ }",
+            "Description": "In your current code, you are manually closing the FileInputStream and OutputStream. However, if an exception is thrown before the close() method is called, the resource may never be closed, causing a resource leak. In contrast, the try-with-resources statement ensures that each resource is closed at the end of the statement.",
+            "Start": 2,
+            "End": 12
+        }],
+        "Final code": "@Override protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {\n  try (InputStream fis = new FileInputStream(new File(\"/Users/ray/IdeaProjects/LearningServlet/myservlet04/src/banana.png\"));\n  OutputStream fos = resp.getOutputStream()) {\n    byte[] buf = new byte[1024];\n    int len;\n    resp.setContentType(\"image/webp\");\n    while ((len = fis.read(buf)) != -1) {\n      fos.write(buf, 0, len);\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void doPost(HttpServletRequest req,HttpServletResponse resp) throws ServletException, IOException {\n  InputStream fis=new FileInputStream(new File(\"/Users/ray/IdeaProjects/LearningServlet/myservlet04/src/banana.png\"));\n  byte[] buf=new byte[1024];\n  int len;\n  OutputStream fos=resp.getOutputStream();\n  resp.setContentType(\"image/webp\");\n  while ((len=fis.read(buf)) != -1) {\n    fos.write(buf,0,len);\n  }\n  fis.close();\n  fos.close();\n}\n",
+    "File_Path": "learning-servlet/myservlet04/src/main/java/com/ray/MyServlet.java",
+    "Start": 561,
+    "Stop": 1100,
+    "Project_Name": "data/projects/learning-servlet",
+    "Method_Name": "doPost"
+}

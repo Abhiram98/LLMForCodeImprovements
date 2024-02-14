@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract the 'uri' variable initialization to a separate method",
+                "Change_Diff": "- final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n+ final String uri = getUri();",
+                "Description": "The 'uri' variable initialization is a complex expression that is used only once. To improve readability, this expression can be moved to a separate method.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Use Optional to handle possible null value of 'cached'",
+                "Change_Diff": "- if (cached != null) {\n-    sheet_=new CssStyleSheet(this,cached,uri);\n-  }\n- else {\n-    final String css=getTextContent();\n-    try (InputSource source=new InputSource(new StringReader(css))){\n-      sheet_=new CssStyleSheet(this,source,uri);\n-      cache.cache(css,sheet_.getWrappedSheet());\n-    }\n- catch (    final IOException e) {\n-      LOG.error(e.getMessage(),e);\n-    }\n-  }\n+ Optional.ofNullable(cached).ifPresentOrElse(\n+     cachedValue -> sheet_ = new CssStyleSheet(this, cachedValue, uri),\n+     () -> {\n+         final String css = getTextContent();\n+         try (InputSource source = new InputSource(new StringReader(css))) {\n+             sheet_ = new CssStyleSheet(this, source, uri);\n+             cache.cache(css, sheet_.getWrappedSheet());\n+         } catch (final IOException e) {\n+             LOG.error(e.getMessage(), e);\n+         }\n+     }\n+ );",
+                "Description": "Instead of checking if 'cached' is null, use Optional to handle the possible null value. This makes the code more readable and easier to understand.",
+                "Start": 8,
+                "End": 15
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri = getUri();\n  Optional.ofNullable(cached).ifPresentOrElse(\n    cachedValue -> sheet_ = new CssStyleSheet(this, cachedValue, uri),\n    () -> {\n        final String css = getTextContent();\n        try (InputSource source = new InputSource(new StringReader(css))) {\n            sheet_ = new CssStyleSheet(this, source, uri);\n            cache.cache(css, sheet_.getWrappedSheet());\n        } catch (final IOException e) {\n            LOG.error(e.getMessage(), e);\n        }\n    }\n  );\n  return sheet_;\n}\n\nprivate String getUri() {\n  return getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

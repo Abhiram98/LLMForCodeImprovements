@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant assertTrue check",
+                "Change_Diff": "- assertTrue(executed.get());\n",
+                "Description": "The second while loop guarantees that the 'executed' variable is set to true before proceeding, hence the assertion to check if it's true is redundant and can be removed.",
+                "Start": 29,
+                "End": 29
+            },
+            {
+                "Improvement": "Add comments for clarity",
+                "Change_Diff": "+ // Add appropriate comments at each step\n",
+                "Description": "Adding comments to the code can make it easier for other developers to understand what each part of the code does.",
+                "Start": 1,
+                "End": 31
+            },
+            {
+                "Improvement": "Handle InterruptedException",
+                "Change_Diff": "+ try {\n     Thread.yield();\n  } catch (InterruptedException e) {\n     Thread.currentThread().interrupt();\n  }\n",
+                "Description": "Thread.yield() can throw InterruptedException which should be caught and handled appropriately.",
+                "Start": 27,
+                "End": 27
+            }
+        ],
+        "Final code": "@Test void registerOneTasksAsynchronously(){\n  // Main thread for comparison\n  final Thread mainThread = Thread.currentThread();\n  // Flags to check conditions\n  AtomicBoolean executed = new AtomicBoolean();\n  AtomicBoolean completed = new AtomicBoolean();\n  AtomicBoolean notPrimaryThread = new AtomicBoolean();\n  // New thread for task\n  Thread thread = new Thread(() -> {\n    try {\n      // Scheduler for task\n      scheduler.runTaskLater(null, buukkitTask -> {\n        // Check if current thread is the main thread\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }, 1);\n    } finally {\n      // Mark task as completed\n      completed.set(true);\n    }\n  });\n  thread.start();\n  // Monitor task execution\n  long startTime = System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime, thread);\n    scheduler.performOneTick();\n    try {\n       Thread.yield();\n    } catch (InterruptedException e) {\n       Thread.currentThread().interrupt();\n    }\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  // Assert that task was not run on the main thread\n  assertFalse(notPrimaryThread.get());\n}"
+    },
+    "Old_Method": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,1);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertTrue(executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n",
+    "File_Path": "MockBukkit/src/test/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMockTest.java",
+    "Start": 14506,
+    "Stop": 15448,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "registerOneTasksAsynchronously"
+}

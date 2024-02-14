@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract URL as a constant",
+                "Change_Diff": "- XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"\n+ HOME_URL",
+                "Description": "The URL `XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"` is used multiple times. It should be extracted as a constant to avoid repetition and make it easier to change in the future.",
+                "Start": 2,
+                "End": 8
+            },
+            {
+                "Improvement": "Use try-catch for error handling",
+                "Change_Diff": "+ try {\n  ResponseEntity response=rt.getForEntity(HOME_URL, String.class, entity);\n+ } catch (RestClientException e) {\n+   return Optional.empty();\n+ }",
+                "Description": "The HTTP request may throw exceptions. It's better to wrap it in try-catch block for better error handling.",
+                "Start": 5,
+                "End": 9
+            }
+        ],
+        "Final code": "@Override public Optional<JSONObject> getApiResourceList(){\n  final String HOME_URL = XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\";\n  JSONObject cachedObject=this.apiResourceListCache.get(HOME_URL);\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  try {\n    ResponseEntity response=rt.getForEntity(HOME_URL, String.class, entity);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return Optional.empty();\n    }\n    return Optional.of(this.apiResourceListCache.putIfAbsent(HOME_URL, new JSONObject(response.getBody().toString())));\n  } catch (RestClientException e) {\n    return Optional.empty();\n  }\n}"
+    },
+    "Old_Method": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 5788,
+    "Stop": 6769,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "getApiResourceList"
+}

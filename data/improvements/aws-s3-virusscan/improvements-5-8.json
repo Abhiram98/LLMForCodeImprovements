@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary else statement",
+                "Change_Diff": "- else {\n-   return env;\n- }",
+                "Description": "In the given code, the else statement after return key.defaultValue; is not necessary. This is because if the control reaches return key.defaultValue; statement, it will exit the method at that point. So, we need not use else statement here. This makes the code cleaner and easier to understand.",
+                "Start": 6,
+                "End": 11
+            },
+            {
+                "Improvement": "Use Optional to handle null values",
+                "Change_Diff": "- if (env == null) {\n-   if (key.defaultValue == null) {\n-     throw new RuntimeException(\"config not found: \" + key.name);\n-   }\n- else {\n-   return key.defaultValue;\n- }\n+ return Optional.ofNullable(env)\n+   .orElse(Optional.ofNullable(key.defaultValue)\n+   .orElseThrow(() -> new RuntimeException(\"config not found: \" + key.name)));",
+                "Description": "Java 8 introduced the Optional class, which can be used to represent nullable reference. It helps to prevent NullPointerException. We can replace the null check for env and key.defaultValue with Optional.ofNullable() and orElseThrow() for throwing exception when value is not present.",
+                "Start": 2,
+                "End": 7
+            }
+        ],
+        "Final code": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  return Optional.ofNullable(env)\n    .orElse(Optional.ofNullable(key.defaultValue)\n    .orElseThrow(() -> new RuntimeException(\"config not found: \" + key.name)));\n}"
+    },
+    "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+    "Start": 813,
+    "Stop": 1187,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "get"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract constant variables",
+                "Change_Diff": "- final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);...union.union(sketchIn2);\n- result=union.getResult();\n- assertEquals(result.getMaxItem(),n2 + 17,0.0);\n...\n+ final int maxKValue = 256;\n+ final int storageBytesValue = 50;\n+ final int offsetValue = 17;\n+ final int bytes=DoublesSketch.getUpdatableStorageBytes(maxKValue,storageBytesValue);...union.union(sketchIn2);\n+ result=union.getResult();\n+ assertEquals(result.getMaxItem(),n2 + offsetValue,0.0);",
+                "Description": "Values like `256`, `50`, `17` are hardcoded and used multiple times in the code. It's better to extract these values into named constant variables at the beginning of the method for better readability and easier maintenance.",
+                "Start": 6,
+                "End": 32
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);...final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n+ final WritableMemory sketchMemory=WritableMemory.writableWrap(new byte[bytes]);...final DoublesUnion union=DoublesUnion.builder().setMaxK(maxKValue).build(unionMemory);",
+                "Description": "Variables `skMem` and `uMem` could be renamed to more meaningful names that reflect their purpose.",
+                "Start": 8,
+                "End": 14
+            },
+            {
+                "Improvement": "Remove unused variables",
+                "Change_Diff": "- final int k2=4;\n- final int n2=5 * k2;\n",
+                "Description": "Variables `k2` and `n2` are declared but never used in this method. Removing unused variables helps keep the code clean and efficient.",
+                "Start": 4,
+                "End": 5
+            }
+        ],
+        "Final code": "@Test public void checkUnion4DirectCompact(){\n  final int k1=8;\n  final int n1=2 * k1;\n  final int maxKValue = 256;\n  final int storageBytesValue = 50;\n  final int offsetValue = 17;\n  final int bytes=DoublesSketch.getUpdatableStorageBytes(maxKValue,storageBytesValue);\n  final WritableMemory sketchMemory=WritableMemory.writableWrap(new byte[bytes]);\n  final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(k1).build(sketchMemory);\n  for (int i=0; i < n1; i++) {\n    sketchIn0.update(i + 1);\n  }\n  final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n  final WritableMemory unionMemory=WritableMemory.writableWrap(new byte[bytes]);\n  final DoublesUnion union=DoublesUnion.builder().setMaxK(maxKValue).build(unionMemory);\n  union.union(sketchIn1);\n  assertEquals(union.getResult().getN(),n1);\n  assertEquals(union.getMaxK(),maxKValue);\n  assertEquals(union.getEffectiveK(),k1);\n  DoublesSketch result=union.getResult();\n  assertEquals(result.getN(),16);\n  assertEquals(result.getMaxItem(),n1,0.0);\n  assertEquals(result.getMinItem(),1.0,0.0);\n  assertEquals(result.getK(),k1);\n  final CompactDoublesSketch sketchIn2=buildAndLoadDQS(k2,n2,offsetValue).compact();\n  union.reset();\n  union.union(sketchIn2);\n  result=union.getResult();\n  assertEquals(result.getMaxItem(),n2 + offsetValue,0.0);\n  assertEquals(result.getMinItem(),1.0 + offsetValue,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}"
+    },
+    "Old_Method": "@Test public void checkUnion4DirectCompact(){\n  final int k1=8;\n  final int n1=2 * k1;\n  final int k2=4;\n  final int n2=5 * k2;\n  final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n  final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n  final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(k1).build(skMem);\n  for (int i=0; i < n1; i++) {\n    sketchIn0.update(i + 1);\n  }\n  final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n  final WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n  final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n  union.union(sketchIn1);\n  assertEquals(union.getResult().getN(),n1);\n  assertEquals(union.getMaxK(),256);\n  assertEquals(union.getEffectiveK(),k1);\n  DoublesSketch result=union.getResult();\n  assertEquals(result.getN(),16);\n  assertEquals(result.getMaxItem(),n1,0.0);\n  assertEquals(result.getMinItem(),1.0,0.0);\n  assertEquals(result.getK(),k1);\n  final CompactDoublesSketch sketchIn2=buildAndLoadDQS(k2,n2,17).compact();\n  union.reset();\n  union.union(sketchIn2);\n  result=union.getResult();\n  assertEquals(result.getMaxItem(),n2 + 17,0.0);\n  assertEquals(result.getMinItem(),1.0 + 17,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/DoublesUnionImplTest.java",
+    "Start": 9412,
+    "Stop": 10835,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkUnion4DirectCompact"
+}

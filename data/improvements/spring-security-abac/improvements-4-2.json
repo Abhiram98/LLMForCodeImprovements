@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8's stream API",
+                "Change_Diff": "- Iterator<String> keys=jsonObject.keys();\n- while (keys.hasNext()) {\n-   String key=keys.next();\n+ Map<String, String> keyValuePairs = jsonObject.toMap();\n+ keyValuePairs.forEach((key, value) -> {",
+                "Description": "Instead of manually iterating the JSONObject keys, you can use Java 8's stream API to convert `jsonObject` to a `Map` which could improve readability and make the code more concise.",
+                "Start": 3,
+                "End": 14
+            },
+            {
+                "Improvement": "Avoid repeated code",
+                "Change_Diff": "- case QUERY_PARAM:\n- value=httpServletRequest.getParameter(value);\n- break;\n- case FORM_DATA:\n- value=httpServletRequest.getParameter(value);\n+ case QUERY_PARAM, FORM_DATA:\n+ value=httpServletRequest.getParameter(value);",
+                "Description": "The `FORM_DATA` and `QUERY_PARAM` cases in the switch statement have the exact same code. You can combine them into a single case to avoid redundancy.",
+                "Start": 18,
+                "End": 21
+            }
+        ],
+        "Final code": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  Map<String, String> keyValuePairs = jsonObject.toMap();\n  keyValuePairs.forEach((key, value) -> {\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\n    switch (propertyType) {\n    case HEADER:\n      value=httpServletRequest.getHeader(value);\n      break;\n    case COOKIE:\n      value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\n      break;\n    case QUERY_PARAM, FORM_DATA:\n      value=httpServletRequest.getParameter(value);\n      break;\n    case PATH_PARAM:\n      value=extractPathParam(httpServletRequest,value);\n      break;\n    }\n    templateData.put(key,value);\n  });\n  return templateData;\n}"
+    },
+    "Old_Method": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\nswitch (propertyType) {\ncase HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\ncase COOKIE:\n  value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\nbreak;\ncase QUERY_PARAM:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase FORM_DATA:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase PATH_PARAM:\nvalue=extractPathParam(httpServletRequest,value);\nbreak;\n}\ntemplateData.put(key,value);\n}\nreturn templateData;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 2835,
+    "Stop": 4525,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "generateFreemakerTemplateData"
+}

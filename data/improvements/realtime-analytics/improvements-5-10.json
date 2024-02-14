@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringJoiner for concatenating strings",
+                "Change_Diff": "- StringBuilder builder=new StringBuilder();\n+ StringJoiner joiner = new StringJoiner(\":\", \"\", \"\");",
+                "Description": "Instead of using StringBuilder for concatenating strings, use StringJoiner which is more readable and efficient for concatenating multiple strings with delimiters",
+                "Start": 2,
+                "End": 23
+            },
+            {
+                "Improvement": "Extract information string creation into a separate method",
+                "Change_Diff": "- // Entire loop block\n+ private String createInfoString(OffHeapMemoryManager manager) { ... }",
+                "Description": "Extract the logic of creating the information string of each memory manager into a separate method. This improves code readability and maintainability.",
+                "Start": 7,
+                "End": 21
+            }
+        ],
+        "Final code": "public String getInternalOffHeapManagerInfo(){\n  StringJoiner joiner = new StringJoiner(\":\", \"\", \"\");\n  joiner.add(\"InternalOffHeapManagerInfo\");\n  Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n  for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n    joiner.add(\"MemoryManager-\" + entry.getKey() +\":\"+ createInfoString(entry.getValue()));\n  }\n  return joiner.toString();\n}\n\nprivate String createInfoString(OffHeapMemoryManager manager) {\n  if (manager == null) {\n    return \"\";\n  }\n  return new StringJoiner(\";\", \"[\", \"]\")\n    .add(\"FreeMemory:\" + manager.getFreeMemory())\n    .add(\"MaxMemory:\" + manager.getMaxMemory())\n    .add(\"ReservedMemory:\" + manager.getReservedMemory())\n    .add(\"UsedMemory:\" + manager.getUsedMemory())\n    .add(\"OutOfMeomoryErrorCount:\" + manager.getOOMErrorCount())\n    .toString();\n}"
+    },
+    "Old_Method": "public String getInternalOffHeapManagerInfo(){\n  StringBuilder builder=new StringBuilder();\n  builder.append(\"InternalOffHeapManagerInfo:\");\n  Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n  for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n    builder.append(\"MemoryManager-\");\n    builder.append(entry.getKey());\n    builder.append(\":\");\n    OffHeapMemoryManager manager=entry.getValue();\n    if (manager != null) {\n      builder.append(\"[\");\n      builder.append(\"FreeMemory:\");\n      builder.append(manager.getFreeMemory());\n      builder.append(\";\");\n      builder.append(\"MaxMemory:\");\n      builder.append(manager.getMaxMemory());\n      builder.append(\";\");\n      builder.append(\"ReservedMemory:\");\n      builder.append(manager.getReservedMemory());\n      builder.append(\";\");\n      builder.append(\"UsedMemory:\");\n      builder.append(manager.getUsedMemory());\n      builder.append(\";\");\n      builder.append(\"OutOfMeomoryErrorCount:\");\n      builder.append(manager.getOOMErrorCount());\n      builder.append(\"]\");\n    }\n  }\n  return builder.toString();\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 27123,
+    "Stop": 28572,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getInternalOffHeapManagerInfo"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use switch case instead of if else",
+                "Change_Diff": "- if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER) {\n+ switch(browserVersion_) {\n+   case BrowserVersion.INTERNET_EXPLORER:",
+                "Description": "The multiple if else checks against 'browserVersion_' can be replaced with switch case, which is more readable and efficient.",
+                "Start": 12,
+                "End": 32
+            },
+            {
+                "Improvement": "Remove redundant code",
+                "Change_Diff": "- if (alerts != null) {\n...\n}\nif (isRealBrowser()) {\n...\n}\n+ setExpectedAlertsForBrowserVersion(alerts, buggyWebDriver, expectedAlerts);",
+                "Description": "The two blocks of code starting from lines 12 and 26 are almost the same except for the source of values (alerts/buggyWebDriver) and can be moved to a separate method for better maintainability and code reuse.",
+                "Start": 12,
+                "End": 48
+            },
+            {
+                "Improvement": "Use Optional",
+                "Change_Diff": "- if (alerts != null) {\n...\n}\nif (buggyWebDriver != null) {\n...\n}\n+ Optional.ofNullable(alerts).ifPresent(a -> ...);\n+ Optional.ofNullable(buggyWebDriver).ifPresent(b -> ...);",
+                "Description": "Instead of checking if 'alerts' or 'buggyWebDriver' is null, use Optional of Java 8. It will make the code cleaner and less prone to Null Pointer Exceptions.",
+                "Start": 5,
+                "End": 48
+            }
+        ],
+        "Final code": "private void setAlerts(final WebTestCase testCase,final Method method){\n  final Alerts alerts=method.getAnnotation(Alerts.class);\n  String[] expectedAlerts={};\n  Optional.ofNullable(alerts).ifPresent(a -> {\n    expectedAlerts=NO_ALERTS_DEFINED;\n    if (isDefined(alerts.value())) {\n      expectedAlerts=alerts.value();\n    } else {\n      setExpectedAlertsForBrowserVersion(a, expectedAlerts);\n    }\n  });\n  if (isRealBrowser()) {\n    final BuggyWebDriver buggyWebDriver=method.getAnnotation(BuggyWebDriver.class);\n    Optional.ofNullable(buggyWebDriver).ifPresent(b -> setExpectedAlertsForBrowserVersion(b, expectedAlerts));\n  } else {\n    final HtmlUnitNYI htmlUnitNYI=method.getAnnotation(HtmlUnitNYI.class);\n    Optional.ofNullable(htmlUnitNYI).ifPresent(h -> setExpectedAlertsForBrowserVersion(h, expectedAlerts));\n  }\n  testCase.setExpectedAlerts(expectedAlerts);\n}\n\nprivate void setExpectedAlertsForBrowserVersion(BrowserVersion source, String[] expectedAlerts) {\n  switch(browserVersion_) {\n    case BrowserVersion.INTERNET_EXPLORER:\n      expectedAlerts=firstDefinedOrGiven(expectedAlerts,source.IE(),source.DEFAULT());\n      break;\n    case BrowserVersion.EDGE:\n      expectedAlerts=firstDefinedOrGiven(expectedAlerts,source.EDGE(),source.DEFAULT());\n      break;\n    case BrowserVersion.FIREFOX_ESR:\n      expectedAlerts=firstDefinedOrGiven(expectedAlerts,source.FF_ESR(),source.DEFAULT());\n      break;\n    case BrowserVersion.FIREFOX:\n      expectedAlerts=firstDefinedOrGiven(expectedAlerts,source.FF(),source.DEFAULT());\n      break;\n    case BrowserVersion.CHROME:\n      expectedAlerts=firstDefinedOrGiven(expectedAlerts,source.CHROME(),source.DEFAULT());\n      break;\n  }\n}"
+    },
+    "Old_Method": "private void setAlerts(final WebTestCase testCase,final Method method){\n  final Alerts alerts=method.getAnnotation(Alerts.class);\n  String[] expectedAlerts={};\n  if (alerts != null) {\n    expectedAlerts=NO_ALERTS_DEFINED;\n    if (isDefined(alerts.value())) {\n      expectedAlerts=alerts.value();\n    }\n else {\n      if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER) {\n        expectedAlerts=firstDefined(alerts.IE(),alerts.DEFAULT());\n      }\n else       if (browserVersion_ == BrowserVersion.EDGE) {\n        expectedAlerts=firstDefined(alerts.EDGE(),alerts.DEFAULT());\n      }\n else       if (browserVersion_ == BrowserVersion.FIREFOX_ESR) {\n        expectedAlerts=firstDefined(alerts.FF_ESR(),alerts.DEFAULT());\n      }\n else       if (browserVersion_ == BrowserVersion.FIREFOX) {\n        expectedAlerts=firstDefined(alerts.FF(),alerts.DEFAULT());\n      }\n else       if (browserVersion_ == BrowserVersion.CHROME) {\n        expectedAlerts=firstDefined(alerts.CHROME(),alerts.DEFAULT());\n      }\n    }\n  }\n  if (isRealBrowser()) {\n    final BuggyWebDriver buggyWebDriver=method.getAnnotation(BuggyWebDriver.class);\n    if (buggyWebDriver != null) {\n      if (isDefined(buggyWebDriver.value())) {\n        expectedAlerts=buggyWebDriver.value();\n      }\n else {\n        if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER) {\n          expectedAlerts=firstDefinedOrGiven(expectedAlerts,buggyWebDriver.IE(),buggyWebDriver.DEFAULT());\n        }\n else         if (browserVersion_ == BrowserVersion.EDGE) {\n          expectedAlerts=firstDefinedOrGiven(expectedAlerts,buggyWebDriver.EDGE(),buggyWebDriver.DEFAULT());\n        }\n else         if (browserVersion_ == BrowserVersion.FIREFOX_ESR) {\n          expectedAlerts=firstDefinedOrGiven(expectedAlerts,buggyWebDriver.FF_ESR(),buggyWebDriver.DEFAULT());\n        }\n else         if (browserVersion_ == BrowserVersion.FIREFOX) {\n          expectedAlerts=firstDefinedOrGiven(expectedAlerts,buggyWebDriver.FF(),buggyWebDriver.DEFAULT());\n        }\n else         if (browserVersion_ == BrowserVersion.CHROME) {\n          expectedAlerts=firstDefinedOrGiven(expectedAlerts,buggyWebDriver.CHROME(),buggyWebDriver.DEFAULT());\n        }\n      }\n    }\n  }\n else {\n    final HtmlUnitNYI htmlUnitNYI=method.getAnnotation(HtmlUnitNYI.class);\n    if (htmlUnitNYI != null) {\n      if (browserVersion_ == BrowserVersion.INTERNET_EXPLORER) {\n        expectedAlerts=firstDefinedOrGiven(expectedAlerts,htmlUnitNYI.IE());\n      }\n else       if (browserVersion_ == BrowserVersion.EDGE) {\n        expectedAlerts=firstDefinedOrGiven(expectedAlerts,htmlUnitNYI.EDGE());\n      }\n else       if (browserVersion_ == BrowserVersion.FIREFOX_ESR) {\n        expectedAlerts=firstDefinedOrGiven(expectedAlerts,htmlUnitNYI.FF_ESR());\n      }\n else       if (browserVersion_ == BrowserVersion.FIREFOX) {\n        expectedAlerts=firstDefinedOrGiven(expectedAlerts,htmlUnitNYI.FF());\n      }\n else       if (browserVersion_ == BrowserVersion.CHROME) {\n        expectedAlerts=firstDefinedOrGiven(expectedAlerts,htmlUnitNYI.CHROME());\n      }\n    }\n  }\n  testCase.setExpectedAlerts(expectedAlerts);\n}\n",
+    "File_Path": "htmlunit/src/test/java/org/htmlunit/junit/BrowserVersionClassRunner.java",
+    "Start": 2954,
+    "Stop": 7071,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "setAlerts"
+}

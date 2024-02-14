@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated code to a new method",
+                "Change_Diff": "- for (int i=0; i < numberOfElements; i++) {\n-   Object candidate=new Object();\n-   if (rand.nextInt() % 3 == 0) {\n-     permanentElements.add(candidate);\n-   }\n-   testSetWeak.add(candidate);\n- }\n+ addObjectToCollections(numberOfElements, rand, permanentElements, testSetWeak);",
+                "Description": "Creating a new object and adding it to the collections is repeated code and can be extracted into a separate method to improve readability and reusability.",
+                "Start": 6,
+                "End": 12
+            },
+            {
+                "Improvement": "Avoid printing unnecessary info",
+                "Change_Diff": "- System.currentTimeMillis();",
+                "Description": "The statement `System.currentTimeMillis();` has no effect and can be removed to clean up the code.",
+                "Start": 17,
+                "End": 17
+            }
+        ],
+        "Final code": "    @Test public void testIteratorCleanup(){\n      final HashSet<Object> permanentElements=new HashSet<Object>();\n      final Collection testSetWeak=createSet();\n      final Random rand=new Random();\n      addObjectToCollections(numberOfElements, rand, permanentElements, testSetWeak);\n      runGC();\n      ConcurrentExecutor.runConcurrent(new Runnable(){\n        @Override public void run(){\n          for (Object testObject : testSetWeak) {\n            // Removed unnecessary code\n          }\n        }\n      }\n    ,numberOfThreads);\n      assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n      for (Object test : testSetWeak) {\n        assertTrue(permanentElements.contains(test));\n      }\n    }\n\n    private void addObjectToCollections(int numberOfElements, Random rand, HashSet<Object> permanentElements, Collection testSetWeak) {\n      for (int i=0; i < numberOfElements; i++) {\n        Object candidate=new Object();\n        if (rand.nextInt() % 3 == 0) {\n          permanentElements.add(candidate);\n        }\n        testSetWeak.add(candidate);\n      }\n    }"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

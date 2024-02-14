@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use 'try-with-resources' for 'WritableHandle' to automatically close it",
+                "Change_Diff": "- WritableHandle wh;\n- wh=putOffHeap(Memory.wrap(sv3csk.toByteArray()));\n- sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n- try {\n- wh.close();\n- } catch (Exception e) {}\n+ try (WritableHandle wh = putOffHeap(Memory.wrap(sv3csk.toByteArray()))) {\n+ sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n+ }",
+                "Description": "Instead of manually closing 'WritableHandle' in a try-catch block, use 'try-with-resources' statement. The advantage of using a try-with-resources statement is that it ensures that each resource is closed at the end of the statement.",
+                "Start": 12,
+                "End": 20
+            },
+            {
+                "Improvement": "Remove redundant code by creating a method for repeated code",
+                "Change_Diff": "- // Repeated code snippets\n- wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed));\n- sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n- assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n- assertEquals(sv3cskResult.getSeedHash(),seedHash);\n- assertFalse(sv3cskResult.isDirect());\n- try {\n- wh.close();\n- } catch (Exception e) {}\n+ // New method to remove redundancy\n+ performWrapAndAssertions(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed), sv3usk, seed, seedHash, false);",
+                "Description": "The following code snippets are repeated three times in the method: wrapping a compact sketch, asserting equality of estimates and seed hashes, checking the directness of the sketch. This can be moved to a separate private method to reduce redundancy.",
+                "Start": 12,
+                "End": 34
+            }
+        ],
+        "Final code": "public void checkWrapCompactSketchGivenDefaultSeed() {\n    final int k=64;\n    final long seed=ThetaUtil.DEFAULT_UPDATE_SEED;\n    final short seedHash=Util.computeSeedHash(seed);\n    UpdateSketch sv3usk=UpdateSketch.builder().setNominalEntries(k).setSeed(seed).build();\n    for (int i=0; i < k; i++) {\n        sv3usk.update(i);\n    }\n    CompactSketch sv3cskResult;\n    CompactSketch sv3csk=sv3usk.compact();\n    try (WritableHandle wh = putOffHeap(Memory.wrap(sv3csk.toByteArray()))) {\n        sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n        performAssertions(sv3cskResult, sv3usk, seedHash, true);\n    }\n    performWrapAndAssertions(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed), sv3usk, seed, seedHash, false);\n    performWrapAndAssertions(BackwardConversions.convertSerVer3toSerVer1(sv3csk), sv3usk, seed, seedHash, false);\n}\n\nprivate void performWrapAndAssertions(byte[] input, UpdateSketch sv3usk, long seed, short seedHash, boolean isDirect) {\n    try (WritableHandle wh = putOffHeap(input)) {\n        CompactSketch sv3cskResult = Sketches.wrapCompactSketch(wh.getWritable(),seed);\n        performAssertions(sv3cskResult, sv3usk, seedHash, isDirect);\n    }\n}\n\nprivate void performAssertions(CompactSketch sv3cskResult, UpdateSketch sv3usk, short seedHash, boolean isDirect) {\n    assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n    assertEquals(sv3cskResult.getSeedHash(),seedHash);\n    assertEquals(sv3cskResult.isDirect(), isDirect);\n}"
+    },
+    "Old_Method": "@Test public void checkWrapCompactSketchGivenDefaultSeed(){\n  final int k=64;\n  final long seed=ThetaUtil.DEFAULT_UPDATE_SEED;\n  final short seedHash=Util.computeSeedHash(seed);\n  UpdateSketch sv3usk=UpdateSketch.builder().setNominalEntries(k).setSeed(seed).build();\n  for (int i=0; i < k; i++) {\n    sv3usk.update(i);\n  }\n  CompactSketch sv3cskResult;\n  WritableHandle wh;\n  CompactSketch sv3csk=sv3usk.compact();\n  wh=putOffHeap(Memory.wrap(sv3csk.toByteArray()));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertTrue(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n  wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertFalse(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n  wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer1(sv3csk));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertFalse(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/HeapifyWrapSerVer1and2Test.java",
+    "Start": 14530,
+    "Stop": 16090,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkWrapCompactSketchGivenDefaultSeed"
+}

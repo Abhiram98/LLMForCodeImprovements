@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use finally block for resource leak",
+                "Change_Diff": "- response.close();\n+ finally {\n+    response.close();\n+ }",
+                "Description": "It is always better to close resources in the 'finally' block to avoid resource leaks. In this case, 'response' should be closed in a 'finally' block.",
+                "Start": 19,
+                "End": 19
+            },
+            {
+                "Improvement": "Use meaningful exception messages",
+                "Change_Diff": "- throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\"); \n+ throw new IllegalStateException(\"Task Executor not available! Unable to perform download operation.\"); \n- throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath()); \n+ throw new IllegalStateException(\"Invalid download path: \" + file.getPath()); \n- throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath()); \n+ throw new IllegalStateException(\"Unable to create parent directory: \" + parent.getPath()); \n- throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath()); \n+ throw new IllegalStateException(\"File is being used by another thread: \" + parent.getPath()); \n- throw new OkHttpsException(\"文件下载失败\",e); \n+ throw new OkHttpsException(\"File download failed\",e);",
+                "Description": "The exception messages are currently in Chinese which may not be understood by all developers. It would be better to use English messages.",
+                "Start": 6,
+                "End": 15
+            }
+        ],
+        "Final code": "@Override public Download toFile(File file){ \n try { \n   if (taskExecutor == null) { \n     throw new IllegalStateException(\"Task Executor not available! Unable to perform download operation.\"); \n   } \n   if (!file.exists()) { \n     File parent=file.getParentFile(); \n     if (parent == null) { \n       throw new IllegalStateException(\"Invalid download path: \" + file.getPath()); \n     } \n     if (!parent.exists() && !parent.mkdirs()) { \n       throw new IllegalStateException(\"Unable to create parent directory: \" + parent.getPath()); \n     } \n     if (!file.createNewFile()) { \n       throw new IllegalStateException(\"File is being used by another thread: \" + parent.getPath()); \n     } \n   } \n } \n catch (Exception e) { \n   throw new OkHttpsException(\"File download failed\",e); \n } \n finally { \n   response.close(); \n } \n return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart()); \n}"
+    },
+    "Old_Method": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n    }\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n      }\n    }\n  }\n catch (  Exception e) {\n    response.close();\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/internal/ResultBody.java",
+    "Start": 3853,
+    "Stop": 4601,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "toFile"
+}

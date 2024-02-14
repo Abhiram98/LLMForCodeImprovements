@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract 'x' piece search to a separate method.",
+                "Change_Diff": "- for (  Piece p : pieces) {\n-   if (\"x\".equals(p.name)) {\n-     xPiece=p;\n-     break;\n-   }\n- }\n+ xPiece = findXPiece(pieces);",
+                "Description": "The code for searching the 'x' piece is not directly related to the getCategory method. Extracting this to a separate method improves readability and makes the code more modular.",
+                "Start": 12,
+                "End": 18
+            },
+            {
+                "Improvement": "Extract finding the lowest and highest coordinates to a separate method",
+                "Change_Diff": "- int low_x=width;\n- int high_x=0;\n- int low_y=height;\n- int high_y=0;\n- for (ColumnName col : row) {\n-   if (col instanceof Point) {\n-     int x=((Point)col).x;\n-     int y=((Point)col).y;\n-     if (x < low_x) { low_x=x; }\n-     if (x > high_x) { high_x=x; }\n-     if (y < low_y) { low_y=y; }\n-     if (y > high_y) { high_y=y; }\n-   }\n- }\n- boolean mid_x=(low_x + high_x == width - 1);\n- boolean mid_y=(low_y + high_y == height - 1);\n+ CoordinateBounds bounds = findBounds(row);\n+ boolean mid_x = (bounds.low_x + bounds.high_x == width - 1);\n+ boolean mid_y = (bounds.low_y + bounds.high_y == height - 1);",
+                "Description": "The code for finding the lowest and highest coordinates is not directly related to the getCategory method. Extracting this to a separate method improves readability and makes the code more modular.",
+                "Start": 20,
+                "End": 37
+            }
+        ],
+        "Final code": "public SolutionCategory getCategory(List<List<ColumnName>> names){\n  Piece xPiece=findXPiece(pieces);\n\n  for (List<ColumnName> row : names) {\n    if (row.contains(xPiece)) {\n      CoordinateBounds bounds = findBounds(row);\n      boolean mid_x = (bounds.low_x + bounds.high_x == width - 1);\n      boolean mid_y = (bounds.low_y + bounds.high_y == height - 1);\n      if (mid_x && mid_y) {\n        return SolutionCategory.CENTER;\n      } else if (mid_x) {\n        return SolutionCategory.MID_X;\n      } else if (mid_y) {\n        return SolutionCategory.MID_Y;\n      }\n      break;\n    }\n  }\n\n  return SolutionCategory.UPPER_LEFT;\n}\n\nprivate Piece findXPiece(List<Piece> pieces) {\n  for (Piece p : pieces) {\n    if ('x'.equals(p.name)) {\n      return p;\n    }\n  }\n  return null;\n}\n\nprivate CoordinateBounds findBounds(List<ColumnName> row) {\n  int low_x = width;\n  int high_x = 0;\n  int low_y = height;\n  int high_y = 0;\n  for (ColumnName col : row) {\n    if (col instanceof Point) {\n      int x = ((Point)col).x;\n      int y = ((Point)col).y;\n      if (x < low_x) { low_x = x; }\n      if (x > high_x) { high_x = x; }\n      if (y < low_y) { low_y = y; }\n      if (y > high_y) { high_y = y; }\n    }\n  }\n  return new CoordinateBounds(low_x, high_x, low_y, high_y);\n}"
+    },
+    "Old_Method": "/** \n * Find whether the solution has the x in the upper left quadrant, the x-midline, the y-midline or in the center.\n * @param names the solution to check\n * @return the catagory of the solution\n */\npublic SolutionCategory getCategory(List<List<ColumnName>> names){\n  Piece xPiece=null;\n  for (  Piece p : pieces) {\n    if (\"x\".equals(p.name)) {\n      xPiece=p;\n      break;\n    }\n  }\n  for (  List<ColumnName> row : names) {\n    if (row.contains(xPiece)) {\n      int low_x=width;\n      int high_x=0;\n      int low_y=height;\n      int high_y=0;\n      for (      ColumnName col : row) {\n        if (col instanceof Point) {\n          int x=((Point)col).x;\n          int y=((Point)col).y;\n          if (x < low_x) {\n            low_x=x;\n          }\n          if (x > high_x) {\n            high_x=x;\n          }\n          if (y < low_y) {\n            low_y=y;\n          }\n          if (y > high_y) {\n            high_y=y;\n          }\n        }\n      }\n      boolean mid_x=(low_x + high_x == width - 1);\n      boolean mid_y=(low_y + high_y == height - 1);\n      if (mid_x && mid_y) {\n        return SolutionCategory.CENTER;\n      }\n else       if (mid_x) {\n        return SolutionCategory.MID_X;\n      }\n else       if (mid_y) {\n        return SolutionCategory.MID_Y;\n      }\n      break;\n    }\n  }\n  return SolutionCategory.UPPER_LEFT;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Pentomino.java",
+    "Start": 6117,
+    "Stop": 8106,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "getCategory"
+}

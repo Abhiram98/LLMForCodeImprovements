@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "@Override HllSketchImpl couponUpdate(final int coupon){\n  if (wmem == null) {\n    noWriteAccess();\n  }\n  final int index=find(mem,getLgCouponArrInts(),coupon);\n  if (index >= 0) {\n    return this;\n  }\n  insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n  insertHashSetCount(wmem,getCouponCount() + 1);\n  final boolean promote=checkGrowOrPromote();\n  if (!promote) {\n    return this;\n  }\n  return promoteListOrSetToHll(this);\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/hll/DirectCouponHashSet.java",
+    "Start": 2926,
+    "Stop": 3436,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "couponUpdate"
+}

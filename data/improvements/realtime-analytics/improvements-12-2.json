@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Stream API to simplify list to string conversion",
+                "Change_Diff": "- StringBuilder b=new StringBuilder();\n- b.append(values.get(0));\n- for (int i=1, t=values.size(); i < t; i++) {\n-   b.append(\",\");\n-   b.append(values.get(i));\n- }\n- return b.toString();\n+ return values.stream().map(Object::toString).collect(Collectors.joining(\",\"));",
+                "Description": "Instead of using a StringBuilder and a loop to convert the list to a string, you can use Java 8 Stream API's `joining` method. This makes the code simpler and easier to understand.",
+                "Start": 7,
+                "End": 12
+            },
+            {
+                "Improvement": "Use Generics for type safety",
+                "Change_Diff": "- private static Object normailizeValue(Object value){\n+ private static Object normailizeValue(List<Object> value){",
+                "Description": "The method accepts an Object and assumes it's a List without any type safety. It would be better to specify that the method accepts List<Object> as an argument to prevent ClassCastException at runtime.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "private static Object normailizeValue(List<Object> value){\n  if (value.size() == 1) {\n    return value.get(0).toString();\n  }\n  return value.stream().map(Object::toString).collect(Collectors.joining(\",\"));\n}"
+    },
+    "Old_Method": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    StringBuilder b=new StringBuilder();\n    b.append(values.get(0));\n    for (int i=1, t=values.size(); i < t; i++) {\n      b.append(\",\");\n      b.append(values.get(i));\n    }\n    return b.toString();\n  }\n else {\n    return value;\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 4288,
+    "Stop": 4905,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "normailizeValue"
+}

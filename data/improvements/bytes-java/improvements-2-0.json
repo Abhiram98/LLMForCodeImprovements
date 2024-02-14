@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid creating new objects inside loop",
+                "Change_Diff": "- BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n+ BinaryToTextEncoding.EncoderDecoder encoding = encoders[j - 2];",
+                "Description": "Creating new objects inside a loop can lead to memory exhaustion and performance degradation. In this case, the `BinaryToTextEncoding.EncoderDecoder encoding` object is being created for each iteration of the inner loop. Instead, we can create an array of `BinaryToTextEncoding.EncoderDecoder` objects before the loop and use them inside the loop.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Avoid excessive console output",
+                "Change_Diff": "- System.out.println(...);\n+ logger.info(...);",
+                "Description": "Constantly writing to the console can slow down your application, especially when done within loops. Here, the System.out.println calls can be replaced with a logging library, which can be configured to print only when needed.",
+                "Start": 6,
+                "End": 14
+            },
+            {
+                "Improvement": "Use try-catch block for testing",
+                "Change_Diff": "+ try {\n // code block\n} catch (Exception e) {\n  fail(\"Test failed with Exception: \" + e.getMessage());\n}",
+                "Description": "When running tests, it's better to use a try-catch block to handle any potential exceptions. This way, you can provide more detailed error messages and make debugging easier.",
+                "Start": 9,
+                "End": 22
+            }
+        ],
+        "Final code": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  BinaryToTextEncoding.EncoderDecoder[] encoders = new BinaryToTextEncoding.EncoderDecoder[35];\n  for (int i = 2; i <= 36; i++) {\n    encoders[i - 2] = new BinaryToTextEncoding.BaseRadixNumber(i);\n  }\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    logger.info(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding = encoders[j - 2];\n      try {\n        String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n        byte[] decoded=encoding.decode(encodedBigEndian);\n        logger.info(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n        logger.info(\"orig   :\\t\" + rnd.encodeHex());\n        logger.info(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n        if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n          assertArrayEquals(rnd.array(),decoded);\n        } else {\n          leadingZeroHits++;\n          assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n        }\n      } catch (Exception e) {\n        fail(\"Test failed with Exception: \" + e.getMessage());\n      }\n    }\n  }\n  logger.info(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}"
+    },
+    "Old_Method": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n      String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n      byte[] decoded=encoding.decode(encodedBigEndian);\n      System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n      System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n      System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n      if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        assertArrayEquals(rnd.array(),decoded);\n      }\n else {\n        leadingZeroHits++;\n        assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n      }\n    }\n  }\n  System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BinaryToTextEncodingTest.java",
+    "Start": 3738,
+    "Stop": 5067,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "encodeDecodeRadix"
+}

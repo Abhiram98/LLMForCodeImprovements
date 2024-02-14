@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use a helper function to eliminate repetitive code",
+                "Change_Diff": "-    insertPreLongs(onHeapMem,v);\n-    onH=extractPreLongs(onHeapMem);\n-    assertEquals(onH,v);\n-    insertPreLongs(offHeapMem,v);\n-    offH=extractPreLongs(offHeapMem);\n-    assertEquals(offH,v);\n-    onHeapMem.clear();\n-    offHeapMem.clear();\n+    runTest(onHeapMem, offHeapMem, v, this::insertPreLongs, this::extractPreLongs);\n\n... (similar changes for other repetitive code)",
+                "Description": "There is a lot of repetitive code where the same series of operations are applied to both 'onHeapMem' and 'offHeapMem'. This can be simplified by creating a helper function that takes a WritableMemory object and the value to be inserted as arguments, and then performs the series of insert, extract, and assert operations.",
+                "Start": 6,
+                "End": 61
+            },
+            {
+                "Improvement": "Catch a more specific exception",
+                "Change_Diff": "- catch (  final Exception e) {\n+ catch (final IOException e) {",
+                "Description": "Catching 'Exception' is too broad, and it might mask other exceptions that you did not anticipate. Try to catch a more specific exception, such as IOException, to handle only the exceptions that you know how to handle.",
+                "Start": 63,
+                "End": 65
+            }
+        ],
+        "Final code": "@Test public void checkInsertsAndExtracts(){\n  final int bytes=32;\n  try (WritableHandle offHeapMemHandler=WritableMemory.allocateDirect(bytes)){\n    final WritableMemory offHeapMem=offHeapMemHandler.getWritable();\n    final WritableMemory onHeapMem=WritableMemory.writableWrap(new byte[bytes]);\n    int v=0XFF;\n    runTest(onHeapMem, offHeapMem, v, this::insertPreLongs, this::extractPreLongs);\n    ...\n  }\n catch (final IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n\nprivate void runTest(WritableMemory onHeapMem, WritableMemory offHeapMem, int v, BiConsumer<WritableMemory, Integer> insertMethod, Function<WritableMemory, Integer> extractMethod) {\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertMethod.accept(onHeapMem, v);\n    int onH = extractMethod.apply(onHeapMem);\n    assertEquals(onH, v);\n    insertMethod.accept(offHeapMem, v);\n    int offH = extractMethod.apply(offHeapMem);\n    assertEquals(offH, v);\n}"
+    },
+    "Old_Method": "@Test public void checkInsertsAndExtracts(){\n  final int bytes=32;\n  try (WritableHandle offHeapMemHandler=WritableMemory.allocateDirect(bytes)){\n    final WritableMemory offHeapMem=offHeapMemHandler.getWritable();\n    final WritableMemory onHeapMem=WritableMemory.writableWrap(new byte[bytes]);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    int v=0XFF;\n    int onH, offH;\n    insertPreLongs(onHeapMem,v);\n    onH=extractPreLongs(onHeapMem);\n    assertEquals(onH,v);\n    insertPreLongs(offHeapMem,v);\n    offH=extractPreLongs(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertSerVer(onHeapMem,v);\n    onH=extractSerVer(onHeapMem);\n    assertEquals(onH,v);\n    insertSerVer(offHeapMem,v);\n    offH=extractSerVer(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertFamilyID(onHeapMem,v);\n    onH=extractFamilyID(onHeapMem);\n    assertEquals(onH,v);\n    insertFamilyID(offHeapMem,v);\n    offH=extractFamilyID(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertFlags(onHeapMem,v);\n    onH=extractFlags(onHeapMem);\n    assertEquals(onH,v);\n    insertFlags(offHeapMem,v);\n    offH=extractFlags(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    v=0XFFFF;\n    insertK(onHeapMem,v);\n    onH=extractK(onHeapMem);\n    assertEquals(onH,v);\n    insertK(offHeapMem,v);\n    offH=extractK(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    long onHL, offHL, vL=1L << 30;\n    insertN(onHeapMem,vL);\n    onHL=extractN(onHeapMem);\n    assertEquals(onHL,vL);\n    insertN(offHeapMem,vL);\n    offHL=extractN(offHeapMem);\n    assertEquals(offHL,vL);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    double onHD, offHD, vD=1L << 40;\n    insertMinDouble(onHeapMem,vD);\n    onHD=extractMinDouble(onHeapMem);\n    assertEquals(onHD,vD);\n    insertMinDouble(offHeapMem,vD);\n    offHD=extractMinDouble(offHeapMem);\n    assertEquals(offHD,vD);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertMaxDouble(onHeapMem,vD);\n    onHD=extractMaxDouble(onHeapMem);\n    assertEquals(onHD,vD);\n    insertMaxDouble(offHeapMem,vD);\n    offHD=extractMaxDouble(offHeapMem);\n    assertEquals(offHD,vD);\n    onHeapMem.clear();\n    offHeapMem.clear();\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/PreambleUtilTest.java",
+    "Start": 2333,
+    "Stop": 5225,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkInsertsAndExtracts"
+}

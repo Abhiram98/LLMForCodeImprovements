@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "+ /**\n+  * This method registers saga loader beans.\n+  */\n private void registerSagaLoaderBeans(){",
+                "Description": "Adding method documentation to explain what this method does, it's parameters, and its return value (if any), is a best practice. This makes the code easier to understand for other developers.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add exception details in the RuntimeException",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new RuntimeException(\"Exception occurred while registering saga loader: \" + loaderBeanName, e);",
+                "Description": "When catching an Exception and throwing a RuntimeException, it is a good practice to add some context about what was being done when the Exception occurred. This will help in debugging if the RuntimeException is ever thrown.",
+                "Start": 9,
+                "End": 11
+            }
+        ],
+        "Final code": "    /**\n    * This method registers saga loader beans.\n    */\n    private void registerSagaLoaderBeans(){\n        String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n        for (String loaderBeanName : loadersNames) {\n            BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n            try {\n                registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n            }\n            catch (Exception e) {\n                throw new RuntimeException(\"Exception occurred while registering saga loader: \" + loaderBeanName, e);\n            }\n        }\n    }"
+    },
+    "Old_Method": "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n catch (    Exception e) {\n      throw new RuntimeException(e);\n    }\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/main/java/pl/com/bottega/ecommerce/system/saga/impl/SpringSagaRegistry.java",
+    "Start": 2646,
+    "Stop": 3169,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "registerSagaLoaderBeans"
+}

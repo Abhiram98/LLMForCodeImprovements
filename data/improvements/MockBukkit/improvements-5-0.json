@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary super.equals(obj) check",
+                "Change_Diff": "- if (!super.equals(obj)) {\n-    return false;\n-  }",
+                "Description": "The super.equals(obj) check is not required because it's not common to compare instances of superclasses using equals in Java. This method should only check if the objects belong to the same class and if their properties are equal.",
+                "Start": 5,
+                "End": 7
+            },
+            {
+                "Improvement": "Add null check for obj",
+                "Change_Diff": "+ if (obj == null) {\n+   return false;\n+ }\n",
+                "Description": "It's important to check if the passed object is null before instance checking. This will prevent NullPointerExceptions.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Define other as LeatherArmorMeta type",
+                "Change_Diff": "+ LeatherArmorMeta other = (LeatherArmorMeta) obj;\n",
+                "Description": "The variable 'other' is not defined in the provided method. You should define it as LeatherArmorMeta type after checking the instance of obj.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "@Override public boolean equals(Object obj){\n  if (this == obj) {\n    return true;\n  }\n  if (obj == null) {\n    return false;\n  }\n  if (!(obj instanceof LeatherArmorMeta)) {\n    return false;\n  }\n  LeatherArmorMeta other = (LeatherArmorMeta) obj;\n  return Objects.equals(color,other.getColor());\n}"
+    },
+    "Old_Method": "@Override public boolean equals(Object obj){\n  if (this == obj) {\n    return true;\n  }\n  if (!super.equals(obj)) {\n    return false;\n  }\n  if (!(obj instanceof LeatherArmorMeta)) {\n    return false;\n  }\n  return Objects.equals(color,other.getColor());\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/inventory/meta/LeatherArmorMetaMock.java",
+    "Start": 1196,
+    "Stop": 1464,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "equals"
+}

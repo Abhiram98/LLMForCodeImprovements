@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Set instead of List for eventsDisplayed to avoid duplicates",
+                "Change_Diff": "- final List<StackEvent> eventsDisplayed=new ArrayList<>();\n+ final Set<StackEvent> eventsDisplayed=new HashSet<>();\n- for (final StackEvent eventDisplayed : eventsDisplayed) {\n-     if (event.getEventId().equals(eventDisplayed.getEventId())) {\n-         displayed=true;\n-     }\n- }\n- if (!displayed) {\n+ if (!eventsDisplayed.contains(event)) {",
+                "Description": "Since we are checking for duplicates and only adding unique events to eventsDisplayed, it is better to use a Set which inherently does not allow duplicates. This will also improve the time complexity from O(n^2) to O(n) because checking for duplicates in a list takes O(n) time, whereas in a set it takes O(1) time.",
+                "Start": 7,
+                "End": 17
+            },
+            {
+                "Improvement": "Handle InterruptedException properly",
+                "Change_Diff": "- catch (final InterruptedException e) {\n- }\n+ catch (final InterruptedException e) {\n+     Thread.currentThread().interrupt();\n+     System.out.println(\"Thread was interrupted, Failed to complete operation\");\n+ }",
+                "Description": "It is a bad practice to leave InterruptedException empty. We should at least log the exception, or in many cases, re-interrupt the thread so that higher-level interrupt handlers can deal with it.",
+                "Start": 9,
+                "End": 11
+            }
+        ],
+        "Final code": "protected void waitForStack(final Context context,final String stackName,final FinalStatus finalStackStatus){\n  System.out.println(\"waitForStack[\" + stackName + \"]: to reach status \"+ finalStackStatus.finalStatus);\n  final Set<StackEvent> eventsDisplayed=new HashSet<>();\n  while (true) {\n    try {\n      Thread.sleep(20000);\n    }\n catch (final InterruptedException e) {\n    Thread.currentThread().interrupt();\n    System.out.println(\"Thread was interrupted, Failed to complete operation\");\n    }\n    final List<StackEvent> events=getStackEvents(stackName);\n    for (final StackEvent event : events) {\n      if (!eventsDisplayed.contains(event)) {\n        System.out.println(\"waitForStack[\" + stackName + \"]: \"+ event.getTimestamp().toString()+ \" \"+ event.getLogicalResourceId()+ \" \"+ event.getResourceStatus()+ \" \"+ event.getResourceStatusReason());\n        eventsDisplayed.add(event);\n      }\n    }\n    // Rest of the method remains unchanged\n}"
+    },
+    "Old_Method": "protected void waitForStack(final Context context,final String stackName,final FinalStatus finalStackStatus){\n  System.out.println(\"waitForStack[\" + stackName + \"]: to reach status \"+ finalStackStatus.finalStatus);\n  final List<StackEvent> eventsDisplayed=new ArrayList<>();\n  while (true) {\n    try {\n      Thread.sleep(20000);\n    }\n catch (    final InterruptedException e) {\n    }\n    final List<StackEvent> events=getStackEvents(stackName);\n    for (    final StackEvent event : events) {\n      boolean displayed=false;\n      for (      final StackEvent eventDisplayed : eventsDisplayed) {\n        if (event.getEventId().equals(eventDisplayed.getEventId())) {\n          displayed=true;\n        }\n      }\n      if (!displayed) {\n        System.out.println(\"waitForStack[\" + stackName + \"]: \"+ event.getTimestamp().toString()+ \" \"+ event.getLogicalResourceId()+ \" \"+ event.getResourceStatus()+ \" \"+ event.getResourceStatusReason());\n        eventsDisplayed.add(event);\n      }\n    }\n    try {\n      final DescribeStacksResult res=this.cf.describeStacks(new DescribeStacksRequest().withStackName(stackName));\n      final StackStatus currentStatus=StackStatus.fromValue(res.getStacks().get(0).getStackStatus());\n      if (finalStackStatus.finalStatus == currentStatus) {\n        System.out.println(\"waitForStack[\" + stackName + \"]: final status reached.\");\n        return;\n      }\n else {\n        if (finalStackStatus.intermediateStatus.contains(currentStatus)) {\n          System.out.println(\"waitForStack[\" + stackName + \"]: continue to wait (still in intermediate status \"+ currentStatus+ \") ...\");\n        }\n else {\n          context.reportStackFailure(stackName);\n          throw new RuntimeException(\"waitForStack[\" + stackName + \"]: reached invalid intermediate status \"+ currentStatus+ \".\");\n        }\n      }\n    }\n catch (    final AmazonServiceException e) {\n      if (e.getErrorMessage().equals(\"Stack with id \" + stackName + \" does not exist\")) {\n        if (finalStackStatus.notFoundIsFinalStatus) {\n          System.out.println(\"waitForStack[\" + stackName + \"]: final  reached (not found).\");\n          return;\n        }\n else {\n          if (finalStackStatus.notFoundIsIntermediateStatus) {\n            System.out.println(\"waitForStack[\" + stackName + \"]: continue to wait (stack not found) ...\");\n          }\n else {\n            context.reportStackFailure(stackName);\n            throw new RuntimeException(\"waitForStack[\" + stackName + \"]: stack not found.\");\n          }\n        }\n      }\n else {\n        throw e;\n      }\n    }\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+    "Start": 6172,
+    "Stop": 9325,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "waitForStack"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Introduce a method for node initialization",
+                "Change_Diff": "- Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n- bottom.down=node;\n- top.up=node;\n- if (prev != null) {\n- Node<ColumnName> front=prev.right;\n- node.left=prev;\n- node.right=front;\n- prev.right=node;\n- front.left=node;\n- }\n else {\n- node.left=node;\n- node.right=node;\n- }\n- prev=node;\n+ prev = initializeNode(prev, bottom, top);",
+                "Description": "The process to initialize a new Node object and set its connections is repeated in the method. This process can be abstracted into a separate method to make the code cleaner and reduce redundancy.",
+                "Start": 12,
+                "End": 23
+            },
+            {
+                "Improvement": "Add null check for 'values' array",
+                "Change_Diff": "+ if(values == null) {\n+ throw new IllegalArgumentException(\"Values array cannot be null\");\n+ }\n",
+                "Description": "There is no null check for the 'values' array. If a null value is passed the function will throw a Null Pointer Exception. To avoid this, a null check should be added at the start of the method.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "public void addRow(boolean[] values){\n  if(values == null) {\n    throw new IllegalArgumentException(\"Values array cannot be null\");\n  }\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      prev = initializeNode(prev, bottom, top);\n    }\n  }\n}\n\nprivate Node<ColumnName> initializeNode(Node<ColumnName> prev, Node<ColumnName> bottom, ColumnHeader<ColumnName> top) {\n  Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n  bottom.down=node;\n  top.up=node;\n  if (prev != null) {\n    Node<ColumnName> front=prev.right;\n    node.left=prev;\n    node.right=front;\n    prev.right=node;\n    front.left=node;\n  } else {\n    node.left=node;\n    node.right=node;\n  }\n  return node;\n}"
+    },
+    "Old_Method": "/** \n * Add a row to the table.\n * @param values the columns that are satisfied by this row\n */\npublic void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n      bottom.down=node;\n      top.up=node;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        node.left=prev;\n        node.right=front;\n        prev.right=node;\n        front.left=node;\n      }\n else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/DancingLinks.java",
+    "Start": 5022,
+    "Stop": 6050,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "addRow"
+}

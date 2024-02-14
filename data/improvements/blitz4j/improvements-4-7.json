@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Factor out common logic into helper methods",
+                "Change_Diff": "- if (CONFIGURATION.shouldGenerateBlitz4jLocationInfo()) {\n...\n} else if (CONFIGURATION.shouldGenerateLog4jLocationInfo()) {\n...\n}\n...\nsaveThreadLocalInfo(event);\n...\nsaveThreadLocalInfo(event);\n...\n\n+ LocationInfo locationInfo = generateLocationInfo(event);\n...\nsaveThreadLocalInfo(event);\n...\nLocationInfo locationInfo = generateLocationInfo(event);\n...",
+                "Description": "The method contains repetitive code blocks that can be factored out into helper methods, which will improve readability and maintainability. For example, the code block for generating location information and saving thread local info can be extracted into separate methods.",
+                "Start": 1,
+                "End": 50
+            },
+            {
+                "Improvement": "Use try-with-resources for Stopwatch instances",
+                "Change_Diff": "- Stopwatch s=locationInfoTimer.start();\n...\ns.stop();\n...\nStopwatch sThreadLocal=saveThreadLocalTimer.start();\n...\nsThreadLocal.stop();\n...\nStopwatch t=putDiscardMapTimeTracer.start();\n...\nt.stop();\n\n+ try (Stopwatch s = locationInfoTimer.start()) {\n...\n}\n...\ntry (Stopwatch sThreadLocal = saveThreadLocalTimer.start()) {\n...\n}\n...\ntry (Stopwatch t = putDiscardMapTimeTracer.start()) {\n...\n}",
+                "Description": "The Stopwatch instances are not being stopped in a finally block, which could lead to resource leaks if an exception is thrown before the stop() method is called. Using try-with-resources will ensure that the Stopwatch instances are always stopped, even in the event of an exception.",
+                "Start": 5,
+                "End": 50
+            }
+        ],
+        "Final code": "public void append(final LoggingEvent event){\n  boolean isBufferSpaceAvailable=(batcher.isSpaceAvailable() && (logSummaryMap.size() == 0));\n  boolean isBufferPutSuccessful=false;\n  LocationInfo locationInfo=generateLocationInfo(event);\n  try (Stopwatch s = locationInfoTimer.start()) {\n    // previous code inside the stopwatch\n  }\n  if (isBufferSpaceAvailable) {\n    try (Stopwatch sThreadLocal = saveThreadLocalTimer.start()) {\n      saveThreadLocalInfo(event);\n    }\n    isBufferPutSuccessful=putInBuffer(event);\n  }\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    summarizeEventCounter.increment();\n    try (Stopwatch t = putDiscardMapTimeTracer.start()) {\n      String loggerKey=generateLoggerKey(event, locationInfo);\n      LogSummary summary=(LogSummary)logSummaryMap.get(loggerKey);\n      if (summary == null) {\n        saveThreadLocalInfo(event);\n        summary=new LogSummary(event);\n        logSummaryMap.put(loggerKey,summary);\n      }\n      else {\n        summary.add(event);\n      }\n    }\n  }\n  else if (!CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    discardEventCounter.increment();\n  }\n}\n\nprivate LocationInfo generateLocationInfo(LoggingEvent event) {\n  // code for generating location info\n}\n\nprivate String generateLoggerKey(LoggingEvent event, LocationInfo locationInfo) {\n  // code for generating logger key\n}"
+    },
+    "Old_Method": "public void append(final LoggingEvent event){\n  boolean isBufferSpaceAvailable=(batcher.isSpaceAvailable() && (logSummaryMap.size() == 0));\n  boolean isBufferPutSuccessful=false;\n  LocationInfo locationInfo=null;\n  Stopwatch s=locationInfoTimer.start();\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName)) {\n    if (CONFIGURATION.shouldGenerateBlitz4jLocationInfo()) {\n      locationInfo=LoggingContext.getInstance().generateLocationInfo(event);\n    }\n else     if (CONFIGURATION.shouldGenerateLog4jLocationInfo()) {\n      locationInfo=event.getLocationInformation();\n    }\n  }\n  s.stop();\n  if (isBufferSpaceAvailable) {\n    Stopwatch sThreadLocal=saveThreadLocalTimer.start();\n    saveThreadLocalInfo(event);\n    sThreadLocal.stop();\n    isBufferPutSuccessful=putInBuffer(event);\n  }\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    summarizeEventCounter.increment();\n    Stopwatch t=putDiscardMapTimeTracer.start();\n    String loggerKey=event.getLoggerName();\n    if (locationInfo != null) {\n      loggerKey=locationInfo.getClassName() + \"_\" + locationInfo.getLineNumber();\n    }\n    LogSummary summary=(LogSummary)logSummaryMap.get(loggerKey);\n    if (summary == null) {\n      saveThreadLocalInfo(event);\n      summary=new LogSummary(event);\n      logSummaryMap.put(loggerKey,summary);\n    }\n else {\n      summary.add(event);\n    }\n    t.stop();\n  }\n else   if (!CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    discardEventCounter.increment();\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/blitz4j/AsyncAppender.java",
+    "Start": 8263,
+    "Stop": 10867,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "append"
+}

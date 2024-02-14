@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use a switch statement instead of if-else statements",
+                "Change_Diff": "- if (pathInfo.startsWith(PATH_PING)) {\n-      ping(request,pathInfo,response);\n-    }\n- else if (pathInfo.startsWith(PATH_COUNTER)) {\n-      stats.incQueryRequestCount();\n-      getCounters(request,pathInfo,response);\n-    }\n- else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n-      stats.incQueryRequestCount();\n-      getMetrics(request,pathInfo,response);\n-    }\n- else {\n-      stats.incInvalidRequestCount();\n-      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n-    }\n+    switch (pathInfo) {\n+        case PATH_PING:\n+            ping(request,pathInfo,response);\n+            break;\n+        case PATH_COUNTER:\n+            stats.incQueryRequestCount();\n+            getCounters(request,pathInfo,response);\n+            break;\n+        case PATH_METRICGROUP:\n+            stats.incQueryRequestCount();\n+            getMetrics(request,pathInfo,response);\n+            break;\n+        default:\n+            stats.incInvalidRequestCount();\n+            response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n+            break;\n+    }",
+                "Description": "The if-else statements can be replaced with a switch statement. This would be easier to read and maintain. Each case in the switch would correspond to the different pathInfo start strings, and the default case would handle the invalid request.",
+                "Start": 7,
+                "End": 19
+            },
+            {
+                "Improvement": "Move the Access-Control-Allow headers to the beginning of the method",
+                "Change_Diff": "- response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n+ // Moved to the beginning of the method\n",
+                "Description": "The Access-Control-Allow headers can be set at the beginning of the method. This would ensure they are always set, regardless of any exceptions that might occur during the processing of the request.",
+                "Start": 26,
+                "End": 29
+            }
+        ],
+        "Final code": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n  response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n  response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    switch (pathInfo) {\n        case PATH_PING:\n            ping(request,pathInfo,response);\n            break;\n        case PATH_COUNTER:\n            stats.incQueryRequestCount();\n            getCounters(request,pathInfo,response);\n            break;\n        case PATH_METRICGROUP:\n            stats.incQueryRequestCount();\n            getMetrics(request,pathInfo,response);\n            break;\n        default:\n            stats.incInvalidRequestCount();\n            response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n            break;\n    }\n  }\n catch (Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

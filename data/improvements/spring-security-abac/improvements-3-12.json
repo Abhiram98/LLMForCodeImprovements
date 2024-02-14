@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract common URL as a variable",
+                "Change_Diff": "- XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"\n+ String url = XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\";",
+                "Description": "The URL `XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"` is being reused multiple times in the code. Extract it into a separate variable to increase readability and maintainability of the code.",
+                "Start": 2,
+                "End": 11
+            },
+            {
+                "Improvement": "Use try-catch for RestTemplate operations",
+                "Change_Diff": "- ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n+ try {\n+     ResponseEntity response=rt.getForEntity(url, String.class,entity);\n+ } catch (RestClientException e) {\n+     // Handle exception\n+     return Optional.empty();\n+ }",
+                "Description": "RestTemplate operations may throw exceptions. Therefore, it is a good practice to wrap these operations in a try-catch block to handle potential exceptions and avoid application crashes.",
+                "Start": 6,
+                "End": 9
+            },
+            {
+                "Improvement": "Check for null or empty response body",
+                "Change_Diff": "- new JSONObject(response.getBody().toString())\n+ (response.getBody() != null && !response.getBody().isEmpty()) ? new JSONObject(response.getBody()) : new JSONObject()",
+                "Description": "Before converting the response body to a JSONObject, it is necessary to check if the body is null or empty to prevent `NullPointerException` or `JSONException`.",
+                "Start": 11,
+                "End": 11
+            }
+        ],
+        "Final code": "@Override public Optional<JSONObject> getApiResourceList(){\n  String url = XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\";\n  JSONObject cachedObject=this.apiResourceListCache.get(url);\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  try {\n    ResponseEntity<String> response=rt.getForEntity(url, String.class, entity);\n    if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null || response.getBody().isEmpty()) {\n      return Optional.empty();\n    }\n    return Optional.of(this.apiResourceListCache.putIfAbsent(url, new JSONObject(response.getBody())));\n  } catch (RestClientException e) {\n    // Handle exception\n    return Optional.empty();\n  }\n}"
+    },
+    "Old_Method": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 5788,
+    "Stop": 6769,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "getApiResourceList"
+}

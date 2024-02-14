@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Reduce redundant code",
+            "Change_Diff": "- else {\n-      return key.defaultValue;\n-    }\n-  }\n- else {\n-    return env;\n-  }\n+  }\n+  return env != null ? env : key.defaultValue;",
+            "Description": "The code `return key.defaultValue;` is duplicated in the if-else condition. It can be simplified by removing the else condition and using only one return statement after the if condition.",
+            "Start": 6,
+            "End": 10
+        }],
+        "Final code": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null && key.defaultValue == null) {\n    throw new RuntimeException(\"config not found: \" + key.name);\n  }\n  return env != null ? env : key.defaultValue;\n}"
+    },
+    "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+    "Start": 813,
+    "Stop": 1187,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "get"
+}

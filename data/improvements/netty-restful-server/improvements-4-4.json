@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace multiple if statements with a switch statement",
+                "Change_Diff": "- if (fieldClass == String.class) {...\n- else if (fieldClass == int.class || fieldClass == Integer.class) {...\n- else if (fieldClass == float.class || fieldClass == Float.class) {...\n- else if (fieldClass == double.class || fieldClass == Double.class) {...\n- else if (fieldClass == long.class || fieldClass == Long.class) {...\n- else if (fieldClass == Date.class) {...\n+ switch (fieldClass.getName()) {\n+     case \"java.lang.String\": ...\n+     case \"int\": ...\n+     case \"java.lang.Integer\": ...\n+     case \"float\": ...\n+     case \"java.lang.Float\": ...\n+     case \"double\": ...\n+     case \"java.lang.Double\": ...\n+     case \"long\": ...\n+     case \"java.lang.Long\": ...\n+     case \"java.util.Date\": ...\n+ }",
+                "Description": "Switch statements are more readable and efficient when checking a variable for several specific values. Here, instead of using multiple if statements to check the type of the field, a switch statement on the class name can be used.",
+                "Start": 12,
+                "End": 23
+            },
+            {
+                "Improvement": "Handle exceptions more effectively",
+                "Change_Diff": "- catch (SQLException e) { logger.error(\"resultSet parse error\", e); }\n- catch (IllegalAccessException | ClassNotFoundException | InstantiationException e) { e.printStackTrace(); }\n+ catch (SQLException | IllegalAccessException | ClassNotFoundException | InstantiationException e) { throw new RuntimeException(\"Error parsing result set\", e); }",
+                "Description": "Instead of just printing the stack trace or logging the error, the method should throw the exception to the caller method. This lets the caller decide how to handle the exception, which may include retrying the operation, logging the error, or shutting down the program.",
+                "Start": 26,
+                "End": 29
+            }
+        ],
+        "Final code": "public A resultSet(String[] selectFields, ResultSet resultSet) throws RuntimeException {\n    A bean = null;\n    try {\n        bean = (A) Class.forName(clazz.getName()).newInstance();\n        for (int i = 0; i < selectFields.length; i++) {\n            int j = i + 1;\n            if (!fieldMap.containsKey(selectFields[i])) {\n                continue;\n            }\n            Field field = fieldMap.get(selectFields[i]);\n            field.setAccessible(true);\n            Class fieldClass = field.getType();\n            switch (fieldClass.getName()) {\n                case \"java.lang.String\": field.set(bean, resultSet.getString(j)); break;\n                case \"int\":\n                case \"java.lang.Integer\": field.set(bean, resultSet.getInt(j)); break;\n                case \"float\":\n                case \"java.lang.Float\": field.set(bean, resultSet.getFloat(j)); break;\n                case \"double\":\n                case \"java.lang.Double\": field.set(bean, resultSet.getDouble(j)); break;\n                case \"long\":\n                case \"java.lang.Long\": field.set(bean, resultSet.getLong(j)); break;\n                case \"java.util.Date\": field.set(bean, resultSet.getDate(j)); break;\n            }\n        }\n    } catch (SQLException | IllegalAccessException | ClassNotFoundException | InstantiationException e) {\n        throw new RuntimeException(\"Error parsing result set\", e);\n    }\n    return bean;\n}"
+    },
+    "Old_Method": "/** \n * 根据 fieldMap 里字段名和 bean 属性名的对应关系,根据查询字段取出对应的属性名 然后通过反射设置值\n * @param selectFields\n * @param resultSet\n * @return\n */\n@SuppressWarnings(\"unchecked\") public A resultSet(String[] selectFields,ResultSet resultSet){\n  A bean=null;\n  try {\n    bean=(A)Class.forName(clazz.getName()).newInstance();\n    for (int i=0; i < selectFields.length; i++) {\n      int j=i + 1;\n      if (!fieldMap.containsKey(selectFields[i])) {\n        continue;\n      }\n      Field field=fieldMap.get(selectFields[i]);\n      field.setAccessible(true);\n      Class fieldClass=field.getType();\n      if (fieldClass == String.class) {\n        field.set(bean,resultSet.getString(j));\n      }\n else       if (fieldClass == int.class || fieldClass == Integer.class) {\n        field.set(bean,resultSet.getInt(j));\n      }\n else       if (fieldClass == float.class || fieldClass == Float.class) {\n        field.set(bean,resultSet.getFloat(j));\n      }\n else       if (fieldClass == double.class || fieldClass == Double.class) {\n        field.set(bean,resultSet.getDouble(j));\n      }\n else       if (fieldClass == long.class || fieldClass == Long.class) {\n        field.set(bean,resultSet.getLong(j));\n      }\n else       if (fieldClass == Date.class) {\n        field.set(bean,resultSet.getDate(j));\n      }\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"resultSet parse error\",e);\n  }\ncatch (  IllegalAccessException|ClassNotFoundException|InstantiationException e) {\n    e.printStackTrace();\n  }\n  return bean;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 1900,
+    "Stop": 3717,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "resultSet"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 streams for cleaner code",
+                "Change_Diff": "- for (  Object messageValue : definition.getMessages().values()) {\n-    Message message=(Message)messageValue;\n-    String operationName=getOperationName(message);\n-    if (StringUtils.hasText(operationName)) {\n-      operations.add(operationName,message);\n-    }\n-  }\n+ definition.getMessages().values().stream()\n+   .map(Message.class::cast)\n+   .filter(message -> StringUtils.hasText(getOperationName(message)))\n+   .forEach(message -> operations.add(getOperationName(message), message));",
+                "Description": "Java 8 streams can be used to simplify and clean up the code. This will make it more readable and easier to understand. It can be used to replace the for loop for iterating through the `definition.getMessages().values()`",
+                "Start": 3,
+                "End": 9
+            },
+            {
+                "Improvement": "Use switch-case instead of multiple if-else statements",
+                "Change_Diff": "- if (isInputMessage(message)) {...}\n- else if (isOutputMessage(message)) {...}\n- else if (isFaultMessage(message)) {...}\n+ switch (messageType(message)) {\n+   case INPUT: {...} break;\n+   case OUTPUT: {...} break;\n+   case FAULT: {...} break;\n+ }",
+                "Description": "A switch-case statement can be more efficient and easier to read than multiple if-else statements. Replace the if-else statements with a switch-case statement to handle the input, output, and fault messages.",
+                "Start": 26,
+                "End": 40
+            }
+        ],
+        "Final code": "private void createOperations(Definition definition,PortType portType) throws WSDLException {\n  MultiValueMap<String,Message> operations=new LinkedMultiValueMap<>();\n  definition.getMessages().values().stream()\n    .map(Message.class::cast)\n    .filter(message -> StringUtils.hasText(getOperationName(message)))\n    .forEach(message -> operations.add(getOperationName(message), message));\n  if (operations.isEmpty() && logger.isWarnEnabled()) {\n    logger.warn(\"No operations were created, make sure the WSDL contains messages\");\n  }\n  for (String operationName : operations.keySet()) {\n    Operation operation=definition.createOperation();\n    operation.setName(operationName);\n    List<Message> messages=operations.get(operationName);\n    for (Message message : messages) {\n      switch (messageType(message)) {\n        case INPUT: {...} break;\n        case OUTPUT: {...} break;\n        case FAULT: {...} break;\n      }\n    }\n    operation.setStyle(getOperationType(operation));\n    operation.setUndefined(false);\n    if (logger.isDebugEnabled()) {\n      logger.debug(\"Adding operation [\" + operation.getName() + \"] to port type [\"+ portType.getQName()+ \"]\");\n    }\n    portType.addOperation(operation);\n  }\n}"
+    },
+    "Old_Method": "private void createOperations(Definition definition,PortType portType) throws WSDLException {\n  MultiValueMap<String,Message> operations=new LinkedMultiValueMap<>();\n  for (  Object messageValue : definition.getMessages().values()) {\n    Message message=(Message)messageValue;\n    String operationName=getOperationName(message);\n    if (StringUtils.hasText(operationName)) {\n      operations.add(operationName,message);\n    }\n  }\n  if (operations.isEmpty() && logger.isWarnEnabled()) {\n    logger.warn(\"No operations were created, make sure the WSDL contains messages\");\n  }\n  for (  String operationName : operations.keySet()) {\n    Operation operation=definition.createOperation();\n    operation.setName(operationName);\n    List<Message> messages=operations.get(operationName);\n    for (    Message message : messages) {\n      if (isInputMessage(message)) {\n        Input input=definition.createInput();\n        input.setMessage(message);\n        populateInput(definition,input);\n        operation.setInput(input);\n      }\n else       if (isOutputMessage(message)) {\n        Output output=definition.createOutput();\n        output.setMessage(message);\n        populateOutput(definition,output);\n        operation.setOutput(output);\n      }\n else       if (isFaultMessage(message)) {\n        Fault fault=definition.createFault();\n        fault.setMessage(message);\n        populateFault(definition,fault);\n        operation.addFault(fault);\n      }\n    }\n    operation.setStyle(getOperationType(operation));\n    operation.setUndefined(false);\n    if (logger.isDebugEnabled()) {\n      logger.debug(\"Adding operation [\" + operation.getName() + \"] to port type [\"+ portType.getQName()+ \"]\");\n    }\n    portType.addOperation(operation);\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/main/java/org/springframework/ws/wsdl/wsdl11/provider/AbstractPortTypesProvider.java",
+    "Start": 3063,
+    "Stop": 4748,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "createOperations"
+}

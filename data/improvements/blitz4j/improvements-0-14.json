@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constructor chaining",
+                "Change_Diff": "- public MessageBatcher(String name,MessageProcessor target){\n+ public MessageBatcher(){\n+   this(\"default\", null);",
+                "Description": "It is good practice to use constructor chaining where appropriate, to reduce duplication, and increase clarity and maintainability. This can be used here by creating a new constructor which takes no parameters, and calling it from the existing constructor.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Exception handling",
+                "Change_Diff": "-   catch (  Throwable e) {\n-     if (CONFIGURATION.shouldPrintLoggingErrors()) {\n-       e.printStackTrace();\n-     }\n-   }\n+   catch (  Throwable e) {\n+     logger.error(\"Exception while registering monitor\", e);\n+   }",
+                "Description": "The current exception handling is simply printing the stack trace of the exception. It is better to log the exception message and stack trace using a logger. This allows for better control over where the logs go, and how they are formatted.",
+                "Start": 27,
+                "End": 32
+            }
+        ],
+        "Final code": "public MessageBatcher(){\n  this(\"default\", null);\n}\n\npublic MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n  catch (  Throwable e) {\n    logger.error(\"Exception while registering monitor\", e);\n  }\n}"
+    },
+    "Old_Method": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n catch (  Throwable e) {\n    if (CONFIGURATION.shouldPrintLoggingErrors()) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 4433,
+    "Stop": 5937,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "MessageBatcher"
+}

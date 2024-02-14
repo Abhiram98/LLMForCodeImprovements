@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder for string concatenation",
+                "Change_Diff": "- String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n+ StringBuilder sb = new StringBuilder();\n+ sb.append(policyName).append(jsonKeyValuePairs).append(getTemplateDataAsAString(templateData));\n+ String key=Base64.getEncoder().encodeToString(sb.toString().trim().getBytes());",
+                "Description": "Using StringBuilder is more efficient than using '+' operator for string concatenation. The '+' operator creates a new string object for each concatenation which is less efficient in terms of memory and speed.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Check for null or empty string before processing",
+                "Change_Diff": "- String xacmlRequest;\n+ String xacmlRequest = null;\n\n+ if (policyName == null || policyName.isEmpty() || jsonKeyValuePairs == null || jsonKeyValuePairs.isEmpty()) {\n+     throw new IllegalArgumentException(\"Policy name or jsonKeyValuePairs can't be null or empty\");\n+ }",
+                "Description": "It's good to check for null or empty string before processing it. This can prevent NullPointerException and make the code more robust.",
+                "Start": 8,
+                "End": 21
+            }
+        ],
+        "Final code": "    @Override\n    public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n      if (policyName == null || policyName.isEmpty() || jsonKeyValuePairs == null || jsonKeyValuePairs.isEmpty()) {\n          throw new IllegalArgumentException(\"Policy name or jsonKeyValuePairs can't be null or empty\");\n      }\n      Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n      StringBuilder sb = new StringBuilder();\n      sb.append(policyName).append(jsonKeyValuePairs).append(getTemplateDataAsAString(templateData));\n      String key=Base64.getEncoder().encodeToString(sb.toString().trim().getBytes());\n      String cachedRequest=this.requestBuilderCache.get(key);\n      if (cachedRequest != null) {\n        return cachedRequest;\n      }\n      String xacmlRequest = null;\n      try (StringWriter out=new StringWriter()){\n        Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n        cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n        cfg.setDefaultEncoding(\"UTF-8\");\n        Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n        template.process(templateData,out);\n        xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n        out.flush();\n      }\n      catch (IOException|TemplateException e) {\n        throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n      }\n      if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n        throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n      }\n      return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n    }"
+    },
+    "Old_Method": "@Override public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n  Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n  String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n  String cachedRequest=this.requestBuilderCache.get(key);\n  if (cachedRequest != null) {\n    return cachedRequest;\n  }\n  String xacmlRequest;\n  try (StringWriter out=new StringWriter()){\n    Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData,out);\n    xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n    out.flush();\n  }\n catch (  IOException|TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n  }\n  if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n    throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n  }\n  return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 1262,
+    "Stop": 2829,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "createAuthRequest"
+}

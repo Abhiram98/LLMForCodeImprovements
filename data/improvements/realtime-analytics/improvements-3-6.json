@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for executing queries",
+                "Change_Diff": "- catch (Exception ex) {\n+ catch (SQLException ex) {",
+                "Description": "The code uses traditional try-catch blocks for executing SQL queries. Using try-with-resources ensures that resources are closed after the program is finished with them. This reduces the risk of resource leaks.",
+                "Start": 72,
+                "End": 134
+            },
+            {
+                "Improvement": "Use specific exceptions",
+                "Change_Diff": "- catch (Exception ex) {\n+ catch (SQLException ex) {",
+                "Description": "Instead of catching Exception, it\u2019s better to catch specific exceptions. This would help in understanding the kind of exceptions that can be thrown and handling them appropriately.",
+                "Start": 72,
+                "End": 134
+            },
+            {
+                "Improvement": "Avoid null checks before instanceof",
+                "Change_Diff": "- if (event.get(MCConstant.METRIC_DEMENSION) != null) { \n+ if (event.get(MCConstant.METRIC_DEMENSION) instanceof MCMetricGroupDemension) {",
+                "Description": "Null checks before instanceof are unnecessary because instanceof will return false if the object is null.",
+                "Start": 10,
+                "End": 18
+            },
+            {
+                "Improvement": "Avoid deep nesting",
+                "Change_Diff": "Refactor lengthy method into smaller, more manageable methods.",
+                "Description": "The code has deeply nested conditionals and loops. This makes the code difficult to read and understand. It is better to break up the code into smaller methods, each doing one specific task.",
+                "Start": 1,
+                "End": 134
+            }
+        ],
+        "Final code": "Code after applying the above improvements."
+    },
+    "Old_Method": "private void publishAsync(final JetstreamEvent event){\n  if (config.getEnableCassandra()) {\n    worker.submit(new Runnable(){\n      @Override public void run(){\n        try {\n          String metricName=(String)event.get(MCConstant.METRIC_NAME);\n          String columnFamilyName=event.getEventType().toLowerCase();\n          String groupId=null;\n          Map<String,String> tags=null;\n          if (event.get(MCConstant.METRIC_DEMENSION) != null) {\n            MCMetricGroupDemension groupDemension=(MCMetricGroupDemension)event.get(MCConstant.METRIC_DEMENSION);\n            groupId=groupDemension.getGroupId();\n            if (event.get(MCConstant.TAG_TIME_IGNORE) != null) {\n              tags=new HashMap<String,String>(groupDemension.getDimensions());\n              tags.put(MCConstant.TAG_TIME_IGNORE,(String)event.get(MCConstant.TAG_TIME_IGNORE));\n            }\n else {\n              tags=groupDemension.getDimensions();\n            }\n          }\n          if (groupId == null) {\n            if (event.get(MCConstant.GROUP_ID) != null) {\n              groupId=(String)event.get(MCConstant.GROUP_ID);\n            }\n else {\n              groupId=metricName;\n            }\n          }\n          long count=0;\n          if (event.get(MCConstant.AGGREGATED_COUNT) != null) {\n            count=(Long)event.get(MCConstant.AGGREGATED_COUNT);\n          }\n else {\n            count=(Long)event.get(MCConstant.METRIC_COUNT);\n          }\n          long metricTime=(Long)event.get(MCConstant.METRIC_TIME);\n          if (event.get(MCConstant.SHUTDOWN_FLUSH) == null && (event.get(MCConstant.FIRST_FLUSH) == null)) {\n            metricTime=(metricTime / 60000) * 60000;\n          }\n          boolean counterTable=columnFamilyName.contains(COUNTER_TABLE);\n          if (counterTable) {\n            if (tags == null) {\n              tags=new HashMap<String,String>();\n              tags.put(MCCounterHelper.TAG_METRICTIME,String.valueOf(event.get(MCConstant.METRIC_TIME)));\n            }\n            Calendar c=Calendar.getInstance();\n            c.setTimeInMillis(metricTime);\n          }\n          if (metricColumnFamily.get(metricName) == null || !metricColumnFamily.get(metricName).equals(columnFamilyName)) {\n            if (counterTable) {\n              if (updatestmtMap.get(columnFamilyName) == null) {\n                if (tags != null && tags.size() > 0) {\n                  prepareStatementsForUpdate(columnFamilyName,tags);\n                }\n else {\n                  prepareStatementsForUpdate(columnFamilyName,null);\n                }\n              }\n            }\n else {\n              if (stmtMap.get(columnFamilyName) == null) {\n                if (tags != null && tags.size() > 0) {\n                  prepareStatements(columnFamilyName,tags);\n                }\n else {\n                  prepareStatements(columnFamilyName,null);\n                }\n              }\n            }\n            metricColumnFamily.put(metricName,columnFamilyName);\n          }\n          if (config.getBatchSize() > 1) {\n            MetricCounter metric=new MetricCounter(metricName,groupId,tags,count,metricTime);\n            meticCounters.add(metric);\n            int counterSize=meticCounters.size();\n            if (counterSize >= config.getBatchSize()) {\n              publishToCassandraInBatch();\n            }\n else             if (event.get(LASTEVENTINBATCH) != null) {\n              ePLBatchCount.increment();\n              publishToCassandraInBatch();\n            }\n          }\n else {\n            if (event.get(LASTEVENTINBATCH) != null) {\n              ePLBatchCount.increment();\n            }\n            int parameterSize=4;\n            if (tags != null) {\n              parameterSize=4 + tags.size();\n            }\n            Object[] paramterValues=new Object[parameterSize];\n            if (counterTable) {\n              paramterValues[0]=count;\n              paramterValues[1]=metricName;\n              paramterValues[2]=groupId;\n              paramterValues[3]=new Date(metricTime);\n              int i=1;\n              if (tags != null) {\n                for (                Map.Entry<String,String> entry : tags.entrySet()) {\n                  paramterValues[3 + i]=entry.getValue();\n                  i++;\n                }\n              }\n            }\n else {\n              paramterValues[0]=metricName;\n              paramterValues[1]=groupId;\n              paramterValues[2]=new Date(metricTime);\n              int i=1;\n              if (tags != null) {\n                for (                Map.Entry<String,String> entry : tags.entrySet()) {\n                  paramterValues[2 + i]=entry.getValue();\n                  i++;\n                }\n              }\n              paramterValues[parameterSize - 1]=Long.valueOf(count).intValue();\n            }\n            publishToCassandra(paramterValues,event);\n          }\n        }\n catch (        Exception ex) {\n          LOGGER.error(\"Error publising metrics in MetricCassandraCollector:\" + ex.getMessage());\n          cassandraErrorCount.increment();\n          if (event.get(JetstreamReservedKeys.MessageAffinityKey.toString()) == null) {\n            event.put(JetstreamReservedKeys.MessageAffinityKey.toString(),(String)event.get(MCConstant.METRIC_NAME));\n          }\n          getAdviceListener().retry(event,RetryEventCode.MSG_RETRY,ex.getMessage());\n          eventSentToAdviceListener.increment();\n          registerError(ex);\n        }\n      }\n    }\n);\n  }\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MetricCassandraCollector.java",
+    "Start": 10804,
+    "Stop": 19857,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "publishAsync"
+}

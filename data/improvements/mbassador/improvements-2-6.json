@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Introduce constants for magic numbers",
+                "Change_Diff": "- create(InstancesPerListener,Listeners.synchronous()).create(InstancesPerListener,Listeners.noHandlers());\n+ create(NUM_INSTANCES,Listeners.synchronous()).create(NUM_INSTANCES,Listeners.noHandlers());\n- runConcurrent(publishAndCheck,1);\n+ runConcurrent(publishAndCheck,NUM_THREADS_SINGLE);\n- runConcurrent(publishAndCheck,ConcurrentUnits);\n+ runConcurrent(publishAndCheck,NUM_THREADS_MULTIPLE);\n- pause(200);\n+ pause(PAUSE_DURATION);",
+                "Description": "Magic numbers are direct usage of numerical values in code which can be confusing to the reader. It's better to declare them as constants with meaningful names.",
+                "Start": 2,
+                "End": 17
+            },
+            {
+                "Improvement": "Extract Runnable to a separate method",
+                "Change_Diff": "- Runnable publishAndCheck=new Runnable(){\n- @Override public void run(){\n- ...\n- }\n- }\n+ Runnable publishAndCheck = this::publishAndCheck;",
+                "Description": "The anonymous Runnable class inside the test method increases the complexity of the code. It's better to extract it to a separate method.",
+                "Start": 5,
+                "End": 12
+            }
+        ],
+        "Final code": "@Test public void testSyncPublicationSyncHandlers() throws Exception {\n  final int NUM_INSTANCES = InstancesPerListener;\n  final int NUM_THREADS_SINGLE = 1;\n  final int NUM_THREADS_MULTIPLE = ConcurrentUnits;\n  final int PAUSE_DURATION = 200;\n  ListenerFactory listeners=new ListenerFactory().create(NUM_INSTANCES,Listeners.synchronous()).create(NUM_INSTANCES,Listeners.noHandlers());\n  final MBassador bus=createBus(SyncAsync(),listeners);\n  Runnable publishAndCheck = this::publishAndCheck;\n  ConcurrentExecutor.runConcurrent(publishAndCheck,NUM_THREADS_SINGLE);\n  MessageTypes.resetAll();\n  ConcurrentExecutor.runConcurrent(publishAndCheck,NUM_THREADS_MULTIPLE);\n  assertEquals(NUM_INSTANCES * NUM_THREADS_MULTIPLE,MessageTypes.Simple.getTimesHandled(IMessageListener.DefaultListener.class));\n  assertEquals(NUM_INSTANCES * NUM_THREADS_MULTIPLE,MessageTypes.Simple.getTimesHandled(MessagesTypeListener.DefaultListener.class));\n  bus.shutdown();\n  pause(PAUSE_DURATION);\n}\n\nprivate void publishAndCheck() {\n  StandardMessage standardMessage=new StandardMessage();\n  MultipartMessage multipartMessage=new MultipartMessage();\n  bus.post(standardMessage).now();\n  bus.post(multipartMessage).now();\n  bus.post(MessageTypes.Simple).now();\n  assertEquals(NUM_INSTANCES,standardMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n  assertEquals(NUM_INSTANCES,multipartMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n}"
+    },
+    "Old_Method": "@Test public void testSyncPublicationSyncHandlers() throws Exception {\n  ListenerFactory listeners=new ListenerFactory().create(InstancesPerListener,Listeners.synchronous()).create(InstancesPerListener,Listeners.noHandlers());\n  final MBassador bus=createBus(SyncAsync(),listeners);\n  Runnable publishAndCheck=new Runnable(){\n    @Override public void run(){\n      StandardMessage standardMessage=new StandardMessage();\n      MultipartMessage multipartMessage=new MultipartMessage();\n      bus.post(standardMessage).now();\n      bus.post(multipartMessage).now();\n      bus.post(MessageTypes.Simple).now();\n      assertEquals(InstancesPerListener,standardMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n      assertEquals(InstancesPerListener,multipartMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n    }\n  }\n;\n  ConcurrentExecutor.runConcurrent(publishAndCheck,1);\n  MessageTypes.resetAll();\n  ConcurrentExecutor.runConcurrent(publishAndCheck,ConcurrentUnits);\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(IMessageListener.DefaultListener.class));\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(MessagesTypeListener.DefaultListener.class));\n  bus.shutdown();\n  pause(200);\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/SyncAsyncTest.java",
+    "Start": 762,
+    "Stop": 2358,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testSyncPublicationSyncHandlers"
+}

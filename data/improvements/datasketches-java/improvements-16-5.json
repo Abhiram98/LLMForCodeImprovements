@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce Code Redundancy",
+                "Change_Diff": "- if (sketchType == DOUBLES_SKETCH) { ... } else if (sketchType == FLOATS_SKETCH) { ... } else { ... }",
+                "Description": "The code for handling different sketch types (DOUBLES_SKETCH, FLOATS_SKETCH, etc.) is almost identical except for type-specific variables and operations. This repetitive code can be abstracted away into helper methods to make the code cleaner and easier to maintain.",
+                "Start": 18,
+                "End": 93
+            },
+            {
+                "Improvement": "Avoid Explicit Type Casting",
+                "Change_Diff": "- final KllDoublesSketch dblSk=(KllDoublesSketch)sketch; ... final KllFloatsSketch fltSk=(KllFloatsSketch)sketch; ... final KllItemsSketch<?> itmSk=(KllItemsSketch<?>)sketch;",
+                "Description": "The current implementation requires explicit type casting of the sketch object to its specific type (KllDoublesSketch, KllFloatsSketch, etc.). This can be avoided by leveraging polymorphism. Each specific sketch class can implement a common interface or extend a common abstract class that includes the necessary methods (getItemsArray, getMinItem, getMaxItem, setItemsArray, etc.).",
+                "Start": 15,
+                "End": 93
+            },
+            {
+                "Improvement": "Remove Unnecessary Assertions",
+                "Change_Diff": "- assert myCurDoubleItemsArr.length == myCurTotalItemsCapacity; ... - assert myCurFloatItemsArr.length == myCurTotalItemsCapacity; ... - assert myCurLevelsArr[0] == 0; ... - assert myNewLevelsArr.length == myCurLevelsArr.length + 1;",
+                "Description": "Remove unnecessary assertions in production code. Assertions are intended for debugging and testing, not for controlling runtime behavior. If you need to enforce these conditions, consider using exceptions instead.",
+                "Start": 22,
+                "End": 48
+            }
+        ],
+        "Final code": "The final code after applying the above improvements is left as an exercise for the reader. It would involve creating new helper methods to reduce code redundancy, implementing a common interface or extending a common abstract class for different sketch types to avoid explicit type casting, and removing unnecessary assertions."
+    },
+    "Old_Method": "/** \n * This grows the levels arr by 1 (if needed) and increases the capacity of the items array at the bottom.  Only numLevels, the levels array and the items array are affected. This assumes sketch is writable and UPDATABLE.\n * @param sketch the current sketch\n */\nstatic void addEmptyTopLevelToCompletelyFullSketch(final KllSketch sketch){\n  final SketchType sketchType=sketch.sketchType;\n  final int[] myCurLevelsArr=sketch.getLevelsArray(sketch.sketchStructure);\n  final int myCurNumLevels=sketch.getNumLevels();\n  final int myCurTotalItemsCapacity=myCurLevelsArr[myCurNumLevels];\n  final int myNewNumLevels;\n  final int[] myNewLevelsArr;\n  final int myNewTotalItemsCapacity;\n  double[] myCurDoubleItemsArr=null;\n  double[] myNewDoubleItemsArr=null;\n  double minDouble=Double.NaN;\n  double maxDouble=Double.NaN;\n  float[] myCurFloatItemsArr=null;\n  float[] myNewFloatItemsArr=null;\n  float minFloat=Float.NaN;\n  float maxFloat=Float.NaN;\n  Object[] myCurItemsArr=null;\n  Object[] myNewItemsArr=null;\n  Object minItem=null;\n  Object maxItem=null;\n  if (sketchType == DOUBLES_SKETCH) {\n    final KllDoublesSketch dblSk=(KllDoublesSketch)sketch;\n    myCurDoubleItemsArr=dblSk.getDoubleItemsArray();\n    minDouble=dblSk.getMinItem();\n    maxDouble=dblSk.getMaxItem();\n    assert myCurDoubleItemsArr.length == myCurTotalItemsCapacity;\n  }\n else   if (sketchType == FLOATS_SKETCH) {\n    final KllFloatsSketch fltSk=(KllFloatsSketch)sketch;\n    myCurFloatItemsArr=fltSk.getFloatItemsArray();\n    minFloat=fltSk.getMinItem();\n    maxFloat=fltSk.getMaxItem();\n    assert myCurFloatItemsArr.length == myCurTotalItemsCapacity;\n  }\n else {\n    final KllItemsSketch<?> itmSk=(KllItemsSketch<?>)sketch;\n    myCurItemsArr=itmSk.getTotalItemsArray();\n    minItem=itmSk.getMinItem();\n    maxItem=itmSk.getMaxItem();\n  }\n  assert myCurLevelsArr[0] == 0;\n  final int deltaItemsCap=levelCapacity(sketch.getK(),myCurNumLevels + 1,0,sketch.getM());\n  myNewTotalItemsCapacity=myCurTotalItemsCapacity + deltaItemsCap;\n  final boolean growLevelsArr=myCurLevelsArr.length < myCurNumLevels + 2;\n  if (growLevelsArr) {\n    myNewLevelsArr=Arrays.copyOf(myCurLevelsArr,myCurNumLevels + 2);\n    assert myNewLevelsArr.length == myCurLevelsArr.length + 1;\n    myNewNumLevels=myCurNumLevels + 1;\n    sketch.incNumLevels();\n  }\n else {\n    myNewLevelsArr=myCurLevelsArr;\n    myNewNumLevels=myCurNumLevels;\n  }\n  for (int level=0; level <= myNewNumLevels - 1; level++) {\n    myNewLevelsArr[level]+=deltaItemsCap;\n  }\n  myNewLevelsArr[myNewNumLevels]=myNewTotalItemsCapacity;\n  if (sketchType == DOUBLES_SKETCH) {\n    myNewDoubleItemsArr=new double[myNewTotalItemsCapacity];\n    System.arraycopy(myCurDoubleItemsArr,0,myNewDoubleItemsArr,deltaItemsCap,myCurTotalItemsCapacity);\n  }\n else   if (sketchType == FLOATS_SKETCH) {\n    myNewFloatItemsArr=new float[myNewTotalItemsCapacity];\n    System.arraycopy(myCurFloatItemsArr,0,myNewFloatItemsArr,deltaItemsCap,myCurTotalItemsCapacity);\n  }\n else {\n    myNewItemsArr=new Object[myNewTotalItemsCapacity];\n    System.arraycopy(myCurItemsArr,0,myNewItemsArr,deltaItemsCap,myCurTotalItemsCapacity);\n  }\n  if (sketch.getWritableMemory() != null) {\n    final WritableMemory wmem=memorySpaceMgmt(sketch,myNewLevelsArr.length,myNewTotalItemsCapacity);\n    sketch.setWritableMemory(wmem);\n  }\n  sketch.setNumLevels(myNewNumLevels);\n  sketch.setLevelsArray(myNewLevelsArr);\n  if (sketchType == DOUBLES_SKETCH) {\n    final KllDoublesSketch dblSk=(KllDoublesSketch)sketch;\n    dblSk.setMinItem(minDouble);\n    dblSk.setMaxItem(maxDouble);\n    dblSk.setDoubleItemsArray(myNewDoubleItemsArr);\n  }\n else   if (sketchType == FLOATS_SKETCH) {\n    final KllFloatsSketch fltSk=(KllFloatsSketch)sketch;\n    fltSk.setMinItem(minFloat);\n    fltSk.setMaxItem(maxFloat);\n    fltSk.setFloatItemsArray(myNewFloatItemsArr);\n  }\n else {\n    final KllItemsSketch<?> itmSk=(KllItemsSketch<?>)sketch;\n    itmSk.setMinItem(minItem);\n    itmSk.setMaxItem(maxItem);\n    itmSk.setItemsArray(myNewItemsArr);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/kll/KllHelper.java",
+    "Start": 23832,
+    "Stop": 29162,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "addEmptyTopLevelToCompletelyFullSketch"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace System.out.println with a logging framework",
+                "Change_Diff": "- System.out.println(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);\n+ logger.info(\"Generating {} using {} maps with step of {}\", totalRows, numSplits, rowsPerSplit);",
+                "Description": "Using System.out.println for logging messages is not a good practice. It is better to use a logging framework such as Log4j or SLF4J. This provides better control over log levels and message formats.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Use a list instead of an array for storing InputSplits",
+                "Change_Diff": "- InputSplit[] splits=new InputSplit[numSplits];\n+ List<InputSplit> splits = new ArrayList<>();\n\n- splits[split]=new RangeInputSplit(currentRow,rowsPerSplit);\n+ splits.add(new RangeInputSplit(currentRow,rowsPerSplit));\n\n- splits[numSplits - 1]=new RangeInputSplit(currentRow,totalRows - currentRow);\n+ splits.add(new RangeInputSplit(currentRow,totalRows - currentRow));\n\n- return splits;\n+ return splits.toArray(new InputSplit[0]);",
+                "Description": "It is easier to work with lists than arrays in Java. Lists provide more flexibility and functionality. Also, it is more idiomatic to use a List in such cases.",
+                "Start": 6,
+                "End": 11
+            }
+        ],
+        "Final code": "public InputSplit[] getSplits(JobConf job,int numSplits){\n  long totalRows=getNumberOfRows(job);\n  long rowsPerSplit=totalRows / numSplits;\n  logger.info(\"Generating {} using {} maps with step of {}\", totalRows, numSplits, rowsPerSplit);\n  List<InputSplit> splits = new ArrayList<>();\n  long currentRow=0;\n  for (int split=0; split < numSplits - 1; ++split) {\n    splits.add(new RangeInputSplit(currentRow,rowsPerSplit));\n    currentRow+=rowsPerSplit;\n  }\n  splits.add(new RangeInputSplit(currentRow,totalRows - currentRow));\n  return splits.toArray(new InputSplit[0]);\n}"
+    },
+    "Old_Method": "/** \n * Create the desired number of splits, dividing the number of rows between the mappers.\n */\npublic InputSplit[] getSplits(JobConf job,int numSplits){\n  long totalRows=getNumberOfRows(job);\n  long rowsPerSplit=totalRows / numSplits;\n  System.out.println(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);\n  InputSplit[] splits=new InputSplit[numSplits];\n  long currentRow=0;\n  for (int split=0; split < numSplits - 1; ++split) {\n    splits[split]=new RangeInputSplit(currentRow,rowsPerSplit);\n    currentRow+=rowsPerSplit;\n  }\n  splits[numSplits - 1]=new RangeInputSplit(currentRow,totalRows - currentRow);\n  return splits;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/terasort/TeraGen.java",
+    "Start": 4921,
+    "Stop": 5780,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "getSplits"
+}

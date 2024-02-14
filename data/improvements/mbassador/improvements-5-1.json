@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor to smaller methods",
+                "Change_Diff": "- public void subscribe(Object listener){\n...\n}\n+ public void subscribe(Object listener){\n    try {\n        if (checkNonListeners(listener)) return;\n        Subscription[] subscriptionsByListener = getSubscriptions(listener);\n        processSubscriptions(listener, subscriptionsByListener);\n    } catch (Exception e) {\n        throw new RuntimeException(e);\n    }\n}\n\nprivate boolean checkNonListeners(Object listener) {...}\n\nprivate Subscription[] getSubscriptions(Object listener) {...}\n\nprivate void processSubscriptions(Object listener, Subscription[] subscriptionsByListener) {...}",
+                "Description": "The method is too large and does multiple things. It is recommended to split it into smaller methods to improve readability and maintainability.",
+                "Start": 1,
+                "End": 35
+            },
+            {
+                "Improvement": "Improve error handling",
+                "Change_Diff": "- catch (  Exception e) {\n-     throw new RuntimeException(e);\n  }\n+ catch (SpecificException1 | SpecificException2 e) {\n+     throw new CustomException(\"An error occurred while subscribing.\", e);\n  }",
+                "Description": "Catching a generic Exception is generally a bad practice. It's better to catch specific exceptions that you expect and handle them accordingly. Also, rethrowing an exception as a RuntimeException is not recommended. Instead, create a custom exception and throw that.",
+                "Start": 33,
+                "End": 35
+            }
+        ],
+        "Final code": "public void subscribe(Object listener){\n    try {\n        if (checkNonListeners(listener)) return;\n        Subscription[] subscriptionsByListener = getSubscriptions(listener);\n        processSubscriptions(listener, subscriptionsByListener);\n    } catch (SpecificException1 | SpecificException2 e) {\n        throw new CustomException(\"An error occurred while subscribing.\", e);\n    }\n}\n\nprivate boolean checkNonListeners(Object listener) {\n    Class<?> listenerClass = listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n        return true;\n    }\n    return false;\n}\n\nprivate Subscription[] getSubscriptions(Object listener) {\n    Class<?> listenerClass = listener.getClass();\n    Subscription[] subscriptionsByListener = getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n        MessageHandler[] messageHandlers = metadataReader.getMessageListener(listenerClass).getHandlers();\n        int length = messageHandlers.length;\n        if (length == 0) {\n            nonListeners.add(listenerClass);\n            return null;\n        }\n        subscriptionsByListener = new Subscription[length];\n        for (int i = 0; i < length; i++) {\n            MessageHandler messageHandler = messageHandlers[i];\n            subscriptionsByListener[i] = subscriptionFactory.createSubscription(runtime, messageHandler);\n        }\n    }\n    return subscriptionsByListener;\n}\n\nprivate void processSubscriptions(Object listener, Subscription[] subscriptionsByListener) {\n    if (subscriptionsByListener == null) return;\n    for (Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n    }\n}"
+    },
+    "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+    "Start": 3620,
+    "Stop": 5539,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "subscribe"
+}

@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns=this.combinedAnnotations;\n  if (anns == null) {\n    anns=super.getParameterAnnotations();\n    int index=getParameterIndex();\n    if (index >= 0) {\n      for (      Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n        if (index < ifcAnns.length) {\n          Annotation[] paramAnns=ifcAnns[index];\n          if (paramAnns.length > 0) {\n            List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n            merged.addAll(Arrays.asList(anns));\n            for (            Annotation paramAnn : paramAnns) {\n              boolean existingType=false;\n              for (              Annotation ann : anns) {\n                if (ann.annotationType() == paramAnn.annotationType()) {\n                  existingType=true;\n                  break;\n                }\n              }\n              if (!existingType) {\n                merged.add(adaptAnnotation(paramAnn));\n              }\n            }\n            anns=merged.toArray(new Annotation[0]);\n          }\n        }\n      }\n    }\n    this.combinedAnnotations=anns;\n  }\n  return anns;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/HandlerMethod.java",
+    "Start": 12864,
+    "Stop": 13925,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getParameterAnnotations"
+}

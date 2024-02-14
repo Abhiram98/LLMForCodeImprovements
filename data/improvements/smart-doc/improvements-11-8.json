@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java Streams to filter elements",
+                "Change_Diff": "- for (  ApiParam apiParam : apiParamList) {\n-    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\"))\n-        .replaceAll(\"&nbsp;\",\"\"));\n-    if (apiParam.getPid() == 0) {\n-      params.add(apiParam);\n-    }\n-  }\n+ params = apiParamList.stream()\n+    .peek(apiParam -> apiParam.setField(apiParam.getField()\n+        .replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\")\n+        .replaceAll(\"&nbsp;\", \"\")))\n+    .filter(apiParam -> apiParam.getPid() == 0)\n+    .collect(Collectors.toList());",
+                "Description": "Java 8 introduced streams, which can be used to filter elements based on a predicate. This means that you can use a stream to filter the `apiParamList` for elements where `getPid() == 0`, instead of using a for loop.",
+                "Start": 5,
+                "End": 9
+            },
+            {
+                "Improvement": "Use Stream forEach instead of for loop",
+                "Change_Diff": "- for (  ApiParam apiParam : params) {\n-    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n-  }\n+ params.forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0)));",
+                "Description": "Java 8 introduced the forEach method for collections that is more readable and efficient than a traditional for loop. This can be used to iterate over the `params` list to set the children for each `apiParam`.",
+                "Start": 10,
+                "End": 12
+            }
+        ],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params = apiParamList.stream()\n    .peek(apiParam -> apiParam.setField(apiParam.getField()\n        .replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\")\n        .replaceAll(\"&nbsp;\", \"\")))\n    .filter(apiParam -> apiParam.getPid() == 0)\n    .collect(Collectors.toList());\n  params.forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0)));\n  return params;\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

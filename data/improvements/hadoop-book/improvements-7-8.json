@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract finding 'x' piece into a separate method",
+                "Change_Diff": "- Piece xPiece=null;\n- for (Piece p : pieces) {\n-     if (\"x\".equals(p.name)) {\n-         xPiece=p;\n-         break;\n-     }\n- }\n+ xPiece = findXPiece(pieces);",
+                "Description": "The logic for finding the 'x' piece is not directly related to getting the category of the solution. It is better to extract this part of the code into a separate method. This makes the code more modular and improves readability.",
+                "Start": 3,
+                "End": 8
+            },
+            {
+                "Improvement": "Avoid deep nesting",
+                "Change_Diff": "- for (List<ColumnName> row : names) {\n-     if (row.contains(xPiece)) {\n-         ...\n-     }\n- }\n+ if (names.stream().anyMatch(row -> row.contains(xPiece))) {\n+     calculateCategory(names, xPiece);\n+ }",
+                "Description": "Deeply nested blocks of code can be hard to read and understand. Consider refactoring the code to reduce the level of nesting.",
+                "Start": 10,
+                "End": 41
+            }
+        ],
+        "Final code": "public SolutionCategory getCategory(List<List<ColumnName>> names){\n  Piece xPiece = findXPiece(pieces);\n  if (names.stream().anyMatch(row -> row.contains(xPiece))) {\n      return calculateCategory(names, xPiece);\n  }\n  return SolutionCategory.UPPER_LEFT;\n}\n\nprivate Piece findXPiece(List<Piece> pieces) {\n  for (Piece p : pieces) {\n    if (\"x\".equals(p.name)) {\n      return p;\n    }\n  }\n  return null;\n}\n\nprivate SolutionCategory calculateCategory(List<List<ColumnName>> names, Piece xPiece) {\n  int low_x=width;\n  int high_x=0;\n  int low_y=height;\n  int high_y=0;\n  for (ColumnName col : names.stream().filter(row -> row.contains(xPiece)).findFirst().get()) {\n    if (col instanceof Point) {\n      int x=((Point)col).x;\n      int y=((Point)col).y;\n      if (x < low_x) {\n        low_x=x;\n      }\n      if (x > high_x) {\n        high_x=x;\n      }\n      if (y < low_y) {\n        low_y=y;\n      }\n      if (y > high_y) {\n        high_y=y;\n      }\n    }\n  }\n  boolean mid_x=(low_x + high_x == width - 1);\n  boolean mid_y=(low_y + high_y == height - 1);\n  if (mid_x && mid_y) {\n    return SolutionCategory.CENTER;\n  }\n else if (mid_x) {\n    return SolutionCategory.MID_X;\n  }\n else if (mid_y) {\n    return SolutionCategory.MID_Y;\n  }\n  return SolutionCategory.UPPER_LEFT;\n}"
+    },
+    "Old_Method": "/** \n * Find whether the solution has the x in the upper left quadrant, the x-midline, the y-midline or in the center.\n * @param names the solution to check\n * @return the catagory of the solution\n */\npublic SolutionCategory getCategory(List<List<ColumnName>> names){\n  Piece xPiece=null;\n  for (  Piece p : pieces) {\n    if (\"x\".equals(p.name)) {\n      xPiece=p;\n      break;\n    }\n  }\n  for (  List<ColumnName> row : names) {\n    if (row.contains(xPiece)) {\n      int low_x=width;\n      int high_x=0;\n      int low_y=height;\n      int high_y=0;\n      for (      ColumnName col : row) {\n        if (col instanceof Point) {\n          int x=((Point)col).x;\n          int y=((Point)col).y;\n          if (x < low_x) {\n            low_x=x;\n          }\n          if (x > high_x) {\n            high_x=x;\n          }\n          if (y < low_y) {\n            low_y=y;\n          }\n          if (y > high_y) {\n            high_y=y;\n          }\n        }\n      }\n      boolean mid_x=(low_x + high_x == width - 1);\n      boolean mid_y=(low_y + high_y == height - 1);\n      if (mid_x && mid_y) {\n        return SolutionCategory.CENTER;\n      }\n else       if (mid_x) {\n        return SolutionCategory.MID_X;\n      }\n else       if (mid_y) {\n        return SolutionCategory.MID_Y;\n      }\n      break;\n    }\n  }\n  return SolutionCategory.UPPER_LEFT;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Pentomino.java",
+    "Start": 6117,
+    "Stop": 8106,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "getCategory"
+}

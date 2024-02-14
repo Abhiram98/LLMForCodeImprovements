@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use 'switch' statement instead of multiple 'if-else' statements",
+                "Change_Diff": "- if (lowerCasePath.endsWith(\"db/variables.hjson\")) {\n+ switch(lowerCasePath) {\n+     case \"db/variables.hjson\":\n- else if (lowerCasePath.endsWith(\"models/variables.hjson\")) {\n+     case \"models/variables.hjson\":\n- else if (lowerCasePath.equals(\"models/security.hjson\")) {\n+     case \"models/security.hjson\":",
+                "Description": "Since the same operation (calling lowerCasePath.endsWith or lowerCasePath.equals) is performed with different parameters in each 'if' branch, and the outcome of each operation is known at compile time, using a 'switch' statement should simplify the code and improve readability. A 'case' would be created for each 'if' condition.",
+                "Start": 3,
+                "End": 19
+            },
+            {
+                "Improvement": "Use constants instead of string literals",
+                "Change_Diff": "- if (lowerCasePath.endsWith(\"db/variables.hjson\")) {\n+ if (lowerCasePath.endsWith(DB_VARIABLES_PATH)) {\n- else if (lowerCasePath.endsWith(\"models/variables.hjson\")) {\n+ else if (lowerCasePath.endsWith(MODELS_VARIABLES_PATH)) {\n- else if (lowerCasePath.equals(\"models/security.hjson\")) {\n+ else if (lowerCasePath.equals(MODELS_SECURITY_PATH)) {",
+                "Description": "The string literals used in the 'if' conditions can be replaced by constants. This will make the code easier to maintain and less prone to typing errors.",
+                "Start": 3,
+                "End": 19
+            }
+        ],
+        "Final code": "public static ConfigFile.ConfigFileType toType(String path) {\n  String lowerCasePath = path.toLowerCase(Locale.ROOT);\n  switch(lowerCasePath) {\n    case DB_VARIABLES_PATH:\n    case MODELS_VARIABLES_PATH:\n      return ConfigFile.ConfigFileType.VARIABLE;\n    case MODELS_SECURITY_PATH:\n      return ConfigFile.ConfigFileType.SECURITY;\n    default:\n      if (DB_FILE.matcher(lowerCasePath).matches()) {\n        return ConfigFile.ConfigFileType.DATABASE;\n      } else if (TABLE_FILE.matcher(lowerCasePath).matches()) {\n        return ConfigFile.ConfigFileType.TABLE;\n      } else if (NAME_SPACE_FILE.matcher(lowerCasePath).matches()) {\n        return ConfigFile.ConfigFileType.NAMESPACE;\n      } else {\n        return ConfigFile.ConfigFileType.UNKNOWN;\n      }\n  }\n}"
+    },
+    "Old_Method": "public static ConfigFile.ConfigFileType toType(String path){\n  String lowerCasePath=path.toLowerCase(Locale.ROOT);\n  if (lowerCasePath.endsWith(\"db/variables.hjson\")) {\n    return ConfigFile.ConfigFileType.VARIABLE;\n  }\n else   if (lowerCasePath.endsWith(\"models/variables.hjson\")) {\n    return ConfigFile.ConfigFileType.VARIABLE;\n  }\n else   if (lowerCasePath.equals(\"models/security.hjson\")) {\n    return ConfigFile.ConfigFileType.SECURITY;\n  }\n else   if (DB_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.DATABASE;\n  }\n else   if (TABLE_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.TABLE;\n  }\n else   if (NAME_SPACE_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.NAMESPACE;\n  }\n else {\n    return ConfigFile.ConfigFileType.UNKNOWN;\n  }\n}\n",
+    "File_Path": "elide/elide-model-config/src/main/java/com/yahoo/elide/modelconfig/io/FileLoader.java",
+    "Start": 6753,
+    "Stop": 7690,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "toType"
+}

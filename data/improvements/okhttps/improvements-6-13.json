@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for 'bodyParams' when creating FormBody",
+                "Change_Diff": "- if (bodyParams == null) {\n+ if (bodyParams == null || bodyParams.isEmpty()) {",
+                "Description": "In the current implementation, 'bodyParams' is directly used without checking for null. If 'bodyParams' is null, a NullPointerException will be thrown. To prevent this, add a null check before using 'bodyParams'.",
+                "Start": 28,
+                "End": 33
+            },
+            {
+                "Improvement": "Add null check for 'charset'",
+                "Change_Diff": "- FormBody.Builder builder=new FormBody.Builder(charset);\n+ FormBody.Builder builder = (charset != null) ? new FormBody.Builder(charset) : new FormBody.Builder();",
+                "Description": "The 'charset' is used directly without checking for null, which may result in a NullPointerException. Add a null check for 'charset' before using it.",
+                "Start": 29,
+                "End": 29
+            },
+            {
+                "Improvement": "Refactor duplicate null checks",
+                "Change_Diff": "- if (value == null) return;\n+ if (Objects.isNull(value)) return;",
+                "Description": "The same null check for 'value' is performed in two places. This can be refactored to remove duplication.",
+                "Start": 7,
+                "End": 10
+            },
+            {
+                "Improvement": "Refactor duplicate code for creating 'builder'",
+                "Change_Diff": "",
+                "Description": "The 'builder' is created in two places with very similar code. This can be refactored to a separate function to remove duplication.",
+                "Start": 4,
+                "End": 18
+            }
+        ],
+        "Final code": "private RequestBody buildRequestBody() {\n  if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n    MultipartBody.Builder builder = multipartBodyBuilder();\n    if (bodyParams != null) {\n      bodyParams.forEach((key,value) -> {\n        if (Objects.isNull(value)) return;\n        byte[] content = value.toString().getBytes(charset);\n        RequestBody body = RequestBody.create(null, content);\n        builder.addPart(MultipartBody.Part.createFormData(key, null, body));\n      });\n    }\n    if (files != null) {\n      files.forEach((name, file) -> {\n        MediaType type = httpClient.mediaType(file.getType());\n        builder.addFormDataPart(name, file.getFileName(), file.toRequestBody(type));\n      });\n    }\n    return builder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (bodyParams == null || bodyParams.isEmpty()) {\n    return emptyRequestBody();\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder = (charset != null) ? new FormBody.Builder(charset) : new FormBody.Builder();\n    bodyParams.forEach((key, value) -> {\n      if (Objects.isNull(value)) return;\n      builder.add(key, value.toString());\n    });\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}"
+    },
+    "Old_Method": "private RequestBody buildRequestBody(){\n  if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n    MultipartBody.Builder builder=multipartBodyBuilder();\n    if (bodyParams != null) {\n      bodyParams.forEach((key,value) -> {\n        if (value == null)         return;\n        byte[] content=value.toString().getBytes(charset);\n        RequestBody body=RequestBody.create(null,content);\n        builder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      }\n);\n    }\n    if (files != null) {\n      files.forEach((name,file) -> {\n        MediaType type=httpClient.mediaType(file.getType());\n        builder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n      }\n);\n    }\n    return builder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (bodyParams == null) {\n    return emptyRequestBody();\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder=new FormBody.Builder(charset);\n    bodyParams.forEach((key,value) -> {\n      if (value == null)       return;\n      builder.add(key,value.toString());\n    }\n);\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+    "Start": 19603,
+    "Stop": 21270,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "buildRequestBody"
+}

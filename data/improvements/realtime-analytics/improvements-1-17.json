@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce nested conditions",
+                "Change_Diff": "- if (counters == null) {\n+ if (counters != null) continue;",
+                "Description": "Reduce the nested conditions by using the 'continue' statement to skip the current iteration and proceed to the next. This makes the code more readable and maintainable.",
+                "Start": 4,
+                "End": 18
+            },
+            {
+                "Improvement": "Use try-catch block",
+                "Change_Diff": "+ try {\n ...\n} catch (Exception e) {\n e.printStackTrace();\n}",
+                "Description": "The method does not have any exception handling mechanism. Enclose the code within a try-catch block to handle any unexpected exceptions and ensure the program continues to run.",
+                "Start": 1,
+                "End": 47
+            },
+            {
+                "Improvement": "Remove redundant null check",
+                "Change_Diff": "- if (counters == null) {\n ...",
+                "Description": "There's a redundant null check for 'counters' variable inside the synchronized block. We can safely remove this null check because it's already handled before entering the synchronized block.",
+                "Start": 13,
+                "End": 13
+            },
+            {
+                "Improvement": "Remove redundant variable assignment",
+                "Change_Diff": "- conf=getConfiguration().getOffheapMetricConf().get(metricName);\n ...",
+                "Description": "Variable 'conf' is assigned a value but the value is not used before it is assigned again. This is a redundant assignment and can be removed.",
+                "Start": 5,
+                "End": 5
+            }
+        ],
+        "Final code": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n  try {\n    Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n    OffHeapCacheConfig conf=getConfiguration().getOffheapMetricConf() != null ? getConfiguration().getOffheapMetricConf().get(metricName) : null;\n    if (counters != null) continue;\n    synchronized (this) {\n      counters=conf != null ? CacheManager.getCounterOffHeapCache(metricName,conf) : CacheManager.getCounterCache();\n      groupbyWithTagsMetricMap.put(metricName,counters);\n    }\n    MCMetricGroupDemension groupDemension=tags == null || tags.isEmpty() ? new MCMetricGroupDemension(metricName,groupId) : new MCMetricGroupDemension(metricName,groupId,tags);\n    String tag_time=tags != null && tags.containsKey(MCConstant.TAG_TIME_IGNORE) ? tags.remove(MCConstant.TAG_TIME_IGNORE) : null;\n    Counter counter=counters.get(groupDemension);\n    if (counter == null) {\n      counter=isAvg ? new AvgCounter() : new Counter();\n      if (conf == null) counters.put(groupDemension,counter);\n    }\n    if (tag_time != null) counter.setLastCounterTime(tag_time);\n    if (isAvg) ((AvgCounter)counter).inc(count,total);\n    else {\n      if (count != null) counter.inc(count);\n      else counter.inc();\n    }\n    if (conf != null) counters.put(groupDemension,counter);\n    return counter;\n  } catch (Exception e) {\n    e.printStackTrace();\n    return null;\n  }\n}"
+    },
+    "Old_Method": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n  Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  if (counters == null) {\nsynchronized (this) {\n      if (counters == null) {\n        if (conf != null) {\n          counters=CacheManager.getCounterOffHeapCache(metricName,conf);\n        }\n else {\n          counters=CacheManager.getCounterCache();\n        }\n        groupbyWithTagsMetricMap.put(metricName,counters);\n      }\n    }\n  }\n  MCMetricGroupDemension groupDemension=null;\n  String tag_time=null;\n  if (tags == null || tags.isEmpty()) {\n    groupDemension=new MCMetricGroupDemension(metricName,groupId);\n  }\n else {\n    if (tags.containsKey(MCConstant.TAG_TIME_IGNORE)) {\n      tag_time=tags.remove(MCConstant.TAG_TIME_IGNORE);\n    }\n    groupDemension=new MCMetricGroupDemension(metricName,groupId,tags);\n  }\n  Counter counter=counters.get(groupDemension);\n  if (counter == null) {\n    if (isAvg) {\n      counter=new AvgCounter();\n    }\n else {\n      counter=new Counter();\n    }\n    if (conf == null) {\n      counters.put(groupDemension,counter);\n    }\n  }\n  if (tag_time != null) {\n    counter.setLastCounterTime(tag_time);\n  }\n  if (isAvg) {\n    ((AvgCounter)counter).inc(count,total);\n  }\n else {\n    if (count != null) {\n      counter.inc(count);\n    }\n else {\n      counter.inc();\n    }\n  }\n  if (conf != null) {\n    counters.put(groupDemension,counter);\n  }\n  return counter;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 9927,
+    "Stop": 12300,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getCounterByMetricDemensionAndInc"
+}

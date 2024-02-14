@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract URL to a constant",
+                "Change_Diff": "- http.async(\"http://www.baidu.com\").setOnResponse((  HttpResult result) -> {\n+ http.async(BASE_URL).setOnResponse((  HttpResult result) -> {",
+                "Description": "It is a good practice to extract hardcoded URLs or other strings to constants. This makes them easier to manage and change if needed.",
+                "Start": 17,
+                "End": 17
+            },
+            {
+                "Improvement": "Extract common lambda functions",
+                "Change_Diff": "- .responseListener((  HttpTask<?> task,  HttpResult result) -> {\n+ .responseListener(globalResponseListener)",
+                "Description": "The same lambda function is used multiple times in the method. It would be more efficient to extract this to a variable and reuse it, reducing code duplication.",
+                "Start": 2,
+                "End": 16
+            },
+            {
+                "Improvement": "Avoid hardcoding sleep time",
+                "Change_Diff": "- sleep(2000);\n+ sleep(SLEEP_TIME);",
+                "Description": "Hardcoding sleep time is not a good practice because it may vary depending on the situation. It would be better to use a constant that can be easily changed in one place.",
+                "Start": 27,
+                "End": 27
+            }
+        ],
+        "Final code": "public void testGlobalCallback(){\n  final String BASE_URL = \"http://www.baidu.com\";\n  final int SLEEP_TIME = 2000;\n\n  ResponseListener globalResponseListener = (  HttpTask<?> task,  HttpResult result) -> {\n    println(\"全局 onResponse: \" + result.getStatus());\n    return true;\n  };\n\n  HTTP http=HTTP.builder().responseListener(globalResponseListener).completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n    println(\"全局 onComplete: \" + state);\n    return true;\n  }\n).exceptionListener((  HttpTask<?> task,  IOException error) -> {\n    println(\"全局 onException: \" + error.getMessage());\n    return false;\n  }\n).build();\n\n  http.async(BASE_URL).setOnResponse((  HttpResult result) -> {\n    println(\"单例 onResponse: \" + result.getStatus());\n  }\n).setOnComplete((  HttpResult.State state) -> {\n    println(\"单例 onComplete: \" + state);\n  }\n).setOnException((  IOException error) -> {\n    println(\"单例 onException: \" + error.getMessage());\n  }\n).get();\n\n  sleep(SLEEP_TIME);\n}"
+    },
+    "Old_Method": "@Test public void testGlobalCallback(){\n  HTTP http=HTTP.builder().responseListener((  HttpTask<?> task,  HttpResult result) -> {\n    println(\"全局 onResponse: \" + result.getStatus());\n    return true;\n  }\n).completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n    println(\"全局 onComplete: \" + state);\n    return true;\n  }\n).exceptionListener((  HttpTask<?> task,  IOException error) -> {\n    println(\"全局 onException: \" + error.getMessage());\n    return false;\n  }\n).build();\n  http.async(\"http://www.baidu.com\").setOnResponse((  HttpResult result) -> {\n    println(\"单例 onResponse: \" + result.getStatus());\n  }\n).setOnComplete((  HttpResult.State state) -> {\n    println(\"单例 onComplete: \" + state);\n  }\n).setOnException((  IOException error) -> {\n    println(\"单例 onException: \" + error.getMessage());\n  }\n).get();\n  sleep(2000);\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/ListenerTests.java",
+    "Start": 151,
+    "Stop": 1367,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "testGlobalCallback"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor code to separate concerns",
+                "Change_Diff": "- public WebSecurityConfig(){\n+ public WebSecurityConfig(){\n+   loadProperties();\n+ }\n\n+ private void loadProperties(){",
+                "Description": "Instead of loading the properties in the constructor, it would be better to move this logic to a separate method. This will make the code cleaner and easier to test.",
+                "Start": 1,
+                "End": 13
+            },
+            {
+                "Improvement": "Use of a logger for exceptions",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ logger.error(\"Failed to load properties\", e);",
+                "Description": "Instead of throwing a RuntimeException when an IOException occurs, it would be advisable to log the exception. This will help in debugging.",
+                "Start": 13,
+                "End": 15
+            },
+            {
+                "Improvement": "Use of constants for property keys",
+                "Change_Diff": "- KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n+ KEY_STORE=properties.getProperty(XACML_PDP_KEY_STORE);",
+                "Description": "Instead of using hard-coded strings for property keys, it would be better to use constants. This will eliminate chances of errors due to typos.",
+                "Start": 3,
+                "End": 9
+            }
+        ],
+        "Final code": "public class WebSecurityConfig{\n\n  private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);\n\n  private static final String XACML_PDP_KEY_STORE = \"xacml.pdp.keyStore\";\n  /*...similarly define other constants...*/\n\n  public WebSecurityConfig(){\n     loadProperties();\n  }\n\n  private void loadProperties(){\n     try {\n        Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n        KEY_STORE=properties.getProperty(XACML_PDP_KEY_STORE);\n        /*...similarly use constants for other properties...*/\n     }\n     catch (IOException e) {\n        logger.error(\"Failed to load properties\", e);\n     }\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

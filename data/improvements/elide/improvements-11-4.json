@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constructor instead of init method",
+                "Change_Diff": "- @BeforeAll public void init() throws Exception {\n+ public TestClass() throws Exception {",
+                "Description": "Instead of using a method to initialize the test environment, use a constructor. Constructors are more suitable for initializing an object because they are called automatically when an object is created. This ensures that we don't forget to call init method and allows us to mark fields as final to prevent accidental modification.",
+                "Start": 1,
+                "End": 39
+            },
+            {
+                "Improvement": "Move common configuration to separate method",
+                "Change_Diff": "- settings=new ElideStandaloneTestSettings(){\n...\n}\n+ settings = createTestSettings();",
+                "Description": "The common configuration for the ElideStandaloneTestSettings is repeated multiple times. It would be more efficient and make the code cleaner to move this configuration to a separate method and reuse it as needed.",
+                "Start": 4,
+                "End": 39
+            }
+        ],
+        "Final code": "public class TestClass {\n\n  private Path configRoot;\n  private ElideStandaloneTestSettings settings;\n  private ElideStandalone elide;\n\n  public TestClass() throws Exception {\n    configRoot=Paths.get(Files.createTempDirectory(\"test\").toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n    Files.createDirectories(configRoot);\n    settings = createTestSettings();\n    elide=new ElideStandalone(settings);\n    elide.start(false);\n  }\n\n  private ElideStandaloneTestSettings createTestSettings() {\n    return new ElideStandaloneTestSettings() {\n      ...\n      // Place the remaining initializations here\n      ...\n    };\n  }\n}"
+    },
+    "Old_Method": "@BeforeAll public void init() throws Exception {\n  configRoot=Paths.get(Files.createTempDirectory(\"test\").toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n  Files.createDirectories(configRoot);\n  settings=new ElideStandaloneTestSettings(){\n    @Override public EntityDictionary getEntityDictionary(    ServiceLocator injector,    ClassScanner scanner,    Optional<DynamicConfiguration> dynamicConfiguration,    Set<Type<?>> entitiesToExclude){\n      Map<String,Class<? extends Check>> checks=new HashMap<>();\n      if (getAnalyticProperties().enableDynamicModelConfigAPI()) {\n        checks.put(ConfigChecks.CAN_CREATE_CONFIG,ConfigChecks.CanCreate.class);\n        checks.put(ConfigChecks.CAN_READ_CONFIG,ConfigChecks.CanRead.class);\n        checks.put(ConfigChecks.CAN_DELETE_CONFIG,ConfigChecks.CanDelete.class);\n        checks.put(ConfigChecks.CAN_UPDATE_CONFIG,ConfigChecks.CanNotUpdate.class);\n      }\n      EntityDictionary dictionary=new EntityDictionary(checks,new HashMap<>(),new Injector(){\n        @Override public void inject(        Object entity){\n          injector.inject(entity);\n        }\n        @Override public <T>T instantiate(        Class<T> cls){\n          return injector.create(cls);\n        }\n      }\n,CoerceUtil::lookup,entitiesToExclude,scanner);\n      dynamicConfiguration.map(DynamicConfiguration::getRoles).orElseGet(Collections::emptySet).forEach(role -> dictionary.addRoleCheck(role,new Role.RoleMemberCheck(role)));\n      return dictionary;\n    }\n    @Override public ElideStandaloneAnalyticSettings getAnalyticProperties(){\n      return new ElideStandaloneAnalyticSettings(){\n        @Override public boolean enableDynamicModelConfig(){\n          return true;\n        }\n        @Override public boolean enableDynamicModelConfigAPI(){\n          return true;\n        }\n        @Override public String getDynamicConfigPath(){\n          return configRoot.toFile().getAbsolutePath();\n        }\n        @Override public boolean enableAggregationDataStore(){\n          return true;\n        }\n        @Override public boolean enableMetaDataStore(){\n          return true;\n        }\n      }\n;\n    }\n  }\n;\n  elide=new ElideStandalone(settings);\n  elide.start(false);\n}\n",
+    "File_Path": "elide/elide-standalone/src/test/java/example/ElideStandaloneConfigStoreTest.java",
+    "Start": 2770,
+    "Stop": 6011,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "init"
+}

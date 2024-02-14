@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Objects.requireNonNull() for null check",
+                "Change_Diff": "- if (destination == null || destination.isEmpty()) {\n+ Objects.requireNonNull(destination, \"destination can not be null!\");\n+ if (destination.isEmpty()) {",
+                "Description": "Java 8 introduced Objects.requireNonNull() which throws NullPointerException if the argument is null. It makes the code compact and more readable. Instead of using 'if (destination == null)', we can use 'Objects.requireNonNull(destination, \"destination can not be null!\")'.",
+                "Start": 14,
+                "End": 14
+            },
+            {
+                "Improvement": "Use Stream API to find if destination already exists",
+                "Change_Diff": "- for (  Subscriber s : subscribers) {\n-    if (s.destinationEqual(destination)) {\n-      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n-      return this;\n-    }\n-  }\n+ if (subscribers.stream().anyMatch(s -> s.destinationEqual(destination))) {\n+    Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n+    return this;\n+ }",
+                "Description": "Java 8 introduced Stream API which can be used for more compact and readable code. We can use Stream API to check if destination already exists in subscribers. It will make the code more compact and more readable.",
+                "Start": 16,
+                "End": 21
+            }
+        ],
+        "Final code": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  Objects.requireNonNull(destination, \"destination can not be null!\");\n  if (destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  if (subscribers.stream().anyMatch(s -> s.destinationEqual(destination))) {\n    Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n    return this;\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}"
+    },
+    "Old_Method": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}\n",
+    "File_Path": "okhttps/okhttps-stomp/src/main/java/cn/zhxu/stomp/Stomp.java",
+    "Start": 8602,
+    "Stop": 9429,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "subscribe"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract large anonymous block to a method",
+                "Change_Diff": "- Consumer<OutputStream> data = outputStream -> {\n-    try (ResourceWriter writer = formatter.newResourceWriter(outputStream, projection, exportObj)) {\n-        results.subscribe(resource -> {\n-            this.recordNumber++;\n-            writer.write(resource);\n-        });\n-    } catch (IOException e) {\n-        throw new UncheckedIOException(e);\n-    }\n-};\n+ Consumer<OutputStream> data = this::writeResources;",
+                "Description": "The large anonymous block inside the `Consumer<OutputStream> data` can be extracted into a new method. This would make the code easier to read and more modular.",
+                "Start": 26,
+                "End": 34
+            },
+            {
+                "Improvement": "Improve error handling",
+                "Change_Diff": "- catch (IOException e) {\n-    log.error(\"IOException during TableExport\", e);\n-    exportResult.setMessage(e.getMessage());\n- }\n+ catch (IOException e) {\n+    log.error(\"IOException during TableExport\", e);\n+    throw e;\n+ }",
+                "Description": "Currently, all the exceptions are caught in the same way and the message is set in the `exportResult` object. It would be better to have specific catch blocks for different exception types, and handle them differently. For example, for `IOException`, we could log the error and rethrow it.",
+                "Start": 42,
+                "End": 59
+            }
+        ],
+        "Final code": "private void writeResources(OutputStream outputStream) {\n    try (ResourceWriter writer = formatter.newResourceWriter(outputStream, projection, exportObj)) {\n        results.subscribe(resource -> {\n            this.recordNumber++;\n            writer.write(resource);\n        });\n    } catch (IOException e) {\n        throw new UncheckedIOException(e);\n    }\n}\n\n@Override public AsyncApiResult call() {\n    //...\n    Consumer<OutputStream> data = this::writeResources;\n    //...\n    try {\n        //...\n    } catch (BadRequestException e) {\n        exportResult.setMessage(e.getMessage());\n    } catch (MalformedURLException e) {\n        exportResult.setMessage(\"Download url generation failure.\");\n    } catch (IOException e) {\n        log.error(\"IOException during TableExport\", e);\n        throw e;\n    } catch (Exception e) {\n        // handle generic exception\n    } finally {\n        //...\n    }\n    return exportResult;\n}"
+    },
+    "Old_Method": "@Override public AsyncApiResult call(){\n  log.debug(\"TableExport Object from request: {}\",exportObj);\n  Elide elide=service.getElide();\n  TableExportResult exportResult=new TableExportResult();\n  UUID requestId=UUID.fromString(exportObj.getRequestId());\n  try (DataStoreTransaction tx=elide.getDataStore().beginTransaction()){\n    Map<String,List<String>> requestHeaders=new HashMap<String,List<String>>();\n    requestHeaders.put(\"bypasscache\",new ArrayList<String>(Arrays.asList(\"true\")));\n    RequestScope requestScope=getRequestScope(exportObj,scope,tx,requestHeaders);\n    Collection<EntityProjection> projections=getProjections(exportObj,requestScope);\n    validateProjections(projections);\n    EntityProjection projection=projections.iterator().next();\n    Observable<PersistentResource> observableResults=Observable.empty();\n    elide.getTransactionRegistry().addRunningTransaction(requestId,tx);\n    requestScope.setEntityProjection(projection);\n    if (projection != null) {\n      projection.setPagination(null);\n      observableResults=PersistentResource.loadRecords(projection,Collections.emptyList(),requestScope);\n    }\n    Observable<PersistentResource> results=observableResults;\n    Consumer<OutputStream> data=outputStream -> {\n      try (ResourceWriter writer=formatter.newResourceWriter(outputStream,projection,exportObj)){\n        results.subscribe(resource -> {\n          this.recordNumber++;\n          writer.write(resource);\n        }\n);\n      }\n catch (      IOException e) {\n        throw new UncheckedIOException(e);\n      }\n    }\n;\n    TableExportResult result=storeResults(exportObj,engine,data);\n    if (result != null && result.getMessage() != null) {\n      throw new IllegalStateException(result.getMessage());\n    }\n    exportResult.setUrl(new URL(generateDownloadURL(exportObj,scope)));\n    exportResult.setRecordCount(recordNumber);\n    tx.flush(requestScope);\n    elide.getAuditLogger().commit();\n    tx.commit(requestScope);\n  }\n catch (  BadRequestException e) {\n    exportResult.setMessage(e.getMessage());\n  }\ncatch (  MalformedURLException e) {\n    exportResult.setMessage(\"Download url generation failure.\");\n  }\ncatch (  IOException e) {\n    log.error(\"IOException during TableExport\",e);\n    exportResult.setMessage(e.getMessage());\n  }\ncatch (  Exception e) {\n    exportResult.setMessage(e.getMessage());\n  }\n finally {\n    exportResult.setHttpStatus(200);\n    exportResult.setCompletedOn(new Date());\n    elide.getTransactionRegistry().removeRunningTransaction(requestId);\n    elide.getAuditLogger().clear();\n  }\n  return exportResult;\n}\n",
+    "File_Path": "elide/elide-async/src/main/java/com/yahoo/elide/async/operation/TableExportOperation.java",
+    "Start": 2962,
+    "Stop": 6328,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "call"
+}

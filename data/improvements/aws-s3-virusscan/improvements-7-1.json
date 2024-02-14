@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid deep nesting",
+                "Change_Diff": "- try {\n...\n} finally {\n...\n}",
+                "Description": "The code has deeply nested try-catch blocks which makes it harder to read and maintain. We can flatten the structure by splitting the nested blocks into separate methods.",
+                "Start": 1,
+                "End": 35
+            },
+            {
+                "Improvement": "Avoid hardcoding file names and contents",
+                "Change_Diff": "- this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n- this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");",
+                "Description": "File names and contents are hardcoded in the method. We should move these to constants or parameters to make the method more flexible and reusable.",
+                "Start": 8,
+                "End": 10
+            },
+            {
+                "Improvement": "Avoid using magic strings",
+                "Change_Diff": "- final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n- final String stackName=\"s3-virusscan-\" + this.random8String();\n- final String bucketName=\"s3-virusscan-\" + this.random8String();\n- this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n- this.getStackOutputValue(stackName,\"ScanQueueArn\");\n- this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n- this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");",
+                "Description": "Magic strings like 'vpc-2azs-', 's3-virusscan-', 'template.yaml', 'ParentVPCStack', 'ScanQueueArn', 'virus.txt', 'no-virus.txt' are used. These should be replaced with constants or config variables for better maintainability.",
+                "Start": 4,
+                "End": 10
+            }
+        ],
+        "Final code": "Please note that the final code cannot be provided as the improvements suggested are broad and involve restructuring the whole method and possibly other parts of the codebase as well. The improvements are also about general practices and do not necessarily lead to a single 'correct' version of the code."
+    },
+    "Old_Method": "@Test public void testWithFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n        this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"virus.txt\") == true) {\n            throw new RuntimeException(\"virus.txt must be deleted\");\n          }\n          return false;\n        }\n);\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"no-virus.txt\") == false) {\n            throw new RuntimeException(\"no-virus.txt must be existing\");\n          }\n          return true;\n        }\n);\n        this.deleteObject(context,bucketName,\"no-virus.txt\");\n      }\n  finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestEicarFile.java",
+    "Start": 3987,
+    "Stop": 6025,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "testWithFileDeletion"
+}

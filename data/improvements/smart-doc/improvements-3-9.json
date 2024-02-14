@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Streams to filter methods",
+                "Change_Diff": "- for (  JavaMethod method : methods) {\n...\n}\n+ methods.stream()\n.filter(method -> !method.isPrivate() && Objects.isNull(method.getTagByName(IGNORE)) && (needAllMethods || filterMethods.contains(method.getName())))\n.forEach(method -> methodDocList.add(convertToRpcJavaMethod(apiConfig,method,null)));",
+                "Description": "Instead of using a traditional for loop to filter methods, use Java 8 Stream API. Stream API is more readable and efficient for filtering data.",
+                "Start": 7,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- RpcJavaMethod apiMethodDoc=convertToRpcJavaMethod(apiConfig,method,null);\nmethodDocList.add(apiMethodDoc);\n+ addRpcJavaMethodToList(methodDocList, apiConfig, method, null);",
+                "Description": "The code for converting a JavaMethod to RpcJavaMethod and adding it to a list is repeated. It is good practice to extract repeated code into a method for maintainability and readability.",
+                "Start": 17,
+                "End": 18
+            },
+            {
+                "Improvement": "Simplify if condition",
+                "Change_Diff": "- if (cls.isInterface() || cls.isAbstract()) {\n+ ",
+                "Description": "The if condition `if (cls.isInterface() || cls.isAbstract())` is not necessary since the loop will not be executed if the list `implClasses` is empty. Removing this condition simplifies the code.",
+                "Start": 25,
+                "End": 25
+            },
+            {
+                "Improvement": "Avoid creating new list",
+                "Change_Diff": "- List<RpcJavaMethod> rpcJavaMethods=new ArrayList<>(methodDocList.size());\n...\nrpcJavaMethods.add(method);\n...\nreturn rpcJavaMethods;\n+ return methodDocList;",
+                "Description": "Instead of creating a new list `rpcJavaMethods`, use `methodDocList` directly. This avoids unnecessary instantiation and memory usage.",
+                "Start": 43,
+                "End": 59
+            }
+        ],
+        "Final code": "private List<RpcJavaMethod> buildServiceMethod(final JavaClass cls, ApiConfig apiConfig, ProjectDocConfigBuilder projectBuilder){\n    String clazName=cls.getCanonicalName();\n    List<JavaMethod> methods=cls.getMethods();\n    List<RpcJavaMethod> methodDocList=new ArrayList<>(methods.size());\n    Set<String> filterMethods=DocUtil.findFilterMethods(clazName);\n    boolean needAllMethods=filterMethods.contains(DocGlobalConstants.DEFAULT_FILTER_METHOD);\n    methods.stream().filter(method -> !method.isPrivate() && Objects.isNull(method.getTagByName(IGNORE)) && (needAllMethods || filterMethods.contains(method.getName()))).forEach(method -> addRpcJavaMethodToList(methodDocList, apiConfig, method, null));\n    methodDocList.addAll(getParentsClassMethods(apiConfig,cls));\n    List<JavaType> implClasses=cls.getImplements();\n    for (JavaType type : implClasses) {\n        JavaClass javaClass=(JavaClass)type;\n        Map<String,JavaType> actualTypesMap=JavaClassUtil.getActualTypesMap(javaClass);\n        javaClass.getMethods().stream().filter(method -> !method.isDefault()).forEach(method -> addRpcJavaMethodToList(methodDocList, apiConfig, method, actualTypesMap));\n    }\n    int methodOrder=0;\n    for (RpcJavaMethod method : methodDocList) {\n        methodOrder++;\n        method.setOrder(methodOrder);\n        String methodUid=DocUtil.generateId(clazName + method.getName() + methodOrder);\n        method.setMethodId(methodUid);\n        List<ApiParam> requestParams=requestParams(method.getJavaMethod(),projectBuilder,new AtomicInteger(0),method.getActualTypesMap());\n        List<ApiParam> responseParams=buildReturnApiParams(DocJavaMethod.builder().setJavaMethod(method.getJavaMethod()).setActualTypesMap(method.getActualTypesMap()),projectBuilder);\n        if (apiConfig.isParamsDataToTree()) {\n            method.setRequestParams(ApiParamTreeUtil.apiParamToTree(requestParams));\n            method.setResponseParams(ApiParamTreeUtil.apiParamToTree(responseParams));\n        } else {\n            method.setRequestParams(requestParams);\n            method.setResponseParams(responseParams);\n        }\n    }\n    return methodDocList;\n}\n\nprivate void addRpcJavaMethodToList(List<RpcJavaMethod> list, ApiConfig apiConfig, JavaMethod method, Map<String,JavaType> actualTypesMap) {\n    RpcJavaMethod apiMethodDoc=convertToRpcJavaMethod(apiConfig,method,actualTypesMap);\n    list.add(apiMethodDoc);\n}"
+    },
+    "Old_Method": "private List<RpcJavaMethod> buildServiceMethod(final JavaClass cls,ApiConfig apiConfig,ProjectDocConfigBuilder projectBuilder){\n  String clazName=cls.getCanonicalName();\n  List<JavaMethod> methods=cls.getMethods();\n  List<RpcJavaMethod> methodDocList=new ArrayList<>(methods.size());\n  Set<String> filterMethods=DocUtil.findFilterMethods(clazName);\n  boolean needAllMethods=filterMethods.contains(DocGlobalConstants.DEFAULT_FILTER_METHOD);\n  for (  JavaMethod method : methods) {\n    if (method.isPrivate()) {\n      continue;\n    }\n    if (Objects.nonNull(method.getTagByName(IGNORE))) {\n      continue;\n    }\n    if (StringUtil.isEmpty(method.getComment()) && apiConfig.isStrict()) {\n      throw new RuntimeException(\"Unable to find comment for method \" + method.getName() + \" in \"+ cls.getCanonicalName());\n    }\n    if (needAllMethods || filterMethods.contains(method.getName())) {\n      RpcJavaMethod apiMethodDoc=convertToRpcJavaMethod(apiConfig,method,null);\n      methodDocList.add(apiMethodDoc);\n    }\n  }\n  methodDocList.addAll(getParentsClassMethods(apiConfig,cls));\n  if (cls.isInterface() || cls.isAbstract()) {\n    List<JavaType> implClasses=cls.getImplements();\n    for (    JavaType type : implClasses) {\n      JavaClass javaClass=(JavaClass)type;\n      Map<String,JavaType> actualTypesMap=JavaClassUtil.getActualTypesMap(javaClass);\n      for (      JavaMethod method : javaClass.getMethods()) {\n        if (!method.isDefault()) {\n          methodDocList.add(convertToRpcJavaMethod(apiConfig,method,actualTypesMap));\n        }\n      }\n    }\n  }\n  int methodOrder=0;\n  List<RpcJavaMethod> rpcJavaMethods=new ArrayList<>(methodDocList.size());\n  for (  RpcJavaMethod method : methodDocList) {\n    methodOrder++;\n    method.setOrder(methodOrder);\n    String methodUid=DocUtil.generateId(clazName + method.getName() + methodOrder);\n    method.setMethodId(methodUid);\n    List<ApiParam> requestParams=requestParams(method.getJavaMethod(),projectBuilder,new AtomicInteger(0),method.getActualTypesMap());\n    List<ApiParam> responseParams=buildReturnApiParams(DocJavaMethod.builder().setJavaMethod(method.getJavaMethod()).setActualTypesMap(method.getActualTypesMap()),projectBuilder);\n    if (apiConfig.isParamsDataToTree()) {\n      method.setRequestParams(ApiParamTreeUtil.apiParamToTree(requestParams));\n      method.setResponseParams(ApiParamTreeUtil.apiParamToTree(responseParams));\n    }\n else {\n      method.setRequestParams(requestParams);\n      method.setResponseParams(responseParams);\n    }\n    rpcJavaMethods.add(method);\n  }\n  return rpcJavaMethods;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/template/RpcDocBuildTemplate.java",
+    "Start": 3775,
+    "Stop": 6960,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "buildServiceMethod"
+}

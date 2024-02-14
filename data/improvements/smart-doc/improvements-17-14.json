@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constructor to initialize Apis object",
+                "Change_Diff": "- methodApi=new Apis();\n- methodApi.setIsFolder(TornaConstants.NO);\n- ...\n- ...\n+ methodApi = new Apis(TornaConstants.NO, apiMethodDoc.getDesc(), ...);",
+                "Description": "Instead of setting all properties separately, it would be more efficient and cleaner to use a constructor or builder pattern to initialize the Apis object. This will make the code more readable and maintainable.",
+                "Start": 7,
+                "End": 26
+            },
+            {
+                "Improvement": "Avoid duplicate checks",
+                "Change_Diff": "- if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams()) && DocGlobalConstants.FILE_CONTENT_TYPE.equals(apiMethodDoc.getContentType())) {...}\n- else if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {...}\n+ if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {\n+    if (DocGlobalConstants.FILE_CONTENT_TYPE.equals(apiMethodDoc.getContentType())) {...}\n+    else {...}\n+ }",
+                "Description": "There are multiple checks for CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams()). It would be better to check once and use if-else condition to handle different cases. This will improve performance by reducing unnecessary checks.",
+                "Start": 29,
+                "End": 38
+            }
+        ],
+        "Final code": "public static List<Apis> buildApis(List<ApiMethodDoc> apiMethodDocs,boolean hasDebugEnv){\n  List<Apis> apis=new ArrayList<>();\n  Apis methodApi;\n  for (  ApiMethodDoc apiMethodDoc : apiMethodDocs) {\n    methodApi = new Apis(TornaConstants.NO, apiMethodDoc.getDesc(), ...(all other parameters) );\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getPathParams())) {\n      methodApi.setPathParams(buildParams(apiMethodDoc.getPathParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {\n      if(DocGlobalConstants.FILE_CONTENT_TYPE.equals(apiMethodDoc.getContentType())){\n        methodApi.setRequestParams(buildParams(apiMethodDoc.getQueryParams()));\n      } else {\n        methodApi.setQueryParams(buildParams(apiMethodDoc.getQueryParams()));\n      }\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getRequestParams())) {\n      methodApi.setRequestParams(buildParams(apiMethodDoc.getRequestParams()));\n    }\n    apis.add(methodApi);\n  }\n  return apis;\n}"
+    },
+    "Old_Method": "/** \n * build apis\n * @param apiMethodDocs apiMethodDocs\n * @param hasDebugEnv   has debug environment\n * @return List of Api\n */\npublic static List<Apis> buildApis(List<ApiMethodDoc> apiMethodDocs,boolean hasDebugEnv){\n  List<Apis> apis=new ArrayList<>();\n  Apis methodApi;\n  for (  ApiMethodDoc apiMethodDoc : apiMethodDocs) {\n    methodApi=new Apis();\n    methodApi.setIsFolder(TornaConstants.NO);\n    methodApi.setName(apiMethodDoc.getDesc());\n    methodApi.setUrl(hasDebugEnv ? subFirstUrlOrPath(apiMethodDoc.getPath()) : subFirstUrlOrPath(apiMethodDoc.getUrl()));\n    methodApi.setHttpMethod(apiMethodDoc.getType());\n    methodApi.setContentType(apiMethodDoc.getContentType());\n    methodApi.setDescription(apiMethodDoc.getDetail());\n    methodApi.setIsShow(TornaConstants.YES);\n    methodApi.setAuthor(apiMethodDoc.getAuthor());\n    methodApi.setOrderIndex(apiMethodDoc.getOrder());\n    methodApi.setVersion(apiMethodDoc.getVersion());\n    methodApi.setHeaderParams(buildHerder(apiMethodDoc.getRequestHeaders()));\n    methodApi.setResponseParams(buildParams(apiMethodDoc.getResponseParams()));\n    methodApi.setIsRequestArray(apiMethodDoc.getIsRequestArray());\n    methodApi.setIsResponseArray(apiMethodDoc.getIsResponseArray());\n    methodApi.setRequestArrayType(apiMethodDoc.getRequestArrayType());\n    methodApi.setResponseArrayType(apiMethodDoc.getResponseArrayType());\n    methodApi.setDeprecated(apiMethodDoc.isDeprecated() ? \"Deprecated\" : null);\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getPathParams())) {\n      methodApi.setPathParams(buildParams(apiMethodDoc.getPathParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams()) && DocGlobalConstants.FILE_CONTENT_TYPE.equals(apiMethodDoc.getContentType())) {\n      methodApi.setRequestParams(buildParams(apiMethodDoc.getQueryParams()));\n    }\n else     if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {\n      methodApi.setQueryParams(buildParams(apiMethodDoc.getQueryParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getRequestParams())) {\n      methodApi.setRequestParams(buildParams(apiMethodDoc.getRequestParams()));\n    }\n    apis.add(methodApi);\n  }\n  return apis;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 5753,
+    "Stop": 8424,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "buildApis"
+}

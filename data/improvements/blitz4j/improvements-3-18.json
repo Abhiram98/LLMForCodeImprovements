@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid multiple calls to `getAllAppenders()`",
+                "Change_Diff": "- while (appenders.getAllAppenders() == null || (appenders != null && !appenders.getAllAppenders().hasMoreElements())) {\n+ Enumeration<Appender> allAppenders = appenders.getAllAppenders();\n+ while (allAppenders == null || !allAppenders.hasMoreElements()) {",
+                "Description": "The method `getAllAppenders()` is called multiple times. This could potentially be an expensive operation. It's better to call it once and store the result in a variable, and then use the variable.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use enhanced for loop for readability",
+                "Change_Diff": "- for (Iterator<Entry<String,LogSummary>> iter=logSummaryMap.entrySet().iterator(); iter.hasNext(); ) {\n- Entry<String,LogSummary> mapEntry=(Entry<String,LogSummary>)iter.next();\n+ for (Entry<String,LogSummary> mapEntry : logSummaryMap.entrySet()) {",
+                "Description": "Use an enhanced for loop instead of a traditional for loop to iterate over the `logSummaryMap`. This will improve the readability of the code.",
+                "Start": 30,
+                "End": 42
+            }
+        ],
+        "Final code": "private void processLoggingEvents(List<LoggingEvent> loggingEvents){\n  Enumeration<Appender> allAppenders = appenders.getAllAppenders();\n  while (allAppenders == null || !allAppenders.hasMoreElements()) {\n    if ((batcher == null) || (batcher.isPaused())) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (InterruptedException ignore) {\n      }\n      continue;\n    }\n    org.apache.log4j.Logger asyncLogger=LoggerCache.getInstance().getOrCreateLogger(LOGGER_ASYNC_APPENDER);\n    Appender originalAppender=asyncLogger.getAppender(originalAppenderName);\n    if (originalAppender == null) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (InterruptedException ignore) {\n      }\n      continue;\n    }\n    appenders.addAppender(originalAppender);\n  }\n  for (Entry<String,LogSummary> mapEntry : logSummaryMap.entrySet()) {\n    if (batcher.isSpaceAvailable()) {\n      LogSummary logSummary=mapEntry.getValue();\n      LoggingEvent event=logSummary.createEvent();\n      if (batcher.process(event)) {\n        iter.remove();\n      }\n else {\n        break;\n      }\n    }\n else {\n      break;\n    }\n  }\n  for (LoggingEvent event : loggingEvents) {\n    appenders.appendLoopOnAppenders(event);\n  }\n}"
+    },
+    "Old_Method": "/** \n * Process the logging events. This is called by the batcher.\n * @param loggingEvents - The logging events to be written to the underlying appender\n */\nprivate void processLoggingEvents(List<LoggingEvent> loggingEvents){\n  while (appenders.getAllAppenders() == null || (appenders != null && !appenders.getAllAppenders().hasMoreElements())) {\n    if ((batcher == null) || (batcher.isPaused())) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    org.apache.log4j.Logger asyncLogger=LoggerCache.getInstance().getOrCreateLogger(LOGGER_ASYNC_APPENDER);\n    Appender originalAppender=asyncLogger.getAppender(originalAppenderName);\n    if (originalAppender == null) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    appenders.addAppender(originalAppender);\n  }\n  for (Iterator<Entry<String,LogSummary>> iter=logSummaryMap.entrySet().iterator(); iter.hasNext(); ) {\n    Entry<String,LogSummary> mapEntry=(Entry<String,LogSummary>)iter.next();\n    if (batcher.isSpaceAvailable()) {\n      LogSummary logSummary=mapEntry.getValue();\n      LoggingEvent event=logSummary.createEvent();\n      if (batcher.process(event)) {\n        iter.remove();\n      }\n else {\n        break;\n      }\n    }\n else {\n      break;\n    }\n  }\n  for (  LoggingEvent event : loggingEvents) {\n    appenders.appendLoopOnAppenders(event);\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/blitz4j/AsyncAppender.java",
+    "Start": 5676,
+    "Stop": 8133,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "processLoggingEvents"
+}

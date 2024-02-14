@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Remove Unnecessary Console Outputs",
+            "Change_Diff": "- System.out.println(\"Register user ...\");\n- System.out.println(\"Register user stats callback ...\");\n- System.out.println(\"Register remote storage ...\");\n- System.out.println(\"Register UGC ...\");\n- System.out.println(\"Register Utils ...\");\n- System.out.println(\"Register Apps ...\");\n- System.out.println(\"Register Friends ...\");\n- System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n- System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n- System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n- System.out.println(\"App ID: \" + utils.getAppID());\n- System.out.println(\"App build ID: \" + apps.getAppBuildId());\n- System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n- System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n- System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());",
+            "Description": "The method is currently printing a lot of information to the console. This can make it difficult to understand what the method is doing, and it can also slow down the execution of the method. The System.out.println() calls should be removed unless they are necessary for debugging or logging purposes.",
+            "Start": 2,
+            "End": 19
+        }],
+        "Final code": "@Override protected void registerInterfaces() {\n  user=new SteamUser(userCallback);\n  userStats=new SteamUserStats(userStatsCallback);\n  remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n  ugc=new SteamUGC(ugcCallback);\n  utils=new SteamUtils(utilsCallback);\n  apps=new SteamApps();\n  friends=new SteamFriends(friendsCallback);\n}"
+    },
+    "Old_Method": "@Override protected void registerInterfaces(){\n  System.out.println(\"Register user ...\");\n  user=new SteamUser(userCallback);\n  System.out.println(\"Register user stats callback ...\");\n  userStats=new SteamUserStats(userStatsCallback);\n  System.out.println(\"Register remote storage ...\");\n  remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n  System.out.println(\"Register UGC ...\");\n  ugc=new SteamUGC(ugcCallback);\n  System.out.println(\"Register Utils ...\");\n  utils=new SteamUtils(utilsCallback);\n  System.out.println(\"Register Apps ...\");\n  apps=new SteamApps();\n  System.out.println(\"Register Friends ...\");\n  friends=new SteamFriends(friendsCallback);\n  System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n  System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n  System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n  System.out.println(\"App ID: \" + utils.getAppID());\n  System.out.println(\"App build ID: \" + apps.getAppBuildId());\n  System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n  System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n  System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+    "Start": 13419,
+    "Stop": 14725,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "registerInterfaces"
+}

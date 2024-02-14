@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Add a meaningful message or action in the catch block of UnsupportedCallbackException",
+            "Change_Diff": "- catch (UnsupportedCallbackException ex) {\n+ catch (UnsupportedCallbackException ex) {\n+   logger.warn(\"Unsupported callback exception\",ex);",
+            "Description": "Currently, the catch block of UnsupportedCallbackException is empty. This is not a good practice as it may suppress the error and make debugging difficult. It is better to log the exception or, if you decide that it should be ignored, comment as to why it is being ignored.",
+            "Start": 10,
+            "End": 12
+        }],
+        "Final code": "@Override protected void cleanUp(){\n  if (validationCallbackHandler != null) {\n    try {\n      CleanupCallback cleanupCallback=new CleanupCallback();\n      validationCallbackHandler.handle(new Callback[]{cleanupCallback});\n    }\n    catch (IOException ex) {\n      logger.warn(\"Cleanup callback resulted in IOException\",ex);\n    }\n    catch (UnsupportedCallbackException ex) {\n      logger.warn(\"Unsupported callback exception\",ex);\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void cleanUp(){\n  if (validationCallbackHandler != null) {\n    try {\n      CleanupCallback cleanupCallback=new CleanupCallback();\n      validationCallbackHandler.handle(new Callback[]{cleanupCallback});\n    }\n catch (    IOException ex) {\n      logger.warn(\"Cleanup callback resulted in IOException\",ex);\n    }\ncatch (    UnsupportedCallbackException ex) {\n    }\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-security/src/main/java/org/springframework/ws/soap/security/wss4j2/Wss4jSecurityInterceptor.java",
+    "Start": 31988,
+    "Stop": 32381,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "cleanUp"
+}

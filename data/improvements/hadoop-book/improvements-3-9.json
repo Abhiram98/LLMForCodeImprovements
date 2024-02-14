@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract node creation to a separate method",
+                "Change_Diff": "- Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n- bottom.down=node;\n- top.up=node;\n+ Node<ColumnName> node = createNewNode(bottom, top);\n\n... \n\n private Node<ColumnName> createNewNode(Node<ColumnName> bottom, ColumnHeader<ColumnName> top) {\n    Node<ColumnName> node = new Node<ColumnName>(null, null, bottom, top, top);\n    bottom.down = node;\n    top.up = node;\n    return node;\n}",
+                "Description": "The creation of a new Node within the for loop can be extracted to a separate method. This would make the code more readable and would also separate the concerns of node creation and node linking.",
+                "Start": 7,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract node linking to a separate method",
+                "Change_Diff": "- if (prev != null) {\n ... \n else {\n ... \n }\n prev=node;\n+ linkNodes(prev, node);\n prev = node;\n\n ... \n\n private void linkNodes(Node<ColumnName> prev, Node<ColumnName> node) {\n    if (prev != null) {\n    ...\n    } else {\n    ...\n    }\n}",
+                "Description": "The linking of nodes within the for loop can also be extracted to a separate method. This would make the code more readable, and would separate the concerns of node creation and node linking.",
+                "Start": 11,
+                "End": 20
+            }
+        ],
+        "Final code": "public void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node = createNewNode(bottom, top);\n      if (prev != null) {\n        linkNodes(prev, node);\n      }\n      else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n\nprivate Node<ColumnName> createNewNode(Node<ColumnName> bottom, ColumnHeader<ColumnName> top) {\n  Node<ColumnName> node = new Node<ColumnName>(null, null, bottom, top, top);\n  bottom.down = node;\n  top.up = node;\n  return node;\n}\n\nprivate void linkNodes(Node<ColumnName> prev, Node<ColumnName> node) {\n  Node<ColumnName> front=prev.right;\n  node.left=prev;\n  node.right=front;\n  prev.right=node;\n  front.left=node;\n}"
+    },
+    "Old_Method": "/** \n * Add a row to the table.\n * @param values the columns that are satisfied by this row\n */\npublic void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n      bottom.down=node;\n      top.up=node;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        node.left=prev;\n        node.right=front;\n        prev.right=node;\n        front.left=node;\n      }\n else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/DancingLinks.java",
+    "Start": 5022,
+    "Stop": 6050,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "addRow"
+}

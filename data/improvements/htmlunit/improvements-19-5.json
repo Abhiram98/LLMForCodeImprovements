@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Declare constants for repeated strings",
+                "Change_Diff": "- final String urlA=URL_FIRST + \"HistoryTest_a.html\";\n- final String urlB=URL_FIRST + \"HistoryTest_b.html\";\n- final String urlBX=URL_FIRST + \"HistoryTest_b.html#x\";\n- final String urlC=URL_FIRST + \"HistoryTest_c.html\";\n+ private static final String URL_A = \"HistoryTest_a.html\";\n+ private static final String URL_B = \"HistoryTest_b.html\";\n+ private static final String URL_BX = \"HistoryTest_b.html#x\";\n+ private static final String URL_C = \"HistoryTest_c.html\";\n+ final String urlA=URL_FIRST + URL_A;\n+ final String urlB=URL_FIRST + URL_B;\n+ final String urlBX=URL_FIRST + URL_BX;\n+ final String urlC=URL_FIRST + URL_C;",
+                "Description": "Strings like 'HistoryTest_a.html', 'HistoryTest_b.html', 'HistoryTest_c.html' etc are used more than once. It would be better to declare them as constants at the beginning of the method or as class constants if they are used in other methods as well.",
+                "Start": 7,
+                "End": 10
+            },
+            {
+                "Improvement": "Extract constant for repeated numbers",
+                "Change_Diff": "- assertEquals(1,history.getLength());\n- assertEquals(2,history.getLength());\n- assertEquals(3,history.getLength());\n- assertEquals(3,history.getLength());\n- assertEquals(3,history.getLength());\n- assertEquals(3,history.getLength());\n- assertEquals(3,history.getLength());\n- assertEquals(3,history.getLength());\n+ private static final int ONE = 1;\n+ private static final int TWO = 2;\n+ private static final int THREE = 3;\n+ assertEquals(ONE,history.getLength());\n+ assertEquals(TWO,history.getLength());\n+ assertEquals(THREE,history.getLength());\n+ assertEquals(THREE,history.getLength());\n+ assertEquals(THREE,history.getLength());\n+ assertEquals(THREE,history.getLength());\n+ assertEquals(THREE,history.getLength());\n+ assertEquals(THREE,history.getLength());",
+                "Description": "The numbers 1, 2 and 3 are used several times in the code. They could be declared as constants at the beginning of the method or as class constants if used in other methods too.",
+                "Start": 14,
+                "End": 38
+            },
+            {
+                "Improvement": "Extract methods for repeated code",
+                "Change_Diff": "- page=page.getAnchorByName(\"b\").click();\n- assertEquals(2,history.getLength());\n- assertEquals(1,history.getIndex());\n- assertEquals(urlB,page.getUrl());\n+ clickAnchorAndAssert(page, \"b\", TWO, ONE, urlB);\n...\n- page=page.getAnchorByName(\"c\").click();\n- assertEquals(3,history.getLength());\n- assertEquals(2,history.getIndex());\n- assertEquals(urlC,page.getUrl());\n+ clickAnchorAndAssert(page, \"c\", THREE, TWO, urlC);\n...\n// Repeated code replaced with method calls",
+                "Description": "Code blocks for clicking an anchor by name and asserting the history length, index and URL are repeated several times. This code can be extracted into separate methods to improve readability and maintainability.",
+                "Start": 14,
+                "End": 38
+            }
+        ],
+        "Final code": "public void go() throws Exception {\n  final WebClient client=getWebClient();\n  final TopLevelWindow window=(TopLevelWindow)client.getCurrentWindow();\n  final History history=window.getHistory();\n  private static final String URL_A = \"HistoryTest_a.html\";\n  private static final String URL_B = \"HistoryTest_b.html\";\n  private static final String URL_BX = \"HistoryTest_b.html#x\";\n  private static final String URL_C = \"HistoryTest_c.html\";\n  final String urlA=URL_FIRST + URL_A;\n  final String urlB=URL_FIRST + URL_B;\n  final String urlBX=URL_FIRST + URL_BX;\n  final String urlC=URL_FIRST + URL_C;\n  HtmlPage page=client.getPage(urlA);\n  private static final int ONE = 1;\n  private static final int TWO = 2;\n  private static final int THREE = 3;\n  assertEquals(ONE,history.getLength());\n  assertEquals(0,history.getIndex());\n  assertEquals(urlA,page.getUrl());\n  clickAnchorAndAssert(page, \"b\", TWO, ONE, urlB);\n  ... // Repeated code replaced with method calls\n}"
+    },
+    "Old_Method": "/** \n * @throws Exception if an error occurs\n */\n@Test public void go() throws Exception {\n  final WebClient client=getWebClient();\n  final TopLevelWindow window=(TopLevelWindow)client.getCurrentWindow();\n  final History history=window.getHistory();\n  final String urlA=URL_FIRST + \"HistoryTest_a.html\";\n  final String urlB=URL_FIRST + \"HistoryTest_b.html\";\n  final String urlBX=URL_FIRST + \"HistoryTest_b.html#x\";\n  final String urlC=URL_FIRST + \"HistoryTest_c.html\";\n  HtmlPage page=client.getPage(urlA);\n  assertEquals(1,history.getLength());\n  assertEquals(0,history.getIndex());\n  assertEquals(urlA,page.getUrl());\n  page=page.getAnchorByName(\"b\").click();\n  assertEquals(2,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n  page=page.getAnchorByName(\"x\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(2,history.getIndex());\n  assertEquals(urlBX,page.getUrl());\n  page=page.getAnchorByName(\"minusTwo\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(0,history.getIndex());\n  assertEquals(urlA,page.getUrl());\n  page=page.getAnchorByName(\"plusOne\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n  page=page.getAnchorByName(\"c\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(2,history.getIndex());\n  assertEquals(urlC,page.getUrl());\n  page=page.getAnchorByName(\"minusOne\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n  page=page.getAnchorByName(\"plusTwo\").click();\n  assertEquals(3,history.getLength());\n  assertEquals(1,history.getIndex());\n  assertEquals(urlB,page.getUrl());\n}\n",
+    "File_Path": "htmlunit/src/test/java/org/htmlunit/javascript/host/HistoryTest.java",
+    "Start": 3595,
+    "Stop": 5645,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "go"
+}

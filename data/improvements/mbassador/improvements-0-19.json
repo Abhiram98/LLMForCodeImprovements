@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use methods of java.util.Iterator",
+                "Change_Diff": "- private ISetEntry<T> current=head;\n- ... // Code related to manual iteration\n+ while (current.hasNext()) {\n+    ISetEntry<T> entry = current.next();\n+    ... // Use 'entry'",
+                "Description": "Instead of manually handling the iteration, you can use hasNext() and next() methods of java.util.Iterator. This not only reduces the amount of code but also makes it more readable.",
+                "Start": 3,
+                "End": 24
+            },
+            {
+                "Improvement": "Avoid null checks",
+                "Change_Diff": "- if (current == null) return false;\n- ... // Code related to null checks\n+ Optional<ISetEntry<T>> optionalEntry = Optional.ofNullable(current);\n+ ... // Use 'optionalEntry'",
+                "Description": "Instead of checking for null, you can use java.util.Optional to avoid NullPointerException. This makes the code more robust and easier to read.",
+                "Start": 10,
+                "End": 24
+            },
+            {
+                "Improvement": "Avoid recursive calls",
+                "Change_Diff": "- return next();\n+ while ((value = current.getValue()) == null) {\n+     removeOrphans();\n+ }",
+                "Description": "Instead of recursively calling the next() method, you can use a while loop to avoid potential StackOverflowError.",
+                "Start": 18,
+                "End": 19
+            }
+        ],
+        "Final code": "public Iterator<T> iterator() {\n    return new Iterator<T>() {\n        private Optional<ISetEntry<T>> current = Optional.of(head);\n\n        private void removeOrphans() {\n            Lock writeLock = lock.writeLock();\n            try {\n                writeLock.lock();\n                while (current.isPresent() && current.get().getValue() == null) {\n                    ISetEntry<T> orphaned = current.get();\n                    current = Optional.ofNullable(orphaned.next());\n                    if (orphaned == head) {\n                        head = head.next();\n                    }\n                    orphaned.remove();\n                }\n            } finally {\n                writeLock.unlock();\n            }\n        }\n\n        public boolean hasNext() {\n            if (current.isPresent() && current.get().getValue() == null) {\n                removeOrphans();\n            }\n            return current.isPresent();\n        }\n\n        public T next() {\n            if (!current.isPresent()) {\n                return null;\n            }\n            T value;\n            while ((value = current.get().getValue()) == null) {\n                removeOrphans();\n            }\n            current = Optional.ofNullable(current.get().next());\n            return value;\n        }\n\n        public void remove() {\n            if (current.isPresent()) {\n                ISetEntry<T> newCurrent = current.get().next();\n                WeakConcurrentSet.this.remove(current.get().getValue());\n                current = Optional.ofNullable(newCurrent);\n            }\n        }\n    };\n}"
+    },
+    "Old_Method": "public Iterator<T> iterator(){\n  return new Iterator<T>(){\n    private ISetEntry<T> current=head;\n    private void removeOrphans(){\n      Lock writelock=lock.writeLock();\n      try {\n        writelock.lock();\n        do {\n          ISetEntry orphaned=current;\n          current=current.next();\n          if (orphaned == head) {\n            head=head.next();\n          }\n          orphaned.remove();\n        }\n while (current != null && current.getValue() == null);\n      }\n  finally {\n        writelock.unlock();\n      }\n    }\n    public boolean hasNext(){\n      if (current == null)       return false;\n      if (current.getValue() == null) {\n        removeOrphans();\n        return current != null;\n      }\n else {\n        return true;\n      }\n    }\n    public T next(){\n      if (current == null) {\n        return null;\n      }\n      T value=current.getValue();\n      if (value == null) {\n        removeOrphans();\n        return next();\n      }\n else {\n        current=current.next();\n        return value;\n      }\n    }\n    public void remove(){\n      if (current == null) {\n        return;\n      }\n      ISetEntry<T> newCurrent=current.next();\n      WeakConcurrentSet.this.remove(current.getValue());\n      current=newCurrent;\n    }\n  }\n;\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/common/WeakConcurrentSet.java",
+    "Start": 643,
+    "Stop": 3187,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "iterator"
+}

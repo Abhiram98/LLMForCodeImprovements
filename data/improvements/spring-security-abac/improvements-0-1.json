@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constant for repeated strings",
+                "Change_Diff": "- JSONArray responseDataArr=responseObj.getJSONArray('Response');\n+ JSONArray responseDataArr=responseObj.getJSONArray(RESPONSE_KEY);",
+                "Description": "String 'Response' appears multiple times. Defining it as a constant improves readability and maintainability. If the string ever needs to change, we only need to modify it in one place.",
+                "Start": 15,
+                "End": 16
+            },
+            {
+                "Improvement": "Use constant for HTTP status",
+                "Change_Diff": "- if (response.getStatusCode() != HttpStatus.OK) {\n+ boolean isStatusOK = response.getStatusCode() == HttpStatus.OK;\n+ if (!isStatusOK) {",
+                "Description": "HttpStatus.OK is checked twice. Better to store this in a local variable and use it.",
+                "Start": 9,
+                "End": 12
+            },
+            {
+                "Improvement": "Avoid unnecessary toString() call",
+                "Change_Diff": "- cachedResponse=response.getBody().toString();\n+ cachedResponse=response.getBody();",
+                "Description": "response.getBody() already returns a String. No need to call toString() on it.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Use early return to reduce nesting",
+                "Change_Diff": "- if (cachedResponse == null) {\n+ if (cachedResponse != null) {\n+   return processResponse(cachedResponse);\n+ }",
+                "Description": "Instead of wrapping most of the method body in an if statement, you can return early if the condition isn't met. This reduces the level of nesting and makes the code easier to read.",
+                "Start": 3,
+                "End": 16
+            }
+        ],
+        "Final code": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  boolean isStatusOK;\n  if (cachedResponse != null) {\n    return processResponse(cachedResponse);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n  ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + '/pdp',entity,String.class);\n  isStatusOK = response.getStatusCode() == HttpStatus.OK;\n  if (!isStatusOK) {\n    return false;\n  }\n  cachedResponse=response.getBody();\n  this.authCache.putIfAbsent(authRequest,cachedResponse);\n  return processResponse(cachedResponse);\n}\n\nprivate boolean processResponse(String response) {\n  JSONObject responseObj=new JSONObject(response);\n  JSONArray responseDataArr=responseObj.getJSONArray(RESPONSE_KEY);\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (Object response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)response;\n    if (!currentResponse.getString('Decision').equals('Permit')) {\n      return false;\n    }\n  }\n  return true;\n}"
+    },
+    "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 4347,
+    "Stop": 5782,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "authorize"
+}

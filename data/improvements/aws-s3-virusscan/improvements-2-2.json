@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional instead of checking for null",
+                "Change_Diff": "- if (Config.has(Config.Key.TEMPLATE_DIR)) {\n+ Optional<String> dirOptional = Optional.ofNullable(Config.get(Config.Key.TEMPLATE_DIR));\n+ if (dirOptional.isPresent()) {\n+ final String dir = dirOptional.get();\n- if (Config.has(Config.Key.BUCKET_NAME)) {\n+ Optional<String> bucketNameOptional = Optional.ofNullable(Config.get(Config.Key.BUCKET_NAME));\n+ if (bucketNameOptional.isPresent()) {\n+ final String bucketName = bucketNameOptional.get();",
+                "Description": "Instead of checking if Config has a key and then getting its value, use Optional to avoid potential NullPointerExceptions and make the code cleaner.",
+                "Start": 5,
+                "End": 15
+            },
+            {
+                "Improvement": "Extract hardcoded string to a constant",
+                "Change_Diff": "- req=req.withTemplateURL(\"https://\" + bucketName + \".s3.\"+ bucketRegion+ \".amazonaws.com/\"+ stackName);\n+ req=req.withTemplateURL(String.format(S3_URL_TEMPLATE, bucketName, bucketRegion, stackName));",
+                "Description": "The URL string template is hardcoded in the method. It is better to extract it into a constant to avoid potential errors and make it easily configurable.",
+                "Start": 7,
+                "End": 13
+            },
+            {
+                "Improvement": "Use try-with-resources for reading files",
+                "Change_Diff": "- final String body=readFile(dir + template,StandardCharsets.UTF_8);\n+ final String body;\n+ try (InputStream in = new FileInputStream(dir + template)) {\n+ body = IOUtils.toString(in, StandardCharsets.UTF_8);\n+ }",
+                "Description": "The readFile method may cause resource leaks if not properly closed. Use try-with-resources to ensure that the resources are closed automatically.",
+                "Start": 14,
+                "End": 14
+            }
+        ],
+        "Final code": "protected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  Optional<String> dirOptional = Optional.ofNullable(Config.get(Config.Key.TEMPLATE_DIR));\n  if (dirOptional.isPresent()) {\n    final String dir = dirOptional.get();\n    Optional<String> bucketNameOptional = Optional.ofNullable(Config.get(Config.Key.BUCKET_NAME));\n    if (bucketNameOptional.isPresent()) {\n      final String bucketName = bucketNameOptional.get();\n      final String bucketRegion=Config.get(Config.Key.BUCKET_REGION);\n      final AmazonS3 s3local=AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build();\n      s3local.putObject(bucketName,stackName,new File(dir + template));\n      req=req.withTemplateURL(String.format(S3_URL_TEMPLATE, bucketName, bucketRegion, stackName));\n    } else {\n      final String body;\n      try (InputStream in = new FileInputStream(dir + template)) {\n        body = IOUtils.toString(in, StandardCharsets.UTF_8);\n      }\n      req=req.withTemplateBody(body);\n    }\n  } else {\n    req=req.withTemplateURL(\"https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/\" + template);\n  }\n  if (Config.get(Config.Key.FAILURE_POLICY).equals(\"retain\")) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}"
+    },
+    "Old_Method": "protected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  if (Config.has(Config.Key.TEMPLATE_DIR)) {\n    final String dir=Config.get(Config.Key.TEMPLATE_DIR);\n    if (Config.has(Config.Key.BUCKET_NAME)) {\n      final String bucketName=Config.get(Config.Key.BUCKET_NAME);\n      final String bucketRegion=Config.get(Config.Key.BUCKET_REGION);\n      final AmazonS3 s3local=AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build();\n      s3local.putObject(bucketName,stackName,new File(dir + template));\n      req=req.withTemplateURL(\"https://\" + bucketName + \".s3.\"+ bucketRegion+ \".amazonaws.com/\"+ stackName);\n    }\n else {\n      final String body=readFile(dir + template,StandardCharsets.UTF_8);\n      req=req.withTemplateBody(body);\n    }\n  }\n else {\n    req=req.withTemplateURL(\"https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/\" + template);\n  }\n  if (Config.get(Config.Key.FAILURE_POLICY).equals(\"retain\")) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+    "Start": 1185,
+    "Stop": 2820,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "createStack"
+}

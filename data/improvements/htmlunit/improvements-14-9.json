@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Refactor null check",
+            "Change_Diff": "- if (javaScriptExecutor_ != null) {\n-   javaScriptExecutor_.shutdown();\n-   javaScriptExecutor_=null;\n- }\n- if (postponedActions_ != null) {\n-   postponedActions_.remove();\n- }\n- if (javaScriptRunning_ != null) {\n-   javaScriptRunning_.remove();\n- }\n+ Optional.ofNullable(javaScriptExecutor_).ifPresent(executor -> {\n+   executor.shutdown();\n+   javaScriptExecutor_=null;\n+ });\n+ Optional.ofNullable(postponedActions_).ifPresent(postponedActions_::remove);\n+ Optional.ofNullable(javaScriptRunning_).ifPresent(javaScriptRunning_::remove);",
+            "Description": "Refactor the null checks by using Optional.ofNullable to make the code cleaner, and to avoid NullPointerExceptions.",
+            "Start": 7,
+            "End": 14
+        }],
+        "Final code": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  webClient_=null;\n  contextFactory_=null;\n  jsConfig_=null;\n  Optional.ofNullable(javaScriptExecutor_).ifPresent(executor -> {\n    executor.shutdown();\n    javaScriptExecutor_=null;\n  });\n  Optional.ofNullable(postponedActions_).ifPresent(postponedActions_::remove);\n  Optional.ofNullable(javaScriptRunning_).ifPresent(javaScriptRunning_::remove);\n  holdPostponedActions_=false;\n}"
+    },
+    "Old_Method": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  webClient_=null;\n  contextFactory_=null;\n  jsConfig_=null;\n  if (javaScriptExecutor_ != null) {\n    javaScriptExecutor_.shutdown();\n    javaScriptExecutor_=null;\n  }\n  if (postponedActions_ != null) {\n    postponedActions_.remove();\n  }\n  if (javaScriptRunning_ != null) {\n    javaScriptRunning_.remove();\n  }\n  holdPostponedActions_=false;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/JavaScriptEngine.java",
+    "Start": 35868,
+    "Stop": 36412,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "shutdown"
+}

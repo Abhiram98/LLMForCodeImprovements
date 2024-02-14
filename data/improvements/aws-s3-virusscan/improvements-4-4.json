@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Throw an exception for invalid bucket names",
+                "Change_Diff": "+ try {\n    ObjectListing objectListing = s3.listObjects(name);\n+ } catch (AmazonS3Exception e) {\n+     throw new IllegalArgumentException(\"Invalid bucket name: \" + name, e);\n+ }",
+                "Description": "The current code assumes that the bucket name passed as an argument is valid. However, if an invalid bucket name is passed, the AWS S3 SDK will throw an AmazonS3Exception. To handle this, add a try-catch block to catch this potential exception and throw a more informative one.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Add comments",
+                "Change_Diff": "+ // Initialize count\n  long count = 0;\n+ // List objects in the bucket\n  ObjectListing objectListing = s3.listObjects(name);\n+ // Loop until all object summaries are counted\n  while (true) {\n+     // Add the size of the current batch of object summaries to the count\n    count += objectListing.getObjectSummaries().size();\n+    // If the object listing is truncated, get the next batch of object summaries\n    if (objectListing.isTruncated()) {\n+      objectListing = s3.listNextBatchOfObjects(objectListing);\n+    } else {\n+      break;\n+    }\n+  }\n+ // Return the count of object summaries\n  return count;\n",
+                "Description": "Although the code is relatively self-explanatory, it's always a good practice to add comments to increase readability and make it easier for other developers to understand the code.",
+                "Start": 2,
+                "End": 10
+            }
+        ],
+        "Final code": "protected long countBucket(final String name) {\n    // Initialize count\n    long count = 0;\n    try {\n        // List objects in the bucket\n        ObjectListing objectListing = s3.listObjects(name);\n        // Loop until all object summaries are counted\n        while (true) {\n            // Add the size of the current batch of object summaries to the count\n            count += objectListing.getObjectSummaries().size();\n            // If the object listing is truncated, get the next batch of object summaries\n            if (objectListing.isTruncated()) {\n                objectListing = s3.listNextBatchOfObjects(objectListing);\n            } else {\n                break;\n            }\n        }\n    } catch (AmazonS3Exception e) {\n        throw new IllegalArgumentException(\"Invalid bucket name: \" + name, e);\n    }\n    // Return the count of object summaries\n    return count;\n}"
+    },
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

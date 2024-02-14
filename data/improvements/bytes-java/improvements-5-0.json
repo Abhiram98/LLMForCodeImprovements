@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundancy in Bytes creation",
+                "Change_Diff": "- assertFalse(Bytes.from((byte)8).bitAt(0));\n- assertFalse(Bytes.from((byte)8).bitAt(1));\n- assertFalse(Bytes.from((byte)8).bitAt(2));\n- assertTrue(Bytes.from((byte)8).bitAt(3));\n- assertFalse(Bytes.from((byte)8).bitAt(4));\n+ Bytes eight = Bytes.from((byte)8);\n+ assertFalse(eight.bitAt(0));\n+ assertFalse(eight.bitAt(1));\n+ assertFalse(eight.bitAt(2));\n+ assertTrue(eight.bitAt(3));\n+ assertFalse(eight.bitAt(4));",
+                "Description": "Instead of creating multiple Bytes objects with the same value for different assertions, you can create a single Bytes object and use it for all the relevant assertions. This not only makes the code cleaner but also improves performance by reducing unnecessary object creation.",
+                "Start": 7,
+                "End": 11
+            },
+            {
+                "Improvement": "Use parameterized tests",
+                "Change_Diff": "N/A. This improvement requires restructuring the test method into separate parameterized test methods.",
+                "Description": "There are several cases where you are testing the same logic with different parameters. You can simplify your code and make it more maintainable by using parameterized tests. This will allow you to define a single test method and run it multiple times with different parameters.",
+                "Start": 2,
+                "End": 21
+            }
+        ],
+        "Final code": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  Bytes eight = Bytes.from((byte)8);\n  assertFalse(eight.bitAt(0));\n  assertFalse(eight.bitAt(1));\n  assertFalse(eight.bitAt(2));\n  assertTrue(eight.bitAt(3));\n  assertFalse(eight.bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}"
+    },
+    "Old_Method": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  assertFalse(Bytes.from((byte)8).bitAt(0));\n  assertFalse(Bytes.from((byte)8).bitAt(1));\n  assertFalse(Bytes.from((byte)8).bitAt(2));\n  assertTrue(Bytes.from((byte)8).bitAt(3));\n  assertFalse(Bytes.from((byte)8).bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BytesMiscTest.java",
+    "Start": 12738,
+    "Stop": 14127,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "bitAt"
+}

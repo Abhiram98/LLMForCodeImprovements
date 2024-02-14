@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid calling method multiple times",
+                "Change_Diff": "- oAuth2UserRequest.getClientRegistration().getRegistrationId()\n+ String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n\n- user.getProvider()\n+ AuthProvider provider = user.getProvider();",
+                "Description": "Instead of calling `oAuth2UserRequest.getClientRegistration().getRegistrationId()` and `user.getProvider()` multiple times, store the result in a variable and reuse it in the code. It makes code cleaner and potentially more efficient.",
+                "Start": 2,
+                "End": 12
+            },
+            {
+                "Improvement": "Use map function for Optional",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n+ user = userOptional.map(u -> {",
+                "Description": "Instead of using `isPresent` and `get` methods of `Optional<User>` use `map` function to make the code more readable and functional.",
+                "Start": 6,
+                "End": 12
+            },
+            {
+                "Improvement": "Prefer early return over if-else",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n+ if (!userOptional.isPresent()) { return registerNewUser(oAuth2UserRequest, oAuth2UserInfo); }",
+                "Description": "Instead of using if-else conditions, use early return. This can make the code cleaner and easier to follow.",
+                "Start": 6,
+                "End": 14
+            }
+        ],
+        "Final code": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException('Email not found from OAuth2 provider');\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n  User user = userOptional.map(u -> {\n    if (!u.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n      throw new OAuth2AuthenticationProcessingException('Looks like you're signed up with ' + u.getProvider() + ' account. Please use your '+ u.getProvider()+ ' account to login.');\n    }\n    return updateExistingUser(u, oAuth2UserInfo);\n  }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user, oAuth2User.getAttributes());\n}"
+    },
+    "Old_Method": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/oauth2/CustomOAuth2UserService.java",
+    "Start": 1883,
+    "Stop": 3147,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "processOAuth2User"
+}

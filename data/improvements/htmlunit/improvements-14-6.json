@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Include null checks before setting to null",
+                "Change_Diff": "- webClient_=null;\n- contextFactory_=null;\n- jsConfig_=null;\n+ if (webClient_ != null) webClient_ = null;\n+ if (contextFactory_ != null) contextFactory_ = null;\n+ if (jsConfig_ != null) jsConfig_ = null;",
+                "Description": "It is a good practice to check if an object is null before setting it to null. This can prevent NullPointerExceptions from occurring.",
+                "Start": 3,
+                "End": 5
+            },
+            {
+                "Improvement": "Use try-finally for clean-up code",
+                "Change_Diff": "- if (javaScriptExecutor_ != null) {\n-   javaScriptExecutor_.shutdown();\n-   javaScriptExecutor_=null;\n- }\n- if (postponedActions_ != null) {\n-   postponedActions_.remove();\n- }\n- if (javaScriptRunning_ != null) {\n-   javaScriptRunning_.remove();\n- }\n- holdPostponedActions_=false;\n+ try {\n+   if (javaScriptExecutor_ != null) {\n+     javaScriptExecutor_.shutdown();\n+     javaScriptExecutor_=null;\n+   }\n+   if (postponedActions_ != null) {\n+     postponedActions_.remove();\n+   }\n+   if (javaScriptRunning_ != null) {\n+     javaScriptRunning_.remove();\n+   }\n+ } finally {\n+   holdPostponedActions_=false;\n+ }",
+                "Description": "Clean-up code should be placed in a try-finally block to ensure it gets executed even if an exception occurs.",
+                "Start": 7,
+                "End": 16
+            }
+        ],
+        "Final code": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  if (webClient_ != null) webClient_ = null;\n  if (contextFactory_ != null) contextFactory_ = null;\n  if (jsConfig_ != null) jsConfig_ = null;\n  try {\n    if (javaScriptExecutor_ != null) {\n      javaScriptExecutor_.shutdown();\n      javaScriptExecutor_=null;\n    }\n    if (postponedActions_ != null) {\n      postponedActions_.remove();\n    }\n    if (javaScriptRunning_ != null) {\n      javaScriptRunning_.remove();\n    }\n  } finally {\n    holdPostponedActions_=false;\n  }\n}"
+    },
+    "Old_Method": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  webClient_=null;\n  contextFactory_=null;\n  jsConfig_=null;\n  if (javaScriptExecutor_ != null) {\n    javaScriptExecutor_.shutdown();\n    javaScriptExecutor_=null;\n  }\n  if (postponedActions_ != null) {\n    postponedActions_.remove();\n  }\n  if (javaScriptRunning_ != null) {\n    javaScriptRunning_.remove();\n  }\n  holdPostponedActions_=false;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/JavaScriptEngine.java",
+    "Start": 35868,
+    "Stop": 36412,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "shutdown"
+}

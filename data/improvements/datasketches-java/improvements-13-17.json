@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repeated code into a separate method",
+                "Change_Diff": "- checkByRange(refSk,testSk,u,ordered);\n- byte[] byteArray=refSk.toByteArray();\n- Memory heapROMem=Memory.wrap(byteArray);\n- testSk=(CompactSketch)Sketch.heapify(heapROMem);\n- checkByRange(refSk,testSk,u,ordered);\n- int bytes=usk.getCompactBytes();\n- try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n- WritableMemory directMem=wdh.getWritable();\n- refSk=usk.compact(ordered,directMem);\n- testSk=(CompactSketch)Sketch.wrap(directMem);\n- checkByRange(refSk,testSk,u,ordered);\n- testSk=(CompactSketch)Sketch.wrap(directMem);\n- checkByRange(refSk,testSk,u,ordered);\n+ validateSketch(usk, refSk, u, ordered);",
+                "Description": "There are repeated calls to 'checkByRange(refSk, testSk, u, ordered)'. This pattern can be refactored into a separate method to make the code cleaner and easier to maintain.",
+                "Start": 7,
+                "End": 21
+            },
+            {
+                "Improvement": "Add exception handling",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new RuntimeException(\"An error occurred while handling the sketch\", e);",
+                "Description": "The current code just throws a new RuntimeException when an exception is caught. It's better to provide a meaningful message and include the original exception as a cause. This will help in debugging if an exception occurs.",
+                "Start": 22,
+                "End": 24
+            }
+        ],
+        "Final code": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  validateSketch(usk, u, ordered);\n}\n\nprivate void validateSketch(UpdateSketch usk, int u, boolean ordered) {\n  CompactSketch refSk=usk.compact(ordered,null);\n  validateByRange(refSk, u, ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  validateByRange(refSk, testSk, u, ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    validateByRange(refSk, testSk, u, ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    validateByRange(refSk, testSk, u, ordered);\n  }\n  catch (final Exception e) {\n    throw new RuntimeException(\"An error occurred while handling the sketch\", e);\n  }\n}\n\nprivate void validateByRange(CompactSketch refSk, CompactSketch testSk, int u, boolean ordered) {\n  checkByRange(refSk, testSk, u, ordered);\n}"
+    },
+    "Old_Method": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/CompactSketchTest.java",
+    "Start": 1975,
+    "Stop": 3351,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkHeapifyWrap"
+}

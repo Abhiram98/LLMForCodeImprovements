@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract finding xPiece to a separate method",
+                "Change_Diff": "- for (  Piece p : pieces) {\n    if (\"x\".equals(p.name)) {\n      xPiece=p;\n      break;\n    }\n  }",
+                "Description": "The logic of finding the piece named 'x' can be extracted into a separate method, to improve code readability and modularity.",
+                "Start": 13,
+                "End": 19
+            },
+            {
+                "Improvement": "Extract calculating low_x, high_x, low_y, high_y to a separate method",
+                "Change_Diff": "- for (      ColumnName col : row) {\n        if (col instanceof Point) {\n          int x=((Point)col).x;\n          int y=((Point)col).y;\n          if (x < low_x) {\n            low_x=x;\n          }\n          if (x > high_x) {\n            high_x=x;\n          }\n          if (y < low_y) {\n            low_y=y;\n          }\n          if (y > high_y) {\n            high_y=y;\n          }\n        }\n      }",
+                "Description": "The logic of calculating lowest and highest x and y values can be extracted into a separate method, to improve code readability and modularity.",
+                "Start": 23,
+                "End": 38
+            }
+        ],
+        "Final code": "public SolutionCategory getCategory(List<List<ColumnName>> names){\n  Piece xPiece = findXPiece();\n  for (List<ColumnName> row : names) {\n    if (row.contains(xPiece)) {\n      int[] coordinates = calculateCoordinates(row);\n      boolean mid_x = (coordinates[0] + coordinates[1] == width - 1);\n      boolean mid_y = (coordinates[2] + coordinates[3] == height - 1);\n      if (mid_x && mid_y) {\n        return SolutionCategory.CENTER;\n      } else if (mid_x) {\n        return SolutionCategory.MID_X;\n      } else if (mid_y) {\n        return SolutionCategory.MID_Y;\n      }\n      break;\n    }\n  }\n  return SolutionCategory.UPPER_LEFT;\n}\n\nprivate Piece findXPiece() {\n  for (Piece p : pieces) {\n    if (\"x\".equals(p.name)) {\n      return p;\n    }\n  }\n  return null;\n}\n\nprivate int[] calculateCoordinates(List<ColumnName> row) {\n  int low_x = width, high_x = 0, low_y = height, high_y = 0;\n  for (ColumnName col : row) {\n    if (col instanceof Point) {\n      int x = ((Point)col).x;\n      int y = ((Point)col).y;\n      if (x < low_x) low_x = x;\n      if (x > high_x) high_x = x;\n      if (y < low_y) low_y = y;\n      if (y > high_y) high_y = y;\n    }\n  }\n  return new int[]{low_x, high_x, low_y, high_y};\n}"
+    },
+    "Old_Method": "/** \n * Find whether the solution has the x in the upper left quadrant, the x-midline, the y-midline or in the center.\n * @param names the solution to check\n * @return the catagory of the solution\n */\npublic SolutionCategory getCategory(List<List<ColumnName>> names){\n  Piece xPiece=null;\n  for (  Piece p : pieces) {\n    if (\"x\".equals(p.name)) {\n      xPiece=p;\n      break;\n    }\n  }\n  for (  List<ColumnName> row : names) {\n    if (row.contains(xPiece)) {\n      int low_x=width;\n      int high_x=0;\n      int low_y=height;\n      int high_y=0;\n      for (      ColumnName col : row) {\n        if (col instanceof Point) {\n          int x=((Point)col).x;\n          int y=((Point)col).y;\n          if (x < low_x) {\n            low_x=x;\n          }\n          if (x > high_x) {\n            high_x=x;\n          }\n          if (y < low_y) {\n            low_y=y;\n          }\n          if (y > high_y) {\n            high_y=y;\n          }\n        }\n      }\n      boolean mid_x=(low_x + high_x == width - 1);\n      boolean mid_y=(low_y + high_y == height - 1);\n      if (mid_x && mid_y) {\n        return SolutionCategory.CENTER;\n      }\n else       if (mid_x) {\n        return SolutionCategory.MID_X;\n      }\n else       if (mid_y) {\n        return SolutionCategory.MID_Y;\n      }\n      break;\n    }\n  }\n  return SolutionCategory.UPPER_LEFT;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Pentomino.java",
+    "Start": 6117,
+    "Stop": 8106,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "getCategory"
+}

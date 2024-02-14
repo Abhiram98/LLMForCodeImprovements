@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce nested condition checks",
+                "Change_Diff": "- while (status != Status.CANCELED && status != Status.DONE) { \n- if (status == Status.DOWNLOADING) {...}\n+ switch (status) {\n+     case DOWNLOADING: {...}\n+     case CANCELED:\n+     case DONE:\n+         break;\n+     default: {...}\n+ }",
+                "Description": "The checks for `status == Status.CANCELED` and `status == Status.DONE` are repeated multiple times in the code. This can be reduced by using a switch case for `status`. This would improve code readability.",
+                "Start": 4,
+                "End": 28
+            },
+            {
+                "Improvement": "Move repeated code to finally block",
+                "Change_Diff": "- if (status == Status.CANCELED) {...}\n- if (status == Status.ERROR) {...}\n+ finally {...}",
+                "Description": "The checks for `if (status == Status.CANCELED)` and `if (status == Status.ERROR)` are repeated in the catch block and final block. This can be moved to the finally block to avoid repetition and improve code maintainability.",
+                "Start": 32,
+                "End": 47
+            }
+        ],
+        "Final code": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    switch (status) {\n        case DOWNLOADING:\n            byte[] buff=new byte[buffSize];\n            int len;\n            while ((len=input.read(buff)) != -1) {\n              raFile.write(buff,0,len);\n              doneBytes+=len;\n              if (status == Status.CANCELED || status == Status.PAUSED) {\n                break;\n              }\n            }\n            if (len == -1) {\n                synchronized (lock) {\n                    if (status != Status.CANCELED) {\n                        status=Status.DONE;\n                    }\n                }\n            }\n            break;\n        case CANCELED:\n        case DONE:\n            break;\n        default:\n            break;\n    }\n  }\n  catch (  IOException e) {\n      synchronized (lock) {\n          if (status != Status.CANCELED) {\n              status=Status.ERROR;\n          }\n      }\n  }\n  finally {\n      closeQuietly(raFile);\n      closeQuietly(input);\n      if (status == Status.CANCELED) {\n          if (!file.delete()) {\n              Platform.logError(\"can not delete canceled file: \" + file);\n          }\n          fireOnComplete();\n      }\n      if (status == Status.ERROR) {\n          fireOnFailure(e);\n          fireOnComplete();\n      }\n      if (status == Status.DONE) {\n          fireOnSuccess();\n          fireOnComplete();\n      }\n  }\n}"
+    },
+    "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+    "Start": 6005,
+    "Stop": 7715,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "doDownload"
+}

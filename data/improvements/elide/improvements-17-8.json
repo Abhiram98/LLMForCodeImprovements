@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace 'exception' with 'e' in the instanceof checks",
+                "Change_Diff": "- if (exception instanceof GraphQLException) {\n+ if (e instanceof GraphQLException) {\n- if (exception instanceof InvalidEntityBodyException) {\n+ if (e instanceof InvalidEntityBodyException) {\n- if (exception instanceof InvalidApiVersionException) {\n+ if (e instanceof InvalidApiVersionException) {\n- if (exception instanceof HttpStatusException) {\n+ if (e instanceof HttpStatusException) {\n- if (exception instanceof ConstraintViolationException) {\n+ if (e instanceof ConstraintViolationException) {",
+                "Description": "In the given method, 'e' is the exception being checked in the instanceof conditions, but 'exception' is being used in the checks. This will cause a compile error because 'exception' is not defined in the scope of the method.",
+                "Start": 2,
+                "End": 21
+            },
+            {
+                "Improvement": "Use switch statement instead of multiple ifs",
+                "Change_Diff": "- if (e instanceof GraphQLException) { ... } else if ... \n+ switch (e.getClass().getSimpleName()) {\n case \"GraphQLException\": { ... } break;\n case \"InvalidEntityBodyException\": { ... } break; \n ... \n}",
+                "Description": "In this method, multiple if statements are used to check the type of the exception. A switch statement can be used instead to make the code cleaner and easier to read.",
+                "Start": 2,
+                "End": 21
+            }
+        ],
+        "Final code": "@Override protected ElideResponse<?> handleRuntimeException(RuntimeException e, GraphQLErrorContext errorContext){\n  switch (e.getClass().getSimpleName()) {\n    case \"GraphQLException\":\n      String body=e.getMessage();\n      return ElideResponse.status(HttpStatus.SC_OK).body(body);\n\n    case \"InvalidEntityBodyException\":\n      if (e.getCause() instanceof JsonParseException) {\n        return buildResponse(e,errorContext);\n      }\n      return buildResponse(HttpStatus.SC_OK,e,errorContext);\n\n    case \"InvalidApiVersionException\":\n      return buildResponse(e,errorContext);\n\n    case \"HttpStatusException\":\n      return buildResponse(HttpStatus.SC_OK,e,errorContext);\n\n    case \"ConstraintViolationException\":\n      final GraphQLErrors.GraphQLErrorsBuilder errors=GraphQLErrors.builder();\n      if (e.getConstraintViolations() != null) {\n        for (ConstraintViolation<?> constraintViolation : e.getConstraintViolations()) {\n          errors.error(error -> {\n            error.message(constraintViolation.getMessage());\n            error.extension(\"code\",constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName());\n            error.extension(\"type\",\"ConstraintViolation\");\n            final String propertyPathString=constraintViolation.getPropertyPath().toString();\n            if (!propertyPathString.isEmpty()) {\n              error.extension(\"property\",propertyPathString);\n            }\n          });\n        }\n      }\n      return buildResponse(HttpStatus.SC_OK,errors.build());\n\n    default:\n      log.error(\"Error or exception uncaught by Elide\", e);\n      throw e;\n  }\n}"
+    },
+    "Old_Method": "@Override protected ElideResponse<?> handleRuntimeException(RuntimeException exception,GraphQLErrorContext errorContext){\n  if (exception instanceof GraphQLException) {\n    String body=e.getMessage();\n    return ElideResponse.status(HttpStatus.SC_OK).body(body);\n  }\n  if (exception instanceof InvalidEntityBodyException) {\n    if (e.getCause() instanceof JsonParseException) {\n      return buildResponse(e,errorContext);\n    }\n    return buildResponse(HttpStatus.SC_OK,e,errorContext);\n  }\n  if (exception instanceof InvalidApiVersionException) {\n    return buildResponse(e,errorContext);\n  }\n  if (exception instanceof HttpStatusException) {\n    return buildResponse(HttpStatus.SC_OK,e,errorContext);\n  }\n  if (exception instanceof ConstraintViolationException) {\n    final GraphQLErrors.GraphQLErrorsBuilder errors=GraphQLErrors.builder();\n    if (e.getConstraintViolations() != null) {\n      for (      ConstraintViolation<?> constraintViolation : e.getConstraintViolations()) {\n        errors.error(error -> {\n          error.message(constraintViolation.getMessage());\n          error.extension(\"code\",constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName());\n          error.extension(\"type\",\"ConstraintViolation\");\n          final String propertyPathString=constraintViolation.getPropertyPath().toString();\n          if (!propertyPathString.isEmpty()) {\n            error.extension(\"property\",propertyPathString);\n          }\n        }\n);\n      }\n    }\n    return buildResponse(HttpStatus.SC_OK,errors.build());\n  }\n  log.error(\"Error or exception uncaught by Elide\",exception);\n  throw exception;\n}\n",
+    "File_Path": "elide/elide-graphql/src/main/java/com/yahoo/elide/graphql/DefaultGraphQLExceptionHandler.java",
+    "Start": 1763,
+    "Stop": 3792,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "handleRuntimeException"
+}

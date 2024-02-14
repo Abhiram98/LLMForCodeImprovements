@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor the code to reduce the method's complexity",
+                "Change_Diff": "- private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n...\n}\n+ private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n...\n}\n+ private JetstreamEvent createJetstreamEvent(){\n...\n}",
+                "Description": "The method `createJetStreamGroupbyCountEventsWithTags` is quite complex with a large number of branching conditions and nested loops. It might be more maintainable to refactor this into smaller, more single-responsibility methods. Moreover, the code block within the `for` loop can be extracted into a separate method for better readability and maintainability.",
+                "Start": 1,
+                "End": 75
+            },
+            {
+                "Improvement": "Avoid repeatedly calling the same method",
+                "Change_Diff": "- OffHeapCacheConfig conf=null;\n...\n+ OffHeapCacheConfig conf = getConfiguration().getOffheapMetricConf();\n...\n",
+                "Description": "In the method, `getConfiguration()` is called multiple times. It's better to call it once, store the result in a variable and use that instead. This will improve performance by reducing the number of method calls.",
+                "Start": 5,
+                "End": 10
+            },
+            {
+                "Improvement": "Remove unnecessary synchronization",
+                "Change_Diff": "- synchronized (this) {\n...\n}\n+ // No synchronized block\n",
+                "Description": "In the current method, there are multiple `synchronized` blocks which may lead to performance issues. If the `groupbyWithTagsMetricMap` is a concurrent map, we can remove these `synchronized` blocks.",
+                "Start": 18,
+                "End": 21
+            },
+            {
+                "Improvement": "Use try-with-resources or finally to ensure resources are closed",
+                "Change_Diff": "- if (mapClear) {\n...\n}\n+ if (mapClear) {\n try { \n   ...\n } finally {\n   counterMap.clear();\n   counterMap=null;\n }\n}",
+                "Description": "There are resources that opened but not properly closed in the method. It's better to use try-with-resources or finally to ensure resources are closed even if an exception is thrown. For example, the `counterMap` should be cleared and set to null even if an exception occurs.",
+                "Start": 73,
+                "End": 75
+            }
+        ],
+        "Final code": "private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n    Map<MCMetricGroupDemension,Counter> counterMap=groupbyWithTagsMetricMap.get(metricName);\n    if (counterMap == null) return Collections.emptyList();\n    OffHeapCacheConfig conf = getConfiguration().getOffheapMetricConf();\n    Integer threshold=getConfiguration().getMetricsThreshold().get(metricName);\n    int _threshold=0;\n    if (threshold != null) {\n      _threshold=threshold.intValue();\n    }\n    boolean mapClear=false;\n    if (conf != null) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterOffHeapCache(metricName,conf);\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n      mapClear=true;\n    } else if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterCache();\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n      mapClear=true;\n    }\n    List<JetstreamEvent> result=new ArrayList<JetstreamEvent>(counterMap.size());\n    long now=System.currentTimeMillis();\n    for (Map.Entry<MCMetricGroupDemension,Counter> entry : counterMap.entrySet()) {\n      result.add(createJetstreamEvent(entry, metricName, now, _threshold));\n    }\n    if (mapClear) {\n      try {\n       counterMap.clear();\n       counterMap=null;\n       mapClearCount.increment();\n      } finally {\n        counterMap.clear();\n        counterMap=null;\n      }\n    }\n    return result;\n}\n\nprivate JetstreamEvent createJetstreamEvent(Map.Entry<MCMetricGroupDemension,Counter> entry, String metricName, long now, int _threshold){...}"
+    },
+    "Old_Method": "private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n  Map<MCMetricGroupDemension,Counter> counterMap=groupbyWithTagsMetricMap.get(metricName);\n  if (counterMap == null)   return Collections.emptyList();\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  Integer threshold=getConfiguration().getMetricsThreshold().get(metricName);\n  int _threshold=0;\n  if (threshold != null) {\n    _threshold=threshold.intValue();\n  }\n  boolean mapClear=false;\n  if (conf != null) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterOffHeapCache(metricName,conf);\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n else   if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterCache();\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n  List<JetstreamEvent> result=new ArrayList<JetstreamEvent>(counterMap.size());\n  long now=System.currentTimeMillis();\n  for (  Map.Entry<MCMetricGroupDemension,Counter> entry : counterMap.entrySet()) {\n    MCMetricGroupDemension groupDemension=entry.getKey();\n    Counter counter=entry.getValue();\n    counter.mark();\n    boolean timeBasedMetric=false;\n    if (groupDemension.getDimensions() != null && groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME) != null) {\n      timeBasedMetric=true;\n    }\n    if (counter.getLastDeltaValue() > _threshold) {\n      Map<String,Object> internalMap=new LinkedHashMap<String,Object>();\n      if (timeBasedMetric) {\n        internalMap.put(MCConstant.METRIC_TIME,Long.valueOf(groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME)));\n      }\n else {\n        internalMap.put(MCConstant.METRIC_TIME,now);\n      }\n      if (counter instanceof AvgCounter) {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,((AvgCounter)counter).getLatestAvgValue());\n      }\n else {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,counter.getLastDeltaValue());\n      }\n      internalMap.put(MCConstant.METRIC_NAME,metricName);\n      internalMap.put(MCConstant.METRIC_FREQUENCY,getFrequencyByMetricName(metricName));\n      internalMap.put(MCConstant.METRIC_DEMENSION,groupDemension);\n      if (counter.getLastCounterTime() != null) {\n        internalMap.put(MCConstant.TAG_TIME_IGNORE,counter.getLastCounterTime());\n      }\n      if (shutdownFlag.get()) {\n        internalMap.put(MCConstant.SHUTDOWN_FLUSH,MCConstant.SHUTDOWN_FLUSH);\n      }\n      if ((metricCollectionCounts.get(metricName) != null) && metricCollectionCounts.get(metricName).get() == 1) {\n        internalMap.put(MCConstant.FIRST_FLUSH,MCConstant.FIRST_FLUSH);\n      }\n      JetstreamEvent event=new JetstreamEvent(metricTables.get(metricName),null,internalMap);\n      result.add(event);\n    }\n    if (timeBasedMetric && counter.getLastDeltaValue() == 0) {\n      counterMap.remove(groupDemension);\n    }\n  }\n  if (result.size() > 0) {\n    JetstreamEvent lastEvent=result.get(result.size() - 1);\n    lastEvent.put(\"LastEventInBatch\",\"true\");\n  }\n  if (mapClear) {\n    counterMap.clear();\n    counterMap=null;\n    mapClearCount.increment();\n  }\n  return result;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 13857,
+    "Stop": 18700,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "createJetStreamGroupbyCountEventsWithTags"
+}

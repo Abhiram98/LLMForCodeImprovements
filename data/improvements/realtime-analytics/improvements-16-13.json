@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace direct ByteBuffer access with helper method",
+                "Change_Diff": "- byte version=payload.get();\n+ byte version = getByte(payload);",
+                "Description": "Direct access to ByteBuffer can lead to bugs and is generally not recommended. Instead, consider using a helper method to safely get the value from the ByteBuffer.",
+                "Start": 5,
+                "End": 31
+            },
+            {
+                "Improvement": "Refactor the method to handle exceptions",
+                "Change_Diff": "+ try {\n...\n} catch (Exception e) {\n    e.printStackTrace();\n    return false;\n}",
+                "Description": "The current method does not handle exceptions which may arise during the execution. Consider adding a try-catch block to handle potential exceptions and improve the robustness of your code.",
+                "Start": 3,
+                "End": 33
+            },
+            {
+                "Improvement": "Replace for loop with IntStream.range",
+                "Change_Diff": "- for (int i=0; i < subSize; i++) {\n+ IntStream.range(0, subSize).forEach(i -> {\n...\n});",
+                "Description": "An IntStream can be used to create a range of integers to loop over. This removes the need to manually increment and check a loop variable, and can make the code more readable.",
+                "Start": 23,
+                "End": 31
+            }
+        ],
+        "Final code": "public boolean setSessionPayload(Session session,ByteBuffer payload){\n    try {\n        byte version = getByte(payload);\n        if (version != SESSION_VERSION) {\n            return false;\n        }\n        session.setFirstEventTimestamp(unsignedLongEncoder.decode(payload));\n        session.setCreationTime(unsignedLongEncoder.decode(payload));\n        session.setLastModifiedTime(unsignedLongEncoder.decode(payload));\n        session.setExpirationTime(unsignedLongEncoder.decode(payload));\n        session.setFirstExpirationTime(unsignedLongEncoder.decode(payload));\n        session.setTtl(unsignedIntEncoder.decode(payload));\n        session.setEventCount(unsignedIntEncoder.decode(payload));\n        session.setBotEventCount(unsignedIntEncoder.decode(payload));\n        session.setBotType(unsignedIntEncoder.decode(payload));\n        session.setVersion(unsignedIntEncoder.decode(payload));\n        session.setAffinityKey(encoder.decode(payload));\n        session.setMetadataLastModifiedTime(unsignedLongEncoder.decode(payload));\n        session.setRemoteServerInfo(encoder.decode(payload));\n        session.setDynamicAttributes(bytePrimitiveEncoder.decode(payload));\n        int subSize = payload.getInt();\n        if (subSize != -1) {\n            List<SubSession> subSessions = new ArrayList<>(subSize);\n            IntStream.range(0, subSize).forEach(i -> {\n                SubSession sub = new SubSession();\n                sub.setIdentifier(encoder.decode(payload));\n                sub.setName(encoder.decode(payload));\n                sub.setFirstEventTimestamp(unsignedLongEncoder.decode(payload));\n                sub.setCreationTime(unsignedLongEncoder.decode(payload));\n                sub.setLastModifiedTime(unsignedLongEncoder.decode(payload));\n                sub.setExpirationTime(unsignedLongEncoder.decode(payload));\n                sub.setTtl(unsignedIntEncoder.decode(payload));\n                sub.setEventCount(payload.getInt());\n                sub.setDynamicAttributes(bytePrimitiveEncoder.decode(payload));\n                sub.setInitialAttributes(bytePrimitiveEncoder.decode(payload));\n                subSessions.add(sub);\n            });\n            session.setSubSessions(subSessions);\n        }\n        return true;\n    } catch (Exception e) {\n        e.printStackTrace();\n        return false;\n    }\n}"
+    },
+    "Old_Method": "/** \n * Deserialize the payload and set the content to the session. Return false when version did not match.\n * @param session\n * @param metaData\n * @return\n */\npublic boolean setSessionPayload(Session session,ByteBuffer payload){\n  byte version=payload.get();\n  if (version != SESSION_VERSION) {\n    return false;\n  }\n  session.setFirstEventTimestamp(unsignedLongEncoder.decode(payload));\n  session.setCreationTime(unsignedLongEncoder.decode(payload));\n  session.setLastModifiedTime(unsignedLongEncoder.decode(payload));\n  session.setExpirationTime(unsignedLongEncoder.decode(payload));\n  session.setFirstExpirationTime(unsignedLongEncoder.decode(payload));\n  session.setTtl(unsignedIntEncoder.decode(payload));\n  session.setEventCount(unsignedIntEncoder.decode(payload));\n  session.setBotEventCount(unsignedIntEncoder.decode(payload));\n  session.setBotType(unsignedIntEncoder.decode(payload));\n  session.setVersion(unsignedIntEncoder.decode(payload));\n  session.setAffinityKey(encoder.decode(payload));\n  session.setMetadataLastModifiedTime(unsignedLongEncoder.decode(payload));\n  session.setRemoteServerInfo(encoder.decode(payload));\n  session.setDynamicAttributes(bytePrimitiveEncoder.decode(payload));\n  int subSize=payload.getInt();\n  if (subSize != -1) {\n    List<SubSession> subSessions=new ArrayList<SubSession>(subSize);\n    for (int i=0; i < subSize; i++) {\n      SubSession sub=new SubSession();\n      sub.setIdentifier(encoder.decode(payload));\n      sub.setName(encoder.decode(payload));\n      sub.setFirstEventTimestamp(unsignedLongEncoder.decode(payload));\n      sub.setCreationTime(unsignedLongEncoder.decode(payload));\n      sub.setLastModifiedTime(unsignedLongEncoder.decode(payload));\n      sub.setExpirationTime(unsignedLongEncoder.decode(payload));\n      sub.setTtl(unsignedIntEncoder.decode(payload));\n      sub.setEventCount(payload.getInt());\n      sub.setDynamicAttributes(bytePrimitiveEncoder.decode(payload));\n      sub.setInitialAttributes(bytePrimitiveEncoder.decode(payload));\n      subSessions.add(sub);\n    }\n    session.setSubSessions(subSessions);\n  }\n  return true;\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/util/BinaryFormatSerializer.java",
+    "Start": 6177,
+    "Stop": 8633,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "setSessionPayload"
+}

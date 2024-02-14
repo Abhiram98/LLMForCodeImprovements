@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use annotations for test setup",
+                "Change_Diff": "- MimeUnmarshaller unmarshaller=createMock(MimeUnmarshaller.class);\n- MimeMarshaller marshaller=createMock(MimeMarshaller.class);\n- MimeMessage request=createMock(\"request\",MimeMessage.class);\n- MimeMessage response=createMock(\"response\",MimeMessage.class);\n+ @Before public void setUp() {\n+ unmarshaller=createMock(MimeUnmarshaller.class);\n+ marshaller=createMock(MimeMarshaller.class);\n+ request=createMock(\"request\",MimeMessage.class);\n+ response=createMock(\"response\",MimeMessage.class);\n+ }",
+                "Description": "Instead of setting up your mocks in the test method itself, use @Before annotation to set up the mocks. This way, the setup would be run before every test method in the test class, reducing code redundancy if you have more than one test method.",
+                "Start": 1,
+                "End": 8
+            },
+            {
+                "Improvement": "Use @Test(expected) for exception testing",
+                "Change_Diff": "- @Test public void testInvokeMimeMarshaller() throws Exception {\n+ @Test(expected = Exception.class) public void testInvokeMimeMarshaller() {",
+                "Description": "Instead of catching the exception within the test method, use @Test(expected) annotation to indicate that the test method is expected to throw an exception. This makes the code cleaner and easier to understand.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use @After for cleaning up",
+                "Change_Diff": "+ @After public void tearDown() {\n+ verify(factoryMock,unmarshaller,marshaller,request,response);\n+ }",
+                "Description": "If there are resources that need to be cleaned up after each test, use @After annotation to clean up. This ensures that the cleanup code would be run after every test method in the test class.",
+                "Start": 24,
+                "End": 24
+            }
+        ],
+        "Final code": "@Before public void setUp() {\n  unmarshaller=createMock(MimeUnmarshaller.class);\n  marshaller=createMock(MimeMarshaller.class);\n  request=createMock(\"request\",MimeMessage.class);\n  response=createMock(\"response\",MimeMessage.class);\n}\n\n@Test(expected = Exception.class) public void testInvokeMimeMarshaller() {\n  Source requestSource=new StringSource(\"<request/>\");\n  expect(request.getPayloadSource()).andReturn(requestSource);\n  expect(factoryMock.createWebServiceMessage()).andReturn(response);\n  expect(unmarshaller.unmarshal(eq(requestSource),isA(MimeContainer.class))).andReturn(42L);\n  Result responseResult=new StringResult();\n  expect(response.getPayloadResult()).andReturn(responseResult);\n  marshaller.marshal(eq(\"result\"),eq(responseResult),isA(MimeContainer.class));\n  replay(factoryMock,unmarshaller,marshaller,request,response);\n  AbstractMarshallingPayloadEndpoint endpoint=new AbstractMarshallingPayloadEndpoint(){\n    @Override protected Object invokeInternal(    Object requestObject) throws Exception {\n      assertThat(requestObject).isEqualTo(42L);\n      return \"result\";\n    }\n  };\n  endpoint.setMarshaller(marshaller);\n  endpoint.setUnmarshaller(unmarshaller);\n  endpoint.afterPropertiesSet();\n  context=new DefaultMessageContext(request,factoryMock);\n  endpoint.invoke(context);\n  assertThat(response).isNotNull();\n}\n\n@After public void tearDown() {\n  verify(factoryMock,unmarshaller,marshaller,request,response);\n}"
+    },
+    "Old_Method": "@Test public void testInvokeMimeMarshaller() throws Exception {\n  MimeUnmarshaller unmarshaller=createMock(MimeUnmarshaller.class);\n  MimeMarshaller marshaller=createMock(MimeMarshaller.class);\n  MimeMessage request=createMock(\"request\",MimeMessage.class);\n  MimeMessage response=createMock(\"response\",MimeMessage.class);\n  Source requestSource=new StringSource(\"<request/>\");\n  expect(request.getPayloadSource()).andReturn(requestSource);\n  expect(factoryMock.createWebServiceMessage()).andReturn(response);\n  expect(unmarshaller.unmarshal(eq(requestSource),isA(MimeContainer.class))).andReturn(42L);\n  Result responseResult=new StringResult();\n  expect(response.getPayloadResult()).andReturn(responseResult);\n  marshaller.marshal(eq(\"result\"),eq(responseResult),isA(MimeContainer.class));\n  replay(factoryMock,unmarshaller,marshaller,request,response);\n  AbstractMarshallingPayloadEndpoint endpoint=new AbstractMarshallingPayloadEndpoint(){\n    @Override protected Object invokeInternal(    Object requestObject) throws Exception {\n      assertThat(requestObject).isEqualTo(42L);\n      return \"result\";\n    }\n  }\n;\n  endpoint.setMarshaller(marshaller);\n  endpoint.setUnmarshaller(unmarshaller);\n  endpoint.afterPropertiesSet();\n  context=new DefaultMessageContext(request,factoryMock);\n  endpoint.invoke(context);\n  assertThat(response).isNotNull();\n  verify(factoryMock,unmarshaller,marshaller,request,response);\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/test/java/org/springframework/ws/server/endpoint/MarshallingPayloadEndpointTest.java",
+    "Start": 6056,
+    "Stop": 7507,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "testInvokeMimeMarshaller"
+}

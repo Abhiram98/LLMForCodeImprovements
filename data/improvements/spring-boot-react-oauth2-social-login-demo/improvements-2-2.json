@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Handle null or empty cookie name",
+                "Change_Diff": "+ if (name == null || name.isEmpty()) return;",
+                "Description": "Before trying to delete a cookie, we should check if the provided cookie name is null or empty. This will prevent unnecessary iterations over the cookies array when the name is invalid, enhancing the performance of the method.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Reduce Cookie object mutation and simplify code",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n-     cookie.setValue(\"\");\n-     cookie.setPath(\"/\");\n-     cookie.setMaxAge(0);\n-     response.addCookie(cookie);\n+ if (cookie.getName().equals(name)) {\n+     Cookie deleteCookie = new Cookie(name, \"\");\n+     deleteCookie.setPath(\"/\");\n+     deleteCookie.setMaxAge(0);\n+     response.addCookie(deleteCookie);\n+     break;\n+ }",
+                "Description": "Instead of modifying the existing Cookie object, we can create a new one with the desired properties. This reduces the number of operations we perform on the object and simplifies the code.",
+                "Start": 5,
+                "End": 9
+            }
+        ],
+        "Final code": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  if (name == null || name.isEmpty()) return;\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        Cookie deleteCookie = new Cookie(name, \"\");\n        deleteCookie.setPath(\"/\");\n        deleteCookie.setMaxAge(0);\n        response.addCookie(deleteCookie);\n        break;\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (    Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        cookie.setValue(\"\");\n        cookie.setPath(\"/\");\n        cookie.setMaxAge(0);\n        response.addCookie(cookie);\n      }\n    }\n  }\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/util/CookieUtils.java",
+    "Start": 1016,
+    "Stop": 1537,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "deleteCookie"
+}

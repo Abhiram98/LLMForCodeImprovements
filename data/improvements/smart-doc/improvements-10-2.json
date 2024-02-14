@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor code to remove unnecessary else clause",
+                "Change_Diff": "- else {\n-    gicType=typeName;\n-  }",
+                "Description": "The else clause is not necessary because if the if condition is met, the method will return before it gets to the else clause. Removing the else clause will make the code cleaner and easier to read.",
+                "Start": 4,
+                "End": 6
+            },
+            {
+                "Improvement": "Use Java's built-in String methods more effectively",
+                "Change_Diff": "- if (typeName.contains(\"<\")) {\n-    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n-  }\n- else {\n-    gicType=typeName;\n-  }\n-  if (gicType.contains(\"[\")) {\n-    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n-  }\n-  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n+ gicType = typeName.split(\"<\")[0];\n+ gicType = gicType.replace(\"[\", \"\");\n+ return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();",
+                "Description": "The built-in String methods can be used more effectively to simplify the code. The String.split method can be used to split the string at the '<' character, and then the first part of the string can be selected. The String.replace method can be used to remove any '[' characters. The String.substring method can then be used to extract the part of the string after the last '.' character. This approach is simpler and more efficient than the current approach.",
+                "Start": 3,
+                "End": 11
+            }
+        ],
+        "Final code": "private static String getType(String typeName) {\n  String gicType;\n  gicType = typeName.split(\"<\")[0];\n  gicType = gicType.replace(\"[\", \"\");\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}"
+    },
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

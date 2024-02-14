@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid using RuntimeException",
+                "Change_Diff": "- throw new RuntimeException(\"config not found: \" + key.name);\n+ throw new IllegalArgumentException(\"config not found: \" + key.name);",
+                "Description": "Avoid throwing RuntimeException, as it is too general. Instead, throw a more specific exception like IllegalArgumentException or create a custom exception.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Simplify if-else conditions",
+                "Change_Diff": "- if (env == null) {\n-    if (key.defaultValue == null) {\n-        throw new RuntimeException(\"config not found: \" + key.name);\n-    }\n-    else {\n-        return key.defaultValue;\n-    }\n-  }\n-  else {\n-    return env;\n-  }\n+ if (env != null) {\n+     return env;\n+ }\n+ if (key.defaultValue != null) {\n+     return key.defaultValue;\n+ }\n+ throw new IllegalArgumentException(\"config not found: \" + key.name);",
+                "Description": "The if-else conditions can be simplified to make the code more readable.",
+                "Start": 4,
+                "End": 12
+            }
+        ],
+        "Final code": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env != null) {\n      return env;\n  }\n  if (key.defaultValue != null) {\n      return key.defaultValue;\n  }\n  throw new IllegalArgumentException(\"config not found: \" + key.name);\n}"
+    },
+    "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+    "Start": 813,
+    "Stop": 1187,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "get"
+}

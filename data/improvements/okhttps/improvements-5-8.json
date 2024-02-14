@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Introduce Constants for Magic Numbers",
+                "Change_Diff": "- long size=3 * 1024 * 1024;\n+ final long DOWNLOAD_CHUNK_SIZE_MB = 3 * 1024 * 1024;\n... \n- HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\")...\n+ final String DOWNLOAD_URL = \"/download/test.zip\";\n+ final String DOWNLOAD_LOCATION = \"D:/download/test.zip\";\n... \n+ HttpUtils.sync(DOWNLOAD_URL).setRange(start,end).get().getBody().toFile(DOWNLOAD_LOCATION)...",
+                "Description": "The magic numbers 3, 1024, and 'D:/download/test.zip' should be replaced with named constants. This will improve readability and maintainability of the code, making it clear what these numbers represent.",
+                "Start": 2,
+                "End": 4
+            },
+            {
+                "Improvement": "Extract Recursive Method Call into a Separate Method",
+                "Change_Diff": "- if (end < totalSize) {\n-      download(totalSize,index + 1);\n-    }\n... \n+ private void recursiveDownload(long totalSize, long end, int index) {\n+    if (end < totalSize) {\n+        download(totalSize,index + 1);\n+    }\n+ }\n... \n+ recursiveDownload(totalSize, end, index);",
+                "Description": "The recursive call to 'download' inside the onSuccess callback can be confusing. Extract this into a separate, private method to improve code readability and separation of concerns.",
+                "Start": 6,
+                "End": 9
+            }
+        ],
+        "Final code": "static final long DOWNLOAD_CHUNK_SIZE_MB = 3 * 1024 * 1024;\nstatic final String DOWNLOAD_URL = \"/download/test.zip\";\nstatic final String DOWNLOAD_LOCATION = \"D:/download/test.zip\";\n\nstatic void download(long totalSize,int index){\n  long start=index * DOWNLOAD_CHUNK_SIZE_MB;\n  long end=Math.min(start + DOWNLOAD_CHUNK_SIZE_MB,totalSize);\n  HttpUtils.sync(DOWNLOAD_URL).setRange(start,end).get().getBody().toFile(DOWNLOAD_LOCATION).setAppended().setOnSuccess((  File file) -> {\n    recursiveDownload(totalSize, end, index);\n  }\n).start();\n}\n\nprivate static void recursiveDownload(long totalSize, long end, int index) {\n  if (end < totalSize) {\n    download(totalSize,index + 1);\n  }\n  else {\n    println(\"下载完成\");\n  }\n}"
+    },
+    "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+    "Start": 680,
+    "Stop": 1474,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "download"
+}

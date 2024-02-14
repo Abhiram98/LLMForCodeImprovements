@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant code",
+                "Change_Diff": "- testSk=(CompactSketch)Sketch.wrap(directMem);\n- checkByRange(refSk,testSk,u,ordered);",
+                "Description": "The code block where `testSk` is set and `checkByRange` is called twice consecutively with the same parameters is redundant. It does not change the state of the program and can be safely removed.",
+                "Start": 16,
+                "End": 17
+            },
+            {
+                "Improvement": "Improve exception handling",
+                "Change_Diff": "- catch (  final Exception e) {\n-    throw new RuntimeException(e);\n+ } catch (OutOfMemoryError e) {\n+     System.err.println(\"Insufficient memory.\");\n+     e.printStackTrace();\n+ }",
+                "Description": "Rather than catching a generic `Exception`, catch the specific exceptions that can be thrown in the try block. This follows the principle of catching the most specific exceptions first. In this case, we can catch `OutOfMemoryError` which can be thrown by `WritableMemory.allocateDirect(bytes)`.",
+                "Start": 19,
+                "End": 21
+            }
+        ],
+        "Final code": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (OutOfMemoryError e) {\n     System.err.println(\"Insufficient memory.\");\n     e.printStackTrace();\n  }\n}"
+    },
+    "Old_Method": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/CompactSketchTest.java",
+    "Start": 1975,
+    "Stop": 3351,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkHeapifyWrap"
+}

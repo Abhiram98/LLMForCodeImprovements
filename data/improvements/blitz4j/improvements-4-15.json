@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce complexity by dividing the method into smaller, more manageable methods",
+                "Change_Diff": "The entire method would be refactored, so the Change_Diff would include the entire method being replaced with the new methods.",
+                "Description": "This method is doing too many things which makes it hard to understand and maintain. It's best to divide it into several smaller methods each doing one thing. For example, the 'append' method could be broken into 'generateLocationInfo', 'putInBuffer', 'saveThreadLocalInfo', 'handleSummarizeEvent', and 'handleDiscardEvent' methods.",
+                "Start": 1,
+                "End": 51
+            },
+            {
+                "Improvement": "Remove redundant code",
+                "Change_Diff": "- if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n+ boolean shouldSummarizeOverflow = CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName);\n+ if (shouldSummarizeOverflow && (!isBufferPutSuccessful)) {",
+                "Description": "The check for 'CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName)' is done twice. It can be done once and the result can be stored in a variable for further usage.",
+                "Start": 12,
+                "End": 50
+            }
+        ],
+        "Final code": "public void append(final LoggingEvent event) {\n  boolean shouldSummarizeOverflow = CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName);\n  if (shouldSummarizeOverflow) {\n    handleSummarizeEvent(event);\n  } else {\n    handleNormalEvent(event);\n  }\n}\n\nprivate void handleSummarizeEvent(LoggingEvent event) {\n  LocationInfo locationInfo = generateLocationInfo(event);\n  boolean isBufferPutSuccessful = putInBuffer(event);\n  if (!isBufferPutSuccessful) {\n    summarizeEvent(event, locationInfo);\n  }\n}\n\nprivate void handleNormalEvent(LoggingEvent event) {\n  saveThreadLocalInfo(event);\n  boolean isBufferPutSuccessful = putInBuffer(event);\n  if (!isBufferPutSuccessful) {\n    discardEvent(event);\n  }\n}\n\n... // Other helper methods"
+    },
+    "Old_Method": "public void append(final LoggingEvent event){\n  boolean isBufferSpaceAvailable=(batcher.isSpaceAvailable() && (logSummaryMap.size() == 0));\n  boolean isBufferPutSuccessful=false;\n  LocationInfo locationInfo=null;\n  Stopwatch s=locationInfoTimer.start();\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName)) {\n    if (CONFIGURATION.shouldGenerateBlitz4jLocationInfo()) {\n      locationInfo=LoggingContext.getInstance().generateLocationInfo(event);\n    }\n else     if (CONFIGURATION.shouldGenerateLog4jLocationInfo()) {\n      locationInfo=event.getLocationInformation();\n    }\n  }\n  s.stop();\n  if (isBufferSpaceAvailable) {\n    Stopwatch sThreadLocal=saveThreadLocalTimer.start();\n    saveThreadLocalInfo(event);\n    sThreadLocal.stop();\n    isBufferPutSuccessful=putInBuffer(event);\n  }\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    summarizeEventCounter.increment();\n    Stopwatch t=putDiscardMapTimeTracer.start();\n    String loggerKey=event.getLoggerName();\n    if (locationInfo != null) {\n      loggerKey=locationInfo.getClassName() + \"_\" + locationInfo.getLineNumber();\n    }\n    LogSummary summary=(LogSummary)logSummaryMap.get(loggerKey);\n    if (summary == null) {\n      saveThreadLocalInfo(event);\n      summary=new LogSummary(event);\n      logSummaryMap.put(loggerKey,summary);\n    }\n else {\n      summary.add(event);\n    }\n    t.stop();\n  }\n else   if (!CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    discardEventCounter.increment();\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/blitz4j/AsyncAppender.java",
+    "Start": 8263,
+    "Stop": 10867,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "append"
+}

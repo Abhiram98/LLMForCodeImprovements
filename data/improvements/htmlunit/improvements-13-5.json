@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid swallowing exceptions",
+                "Change_Diff": "- catch (  final MalformedURLException e) {\n  }\n+ catch (  final MalformedURLException e) {\n+   e.printStackTrace();\n  }",
+                "Description": "Exceptions should not be swallowed and ignored. It's better to log them, or, if they are expected, add a comment explaining why they are ignored.",
+                "Start": 13,
+                "End": 15
+            },
+            {
+                "Improvement": "Improve code readability",
+                "Change_Diff": "- return ((HtmlPage)getHtmlForm().getPage()).getFullyQualifiedUrl(action).toExternalForm();\n+ HtmlPage htmlPage = (HtmlPage)getHtmlForm().getPage();\n+ URL url = htmlPage.getFullyQualifiedUrl(action);\n+ return url.toExternalForm();",
+                "Description": "Code readability can be improved by breaking down complex one-liners into multiple lines. Breaking down the line that returns the fully qualified URL makes the code easier to read.",
+                "Start": 10,
+                "End": 11
+            }
+        ],
+        "Final code": "/** \n * Returns the value of the property  {@code action}.\n * @return the value of this property\n */\n@JsxGetter public String getAction(){\n  final String action=getHtmlForm().getActionAttribute();\n  if (ATTRIBUTE_NOT_DEFINED == action && !getBrowserVersion().hasFeature(JS_FORM_ACTION_EXPANDURL_NOT_DEFINED)) {\n    return action;\n  }\n  try {\n    HtmlPage htmlPage = (HtmlPage)getHtmlForm().getPage();\n    URL url = htmlPage.getFullyQualifiedUrl(action);\n    return url.toExternalForm();\n  }\n catch (  final MalformedURLException e) {\n    e.printStackTrace();\n  }\n  return action;\n}"
+    },
+    "Old_Method": "/** \n * Returns the value of the property  {@code action}.\n * @return the value of this property\n */\n@JsxGetter public String getAction(){\n  final String action=getHtmlForm().getActionAttribute();\n  if (ATTRIBUTE_NOT_DEFINED == action && !getBrowserVersion().hasFeature(JS_FORM_ACTION_EXPANDURL_NOT_DEFINED)) {\n    return action;\n  }\n  try {\n    return ((HtmlPage)getHtmlForm().getPage()).getFullyQualifiedUrl(action).toExternalForm();\n  }\n catch (  final MalformedURLException e) {\n  }\n  return action;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/html/HTMLFormElement.java",
+    "Start": 6297,
+    "Stop": 6957,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getAction"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Finally block for code cleanup",
+                "Change_Diff": "- } catch (InterruptedException ignore) {\n+ } catch (InterruptedException ignore) {\n+ } finally {\n+   // clean-up code here\n+ }",
+                "Description": "Any code that needs to be executed after a try-catch block regardless of whether an exception was thrown or not, should be placed in a finally block. This ensures that resources are properly cleaned up.",
+                "Start": 10,
+                "End": 76
+            },
+            {
+                "Improvement": "Minimize the scope of variables",
+                "Change_Diff": "- int batchSize=0;\n+ // Remove batchSize declaration here\n... \n+ int batchSize=batch.size(); // Declare batchSize here",
+                "Description": "The variable `batchSize` is declared at the beginning of the method but it is only used inside the second try block. It's more readable and less error-prone to declare variables in the smallest scope in which they're used.",
+                "Start": 4,
+                "End": 76
+            },
+            {
+                "Improvement": "Avoid catching Throwable",
+                "Change_Diff": "- } catch (Throwable e) {\n+ } catch (Exception e) {",
+                "Description": "Catching Throwable can lead to unintended consequences as Throwable includes both Errors and Exceptions. Errors should not be caught as they're thrown by JVM in situations that are fatal and not recoverable.",
+                "Start": 73,
+                "End": 76
+            }
+        ],
+        "Final code": "public void run(){\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      } catch (InterruptedException ignore) {\n      } finally {\n        // clean-up code here\n      }\n      continue;\n    }\n    try {\n      if (batch.size() < stream.maxMessages) {\n        long now=System.nanoTime();\n        final long firstTime=now;\n        do {\n          if (stream.queue.drainTo(batch,stream.maxMessages - batch.size()) <= 0) {\n            long maxWait=firstTime + stream.maxDelay - now;\n            if (maxWait <= 0) {\n              break;\n            }\n            Object nextMessage=null;\n            try {\n              nextMessage=stream.queue.poll(maxWait,TimeUnit.NANOSECONDS);\n            } catch (InterruptedException ignore) {\n            }\n            if (nextMessage == null) {\n              break;\n            }\n            batch.add(nextMessage);\n            now=System.nanoTime();\n          }\n        } while (batch.size() < stream.maxMessages);\n      }\n      int batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        } catch (Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        Stopwatch s=processTimeTracer.start();\n        boolean retryExecution=false;\n        do {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          } catch (RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        } while (retryExecution);\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    } catch (Exception e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        e.printStackTrace();\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Process messages from the queue, after grouping them into batches. \n */\npublic void run(){\n  int batchSize=0;\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    try {\n      if (batch.size() < stream.maxMessages) {\n        long now=System.nanoTime();\n        final long firstTime=now;\n        do {\n          if (stream.queue.drainTo(batch,stream.maxMessages - batch.size()) <= 0) {\n            long maxWait=firstTime + stream.maxDelay - now;\n            if (maxWait <= 0) {\n              break;\n            }\n            Object nextMessage=null;\n            try {\n              nextMessage=stream.queue.poll(maxWait,TimeUnit.NANOSECONDS);\n            }\n catch (            InterruptedException ignore) {\n            }\n            if (nextMessage == null) {\n              break;\n            }\n            batch.add(nextMessage);\n            now=System.nanoTime();\n          }\n        }\n while (batch.size() < stream.maxMessages);\n      }\n      batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        }\n catch (        Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        Stopwatch s=processTimeTracer.start();\n        boolean retryExecution=false;\n        do {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          }\n catch (          RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        }\n while (retryExecution);\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    }\n catch (    Throwable e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        e.printStackTrace();\n      }\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 14783,
+    "Stop": 18103,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "run"
+}

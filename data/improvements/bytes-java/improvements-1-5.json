@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder instead of Appendable",
+                "Change_Diff": "- private <A extends Appendable>A formatHex(A out,byte[] bytes,int fromIndex,int toIndex){\n+ private StringBuilder formatHex(StringBuilder out,byte[] bytes,int fromIndex,int toIndex){",
+                "Description": "StringBuilder is more efficient than Appendable for concatenating strings in Java. It is mutable and hence faster and more memory efficient than String. It is also thread-safe. So, we can replace Appendable with StringBuilder in the method parameters and wherever used in the method",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Combine if-else conditions",
+                "Change_Diff": "- if (between.isEmpty()) {\n    for (int i=1; i < length; i++) {\n        toHexDigits(out,bytes[fromIndex + i]);\n    }\n}\nelse {\n    for (int i=1; i < length; i++) {\n        out.append(between);\n        toHexDigits(out,bytes[fromIndex + i]);\n    }\n}\n+ for (int i=1; i < length; i++) {\n    if (!between.isEmpty()) {\n        out.append(between);\n    }\n    toHexDigits(out,bytes[fromIndex + i]);\n}",
+                "Description": "The two for loops in the if-else condition are almost identical. We can combine them by always appending 'between' to 'out' and checking if 'between' is not empty inside the loop. This will make the code cleaner and more readable",
+                "Start": 8,
+                "End": 17
+            }
+        ],
+        "Final code": "private StringBuilder formatHex(StringBuilder out,byte[] bytes,int fromIndex,int toIndex){\n    Objects.requireNonNull(out,\"out\");\n    Objects.requireNonNull(bytes,\"bytes\");\n    int length=toIndex - fromIndex;\n    if (length > 0) {\n        try {\n            String between=suffix + delimiter + prefix;\n            out.append(prefix);\n            toHexDigits(out,bytes[fromIndex]);\n            for (int i=1; i < length; i++) {\n                if (!between.isEmpty()) {\n                    out.append(between);\n                }\n                toHexDigits(out,bytes[fromIndex + i]);\n            }\n            out.append(suffix);\n        }\n        catch (IOException ioe) {\n            throw new RuntimeException(ioe.getMessage(),ioe);\n        }\n    }\n    return out;\n}"
+    },
+    "Old_Method": "private <A extends Appendable>A formatHex(A out,byte[] bytes,int fromIndex,int toIndex){\n  Objects.requireNonNull(out,\"out\");\n  Objects.requireNonNull(bytes,\"bytes\");\n  int length=toIndex - fromIndex;\n  if (length > 0) {\n    try {\n      String between=suffix + delimiter + prefix;\n      out.append(prefix);\n      toHexDigits(out,bytes[fromIndex]);\n      if (between.isEmpty()) {\n        for (int i=1; i < length; i++) {\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n else {\n        for (int i=1; i < length; i++) {\n          out.append(between);\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n      out.append(suffix);\n    }\n catch (    IOException ioe) {\n      throw new RuntimeException(ioe.getMessage(),ioe);\n    }\n  }\n  return out;\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/EncodingHexJmhBenchmark.java",
+    "Start": 17470,
+    "Stop": 18670,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "formatHex"
+}

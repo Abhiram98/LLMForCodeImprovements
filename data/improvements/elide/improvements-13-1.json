@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method parameters instead of using instance variables",
+                "Change_Diff": "- FilterExpression filterExpression=entityProjection.getFilterExpression();\n+ private void splitFilters(EntityProjection entityProjection) {\n+    FilterExpression filterExpression=entityProjection.getFilterExpression();",
+                "Description": "Instead of using the instance variable `entityProjection`, pass it as a parameter to the method. This increases the reusability of the method and makes the code easier to understand.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Use Optional instead of null check for FilterExpression",
+                "Change_Diff": "- if (filterExpression == null) {\n-   whereFilter=null;\n-   havingFilter=null;\n-   return;\n+ Optional<FilterExpression> filterExpressionOptional = Optional.ofNullable(filterExpression);\n+ if (!filterExpressionOptional.isPresent()) {\n+   whereFilter=null;\n+   havingFilter=null;\n+   return;\n+ }",
+                "Description": "Instead of checking if `filterExpression` is null, use `Optional` to simplify the nullability handling in the code.",
+                "Start": 8,
+                "End": 11
+            }
+        ],
+        "Final code": "private void splitFilters(EntityProjection entityProjection){\n  Optional<FilterExpression> filterExpressionOptional = Optional.ofNullable(entityProjection.getFilterExpression());\n  if (!filterExpressionOptional.isPresent()) {\n    whereFilter=null;\n    havingFilter=null;\n    return;\n  }\n  SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints constraints=filterExpressionOptional.get().accept(visitor);\n  whereFilter=constraints.getWhereExpression();\n  havingFilter=constraints.getHavingFilterExpression();\n}"
+    },
+    "Old_Method": "/** \n * Gets whereFilter and havingFilter based on provided filter expression from  {@link EntityProjection}.\n */\nprivate void splitFilters(){\n  FilterExpression filterExpression=entityProjection.getFilterExpression();\n  if (filterExpression == null) {\n    whereFilter=null;\n    havingFilter=null;\n    return;\n  }\n  SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints constraints=filterExpression.accept(visitor);\n  whereFilter=constraints.getWhereExpression();\n  havingFilter=constraints.getHavingExpression();\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/EntityProjectionTranslator.java",
+    "Start": 3706,
+    "Stop": 4367,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "splitFilters"
+}

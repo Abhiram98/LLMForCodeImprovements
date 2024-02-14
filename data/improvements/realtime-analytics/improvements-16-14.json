@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch block for error handling",
+                "Change_Diff": "- byte version=payload.get();\n+ try {\n+   byte version=payload.get();\n+   ... // rest of the code\n+ } catch (BufferUnderflowException e) {\n+   // handle exception\n+ }",
+                "Description": "ByteBuffer operations like get(), getInt(), and decode() can throw exceptions. It is better to catch these exceptions and handle them properly.",
+                "Start": 6,
+                "End": 34
+            },
+            {
+                "Improvement": "Reduce code duplication by creating a method for SubSession creation",
+                "Change_Diff": "- SubSession sub=new SubSession();\n- sub.setIdentifier(encoder.decode(payload));\n- ... // rest of the code\n+ SubSession sub = createSubSession(payload);",
+                "Description": "The code for creating a SubSession is duplicated. This can be avoided by creating a separate method for SubSession creation and calling it in the loop.",
+                "Start": 23,
+                "End": 34
+            },
+            {
+                "Improvement": "Use constant for version checking",
+                "Change_Diff": "- if (version != SESSION_VERSION) {\n+ if (version != Constants.SESSION_VERSION) {",
+                "Description": "Instead of using a hardcoded value for session version, it's better to use a constant. It makes the code easier to maintain, especially when the version number changes in the future.",
+                "Start": 6,
+                "End": 6
+            }
+        ],
+        "Final code": "public boolean setSessionPayload(Session session,ByteBuffer payload) {\n  try {\n    byte version=payload.get();\n    if (version != Constants.SESSION_VERSION) {\n      return false;\n    }\n    ... // rest of the code\n    if (subSize != -1) {\n      List<SubSession> subSessions=new ArrayList<SubSession>(subSize);\n      for (int i=0; i < subSize; i++) {\n        SubSession sub = createSubSession(payload);\n        subSessions.add(sub);\n      }\n      session.setSubSessions(subSessions);\n    }\n    return true;\n  } catch (BufferUnderflowException e) {\n    // handle exception\n  }\n}\n\nprivate SubSession createSubSession(ByteBuffer payload) {\n  SubSession sub=new SubSession();\n  sub.setIdentifier(encoder.decode(payload));\n  ... // rest of the code\n  return sub;\n}"
+    },
+    "Old_Method": "/** \n * Deserialize the payload and set the content to the session. Return false when version did not match.\n * @param session\n * @param metaData\n * @return\n */\npublic boolean setSessionPayload(Session session,ByteBuffer payload){\n  byte version=payload.get();\n  if (version != SESSION_VERSION) {\n    return false;\n  }\n  session.setFirstEventTimestamp(unsignedLongEncoder.decode(payload));\n  session.setCreationTime(unsignedLongEncoder.decode(payload));\n  session.setLastModifiedTime(unsignedLongEncoder.decode(payload));\n  session.setExpirationTime(unsignedLongEncoder.decode(payload));\n  session.setFirstExpirationTime(unsignedLongEncoder.decode(payload));\n  session.setTtl(unsignedIntEncoder.decode(payload));\n  session.setEventCount(unsignedIntEncoder.decode(payload));\n  session.setBotEventCount(unsignedIntEncoder.decode(payload));\n  session.setBotType(unsignedIntEncoder.decode(payload));\n  session.setVersion(unsignedIntEncoder.decode(payload));\n  session.setAffinityKey(encoder.decode(payload));\n  session.setMetadataLastModifiedTime(unsignedLongEncoder.decode(payload));\n  session.setRemoteServerInfo(encoder.decode(payload));\n  session.setDynamicAttributes(bytePrimitiveEncoder.decode(payload));\n  int subSize=payload.getInt();\n  if (subSize != -1) {\n    List<SubSession> subSessions=new ArrayList<SubSession>(subSize);\n    for (int i=0; i < subSize; i++) {\n      SubSession sub=new SubSession();\n      sub.setIdentifier(encoder.decode(payload));\n      sub.setName(encoder.decode(payload));\n      sub.setFirstEventTimestamp(unsignedLongEncoder.decode(payload));\n      sub.setCreationTime(unsignedLongEncoder.decode(payload));\n      sub.setLastModifiedTime(unsignedLongEncoder.decode(payload));\n      sub.setExpirationTime(unsignedLongEncoder.decode(payload));\n      sub.setTtl(unsignedIntEncoder.decode(payload));\n      sub.setEventCount(payload.getInt());\n      sub.setDynamicAttributes(bytePrimitiveEncoder.decode(payload));\n      sub.setInitialAttributes(bytePrimitiveEncoder.decode(payload));\n      subSessions.add(sub);\n    }\n    session.setSubSessions(subSessions);\n  }\n  return true;\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/util/BinaryFormatSerializer.java",
+    "Start": 6177,
+    "Stop": 8633,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "setSessionPayload"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional instead of null checks",
+                "Change_Diff": "- if (transferInSession == null) {\n+ Optional<Session> transferInSessionOpt = Optional.ofNullable(transferInSession);\n+ if (!transferInSessionOpt.isPresent()) {",
+                "Description": "Instead of checking if a Session object is null, wrap it in an Optional. This can help avoid Null Pointer Exceptions.",
+                "Start": 5,
+                "End": 7
+            },
+            {
+                "Improvement": "Use try-catch for parsing long from string",
+                "Change_Diff": "- if (Long.parseLong(s.split(\":\")[1]) == transferInSession.getExpirationTime()) {\n+ try {\n+   if (Long.parseLong(s.split(\":\")[1]) == transferInSession.getExpirationTime()) {\n+   }\n+ } catch (NumberFormatException e) {\n+   // Handle exception\n+ }",
+                "Description": "Instead of simply using Long.parseLong without any checks, wrap it in a try-catch block to catch any potential NumberFormatException.",
+                "Start": 13,
+                "End": 13
+            },
+            {
+                "Improvement": "Consolidate duplicate code blocks",
+                "Change_Diff": "- if (session.getFirstEventTimestamp() != transferInSession.getFirstEventTimestamp()) {\n-   transferInSession.setIdentifier(identifier);\n-   transferInSession.setType(sessionizer.getType());\n-   fireSessionEndMarkerEvent(transferInSession,sessionizer);\n+ checkAndUpdateSession(session, transferInSession, identifier, sessionizer);\n\n...\n\n- if (transferInSession.getFirstEventTimestamp() != localSession.getFirstEventTimestamp()) {\n-   transferInSession.setIdentifier(identifier);\n-   transferInSession.setType(sessionizer.getType());\n-   fireSessionEndMarkerEvent(transferInSession,sessionizer);\n+ checkAndUpdateSession(localSession, transferInSession, identifier, sessionizer);",
+                "Description": "The code blocks for checking first event timestamp and firing session end marker event are duplicated. These can be consolidated into a single method to reduce redundancy.",
+                "Start": 28,
+                "End": 43
+            }
+        ],
+        "Final code": "private void handleTransferedSession(String identifier, String uid, JetstreamEvent event, Sessionizer sessionizer) {\n  String ak=(String)event.get(AFFINITY_KEY);\n  Session transferInSession=reconstructSession(event,uid);\n  Optional<Session> transferInSessionOpt = Optional.ofNullable(transferInSession);\n  if (!transferInSessionOpt.isPresent()) {\n    return;\n  }\n  event.put(Constants.EVENT_PAYLOAD_SESSION_OBJ,transferInSession);\n  sessionizer.updateSessionId(transferInSession);\n  if (transferInSession.getExpirationTime() <= System.currentTimeMillis() && recentlyExpiredSessions.containsKey(transferInSession.getSessionId())) {\n    String s=recentlyExpiredSessions.get(transferInSession.getSessionId());\n    try {\n      if (Long.parseLong(s.split(\":\")[1]) == transferInSession.getExpirationTime()) {\n        return;\n      }\n    } catch (NumberFormatException e) {\n      // Handle exception\n    }\n  }\n  Session localSession=localSessionCache.get(uid);\n  if (localSession == null && !pendingReadEvents.containsKey(uid)) {\n    RemoteStoreProvider remoteDAO=provider;\n    if (remoteDAO != null && remoteDAO.asyncLoadSupport()) {\n      asyncLoadFromRemoteStore(event,uid,remoteDAO,ak);\n    }\n else     if (remoteDAO != null) {\n      Session session=remoteDAO.load(uid);\n      if (session == null) {\n        session=transferInSession;\n        if (session != null) {\n          updateRemoteSession(uid,identifier,session,sessionizer);\n        }\n      }\n else {\n        checkAndUpdateSession(session, transferInSession, identifier, sessionizer);\n      }\n    }\n else {\n      updateRemoteSession(uid,identifier,transferInSession,sessionizer);\n    }\n  }\n else   if (localSession != null) {\n    checkAndUpdateSession(localSession, transferInSession, identifier, sessionizer);\n  }\n}\n\nprivate void checkAndUpdateSession(Session session, Session transferInSession, String identifier, Sessionizer sessionizer) {\n  if (session.getFirstEventTimestamp() != transferInSession.getFirstEventTimestamp()) {\n    transferInSession.setIdentifier(identifier);\n    transferInSession.setType(sessionizer.getType());\n    fireSessionEndMarkerEvent(transferInSession,sessionizer);\n  }\n}"
+    },
+    "Old_Method": "private void handleTransferedSession(String identifier,String uid,JetstreamEvent event,Sessionizer sessionizer){\n  String ak=(String)event.get(AFFINITY_KEY);\n  Session transferInSession=reconstructSession(event,uid);\n  if (transferInSession == null) {\n    return;\n  }\n  event.put(Constants.EVENT_PAYLOAD_SESSION_OBJ,transferInSession);\n  sessionizer.updateSessionId(transferInSession);\n  if (transferInSession.getExpirationTime() <= System.currentTimeMillis() && recentlyExpiredSessions.containsKey(transferInSession.getSessionId())) {\n    String s=recentlyExpiredSessions.get(transferInSession.getSessionId());\n    if (Long.parseLong(s.split(\":\")[1]) == transferInSession.getExpirationTime()) {\n      return;\n    }\n  }\n  Session localSession=localSessionCache.get(uid);\n  if (localSession == null && !pendingReadEvents.containsKey(uid)) {\n    RemoteStoreProvider remoteDAO=provider;\n    if (remoteDAO != null && remoteDAO.asyncLoadSupport()) {\n      asyncLoadFromRemoteStore(event,uid,remoteDAO,ak);\n    }\n else     if (remoteDAO != null) {\n      Session session=remoteDAO.load(uid);\n      if (session == null) {\n        session=transferInSession;\n        if (session != null) {\n          updateRemoteSession(uid,identifier,session,sessionizer);\n        }\n      }\n else {\n        if (session.getFirstEventTimestamp() != transferInSession.getFirstEventTimestamp()) {\n          transferInSession.setIdentifier(identifier);\n          transferInSession.setType(sessionizer.getType());\n          fireSessionEndMarkerEvent(transferInSession,sessionizer);\n        }\n      }\n    }\n else {\n      updateRemoteSession(uid,identifier,transferInSession,sessionizer);\n    }\n  }\n else   if (localSession != null) {\n    if (transferInSession.getFirstEventTimestamp() != localSession.getFirstEventTimestamp()) {\n      transferInSession.setIdentifier(identifier);\n      transferInSession.setType(sessionizer.getType());\n      fireSessionEndMarkerEvent(transferInSession,sessionizer);\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 28078,
+    "Stop": 31334,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "handleTransferedSession"
+}

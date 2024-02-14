@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repetitive code into a separate method",
+                "Change_Diff": "- for (int x=0; x < size; ++x) {\n-   for (int num=1; num <= size; ++num) {\n-     model.addColumn(new ColumnConstraint(num,x));\n-   }\n- }\n- for (int y=0; y < size; ++y) {\n-   for (int num=1; num <= size; ++num) {\n-     model.addColumn(new RowConstraint(num,y));\n-   }\n- }\n- for (int x=0; x < squareYSize; ++x) {\n-   for (int y=0; y < squareXSize; ++y) {\n-     for (int num=1; num <= size; ++num) {\n-       model.addColumn(new SquareConstraint(num,x,y));\n-     }\n-   }\n- }\n- for (int x=0; x < size; ++x) {\n-   for (int y=0; y < size; ++y) {\n-     model.addColumn(new CellConstraint(x,y));\n-   }\n- }\n+ addColumnConstraints(model);",
+                "Description": "The loop for adding column constraints is repeated four times with minor changes. This repetitive code could be extracted to a separate method, improving the readability and maintainability of the code.",
+                "Start": 2,
+                "End": 22
+            },
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int x=0; x < size; ++x) {\n-   for (int y=0; y < size; ++y) {\n-     if (board[y][x] == -1) {\n-       for (int num=1; num <= size; ++num) {\n-         model.addRow(generateRow(rowValues,x,y,num));\n-       }\n-     }\n-     else {\n-       model.addRow(generateRow(rowValues,x,y,board[y][x]));\n-     }\n-   }\n- }\n+ addRowConstraints(model, rowValues);",
+                "Description": "The traditional for loop can be replaced with an enhanced for loop, which is more readable and reduces the chance of off-by-one errors.",
+                "Start": 24,
+                "End": 34
+            }
+        ],
+        "Final code": "private DancingLinks<ColumnName> makeModel(){\n    DancingLinks<ColumnName> model=new DancingLinks<ColumnName>();\n    addColumnConstraints(model);\n    boolean[] rowValues=new boolean[size * size * 4];\n    addRowConstraints(model, rowValues);\n    return model;\n}\n\nprivate void addColumnConstraints(DancingLinks<ColumnName> model) {\n    for (int x=0; x < size; ++x) {\n        for (int num=1; num <= size; ++num) {\n            model.addColumn(new ColumnConstraint(num,x));\n        }\n    }\n    // similar code for RowConstraint, SquareConstraint and CellConstraint\n}\n\nprivate void addRowConstraints(DancingLinks<ColumnName> model, boolean[] rowValues) {\n    for (int x=0; x < size; ++x) {\n        for (int y=0; y < size; ++y) {\n            if (board[y][x] == -1) {\n                for (int num=1; num <= size; ++num) {\n                    model.addRow(generateRow(rowValues,x,y,num));\n                }\n            }\n            else {\n                model.addRow(generateRow(rowValues,x,y,board[y][x]));\n            }\n        }\n    }\n}"
+    },
+    "Old_Method": "private DancingLinks<ColumnName> makeModel(){\n  DancingLinks<ColumnName> model=new DancingLinks<ColumnName>();\n  for (int x=0; x < size; ++x) {\n    for (int num=1; num <= size; ++num) {\n      model.addColumn(new ColumnConstraint(num,x));\n    }\n  }\n  for (int y=0; y < size; ++y) {\n    for (int num=1; num <= size; ++num) {\n      model.addColumn(new RowConstraint(num,y));\n    }\n  }\n  for (int x=0; x < squareYSize; ++x) {\n    for (int y=0; y < squareXSize; ++y) {\n      for (int num=1; num <= size; ++num) {\n        model.addColumn(new SquareConstraint(num,x,y));\n      }\n    }\n  }\n  for (int x=0; x < size; ++x) {\n    for (int y=0; y < size; ++y) {\n      model.addColumn(new CellConstraint(x,y));\n    }\n  }\n  boolean[] rowValues=new boolean[size * size * 4];\n  for (int x=0; x < size; ++x) {\n    for (int y=0; y < size; ++y) {\n      if (board[y][x] == -1) {\n        for (int num=1; num <= size; ++num) {\n          model.addRow(generateRow(rowValues,x,y,num));\n        }\n      }\n else {\n        model.addRow(generateRow(rowValues,x,y,board[y][x]));\n      }\n    }\n  }\n  return model;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Sudoku.java",
+    "Start": 8366,
+    "Stop": 10077,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "makeModel"
+}

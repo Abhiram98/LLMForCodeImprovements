@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Consolidate try-catch blocks",
+                "Change_Diff": "- try {\n...\n} catch (final RuntimeException e) {\n...\n} finally {\n...\n}",
+                "Description": "The nested try-catch blocks can be consolidated into a single try-catch block to improve readability and maintainability. This can be achieved by catching multiple exceptions in a single catch block.",
+                "Start": 6,
+                "End": 39
+            },
+            {
+                "Improvement": "Use loggers instead of System.out.println",
+                "Change_Diff": "- System.out.println(\"Remaining objects:\");\n- System.out.println(object); \n+ logger.info(\"Remaining objects:\");\n+ logger.info(object);",
+                "Description": "System.out.println is not recommended in production code. Use a logger to log the messages. This way, you have control over which log messages to output by setting the level in the logger configuration (error, debug, info, etc). It also helps in writing log messages in various outputs (console, file, etc).",
+                "Start": 28,
+                "End": 29
+            }
+        ],
+        "Final code": "@Test public void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n    this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n    cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n    this.retry(context,() -> {\n      final long count=this.countBucket(bucketName);\n      if (count != 0) {\n        throw new RuntimeException(\"there are \" + count + \" infected files left\");\n      }\n      return false;\n    }\n);\n    this.deleteBucket(context,bucketName);\n    this.deleteStack(context,stackName);\n    this.deleteStack(context,vpcStackName);\n  }\n catch (final RuntimeException e) {\n    final List<String> objects=this.listBucket(bucketName,100);\n    logger.info(\"Remaining objects:\");\n    for (final String object : objects) {\n      logger.info(object);\n    }\n    throw e;\n  }\n finally {\n    this.deleteBucket(context,bucketName);\n    this.deleteStack(context,stackName);\n    this.deleteStack(context,vpcStackName);\n  }\n}"
+    },
+    "Old_Method": "@Test public void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n        this.retry(context,() -> {\n          final long count=this.countBucket(bucketName);\n          if (count != 0) {\n            throw new RuntimeException(\"there are \" + count + \" infected files left\");\n          }\n          return false;\n        }\n);\n      }\n catch (      final RuntimeException e) {\n        final List<String> objects=this.listBucket(bucketName,100);\n        System.out.println(\"Remaining objects:\");\n        for (        final String object : objects) {\n          System.out.println(object);\n        }\n        throw e;\n      }\n finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestRealworldFiles.java",
+    "Start": 247,
+    "Stop": 2293,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "test"
+}

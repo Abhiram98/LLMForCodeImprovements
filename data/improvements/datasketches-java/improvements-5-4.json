@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants for magic numbers",
+                "Change_Diff": "- int k=256;\n+ final int K_VALUE = 256;\n\n- int n=1000000;\n+ final int N_VALUE = 1000000;\n\n- double nominal=(1e6 * q) / 100.0;\n+ final double NOMINAL_VALUE = (1e6 * q) / 100.0;\n\n- assertTrue(reported >= (nominal - 10000.0));\n+ final double LOWER_BOUND = nominal - 10000.0;\n\n- assertTrue(reported <= (nominal + 10000.0));\n+ final double UPPER_BOUND = nominal + 10000.0;\n\n- assertEquals(result.getRank(500000),0.5,0.01);\n+ final double EXPECTED_RANK = 0.5;\n+ final double DELTA = 0.01;\n+ assertEquals(result.getRank(500000), EXPECTED_RANK, DELTA);",
+                "Description": "Replace magic numbers like 256, 1000000, 10000.0, 0.5, 0.01, etc. with named constants to improve code readability and maintainability.",
+                "Start": 2,
+                "End": 38
+            },
+            {
+                "Improvement": "Extract duplicate code into a method",
+                "Change_Diff": "- assertTrue(reported >= (nominal - 10000.0));\n- assertTrue(reported <= (nominal + 10000.0));\n+ assertInRange(reported, nominal - 10000.0, nominal + 10000.0);\n\n- assertTrue(subtotal >= (phi - 0.01));\n- assertTrue(subtotal <= (phi + 0.01));\n+ assertInRange(subtotal, phi - 0.01, phi + 0.01);",
+                "Description": "There are several places in the code where the same logic is repeated for asserting within a range. This could be extracted into a separate method, simplifying the logic and reducing duplication.",
+                "Start": 32,
+                "End": 38
+            }
+        ],
+        "Final code": "@Test public void checkEndToEnd(){\n  final int K_VALUE = 256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(K_VALUE).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(K_VALUE).build();\n  final int N_VALUE = 1000000;\n  for (int item=N_VALUE; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    }\n else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),N_VALUE);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  int numPhiValues=99;\n  double[] phiArr=new double[numPhiValues];\n  for (int q=1; q <= 99; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  for (int q=1; q <= 99; q++) {\n    final double NOMINAL_VALUE = (1e6 * q) / 100.0;\n    double reported=splitPoints[q - 1];\n    final double LOWER_BOUND = NOMINAL_VALUE - 10000.0;\n    final double UPPER_BOUND = NOMINAL_VALUE + 10000.0;\n    assertInRange(reported, LOWER_BOUND, UPPER_BOUND);\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  double subtotal=0.0;\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal+=pmfResult[q - 1];\n    assertInRange(subtotal, phi - 0.01, phi + 0.01);\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal=cdfResult[q - 1];\n    assertInRange(subtotal, phi - 0.01, phi + 0.01);\n  }\n  final double EXPECTED_RANK = 0.5;\n  final double DELTA = 0.01;\n  assertEquals(result.getRank(500000), EXPECTED_RANK, DELTA);\n}\n\nprivate void assertInRange(double value, double lower, double upper) {\n  assertTrue(value >= lower);\n  assertTrue(value <= upper);\n}"
+    },
+    "Old_Method": "@Test public void checkEndToEnd(){\n  int k=256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(k).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(k).build();\n  int n=1000000;\n  for (int item=n; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    }\n else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),n);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  int numPhiValues=99;\n  double[] phiArr=new double[numPhiValues];\n  for (int q=1; q <= 99; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  for (int q=1; q <= 99; q++) {\n    double nominal=(1e6 * q) / 100.0;\n    double reported=splitPoints[q - 1];\n    assertTrue(reported >= (nominal - 10000.0));\n    assertTrue(reported <= (nominal + 10000.0));\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  double subtotal=0.0;\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal+=pmfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal=cdfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  assertEquals(result.getRank(500000),0.5,0.01);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/HeapUpdateDoublesSketchTest.java",
+    "Start": 2693,
+    "Stop": 4396,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkEndToEnd"
+}

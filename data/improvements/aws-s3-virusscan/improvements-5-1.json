@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Improve method readability by eliminating the else block",
+                "Change_Diff": "- if (env == null) {\n-   if (key.defaultValue == null) {\n-     throw new RuntimeException(\"config not found: \" + key.name);\n-   }\n- else {\n-     return key.defaultValue;\n-   }\n- }\n- else {\n-   return env;\n- }",
+                "Description": "This improvement simplifies the control flow and improves the readability of the code. We can make use of the 'return' statement to exit the method as soon as we know the result, which eliminates the need for 'else' statements when 'if' conditions are not met.",
+                "Start": 2,
+                "End": 11
+            },
+            {
+                "Improvement": "Use Objects.requireNonNullElse method",
+                "Change_Diff": "- if (key.defaultValue == null) {\n-   throw new RuntimeException(\"config not found: \" + key.name);\n- }",
+                "Description": "Java 9 introduced a new method 'requireNonNullElse' in the Objects class that returns the first argument if it is non-null and otherwise returns the second argument. This can be used to simplify the code.",
+                "Start": 2,
+                "End": 11
+            }
+        ],
+        "Final code": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env != null) {\n    return env;\n  }\n  if (key.defaultValue != null) {\n    return key.defaultValue;\n  }\n  throw new RuntimeException(\"config not found: \" + key.name);\n}"
+    },
+    "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+    "Start": 813,
+    "Stop": 1187,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "get"
+}

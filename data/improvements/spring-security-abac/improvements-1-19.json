@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder for String concatenation",
+                "Change_Diff": "- String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n+ StringBuilder sb = new StringBuilder(policyName).append(jsonKeyValuePairs).append(getTemplateDataAsAString(templateData)).trim();\n+ String key = Base64.getEncoder().encodeToString(sb.toString().getBytes());",
+                "Description": "Instead of using '+' for string concatenation, use StringBuilder. The '+' operator creates a new object every time it is used, while StringBuilder appends to the same object, thus saving memory.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Check for null or empty before processing the data",
+                "Change_Diff": "- String xacmlRequest;\n+ String xacmlRequest = new JSONObject(out.toString()).get(policyName).toString();\n+ if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n+     throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n+ }",
+                "Description": "Before processing the xacmlRequest, check if it is null or empty. This ensures that you don't have to process the data if it's not valid, thus saving resources.",
+                "Start": 19,
+                "End": 19
+            }
+        ],
+        "Final code": "@Override public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n  Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n  StringBuilder sb = new StringBuilder(policyName).append(jsonKeyValuePairs).append(getTemplateDataAsAString(templateData)).trim();\n  String key = Base64.getEncoder().encodeToString(sb.toString().getBytes());\n  String cachedRequest=this.requestBuilderCache.get(key);\n  if (cachedRequest != null) {\n    return cachedRequest;\n  }\n  String xacmlRequest;\n  try (StringWriter out=new StringWriter()){\n    Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData,out);\n    xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n    if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n        throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n    }\n    out.flush();\n  }\n catch (  IOException|TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n  }\n  return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}"
+    },
+    "Old_Method": "@Override public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n  Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n  String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n  String cachedRequest=this.requestBuilderCache.get(key);\n  if (cachedRequest != null) {\n    return cachedRequest;\n  }\n  String xacmlRequest;\n  try (StringWriter out=new StringWriter()){\n    Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData,out);\n    xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n    out.flush();\n  }\n catch (  IOException|TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n  }\n  if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n    throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n  }\n  return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 1262,
+    "Stop": 2829,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "createAuthRequest"
+}

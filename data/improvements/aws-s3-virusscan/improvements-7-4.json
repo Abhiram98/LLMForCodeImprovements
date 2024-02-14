@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor code to avoid deep nesting",
+                "Change_Diff": "- try {\n- ...\n- } finally {\n- ...\n- }",
+                "Description": "Deeply nested code can be difficult to read and maintain. Refactoring the code to reduce the level of nesting can make it more readable and maintainable.",
+                "Start": 6,
+                "End": 44
+            },
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n+ final String virtualPrivateCloudStackName=\"vpc-2azs-\" + this.random8String();",
+                "Description": "Descriptive variable names make the code easier to understand and maintain. Instead of using abbreviations like 'vpc', use the full word to make the variable's purpose clear.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Avoid using 'this' keyword unnecessarily",
+                "Change_Diff": "- this.createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");\n+ createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");",
+                "Description": "In Java, 'this' keyword is used to refer to the current object. It's not necessary to use 'this' keyword unless you want to resolve ambiguity between instance variables and local variables.",
+                "Start": 3,
+                "End": 44
+            }
+        ],
+        "Final code": "public void testWithFileDeletion() {\n  final Context context = new Context();\n  final String virtualPrivateCloudStackName = \"vpc-2azs-\" + random8String();\n  final String stackName = \"s3-virusscan-\" + random8String();\n  final String bucketName = \"s3-virusscan-\" + random8String();\n  try {\n    createWiddixStack(context, virtualPrivateCloudStackName, \"vpc/vpc-2azs.yaml\");\n  } finally {\n    deleteStack(context, virtualPrivateCloudStackName);\n  }\n  try {\n    createStack(context, stackName, \"template.yaml\", new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(virtualPrivateCloudStackName));\n  } finally {\n    deleteStack(context, stackName);\n  }\n  try {\n    createBucketWithSQSNotification(bucketName, getStackOutputValue(stackName, \"ScanQueueArn\"));\n    createObject(bucketName, \"no-virus.txt\", \"not a virus\");\n    createObject(bucketName, \"virus.txt\", \"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n    retry(context, () -> doesObjectExist(bucketName, \"virus.txt\") ? false : throw new RuntimeException(\"virus.txt must be deleted\"));\n    retry(context, () -> doesObjectExist(bucketName, \"no-virus.txt\") ? true : throw new RuntimeException(\"no-virus.txt must be existing\"));\n    deleteObject(context, bucketName, \"no-virus.txt\");\n  } finally {\n    deleteBucket(context, bucketName);\n  }\n}"
+    },
+    "Old_Method": "@Test public void testWithFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n        this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"virus.txt\") == true) {\n            throw new RuntimeException(\"virus.txt must be deleted\");\n          }\n          return false;\n        }\n);\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"no-virus.txt\") == false) {\n            throw new RuntimeException(\"no-virus.txt must be existing\");\n          }\n          return true;\n        }\n);\n        this.deleteObject(context,bucketName,\"no-virus.txt\");\n      }\n  finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestEicarFile.java",
+    "Start": 3987,
+    "Stop": 6025,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "testWithFileDeletion"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract configuration update to a separate method",
+                "Change_Diff": "- int readQueryTimeout=config.getReadQueryTimeout();\n... // All the config update code\n- config.setRawEventDefinition(newBean.getRawEventDefinition());\n+ updateConfig(newBean);",
+                "Description": "The processApplicationEvent method is too large and does a lot of things. To make the code cleaner, easier to read and maintain, the configuration update can be moved to a separate method.",
+                "Start": 10,
+                "End": 28
+            },
+            {
+                "Improvement": "Extract rollback logic to a separate method",
+                "Change_Diff": "- for (SessionizerRunnable task : tasks) {\n... // All the rollback logic code\n- config.setRawEventDefinition(rawEventDefinition);\n+ rollbackConfig();",
+                "Description": "The processApplicationEvent method is too large and does a lot of things. To make the code cleaner, easier to read and maintain, the rollback logic can be moved to a separate method.",
+                "Start": 31,
+                "End": 47
+            },
+            {
+                "Improvement": "Use try-with-resources to ensure the resources are closed",
+                "Change_Diff": "- try {\n... // code\n- finally {\n+ try (CompiledConfig compiledConfig = new CompiledConfig(config, task)) {",
+                "Description": "In the current code, if the code fails the resources are not closed which could lead to memory leaks. By using try-with-resources, it will ensure that the resources are closed automatically after being used.",
+                "Start": 29,
+                "End": 30
+            }
+        ],
+        "Final code": "@Override protected void processApplicationEvent(ApplicationEvent event){\n  if (event instanceof ContextBeanChangedEvent) {\n    ContextBeanChangedEvent bcInfo=(ContextBeanChangedEvent)event;\n    SessionizerConfig newBean=(SessionizerConfig)(bcInfo.getApplicationContext().getBean(config.getBeanName()));\n    if (newBean != lastConfig) {\n      lastConfig=newBean;\n      SessionizerConfigValidator validator=new SessionizerConfigValidator(config,newBean);\n      List<String> errors=validator.validate();\n      if (!errors.isEmpty()) {\n        throw new IllegalArgumentException(\"Config error: \" + errors);\n      }\n      updateConfig(newBean);\n      boolean isSuccess=false;\n      try {\n        for (SessionizerRunnable task : tasks) {\n          try (CompiledConfig compiledConfig = new CompiledConfig(config, task)) {\n            task.newCompiledConfig = compiledConfig;\n          }\n        }\n        isSuccess=true;\n      } finally {\n        if (!isSuccess) {\n          rollbackConfig();\n        }\n      }\n      refreshConfig();\n    }\n  }\n}\n\nprivate void updateConfig(SessionizerConfig newBean) {\n  // All the config update code\n}\n\nprivate void rollbackConfig() {\n  // All the rollback logic code\n}"
+    },
+    "Old_Method": "@Override protected void processApplicationEvent(ApplicationEvent event){\n  if (event instanceof ContextBeanChangedEvent) {\n    ContextBeanChangedEvent bcInfo=(ContextBeanChangedEvent)event;\n    SessionizerConfig newBean=(SessionizerConfig)(bcInfo.getApplicationContext().getBean(config.getBeanName()));\n    if (newBean != lastConfig) {\n      lastConfig=newBean;\n      SessionizerConfigValidator validator=new SessionizerConfigValidator(config,newBean);\n      List<String> errors=validator.validate();\n      if (!errors.isEmpty()) {\n        throw new IllegalArgumentException(\"Config error: \" + errors);\n      }\n      int readQueryTimeout=config.getReadQueryTimeout();\n      boolean enableReadOptimization=config.getEnableReadOptimization();\n      int maxIdleTime=config.getMaxIdleTime();\n      List<SessionProfile> mainSessionProfiles=config.getMainSessionProfiles();\n      EPL epl=config.getEpl();\n      List<String> imports=config.getImports();\n      EsperDeclaredEvents rawEventDefinition=config.getRawEventDefinition();\n      config.setReadQueryTimeout(newBean.getReadQueryTimeout());\n      config.setEnableReadOptimization(newBean.getEnableReadOptimization());\n      config.setMaxIdleTime(newBean.getMaxIdleTime());\n      config.setMainSessionProfiles(newBean.getMainSessionProfiles());\n      config.setEpl(newBean.getEpl());\n      config.setImports(newBean.getImports());\n      config.setRawEventDefinition(newBean.getRawEventDefinition());\n      boolean isSuccess=false;\n      try {\n        for (        SessionizerRunnable task : tasks) {\n          task.newCompiledConfig=new CompiledConfig(config,task);\n        }\n        isSuccess=true;\n      }\n  finally {\n        if (!isSuccess) {\n          for (          SessionizerRunnable task : tasks) {\n            if (task.newCompiledConfig != null) {\n              task.newCompiledConfig.destroy();\n              task.newCompiledConfig=null;\n            }\n          }\n          config.setReadQueryTimeout(readQueryTimeout);\n          config.setEnableReadOptimization(enableReadOptimization);\n          config.setMaxIdleTime(maxIdleTime);\n          config.setMainSessionProfiles(mainSessionProfiles);\n          config.setEpl(epl);\n          config.setImports(imports);\n          config.setRawEventDefinition(rawEventDefinition);\n        }\n      }\n      refreshConfig();\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 70925,
+    "Stop": 73856,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "processApplicationEvent"
+}

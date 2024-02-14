@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid unnecessary use of StringUtils for null/empty checks",
+                "Change_Diff": "- if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n+ if (oAuth2UserInfo.getEmail() == null || oAuth2UserInfo.getEmail().isEmpty()) {",
+                "Description": "Java provides built-in methods for checking null or empty strings. We can use these methods instead of external libraries such as StringUtils, which can improve performance and remove unnecessary dependencies.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Avoid unnecessary boxing of Boolean",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n+ if (userOptional.isPresent) {",
+                "Description": "In the conditional check, there is no need to box the boolean primitive into a Boolean object. Using the primitive directly can improve performance.",
+                "Start": 8,
+                "End": 10
+            },
+            {
+                "Improvement": "Use try-catch block for handling exceptions",
+                "Change_Diff": "+ try {\n <existing code> \n+ } catch (OAuth2AuthenticationProcessingException e) {\n+     e.printStackTrace();\n+ }",
+                "Description": "Consider wrapping the code blocks that could potentially throw exceptions in a try-catch block. This way, you can handle any exceptions that might occur and also provide more informative error messages to the user.",
+                "Start": 1,
+                "End": 18
+            }
+        ],
+        "Final code": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  try {\n    OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n    if (oAuth2UserInfo.getEmail() == null || oAuth2UserInfo.getEmail().isEmpty()) {\n      throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n    }\n    Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n    User user;\n    if (userOptional.isPresent) {\n      user=userOptional.get();\n      if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n        throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n      }\n      user=updateExistingUser(user,oAuth2UserInfo);\n    }\n   else {\n      user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n    }\n    return UserPrincipal.create(user,oAuth2User.getAttributes());\n  } catch (OAuth2AuthenticationProcessingException e) {\n    e.printStackTrace();\n  }\n}"
+    },
+    "Old_Method": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/oauth2/CustomOAuth2UserService.java",
+    "Start": 1883,
+    "Stop": 3147,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "processOAuth2User"
+}

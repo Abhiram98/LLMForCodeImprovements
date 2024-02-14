@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Improve readability by extracting the namespace URI as a variable",
+                "Change_Diff": "- if (StringUtils.hasLength(qName.getNamespaceURI()) && StringUtils.hasLength(qNamePrefix)) {\n- ... if (qName.getNamespaceURI().equals(resolveElement.getNamespaceURI(prefix))) {\n- return envelope.createName(qName.getLocalPart(),prefix,qName.getNamespaceURI());\n+ String qNameNamespaceURI = qName.getNamespaceURI();\n+ if (StringUtils.hasLength(qNameNamespaceURI) && StringUtils.hasLength(qNamePrefix)) {\n+ ... if (qNameNamespaceURI.equals(resolveElement.getNamespaceURI(prefix))) {\n+ return envelope.createName(qName.getLocalPart(),prefix,qNameNamespaceURI);",
+                "Description": "Extracting the namespace URI as a variable will improve readability and avoid multiple calls to the getNamespaceURI() method.",
+                "Start": 13,
+                "End": 24
+            },
+            {
+                "Improvement": "Improve performance by extracting the local part as a variable",
+                "Change_Diff": "- return envelope.createName(qName.getLocalPart(),qNamePrefix,qName.getNamespaceURI());\n- ... return envelope.createName(qName.getLocalPart(),prefix,qName.getNamespaceURI());\n- ... return envelope.createName(qName.getLocalPart(),\"\",qName.getNamespaceURI());\n- ... return envelope.createName(qName.getLocalPart());\n+ String qNameLocalPart = qName.getLocalPart();\n+ return envelope.createName(qNameLocalPart ,qNamePrefix,qName.getNamespaceURI());\n+ ... return envelope.createName(qNameLocalPart ,prefix,qName.getNamespaceURI());\n+ ... return envelope.createName(qNameLocalPart ,\"\",qName.getNamespaceURI());\n+ ... return envelope.createName(qNameLocalPart);",
+                "Description": "Extracting the local part of the QName as a variable will improve performance and avoid multiple calls to the getLocalPart() method.",
+                "Start": 13,
+                "End": 24
+            }
+        ],
+        "Final code": "public static Name toName(QName qName,SOAPElement resolveElement) throws SOAPException {\n  String qNamePrefix=qName.getPrefix();\n  SOAPEnvelope envelope=getEnvelope(resolveElement);\n  String qNameNamespaceURI = qName.getNamespaceURI();\n  String qNameLocalPart = qName.getLocalPart();\n  if (StringUtils.hasLength(qNameNamespaceURI) && StringUtils.hasLength(qNamePrefix)) {\n    return envelope.createName(qNameLocalPart,qNamePrefix,qNameNamespaceURI);\n  }\n else if (StringUtils.hasLength(qNameNamespaceURI)) {\n    Iterator<?> prefixes;\n    if (getSaajVersion(resolveElement) == SAAJ_11) {\n      prefixes=resolveElement.getNamespacePrefixes();\n    }\n else {\n      prefixes=resolveElement.getVisibleNamespacePrefixes();\n    }\n    while (prefixes.hasNext()) {\n      String prefix=(String)prefixes.next();\n      if (qNameNamespaceURI.equals(resolveElement.getNamespaceURI(prefix))) {\n        return envelope.createName(qNameLocalPart,prefix,qNameNamespaceURI);\n      }\n    }\n    return envelope.createName(qNameLocalPart,\"\",qNameNamespaceURI);\n  }\n else {\n    return envelope.createName(qNameLocalPart);\n  }\n}"
+    },
+    "Old_Method": "/** \n * Converts a  {@link QName} to a {@link Name}. A  {@link SOAPElement} is required to resolve namespaces.\n * @param qName the {@code QName} to convert\n * @param resolveElement a {@code SOAPElement} used to resolve namespaces to prefixes\n * @return the converted SAAJ Name\n * @throws SOAPException if conversion is unsuccessful\n * @throws IllegalArgumentException if {@code qName} is not fully qualified\n */\npublic static Name toName(QName qName,SOAPElement resolveElement) throws SOAPException {\n  String qNamePrefix=qName.getPrefix();\n  SOAPEnvelope envelope=getEnvelope(resolveElement);\n  if (StringUtils.hasLength(qName.getNamespaceURI()) && StringUtils.hasLength(qNamePrefix)) {\n    return envelope.createName(qName.getLocalPart(),qNamePrefix,qName.getNamespaceURI());\n  }\n else   if (StringUtils.hasLength(qName.getNamespaceURI())) {\n    Iterator<?> prefixes;\n    if (getSaajVersion(resolveElement) == SAAJ_11) {\n      prefixes=resolveElement.getNamespacePrefixes();\n    }\n else {\n      prefixes=resolveElement.getVisibleNamespacePrefixes();\n    }\n    while (prefixes.hasNext()) {\n      String prefix=(String)prefixes.next();\n      if (qName.getNamespaceURI().equals(resolveElement.getNamespaceURI(prefix))) {\n        return envelope.createName(qName.getLocalPart(),prefix,qName.getNamespaceURI());\n      }\n    }\n    return envelope.createName(qName.getLocalPart(),\"\",qName.getNamespaceURI());\n  }\n else {\n    return envelope.createName(qName.getLocalPart());\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/main/java/org/springframework/ws/soap/saaj/support/SaajUtils.java",
+    "Start": 3162,
+    "Stop": 4638,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "toName"
+}

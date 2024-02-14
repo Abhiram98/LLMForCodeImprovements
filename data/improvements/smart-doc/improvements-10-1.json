@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use regular expression for type extraction",
+            "Change_Diff": "- if (typeName.contains(\"<\")) {\n-    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n- } else {\n-    gicType=typeName;\n- }\n- if (gicType.contains(\"[\")) {\n-    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n- }\n- return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n+ Matcher matcher = Pattern.compile(\"([^.\\[<]*)(?:\\.([^.<\\[]*))?(?:\\<([^>]*)\\>)?(?:\\[(\\d*)\\])?\").matcher(typeName);\n+ if (matcher.find()) {\n+    gicType = matcher.group(2);\n+    if (gicType == null) {\n+        gicType = matcher.group(1);\n+    }\n+ }\n+ return gicType.toLowerCase();",
+            "Description": "Instead of using multiple conditions and string manipulations, use regular expressions to extract the type from the string. This approach is cleaner and more efficient.",
+            "Start": 2,
+            "End": 14
+        }],
+        "Final code": "private static String getType(String typeName) {\n    String gicType;\n    Matcher matcher = Pattern.compile(\"([^.\\[<]*)(?:\\.([^.<\\[]*))?(?:\\<([^>]*)\\>)?(?:\\[(\\d*)\\])?\").matcher(typeName);\n    if (matcher.find()) {\n        gicType = matcher.group(2);\n        if (gicType == null) {\n            gicType = matcher.group(1);\n        }\n    }\n    return gicType.toLowerCase();\n}"
+    },
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor if-else conditions to switch statement",
+                "Change_Diff": "- if (pathInfo.startsWith(PATH_PING)) {\n- ping(request,pathInfo,response);\n- } else if (pathInfo.startsWith(PATH_COUNTER)) {\n- stats.incQueryRequestCount();\n- getCounters(request,pathInfo,response);\n- } else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n- stats.incQueryRequestCount();\n- getMetrics(request,pathInfo,response);\n- } else {\n- stats.incInvalidRequestCount();\n- response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n- }",
+                "Description": "The if-else blocks checking the 'pathInfo' can be refactored into a switch statement for better readability and maintainability. This will ease adding more paths in the future.",
+                "Start": 9,
+                "End": 22
+            },
+            {
+                "Improvement": "Handle specific exceptions",
+                "Change_Diff": "- catch (Throwable ex) {",
+                "Description": "Instead of catching a general Throwable, specific exceptions should be caught to provide more detailed error handling and prevent catching unintended exceptions.",
+                "Start": 24,
+                "End": 29
+            }
+        ],
+        "Final code": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    switch (pathInfo) {\n      case PATH_PING:\n        ping(request,pathInfo,response);\n        break;\n      case PATH_COUNTER:\n        stats.incQueryRequestCount();\n        getCounters(request,pathInfo,response);\n        break;\n      case PATH_METRICGROUP:\n        stats.incQueryRequestCount();\n        getMetrics(request,pathInfo,response);\n        break;\n      default:\n        stats.incInvalidRequestCount();\n        response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  } catch (ServletException | IOException ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  } finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

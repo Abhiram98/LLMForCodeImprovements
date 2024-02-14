@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use dependency injection",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n+ @Value(\"${xacml.pdp.keyStore}\")\n    private String KEY_STORE;\n+ @Value(\"${xacml.pdp.keyStore.password}\")\n    private String KEY_STORE_PASSWORD;\n+ @Value(\"${xacml.pdp.cert.alias}\")\n    private String CERT_ALIAS;\n+ @Value(\"${xacml.pdp.cert.password}\")\n    private String CERT_PASSWORD;\n+ @Value(\"${xacml.idp.metadata.url}\")\n    private String IDP_META_DATA_URL;\n+ @Value(\"${idp.issuerid}\")\n    private String ISSUER_ID;",
+                "Description": "Java supports Dependency Injection and it is a great way to get rid of hard dependencies. You can inject application.properties into your class and retrieve properties from there.",
+                "Start": 3,
+                "End": 12
+            },
+            {
+                "Improvement": "Remove try-catch block",
+                "Change_Diff": "- try {\n...\n} catch (IOException e) {\n    throw new RuntimeException(e);\n- }",
+                "Description": "The try-catch block is not needed after using dependency injection.",
+                "Start": 2,
+                "End": 13
+            },
+            {
+                "Improvement": "Use constructor injection",
+                "Change_Diff": "- public WebSecurityConfig() {\n+ public WebSecurityConfig(@Value(\"${xacml.pdp.keyStore}\") String KEY_STORE, @Value(\"${xacml.pdp.keyStore.password}\") String KEY_STORE_PASSWORD, @Value(\"${xacml.pdp.cert.alias}\") String CERT_ALIAS, @Value(\"${xacml.pdp.cert.password}\") String CERT_PASSWORD, @Value(\"${xacml.idp.metadata.url}\") String IDP_META_DATA_URL, @Value(\"${idp.issuerid}\") String ISSUER_ID) {",
+                "Description": "It is better to use constructor injection as it helps to keep your code clean and makes it easy to test. Moreover, it ensures that the object is fully initialized when it is created and it helps in making the classes immutable.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "public class WebSecurityConfig {\n\n    private String KEY_STORE;\n    private String KEY_STORE_PASSWORD;\n    private String CERT_ALIAS;\n    private String CERT_PASSWORD;\n    private String IDP_META_DATA_URL;\n    private String ISSUER_ID;\n\n    public WebSecurityConfig(@Value(\"${xacml.pdp.keyStore}\") String KEY_STORE, @Value(\"${xacml.pdp.keyStore.password}\") String KEY_STORE_PASSWORD, @Value(\"${xacml.pdp.cert.alias}\") String CERT_ALIAS, @Value(\"${xacml.pdp.cert.password}\") String CERT_PASSWORD, @Value(\"${xacml.idp.metadata.url}\") String IDP_META_DATA_URL, @Value(\"${idp.issuerid}\") String ISSUER_ID) {\n        this.KEY_STORE = KEY_STORE;\n        this.KEY_STORE_PASSWORD = KEY_STORE_PASSWORD;\n        this.CERT_ALIAS = CERT_ALIAS;\n        this.CERT_PASSWORD = CERT_PASSWORD;\n        this.IDP_META_DATA_URL = IDP_META_DATA_URL;\n        this.ISSUER_ID = ISSUER_ID;\n    }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

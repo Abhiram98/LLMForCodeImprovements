@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive code using a loop",
+                "Change_Diff": "- buf[off++]=(byte)(values[i + 0] >>> 50);\n...\n- buf[off]=(byte)(values[i + 7]);\n+ for (int j = 0; j < 8; j++) {\n+     int shift = 50;\n+     for (int k = 0; k < 7; k++) {\n+         buf[off++]=(byte)(values[i + j] >>> shift);\n+         shift -= 8;\n+     }\n+     buf[off]=(byte)(values[i + j]);\n+     off++;\n+ }",
+                "Description": "The method contains repetitive statements that can be refactored using a loop. This makes the code cleaner and easier to maintain.",
+                "Start": 3,
+                "End": 97
+            },
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "+ /**\n+  * Packs the given long values into the specified byte array. The values are packed in a specific way,\n+  * starting from the specified index.\n+  *\n+  * @param values the array of long values to pack\n+  * @param i the start index in the values array\n+  * @param buf the byte array to pack the values into\n+  * @param off the start offset in the byte array\n+  */",
+                "Description": "The method lacks documentation. Adding documentation helps others understand the purpose and usage of the method.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "    /**\n     * Packs the given long values into the specified byte array. The values are packed in a specific way,\n     * starting from the specified index.\n     *\n     * @param values the array of long values to pack\n     * @param i the start index in the values array\n     * @param buf the byte array to pack the values into\n     * @param off the start offset in the byte array\n     */\n    static void packBits58(final long[] values,final int i,final byte[] buf,int off){\n        for (int j = 0; j < 8; j++) {\n            int shift = 50;\n            for (int k = 0; k < 7; k++) {\n                buf[off++]=(byte)(values[i + j] >>> shift);\n                shift -= 8;\n            }\n            buf[off]=(byte)(values[i + j]);\n            off++;\n        }\n    }"
+    },
+    "Old_Method": "static void packBits58(final long[] values,final int i,final byte[] buf,int off){\n  buf[off++]=(byte)(values[i + 0] >>> 50);\n  buf[off++]=(byte)(values[i + 0] >>> 42);\n  buf[off++]=(byte)(values[i + 0] >>> 34);\n  buf[off++]=(byte)(values[i + 0] >>> 26);\n  buf[off++]=(byte)(values[i + 0] >>> 18);\n  buf[off++]=(byte)(values[i + 0] >>> 10);\n  buf[off++]=(byte)(values[i + 0] >>> 2);\n  buf[off]=(byte)(values[i + 0] << 6);\n  buf[off++]|=values[i + 1] >>> 52;\n  buf[off++]=(byte)(values[i + 1] >>> 44);\n  buf[off++]=(byte)(values[i + 1] >>> 36);\n  buf[off++]=(byte)(values[i + 1] >>> 28);\n  buf[off++]=(byte)(values[i + 1] >>> 20);\n  buf[off++]=(byte)(values[i + 1] >>> 12);\n  buf[off++]=(byte)(values[i + 1] >>> 4);\n  buf[off]=(byte)(values[i + 1] << 4);\n  buf[off++]|=values[i + 2] >>> 54;\n  buf[off++]=(byte)(values[i + 2] >>> 46);\n  buf[off++]=(byte)(values[i + 2] >>> 38);\n  buf[off++]=(byte)(values[i + 2] >>> 30);\n  buf[off++]=(byte)(values[i + 2] >>> 22);\n  buf[off++]=(byte)(values[i + 2] >>> 14);\n  buf[off++]=(byte)(values[i + 2] >>> 6);\n  buf[off]=(byte)(values[i + 2] << 2);\n  buf[off++]|=values[i + 3] >>> 56;\n  buf[off++]=(byte)(values[i + 3] >>> 48);\n  buf[off++]=(byte)(values[i + 3] >>> 40);\n  buf[off++]=(byte)(values[i + 3] >>> 32);\n  buf[off++]=(byte)(values[i + 3] >>> 24);\n  buf[off++]=(byte)(values[i + 3] >>> 16);\n  buf[off++]=(byte)(values[i + 3] >>> 8);\n  buf[off++]=(byte)(values[i + 3]);\n  buf[off++]=(byte)(values[i + 4] >>> 50);\n  buf[off++]=(byte)(values[i + 4] >>> 42);\n  buf[off++]=(byte)(values[i + 4] >>> 34);\n  buf[off++]=(byte)(values[i + 4] >>> 26);\n  buf[off++]=(byte)(values[i + 4] >>> 18);\n  buf[off++]=(byte)(values[i + 4] >>> 10);\n  buf[off++]=(byte)(values[i + 4] >>> 2);\n  buf[off]=(byte)(values[i + 4] << 6);\n  buf[off++]|=values[i + 5] >>> 52;\n  buf[off++]=(byte)(values[i + 5] >>> 44);\n  buf[off++]=(byte)(values[i + 5] >>> 36);\n  buf[off++]=(byte)(values[i + 5] >>> 28);\n  buf[off++]=(byte)(values[i + 5] >>> 20);\n  buf[off++]=(byte)(values[i + 5] >>> 12);\n  buf[off++]=(byte)(values[i + 5] >>> 4);\n  buf[off]=(byte)(values[i + 5] << 4);\n  buf[off++]|=values[i + 6] >>> 54;\n  buf[off++]=(byte)(values[i + 6] >>> 46);\n  buf[off++]=(byte)(values[i + 6] >>> 38);\n  buf[off++]=(byte)(values[i + 6] >>> 30);\n  buf[off++]=(byte)(values[i + 6] >>> 22);\n  buf[off++]=(byte)(values[i + 6] >>> 14);\n  buf[off++]=(byte)(values[i + 6] >>> 6);\n  buf[off]=(byte)(values[i + 6] << 2);\n  buf[off++]|=values[i + 7] >>> 56;\n  buf[off++]=(byte)(values[i + 7] >>> 48);\n  buf[off++]=(byte)(values[i + 7] >>> 40);\n  buf[off++]=(byte)(values[i + 7] >>> 32);\n  buf[off++]=(byte)(values[i + 7] >>> 24);\n  buf[off++]=(byte)(values[i + 7] >>> 16);\n  buf[off++]=(byte)(values[i + 7] >>> 8);\n  buf[off]=(byte)(values[i + 7]);\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/theta/BitPacking.java",
+    "Start": 105006,
+    "Stop": 108078,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "packBits58"
+}

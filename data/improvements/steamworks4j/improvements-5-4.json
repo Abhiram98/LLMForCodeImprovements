@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder instead of String concatenation",
+                "Change_Diff": "- System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n+ StringBuilder sb = new StringBuilder();\n+ sb.append(\"HTTP request data received: offset=\").append(offset).append(\", bytes=\").append(bytesReceived);\n+ System.out.println(sb.toString());",
+                "Description": "Using StringBuilder is more efficient than using '+' for string concatenation in a loop. StringBuilder would significantly improve the performance in situations where the strings are concatenated multiple times.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Avoid hardcoding Charset",
+                "Change_Diff": "- String result=new String(dest,Charset.defaultCharset());\n+ String result=new String(dest,StandardCharsets.UTF_8);",
+                "Description": "Instead of hardcoding the Charset as defaultCharset(), it would be better to define it as a constant somewhere and refer to that constant wherever needed. This would make the code more maintainable and flexible.",
+                "Start": 8,
+                "End": 8
+            }
+        ],
+        "Final code": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  StringBuilder sb = new StringBuilder();\n  sb.append(\"HTTP request data received: offset=\").append(offset).append(\", bytes=\").append(bytesReceived);\n  System.out.println(sb.toString());\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,StandardCharsets.UTF_8);\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}"
+    },
+    "Old_Method": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamHTTPTest.java",
+    "Start": 1411,
+    "Stop": 2260,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onHTTPRequestDataReceived"
+}

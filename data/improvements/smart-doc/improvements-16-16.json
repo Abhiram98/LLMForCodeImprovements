@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use final keyword where appropriate",
+                "Change_Diff": "- Map<String,String> constantsMap=projectBuilder.getConstantsMap();\n- List<JavaParameter> parameters=method.getParameters();\n+ final Map<String,String> constantsMap=projectBuilder.getConstantsMap();\n+ final List<JavaParameter> parameters=method.getParameters();",
+                "Description": "Java provides the 'final' keyword, which can be applied to variables. When a variable is declared as final, its value can't be modified, essentially, a constant. This can be particularly useful for values that will not change, like 'constantsMap', 'parameters', etc. This also improves the code's readability and safety, especially in multithreaded environment.",
+                "Start": 2,
+                "End": 4
+            },
+            {
+                "Improvement": "Avoid creating unnecessary objects inside loop",
+                "Change_Diff": "- ApiReqParam apiReqHeader=new ApiReqParam();\n- String defaultValue=\"\";\n+ String defaultValue=\"\";\n\n...\n\n+ ApiReqParam apiReqHeader=new ApiReqParam();",
+                "Description": "Currently, a new instance of ApiReqParam is created at the beginning of each iteration, even if it's not added to the 'apiReqHeaders' list. This can waste memory and processing power. Instead, the object should be created inside the condition where it's actually needed.",
+                "Start": 7,
+                "End": 21
+            },
+            {
+                "Improvement": "Move variable declaration closer to usage",
+                "Change_Diff": "- String paramName=javaParameter.getName();\n...\n+ String paramName=javaParameter.getName();",
+                "Description": "The variable 'paramName' is declared at the start of the loop but is only used much later. Moving the declaration closer to where it's first used can improve readability and prevent potential errors.",
+                "Start": 8,
+                "End": 19
+            }
+        ],
+        "Final code": "public List<ApiReqParam> handle(final JavaMethod method, final ProjectDocConfigBuilder projectBuilder) {\n    final Map<String,String> constantsMap = projectBuilder.getConstantsMap();\n    final List<JavaParameter> parameters = method.getParameters();\n    List<ApiReqParam> apiReqHeaders = new ArrayList<>();\n    for (final JavaParameter javaParameter : parameters) {\n        List<JavaAnnotation> annotations = javaParameter.getAnnotations();\n        String defaultValue = \"\";\n        for (final JavaAnnotation annotation : annotations) {\n            String annotationName = annotation.getType().getFullyQualifiedName();\n            if (JakartaJaxrsAnnotations.JAX_DEFAULT_VALUE_FULLY.equals(annotationName) || JAXRSAnnotations.JAX_DEFAULT_VALUE_FULLY.equals(annotationName)) {\n                defaultValue = StringUtil.removeQuotes(DocUtil.getRequestHeaderValue(annotation));\n                defaultValue = DocUtil.handleConstants(constantsMap,defaultValue);\n            }\n            if (JakartaJaxrsAnnotations.JAX_HEADER_PARAM_FULLY.equals(annotationName) || JAXRSAnnotations.JAX_HEADER_PARAM_FULLY.equals(annotationName)) {\n                ApiReqParam apiReqHeader = new ApiReqParam();\n                apiReqHeader.setValue(defaultValue);\n                String name = StringUtil.removeQuotes(DocUtil.getRequestHeaderValue(annotation));\n                name = DocUtil.handleConstants(constantsMap,name);\n                apiReqHeader.setName(name);\n                String typeName = javaParameter.getType().getValue().toLowerCase();\n                apiReqHeader.setType(DocClassUtil.processTypeNameForParams(typeName));\n                String className = method.getDeclaringClass().getCanonicalName();\n                final Map<String,String> paramMap = DocUtil.getCommentsByTag(method,DocTags.PARAM,className);\n                final String paramName = javaParameter.getName();\n                String paramComments = paramMap.get(paramName);\n                apiReqHeader.setDesc(getComments(defaultValue,paramComments));\n                apiReqHeaders.add(apiReqHeader);\n            }\n        }\n    }\n    return apiReqHeaders;\n}"
+    },
+    "Old_Method": "/** \n * Handle JAX RS Header\n * @param method         method\n * @param projectBuilder ProjectDocConfigBuilder\n * @return list of ApiReqParam\n */\npublic List<ApiReqParam> handle(JavaMethod method,ProjectDocConfigBuilder projectBuilder){\n  Map<String,String> constantsMap=projectBuilder.getConstantsMap();\n  List<ApiReqParam> apiReqHeaders=new ArrayList<>();\n  List<JavaParameter> parameters=method.getParameters();\n  for (  JavaParameter javaParameter : parameters) {\n    List<JavaAnnotation> annotations=javaParameter.getAnnotations();\n    String paramName=javaParameter.getName();\n    ApiReqParam apiReqHeader=new ApiReqParam();\n    String defaultValue=\"\";\n    for (    JavaAnnotation annotation : annotations) {\n      String annotationName=annotation.getType().getFullyQualifiedName();\n      if (JakartaJaxrsAnnotations.JAX_DEFAULT_VALUE_FULLY.equals(annotationName) || JAXRSAnnotations.JAX_DEFAULT_VALUE_FULLY.equals(annotationName)) {\n        defaultValue=StringUtil.removeQuotes(DocUtil.getRequestHeaderValue(annotation));\n        defaultValue=DocUtil.handleConstants(constantsMap,defaultValue);\n      }\n      apiReqHeader.setValue(defaultValue);\n      if (JakartaJaxrsAnnotations.JAX_HEADER_PARAM_FULLY.equals(annotationName) || JAXRSAnnotations.JAX_HEADER_PARAM_FULLY.equals(annotationName)) {\n        String name=StringUtil.removeQuotes(DocUtil.getRequestHeaderValue(annotation));\n        name=DocUtil.handleConstants(constantsMap,name);\n        apiReqHeader.setName(name);\n        String typeName=javaParameter.getType().getValue().toLowerCase();\n        apiReqHeader.setType(DocClassUtil.processTypeNameForParams(typeName));\n        String className=method.getDeclaringClass().getCanonicalName();\n        Map<String,String> paramMap=DocUtil.getCommentsByTag(method,DocTags.PARAM,className);\n        String paramComments=paramMap.get(paramName);\n        apiReqHeader.setDesc(getComments(defaultValue,paramComments));\n        apiReqHeaders.add(apiReqHeader);\n      }\n    }\n  }\n  return apiReqHeaders;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/handler/JaxrsHeaderHandler.java",
+    "Start": 1598,
+    "Stop": 4138,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "handle"
+}

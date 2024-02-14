@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful variable and method names",
+                "Change_Diff": "- Runnable publishAndCheck=new Runnable(){\n+ Runnable publishAndCheckMessage=new Runnable(){\n- @Test public void testSyncPublicationSyncHandlers() throws Exception {\n+ @Test public void testSynchronousPublicationHandlers() throws Exception {",
+                "Description": "Instead of using generic names like 'publishAndCheck' for Runnable, use a more descriptive name like 'publishAndCheckMessage' so that the purpose of the variable is clear. Similarly, instead of naming the test method 'testSyncPublicationSyncHandlers', use a more descriptive name like 'testSynchronousPublicationHandlers'.",
+                "Start": 5,
+                "End": 14
+            },
+            {
+                "Improvement": "Extract repeated code into methods",
+                "Change_Diff": "- bus.post(standardMessage).now();\n- bus.post(multipartMessage).now();\n- bus.post(MessageTypes.Simple).now();\n- assertEquals(InstancesPerListener,standardMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n- assertEquals(InstancesPerListener,multipartMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n+ postMessagesAndCheckHandlingTimes(bus, standardMessage, multipartMessage);",
+                "Description": "The block of code for posting messages and checking their handling times is repeated twice. This block of code can be extracted into a separate method to improve readability and maintainability.",
+                "Start": 6,
+                "End": 11
+            }
+        ],
+        "Final code": "@Test public void testSynchronousPublicationHandlers() throws Exception {\n  ListenerFactory listeners=new ListenerFactory().create(InstancesPerListener,Listeners.synchronous()).create(InstancesPerListener,Listeners.noHandlers());\n  final MBassador bus=createBus(SyncAsync(),listeners);\n  Runnable publishAndCheckMessage=new Runnable(){\n    @Override public void run(){\n      StandardMessage standardMessage=new StandardMessage();\n      MultipartMessage multipartMessage=new MultipartMessage();\n      postMessagesAndCheckHandlingTimes(bus, standardMessage, multipartMessage);\n    }\n  };\n  ConcurrentExecutor.runConcurrent(publishAndCheckMessage,1);\n  MessageTypes.resetAll();\n  ConcurrentExecutor.runConcurrent(publishAndCheckMessage,ConcurrentUnits);\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(IMessageListener.DefaultListener.class));\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(MessagesTypeListener.DefaultListener.class));\n  bus.shutdown();\n  pause(200);\n}\n\nprivate void postMessagesAndCheckHandlingTimes(MBassador bus, StandardMessage standardMessage, MultipartMessage multipartMessage) {\n  bus.post(standardMessage).now();\n  bus.post(multipartMessage).now();\n  bus.post(MessageTypes.Simple).now();\n  assertEquals(InstancesPerListener,standardMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n  assertEquals(InstancesPerListener,multipartMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n}"
+    },
+    "Old_Method": "@Test public void testSyncPublicationSyncHandlers() throws Exception {\n  ListenerFactory listeners=new ListenerFactory().create(InstancesPerListener,Listeners.synchronous()).create(InstancesPerListener,Listeners.noHandlers());\n  final MBassador bus=createBus(SyncAsync(),listeners);\n  Runnable publishAndCheck=new Runnable(){\n    @Override public void run(){\n      StandardMessage standardMessage=new StandardMessage();\n      MultipartMessage multipartMessage=new MultipartMessage();\n      bus.post(standardMessage).now();\n      bus.post(multipartMessage).now();\n      bus.post(MessageTypes.Simple).now();\n      assertEquals(InstancesPerListener,standardMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n      assertEquals(InstancesPerListener,multipartMessage.getTimesHandled(IMessageListener.DefaultListener.class));\n    }\n  }\n;\n  ConcurrentExecutor.runConcurrent(publishAndCheck,1);\n  MessageTypes.resetAll();\n  ConcurrentExecutor.runConcurrent(publishAndCheck,ConcurrentUnits);\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(IMessageListener.DefaultListener.class));\n  assertEquals(InstancesPerListener * ConcurrentUnits,MessageTypes.Simple.getTimesHandled(MessagesTypeListener.DefaultListener.class));\n  bus.shutdown();\n  pause(200);\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/SyncAsyncTest.java",
+    "Start": 762,
+    "Stop": 2358,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testSyncPublicationSyncHandlers"
+}

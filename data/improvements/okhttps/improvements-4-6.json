@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use the equals() method instead of '==' for string comparison",
+                "Change_Diff": "- if (s.destinationEqual(destination)) {\n+ if (s.destinationEqual(destination).equals(destination)) {",
+                "Description": "In Java, it's recommended to use the equals() method for string comparison instead of using '=='. This is because '==' checks if both objects point to the same memory location, while equals() checks for actual contents of the string.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Replace 'synchronized' method with 'synchronized' block",
+                "Change_Diff": "- public synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n+ public Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n...\n-   subscribers.add(subscriber);\n+   synchronized(this) { subscribers.add(subscriber); }\n...",
+                "Description": "Instead of making the entire method 'synchronized', it's more efficient to synchronize only the critical section of code. In this case, the critical section is the code that modifies the 'subscribers' list.",
+                "Start": 9,
+                "End": 16
+            }
+        ],
+        "Final code": "public Stomp subscribe(String destination, List<Header> headers, Consumer<Message> callback) {\n    if (destination == null || destination.isEmpty()) {\n        throw new IllegalArgumentException(\"destination can not be empty!\");\n    }\n    for (Subscriber s : subscribers) {\n        if (s.destinationEqual(destination).equals(destination)) {\n            Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n            return this;\n        }\n    }\n    Subscriber subscriber = new Subscriber(this, destination, callback, headers);\n    synchronized(this) { subscribers.add(subscriber); }\n    subscriber.subscribe();\n    return this;\n}"
+    },
+    "Old_Method": "/** \n * 订阅消息\n * @param destination 订阅地址\n * @param headers 附加头信息\n * @param callback 消息回调\n * @return Stomp\n */\npublic synchronized Stomp subscribe(String destination,List<Header> headers,Consumer<Message> callback){\n  if (destination == null || destination.isEmpty()) {\n    throw new IllegalArgumentException(\"destination can not be empty!\");\n  }\n  for (  Subscriber s : subscribers) {\n    if (s.destinationEqual(destination)) {\n      Platform.logError(\"The destination [\" + destination + \"] has already been subscribed!\");\n      return this;\n    }\n  }\n  Subscriber subscriber=new Subscriber(this,destination,callback,headers);\n  subscribers.add(subscriber);\n  subscriber.subscribe();\n  return this;\n}\n",
+    "File_Path": "okhttps/okhttps-stomp/src/main/java/cn/zhxu/stomp/Stomp.java",
+    "Start": 8602,
+    "Stop": 9429,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "subscribe"
+}

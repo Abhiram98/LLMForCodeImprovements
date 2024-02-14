@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid duplicating the URL string",
+                "Change_Diff": "- XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"\n+ String url = XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\";",
+                "Description": "The URL string `XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\"` is repeated multiple times in the method. It's better to store this in a variable and use it throughout the method to avoid duplication and to make the code more maintainable.",
+                "Start": 2,
+                "End": 10
+            },
+            {
+                "Improvement": "Use try-catch block to handle exceptions",
+                "Change_Diff": "- ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n+ try {\n+     ResponseEntity response=rt.getForEntity(url, String.class,entity);\n+ } catch (RestClientException e) {\n+     return Optional.empty();\n+ }",
+                "Description": "The call to `rt.getForEntity` method can throw a RestClientException. It's better to wrap this call in a try-catch block to handle any potential exceptions and ensure that the program doesn't crash.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use Optional's map and orElse methods",
+                "Change_Diff": "- if (response.getStatusCode() != HttpStatus.OK) {\n-    return Optional.empty();\n- }\n- return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n+ return Optional.ofNullable(response).map(r -> this.apiResourceListCache.putIfAbsent(url, new JSONObject(r.getBody().toString()))).orElse(Optional.empty());",
+                "Description": "After retrieving the response, you can use the `map` method to transform its body to a JSONObject and the `orElse` method to handle the case when the response status is not OK. This will make the code more concise and readable.",
+                "Start": 9,
+                "End": 13
+            }
+        ],
+        "Final code": "@Override public Optional<JSONObject> getApiResourceList(){\n  String url = XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\";\n  JSONObject cachedObject=this.apiResourceListCache.get(url);\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response = null;\n  try {\n    response=rt.getForEntity(url, String.class,entity);\n  } catch (RestClientException e) {\n    return Optional.empty();\n  }\n  return Optional.ofNullable(response).map(r -> this.apiResourceListCache.putIfAbsent(url, new JSONObject(r.getBody().toString()))).orElse(Optional.empty());\n}"
+    },
+    "Old_Method": "@Override public Optional<JSONObject> getApiResourceList(){\n  JSONObject cachedObject=this.apiResourceListCache.get(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\");\n  if (cachedObject != null) {\n    return Optional.of(cachedObject);\n  }\n  RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n  RestTemplate rt=restTemplateBuilder.build();\n  HttpEntity<String> entity=new HttpEntity<>(this.restHeaders);\n  ResponseEntity response=rt.getForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",String.class,entity);\n  if (response.getStatusCode() != HttpStatus.OK) {\n    return Optional.empty();\n  }\n  return Optional.of(this.apiResourceListCache.putIfAbsent(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/home\",new JSONObject(response.getBody().toString())));\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 5788,
+    "Stop": 6769,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "getApiResourceList"
+}

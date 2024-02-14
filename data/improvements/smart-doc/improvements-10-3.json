@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- String gicType;\n+ String processedType;",
+                "Description": "Changing variable name from 'gicType' to 'processedType' will make the code more readable and maintainable. The new name more accurately describes what the variable does.",
+                "Start": 2,
+                "End": 10
+            },
+            {
+                "Improvement": "Use try-catch block to handle potential exceptions",
+                "Change_Diff": "+ try {\n [method body] \n} catch (StringIndexOutOfBoundsException e) {\n    return \"\";\n}",
+                "Description": "The current method may throw a StringIndexOutOfBoundsException if the input string doesn't have the expected format. Adding a try-catch block around the entire method body will help to catch this exception and allow the method to fail gracefully.",
+                "Start": 2,
+                "End": 10
+            }
+        ],
+        "Final code": "private static String getType(String typeName){\n  String processedType;\n  try {\n    if (typeName.contains(\"<\")) {\n      processedType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n    }\n    else {\n      processedType=typeName;\n    }\n    if (processedType.contains(\"[\")) {\n      processedType=processedType.substring(0,processedType.indexOf(\"[\"));\n    }\n    return processedType.substring(processedType.lastIndexOf(\".\") + 1).toLowerCase();\n  } catch (StringIndexOutOfBoundsException e) {\n    return \"\";\n  }\n}"
+    },
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

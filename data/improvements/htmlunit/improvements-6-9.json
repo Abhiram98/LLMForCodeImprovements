@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated method calls to variables",
+                "Change_Diff": "- final Cache cache=getPage().getWebClient().getCache();\n- final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n- final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n+ final Page page = getPage();\n+ final WebClient webClient = page.getWebClient();\n+ final Cache cache = webClient.getCache();\n+ final String textContent = getTextContent();\n+ final CSSStyleSheetImpl cached = cache.getCachedStyleSheet(textContent);\n+ final String uri = page.getWebResponse().getWebRequest().getUrl().toExternalForm();",
+                "Description": "The methods `getPage().getWebClient().getCache()`, `getTextContent()`, and `getPage().getWebResponse().getWebRequest().getUrl().toExternalForm()` are called multiple times in the method. To avoid potential performance issues and to improve readability, these method calls can be extracted to variables at the start of the method.",
+                "Start": 6,
+                "End": 14
+            },
+            {
+                "Improvement": "Avoid deep nesting",
+                "Change_Diff": "- if (cached != null) {\n...\n} else {\n...\n}\n+ if (cached != null) {\n...\nreturn sheet_;\n}\n...\nreturn sheet_;\n",
+                "Description": "The deep nesting of the `if` and `try-catch` blocks can be avoided by using return statements. This makes the code easier to read and understand.",
+                "Start": 9,
+                "End": 22
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Page page = getPage();\n  final WebClient webClient = page.getWebClient();\n  final Cache cache = webClient.getCache();\n  final String textContent = getTextContent();\n  final CSSStyleSheetImpl cached = cache.getCachedStyleSheet(textContent);\n  final String uri = page.getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n    return sheet_;\n  }\n  try (InputSource source=new InputSource(new StringReader(textContent))){\n    sheet_=new CssStyleSheet(this,source,uri);\n    cache.cache(textContent,sheet_.getWrappedSheet());\n  }\n catch (final IOException e) {\n    LOG.error(e.getMessage(),e);\n  }\n  return sheet_;\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

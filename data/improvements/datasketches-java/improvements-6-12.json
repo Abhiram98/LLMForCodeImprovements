@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- final int lgK=5;\n- final int k=1 << lgK;\n- final int u=4 * k;\n- final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n- final CompactSketch csk1=usk1.compact(true,null);\n+ final int logK=5;\n+ final int size=1 << logK;\n+ final int updateSize=4 * size;\n+ final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(size).build();\n+ final CompactSketch compactSketch=updateSketch.compact(true,null);",
+                "Description": "Instead of using non-descriptive names like `lgK`, `k`, `u`, `usk1`, and `csk1`, use names that accurately describe what the variable is for. This makes your code easier to understand and maintain.",
+                "Start": 2,
+                "End": 11
+            },
+            {
+                "Improvement": "Use constants for magic numbers",
+                "Change_Diff": "- final int lgK=5;\n- final int k=1 << lgK;\n- final int u=4 * k;\n+ final int LOG_K=5;\n+ final int SIZE=1 << LOG_K;\n+ final int UPDATE_SIZE=4 * SIZE;",
+                "Description": "In your code, you've used magic numbers like 5, 4, and 2. It's better to replace these with named constants to improve code readability and maintainability.",
+                "Start": 2,
+                "End": 5
+            }
+        ],
+        "Final code": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int LOG_K=5;\n  final int SIZE=1 << LOG_K;\n  final int UPDATE_SIZE=4 * SIZE;\n  final int memBytes=getMaxIntersectionBytes(SIZE / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(SIZE).build();\n  for (int i=0; i < UPDATE_SIZE; i++) {\n    updateSketch.update(i);\n  }\n  final CompactSketch compactSketch=updateSketch.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(compactSketch);\n}"
+    },
+    "Old_Method": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int lgK=5;\n  final int k=1 << lgK;\n  final int u=4 * k;\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/DirectIntersectionTest.java",
+    "Start": 17194,
+    "Stop": 17845,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSizedTooSmall"
+}

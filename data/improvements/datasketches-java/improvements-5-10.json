@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constant for repeated values",
+                "Change_Diff": "- int n=1000000;\n- int numPhiValues=99;\n- for (int q=1; q <= 99; q++) {\n+ final int TOTAL_ITEMS = 1000000;\n+ final int PHI_VALUES = 99;\n+ for (int q=1; q <= PHI_VALUES; q++) {",
+                "Description": "The value 100 is used repeatedly in the code. Consider using a named constant instead, to avoid potential errors and improve readability.",
+                "Start": 8,
+                "End": 35
+            },
+            {
+                "Improvement": "Avoid magic numbers",
+                "Change_Diff": "- assertTrue(reported >= (nominal - 10000.0));\n- assertTrue(reported <= (nominal + 10000.0));\n+ final double NOMINAL_RANGE = 10000.0;\n+ assertTrue(reported >= (nominal - NOMINAL_RANGE));\n+ assertTrue(reported <= (nominal + NOMINAL_RANGE));",
+                "Description": "There are several instances of 'magic numbers' in the code. These are literal numbers that appear in the code without any context. Consider using named constants for these to make the code easier to understand.",
+                "Start": 19,
+                "End": 35
+            },
+            {
+                "Improvement": "Remove redundant code",
+                "Change_Diff": "- for (int q=1; q <= 100; q++) {\n-   double phi=q / 100.0;\n-   subtotal+=pmfResult[q - 1];\n-   assertTrue(subtotal >= (phi - 0.01));\n-   assertTrue(subtotal <= (phi + 0.01));\n- }\n- double[] cdfResult=result.getCDF(splitPoints);\n- for (int q=1; q <= 100; q++) {\n-   double phi=q / 100.0;\n-   subtotal=cdfResult[q - 1];\n-   assertTrue(subtotal >= (phi - 0.01));\n-   assertTrue(subtotal <= (phi + 0.01));\n- }\n+ private void checkSubtotalRange(double[] resultArr) {\n+   double subtotal = 0.0;\n+   for (int q=1; q <= 100; q++) {\n+     double phi=q / 100.0;\n+     subtotal+=resultArr[q - 1];\n+     assertTrue(subtotal >= (phi - 0.01));\n+     assertTrue(subtotal <= (phi + 0.01));\n+   }\n+ }\n+ double[] pmfResult=result.getPMF(splitPoints);\n+ checkSubtotalRange(pmfResult);\n+ double[] cdfResult=result.getCDF(splitPoints);\n+ checkSubtotalRange(cdfResult);",
+                "Description": "The two for loop blocks for checking the subtotal range are identical. Consider extracting this to a separate method to avoid redundancy and improve code maintainability.",
+                "Start": 28,
+                "End": 38
+            }
+        ],
+        "Final code": "@Test public void checkEndToEnd(){\n  int k=256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(k).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(k).build();\n  final int TOTAL_ITEMS = 1000000;\n  for (int item=TOTAL_ITEMS; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    }\n else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),TOTAL_ITEMS);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  final int PHI_VALUES = 99;\n  double[] phiArr=new double[PHI_VALUES];\n  for (int q=1; q <= PHI_VALUES; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  final double NOMINAL_RANGE = 10000.0;\n  for (int q=1; q <= PHI_VALUES; q++) {\n    double nominal=(1e6 * q) / 100.0;\n    double reported=splitPoints[q - 1];\n    assertTrue(reported >= (nominal - NOMINAL_RANGE));\n    assertTrue(reported <= (nominal + NOMINAL_RANGE));\n  }\n  private void checkSubtotalRange(double[] resultArr) {\n    double subtotal = 0.0;\n    for (int q=1; q <= 100; q++) {\n      double phi=q / 100.0;\n      subtotal+=resultArr[q - 1];\n      assertTrue(subtotal >= (phi - 0.01));\n      assertTrue(subtotal <= (phi + 0.01));\n    }\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  checkSubtotalRange(pmfResult);\n  double[] cdfResult=result.getCDF(splitPoints);\n  checkSubtotalRange(cdfResult);\n  assertEquals(result.getRank(500000),0.5,0.01);\n}"
+    },
+    "Old_Method": "@Test public void checkEndToEnd(){\n  int k=256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(k).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(k).build();\n  int n=1000000;\n  for (int item=n; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    }\n else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),n);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  int numPhiValues=99;\n  double[] phiArr=new double[numPhiValues];\n  for (int q=1; q <= 99; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  for (int q=1; q <= 99; q++) {\n    double nominal=(1e6 * q) / 100.0;\n    double reported=splitPoints[q - 1];\n    assertTrue(reported >= (nominal - 10000.0));\n    assertTrue(reported <= (nominal + 10000.0));\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  double subtotal=0.0;\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal+=pmfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal=cdfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  assertEquals(result.getRank(500000),0.5,0.01);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/HeapUpdateDoublesSketchTest.java",
+    "Start": 2693,
+    "Stop": 4396,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkEndToEnd"
+}

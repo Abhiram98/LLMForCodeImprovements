@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add input validation for 'sql' parameter",
+                "Change_Diff": "+ if (sql == null || sql.isEmpty()) {\n+   throw new IllegalArgumentException(\"The SQL query cannot be null or empty.\");\n+ }",
+                "Description": "The method should not proceed if the 'sql' parameter is null or empty. This will prevent any NullPointerException or SQLException that might occur later. This can be done by adding an if condition at the start of the method to check if 'sql' is null or empty and throw an IllegalArgumentException if it is.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Close resources in separate try-catch blocks",
+                "Change_Diff": "- JdbcPool.release(conn, statement, resultSet);\n+ try {\n+   if (resultSet != null) resultSet.close();\n+ } catch (SQLException e) {\n+   logger.error(\"Error closing ResultSet\", e);\n+ }\n+ try {\n+   if (statement != null) statement.close();\n+ } catch (SQLException e) {\n+   logger.error(\"Error closing Statement\", e);\n+ }\n+ try {\n+   if (conn != null) conn.close();\n+ } catch (SQLException e) {\n+   logger.error(\"Error closing Connection\", e);\n+ }",
+                "Description": "In the finally block, resources should be closed separately in their own try-catch blocks. This ensures that if one close operation fails, it doesn't prevent the others from being attempted. This can be done by enclosing each release() call in its own try-catch block.",
+                "Start": 21,
+                "End": 21
+            }
+        ],
+        "Final code": "public List<A> list(String sql,Object... params){\n  if (sql == null || sql.isEmpty()) {\n    throw new IllegalArgumentException(\"The SQL query cannot be null or empty.\");\n  }\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n  catch (Exception e) {\n    logger.error(\"sql error\",e);\n  }\n  finally {\n    try {\n      if (resultSet != null) resultSet.close();\n    } catch (SQLException e) {\n      logger.error(\"Error closing ResultSet\", e);\n    }\n    try {\n      if (statement != null) statement.close();\n    } catch (SQLException e) {\n      logger.error(\"Error closing Statement\", e);\n    }\n    try {\n      if (conn != null) conn.close();\n    } catch (SQLException e) {\n      logger.error(\"Error closing Connection\", e);\n    }\n  }\n  return beanList;\n}"
+    },
+    "Old_Method": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,resultSet);\n  }\n  return beanList;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 4628,
+    "Stop": 5587,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "list"
+}

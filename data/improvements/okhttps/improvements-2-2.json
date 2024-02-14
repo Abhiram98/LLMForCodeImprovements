@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce Cyclomatic Complexity",
+                "Change_Diff": "- private void doDownload(RandomAccessFile raFile) { ... } \n+ private void doDownload(RandomAccessFile raFile) { \n+     try { \n+         performDownload(raFile); \n+     } catch (IOException e) { \n+         handleIOException(e); \n+     } finally { \n+         cleanUpAfterDownload(); \n+     } \n+ }",
+                "Description": "The current method has too many nested if/while loops, which increases the cyclomatic complexity of the code, making it harder to understand and maintain. We should simplify this structure by breaking down the operations into smaller methods.",
+                "Start": 1,
+                "End": 45
+            },
+            {
+                "Improvement": "Use try-with-resources to handle resource management",
+                "Change_Diff": "- try { ... } finally { closeQuietly(raFile); closeQuietly(input); } \n+ try (RandomAccessFile raFile = new RandomAccessFile(file, \"rwd\"); InputStream input = sourceUrl.openStream()) { ... }",
+                "Description": "Java 7 introduced try-with-resources, which automatically closes the resources used within the try block. This can be used to simplify the code and make it more robust.",
+                "Start": 2,
+                "End": 45
+            }
+        ],
+        "Final code": "private void doDownload() { \n    try (RandomAccessFile raFile = new RandomAccessFile(file, \"rwd\"); InputStream input = sourceUrl.openStream()) { \n        performDownload(raFile); \n    } catch (IOException e) { \n        handleIOException(e); \n    } finally { \n        cleanUpAfterDownload(); \n    } \n} \n\nprivate void performDownload(RandomAccessFile raFile) throws IOException { ... } \n\nprivate void handleIOException(IOException e) { ... } \n\nprivate void cleanUpAfterDownload() { ... }"
+    },
+    "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+    "Start": 6005,
+    "Stop": 7715,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "doDownload"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce redundancy in initiating the builder",
+                "Change_Diff": "- HttpGraphQlClient.Builder<?> builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n+ private HttpGraphQlClient.Builder<?> initBuilderWithHeader(String headerValue) {\n+    return clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", headerValue)));\n+ }",
+                "Description": "Instead of repeating the initiation of `HttpGraphQlClient.Builder<?> builder` for each test case, use a helper method.",
+                "Start": 2,
+                "End": 16
+            },
+            {
+                "Improvement": "Reduce redundancy in executing the client and verifying the result",
+                "Change_Diff": "- client.document(DOCUMENT).execute().block(TIMEOUT);\n- assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n+ private void executeAndAssert(HttpGraphQlClient client, String... expectedHeaders) {\n+    client.document(DOCUMENT).execute().block(TIMEOUT);\n+    assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(expectedHeaders);\n+ }",
+                "Description": "Instead of repeating the execution of `client.document(DOCUMENT).execute().block(TIMEOUT);` and the assertion for each test case, use a helper method.",
+                "Start": 5,
+                "End": 14
+            }
+        ],
+        "Final code": "@Test void mutateWebTestClientViaConsumer(){\n  HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n\n  HttpGraphQlClient client=initBuilderWithHeader(\"one\").build();\n  executeAndAssert(client, \"one\");\n\n  client=initBuilderWithHeader(\"two\").build();\n  executeAndAssert(client, \"one\",\"two\");\n\n  client=initBuilderWithHeader(\"three\").build();\n  executeAndAssert(client, \"three\");\n}\n\nprivate HttpGraphQlClient.Builder<?> initBuilderWithHeader(String headerValue) {\n  return clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\", headerValue)));\n}\n\nprivate void executeAndAssert(HttpGraphQlClient client, String... expectedHeaders) {\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(expectedHeaders);\n}"
+    },
+    "Old_Method": "@Test void mutateWebTestClientViaConsumer(){\n  HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n  HttpGraphQlClient.Builder<?> builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n  HttpGraphQlClient client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n  HttpGraphQlClient.Builder<?> builder2=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n  client=builder2.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\",\"two\");\n  HttpGraphQlClient.Builder<?> builder3=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));\n  client=builder3.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/test/java/org/springframework/graphql/client/WebGraphQlClientBuilderTests.java",
+    "Start": 5152,
+    "Stop": 6358,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "mutateWebTestClientViaConsumer"
+}

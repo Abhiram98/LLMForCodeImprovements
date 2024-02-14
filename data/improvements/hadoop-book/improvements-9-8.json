@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract nested loops into separate methods",
+                "Change_Diff": "- for (int x=0; x < size; ++x) {\n...\n}\n- for (int y=0; y < size; ++y) {\n...\n}\n\n+ createColumnConstraints(model);\n+ createRowConstraints(model);\n+ createSquareConstraints(model);\n+ createCellConstraints(model);",
+                "Description": "The method 'makeModel()' has several nested loops. It would be a good idea to extract these loops into their own methods to make the code cleaner and more maintainable.",
+                "Start": 3,
+                "End": 25
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- for (int x=0; x < size; ++x) {\n...\n}\n- for (int y=0; y < size; ++y) {\n...\n}\n\n+ for (int colIndex=0; colIndex < size; ++colIndex) {...}\n+ for (int rowIndex=0; rowIndex < size; ++rowIndex) {...}",
+                "Description": "The variable names 'x' and 'y' are not very descriptive. It would be better to use more meaningful names that describe what these variables represent.",
+                "Start": 3,
+                "End": 27
+            },
+            {
+                "Improvement": "Replace magic number with constant",
+                "Change_Diff": "- boolean[] rowValues=new boolean[size * size * 4];\n\n+ final int NUMBER_OF_CONSTRAINTS = 4;\n+ boolean[] rowValues=new boolean[size * size * NUMBER_OF_CONSTRAINTS];",
+                "Description": "The number '4' is used in the line 'boolean[] rowValues=new boolean[size * size * 4]'. It would be better to replace this magic number with a named constant to improve readability.",
+                "Start": 25,
+                "End": 25
+            }
+        ],
+        "Final code": "private DancingLinks<ColumnName> makeModel(){\n  DancingLinks<ColumnName> model=new DancingLinks<ColumnName>();\n  createColumnConstraints(model);\n  createRowConstraints(model);\n  createSquareConstraints(model);\n  createCellConstraints(model);\n  final int NUMBER_OF_CONSTRAINTS = 4;\n  boolean[] rowValues=new boolean[size * size * NUMBER_OF_CONSTRAINTS];\n  for (int colIndex=0; colIndex < size; ++colIndex) {\n    for (int rowIndex=0; rowIndex < size; ++rowIndex) {\n      if (board[rowIndex][colIndex] == -1) {\n        for (int num=1; num <= size; ++num) {\n          model.addRow(generateRow(rowValues,colIndex,rowIndex,num));\n        }\n      }\n else {\n        model.addRow(generateRow(rowValues,colIndex,rowIndex,board[rowIndex][colIndex]));\n      }\n    }\n  }\n  return model;\n}\n\nprivate void createColumnConstraints(DancingLinks<ColumnName> model) {...}\nprivate void createRowConstraints(DancingLinks<ColumnName> model) {...}\nprivate void createSquareConstraints(DancingLinks<ColumnName> model) {...}\nprivate void createCellConstraints(DancingLinks<ColumnName> model) {...}"
+    },
+    "Old_Method": "private DancingLinks<ColumnName> makeModel(){\n  DancingLinks<ColumnName> model=new DancingLinks<ColumnName>();\n  for (int x=0; x < size; ++x) {\n    for (int num=1; num <= size; ++num) {\n      model.addColumn(new ColumnConstraint(num,x));\n    }\n  }\n  for (int y=0; y < size; ++y) {\n    for (int num=1; num <= size; ++num) {\n      model.addColumn(new RowConstraint(num,y));\n    }\n  }\n  for (int x=0; x < squareYSize; ++x) {\n    for (int y=0; y < squareXSize; ++y) {\n      for (int num=1; num <= size; ++num) {\n        model.addColumn(new SquareConstraint(num,x,y));\n      }\n    }\n  }\n  for (int x=0; x < size; ++x) {\n    for (int y=0; y < size; ++y) {\n      model.addColumn(new CellConstraint(x,y));\n    }\n  }\n  boolean[] rowValues=new boolean[size * size * 4];\n  for (int x=0; x < size; ++x) {\n    for (int y=0; y < size; ++y) {\n      if (board[y][x] == -1) {\n        for (int num=1; num <= size; ++num) {\n          model.addRow(generateRow(rowValues,x,y,num));\n        }\n      }\n else {\n        model.addRow(generateRow(rowValues,x,y,board[y][x]));\n      }\n    }\n  }\n  return model;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Sudoku.java",
+    "Start": 8366,
+    "Stop": 10077,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "makeModel"
+}

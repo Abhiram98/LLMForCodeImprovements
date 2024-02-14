@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace if-else statement with ternary operator",
+                "Change_Diff": "- if (i > args.length) {\n-     arg=null;\n- } else {\n-     arg=Context.jsToJava(args[i],method.getParameterTypes()[i]);\n- }\n+ arg = (i > args.length) ? null : Context.jsToJava(args[i],method.getParameterTypes()[i]);",
+                "Description": "The if-else statement inside the for loop can be replaced with a ternary operator for readability and brevity. A ternary operator is a one liner replacement for if-then-else statement and used a lot in java programming.",
+                "Start": 16,
+                "End": 21
+            },
+            {
+                "Improvement": "Extract method",
+                "Change_Diff": "- final Object[] realArgs=new Object[method.getParameterTypes().length];\n- for (int i=0; i < realArgs.length; i++) {\n-     final Object arg;\n-     arg = (i > args.length) ? null : Context.jsToJava(args[i],method.getParameterTypes()[i]);\n-     realArgs[i]=arg;\n- }\n- return method.invoke(applet,realArgs);\n+ final Object[] realArgs = convertArgsToJava(args, method);\n+ return invokeMethod(applet, method, realArgs);",
+                "Description": "The inner function call() has too many responsibilities, extract the conversion from JavaScript to Java objects to a new method. This will make the code more maintainable and readable.",
+                "Start": 8,
+                "End": 29
+            }
+        ],
+        "Final code": "private void createAppletMethodAndProperties() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  final Applet applet=appletNode.getApplet();\n  if (applet == null) {\n    return;\n  }\n  for (final Method method : applet.getClass().getMethods()) {\n    final Function f=new BaseFunction(){\n      @Override public Object call(final Context cx, final Scriptable scope, final Scriptable thisObj, final Object[] args){\n        final Object[] realArgs = convertArgsToJava(args, method);\n        try {\n          return invokeMethod(applet, method, realArgs);\n        } catch (final Exception e) {\n          throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n        }\n      }\n    };\n    ScriptableObject.defineProperty(this,method.getName(),f,ScriptableObject.READONLY);\n  }\n}\n\nprivate Object[] convertArgsToJava(final Object[] args, Method method) {\n  final Object[] realArgs = new Object[method.getParameterTypes().length];\n  for (int i = 0; i < realArgs.length; i++) {\n    final Object arg = (i > args.length) ? null : Context.jsToJava(args[i],method.getParameterTypes()[i]);\n    realArgs[i] = arg;\n  }\n  return realArgs;\n}\n\nprivate Object invokeMethod(Applet applet, Method method, Object[] realArgs) throws IllegalAccessException, InvocationTargetException {\n  return method.invoke(applet,realArgs);\n}"
+    },
+    "Old_Method": "private void createAppletMethodAndProperties() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  final Applet applet=appletNode.getApplet();\n  if (applet == null) {\n    return;\n  }\n  for (  final Method method : applet.getClass().getMethods()) {\n    final Function f=new BaseFunction(){\n      @Override public Object call(      final Context cx,      final Scriptable scope,      final Scriptable thisObj,      final Object[] args){\n        final Object[] realArgs=new Object[method.getParameterTypes().length];\n        for (int i=0; i < realArgs.length; i++) {\n          final Object arg;\n          if (i > args.length) {\n            arg=null;\n          }\n else {\n            arg=Context.jsToJava(args[i],method.getParameterTypes()[i]);\n          }\n          realArgs[i]=arg;\n        }\n        try {\n          return method.invoke(applet,realArgs);\n        }\n catch (        final Exception e) {\n          throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n        }\n      }\n    }\n;\n    ScriptableObject.defineProperty(this,method.getName(),f,ScriptableObject.READONLY);\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/html/HTMLObjectElement.java",
+    "Start": 3134,
+    "Stop": 4723,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "createAppletMethodAndProperties"
+}

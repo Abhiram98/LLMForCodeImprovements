@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace magic number with constant variable",
+                "Change_Diff": "- if (rand.nextInt() % 3 == 0) {\n+ if (rand.nextInt() % DIVISOR_FOR_PERMANENT_ELEMENTS == 0) {",
+                "Description": "The magic number 3 in the if condition is not self-explanatory. It's better to replace it with a constant variable that explains its purpose.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Remove unused function call",
+                "Change_Diff": "- System.currentTimeMillis();\n+ // Removed unused function call",
+                "Description": "The call to `System.currentTimeMillis();` is not used for anything and should be removed to avoid confusion.",
+                "Start": 18,
+                "End": 18
+            },
+            {
+                "Improvement": "Use Java 8 predicates for collection filtering",
+                "Change_Diff": "- for (Object test : testSetWeak) {\n-     assertTrue(permanentElements.contains(test));\n+ assertTrue(testSetWeak.stream().allMatch(permanentElements::contains));",
+                "Description": "Instead of looping through `testSetWeak` and calling `contains()` on `permanentElements` for each element, use Java 8's `Stream` API to filter `testSetWeak` based on whether `permanentElements` contains the element.",
+                "Start": 25,
+                "End": 27
+            }
+        ],
+        "Final code": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  final int DIVISOR_FOR_PERMANENT_ELEMENTS = 3;\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % DIVISOR_FOR_PERMANENT_ELEMENTS == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (Object testObject : testSetWeak) {\n        // Removed unused function call\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  assertTrue(testSetWeak.stream().allMatch(permanentElements::contains));\n}"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

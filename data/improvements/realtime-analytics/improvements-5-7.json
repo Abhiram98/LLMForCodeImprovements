@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use String.format for string concatenation",
+                "Change_Diff": "- builder.append(\"MemoryManager-\");\n- builder.append(entry.getKey());\n- builder.append(\":\");\n- builder.append(\"[\");\n- builder.append(\"FreeMemory:\");\n- builder.append(manager.getFreeMemory());\n- builder.append(\";\");\n- builder.append(\"MaxMemory:\");\n- builder.append(manager.getMaxMemory());\n- builder.append(\";\");\n- builder.append(\"ReservedMemory:\");\n- builder.append(manager.getReservedMemory());\n- builder.append(\";\");\n- builder.append(\"UsedMemory:\");\n- builder.append(manager.getUsedMemory());\n- builder.append(\";\");\n- builder.append(\"OutOfMeomoryErrorCount:\");\n- builder.append(manager.getOOMErrorCount());\n- builder.append(\"]\");\n+ builder.append(String.format(\"MemoryManager-%s:[FreeMemory:%s;MaxMemory:%s;ReservedMemory:%s;UsedMemory:%s;OutOfMeomoryErrorCount:%s]\", entry.getKey(), manager.getFreeMemory(), manager.getMaxMemory(), manager.getReservedMemory(), manager.getUsedMemory(), manager.getOOMErrorCount()));",
+                "Description": "Instead of using StringBuilder for constructing the string, use String.format. It improves readability and maintainability of the code.",
+                "Start": 3,
+                "End": 26
+            },
+            {
+                "Improvement": "Use try-with-resources to ensure proper resource management",
+                "Change_Diff": "- StringBuilder builder=new StringBuilder();\n+ try (StringBuilder builder=new StringBuilder()) {",
+                "Description": "Enclose your code within a try-with-resources statement to ensure that each resource is closed at the end of the statement. This will help to avoid memory leaks.",
+                "Start": 2,
+                "End": 26
+            }
+        ],
+        "Final code": "public String getInternalOffHeapManagerInfo(){\n  try (StringBuilder builder=new StringBuilder()) {\n    builder.append(\"InternalOffHeapManagerInfo:\");\n    Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n    for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n      OffHeapMemoryManager manager=entry.getValue();\n      if (manager != null) {\n        builder.append(String.format(\"MemoryManager-%s:[FreeMemory:%s;MaxMemory:%s;ReservedMemory:%s;UsedMemory:%s;OutOfMeomoryErrorCount:%s]\", entry.getKey(), manager.getFreeMemory(), manager.getMaxMemory(), manager.getReservedMemory(), manager.getUsedMemory(), manager.getOOMErrorCount()));\n      }\n    }\n    return builder.toString();\n  }\n}"
+    },
+    "Old_Method": "public String getInternalOffHeapManagerInfo(){\n  StringBuilder builder=new StringBuilder();\n  builder.append(\"InternalOffHeapManagerInfo:\");\n  Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n  for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n    builder.append(\"MemoryManager-\");\n    builder.append(entry.getKey());\n    builder.append(\":\");\n    OffHeapMemoryManager manager=entry.getValue();\n    if (manager != null) {\n      builder.append(\"[\");\n      builder.append(\"FreeMemory:\");\n      builder.append(manager.getFreeMemory());\n      builder.append(\";\");\n      builder.append(\"MaxMemory:\");\n      builder.append(manager.getMaxMemory());\n      builder.append(\";\");\n      builder.append(\"ReservedMemory:\");\n      builder.append(manager.getReservedMemory());\n      builder.append(\";\");\n      builder.append(\"UsedMemory:\");\n      builder.append(manager.getUsedMemory());\n      builder.append(\";\");\n      builder.append(\"OutOfMeomoryErrorCount:\");\n      builder.append(manager.getOOMErrorCount());\n      builder.append(\"]\");\n    }\n  }\n  return builder.toString();\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 27123,
+    "Stop": 28572,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getInternalOffHeapManagerInfo"
+}

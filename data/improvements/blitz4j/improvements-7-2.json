@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for Thread management",
+                "Change_Diff": "- Thread t1=new Thread(new Runnable(){\n- public void run(){\n...\n- }\n- }\n- );\n- tArray[i]=t1;\n+ try (Thread t1 = new Thread(new Runnable(){\n+ public void run() {\n...\n+ }) {\n+ tArray[i]=t1;\n+ }",
+                "Description": "Instead of manually managing the lifecycle of each Thread, consider using try-with-resources, which ensures that each Thread is properly closed after it finishes executing. This can help prevent resource leaks.",
+                "Start": 10,
+                "End": 43
+            },
+            {
+                "Improvement": "Extract repetitive code into methods",
+                "Change_Diff": "- Thread t1=new Thread(new Runnable(){\n- public void run(){\n...\n- }\n- }\n- );\n- tArray[i]=t1;\n+ tArray[i] = createThread();",
+                "Description": "The code that creates new Threads and runs certain logic is repetitive. It's a good practice to extract this repetitive code into a separate method to enhance readability and maintainability of the code.",
+                "Start": 10,
+                "End": 43
+            },
+            {
+                "Improvement": "Extract magic numbers into constants",
+                "Change_Diff": "- int noOfThreads=100;\n- while (i < 1000) {\n- props.setProperty(\"batcher.com.netflix.logging.AsyncAppender.stdout.waitTimeinMillis\",\"120000\");\n+ static final int NUMBER_OF_THREADS = 100;\n+ static final int ITERATIONS = 1000;\n+ static final int WAIT_TIME_MILLIS = 120000;\n+ int noOfThreads=NUMBER_OF_THREADS;\n+ while (i < ITERATIONS) {\n+ props.setProperty(\"batcher.com.netflix.logging.AsyncAppender.stdout.waitTimeinMillis\", String.valueOf(WAIT_TIME_MILLIS));",
+                "Description": "The code contains magic numbers (e.g., 100, 1000, 120000). It's a good practice to replace these with named constants to improve code readability.",
+                "Start": 12,
+                "End": 33
+            },
+            {
+                "Improvement": "Replace printStackTrace with proper logging",
+                "Change_Diff": "- e.printStackTrace();\n+ Logger.getLogger(TestBlitz4j.class).error(\"Error message\", e);",
+                "Description": "Using printStackTrace() is not recommended because it prints to standard error and can be considered poor error handling. Consider using a logger to log the error message.",
+                "Start": 29,
+                "End": 31
+            }
+        ],
+        "Final code": "To be implemented based on the above-mentioned improvements"
+    },
+    "Old_Method": "@Test public void testAsyncAppendersWithWhiteSpace() throws Exception {\n  props.setProperty(\"log4j.rootCategory\",\"OFF\");\n  props.setProperty(\"log4j.logger.com.netflix.blitz4j.TestBlitz4j\",\"INFO, stdout\");\n  props.setProperty(\"log4j.logger.com.netflix.blitz4j.TestBlitz4j$1\",\"INFO,stdout\");\n  props.setProperty(\"log4j.appender.stdout\",\"org.apache.log4j.ConsoleAppender\");\n  props.setProperty(\"log4j.appender.stdout.layout\",\"com.netflix.logging.log4jAdapter.NFPatternLayout\");\n  props.setProperty(\"log4j.appender.stdout.layout.ConversionPattern\",\"%d %-5p %C:%L [%t] [%M] %m%n\");\n  props.setProperty(\"log4j.logger.asyncAppenders\",\"INFO,stdout\");\n  props.setProperty(\"batcher.com.netflix.logging.AsyncAppender.stdout.waitTimeinMillis\",\"120000\");\n  LoggingConfiguration.getInstance().configure(props);\n  int noOfThreads=100;\n  Thread[] tArray=new Thread[noOfThreads];\n  for (int i=0; i < noOfThreads; i++) {\n    Thread t1=new Thread(new Runnable(){\n      public void run(){\n        int i=0;\n        while (i < 1000) {\n          i++;\n          Logger slflogger=LoggerFactory.getLogger(TestBlitz4j.class);\n          slflogger.info(\"Testing named log with this string {}\",\"Test String\");\n          Thread.yield();\n          try {\n            Thread.sleep(10);\n          }\n catch (          InterruptedException e) {\n            e.printStackTrace();\n          }\n        }\n      }\n    }\n);\n    tArray[i]=t1;\n  }\n  Thread t2=new Thread(new Runnable(){\n    public void run(){\n      int i=0;\n      while (i <= 1000) {\n        try {\n          ConfigurationManager.getConfigInstance().setProperty(\"log4j.junk\",(i++) + \"\");\n          Thread.sleep(10);\n          Thread.yield();\n        }\n catch (        Exception e) {\n          e.printStackTrace();\n        }\n      }\n    }\n  }\n);\n  for (int i=0; i < noOfThreads; i++) {\n    tArray[i].start();\n  }\n  t2.start();\n  t2.join();\n  for (int i=0; i < noOfThreads; i++) {\n    tArray[i].join();\n  }\n  int numSummarizedConsole=0;\n  try {\n    numSummarizedConsole=Integer.valueOf(getMonitoringData(consoleSummarizeEvent));\n  }\n catch (  Throwable e) {\n  }\n  int numAddedConsole=Integer.valueOf(getMonitoringData(consoleEventsProcessed));\n  System.out.println(\"The number of messages added to async batcher console: \" + numAddedConsole);\n  System.out.println(\"The number of messages summarized from async batcher console : \" + numSummarizedConsole);\n  System.out.println(\"Total number of messages to asyncBatcher console: \" + (numAddedConsole + numSummarizedConsole));\n  Assert.assertTrue(((numAddedConsole + numSummarizedConsole) >= 100000));\n  LoggingConfiguration.getInstance().stop();\n}\n",
+    "File_Path": "blitz4j/src/test/java/com/netflix/blitz4j/TestBlitz4j.java",
+    "Start": 5898,
+    "Stop": 9749,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "testAsyncAppendersWithWhiteSpace"
+}

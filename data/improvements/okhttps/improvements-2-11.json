@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor the method to reduce its complexity",
+                "Change_Diff": "- private void doDownload(RandomAccessFile raFile){\n+ private void doDownload(RandomAccessFile raFile) throws IOException {\n+     setFilePosition(raFile);\n+     downloadFile(raFile);\n+     closeResources(raFile, input);\n+     handleDownloadStatus();\n+ }",
+                "Description": "The method `doDownload` is too long and complex, which makes it difficult to read and maintain. We should break it down into smaller, more manageable methods. This will improve readability and make the code easier to test.",
+                "Start": 1,
+                "End": 46
+            },
+            {
+                "Improvement": "Add necessary comments",
+                "Change_Diff": "+ // Method to handle the file download",
+                "Description": "Few parts of the code are complex and therefore, adding comments to the code will provide more context about what is happening. It will make the code easier to understand for other developers.",
+                "Start": 1,
+                "End": 46
+            }
+        ],
+        "Final code": "private void doDownload(RandomAccessFile raFile) throws IOException {\n    setFilePosition(raFile);\n    downloadFile(raFile);\n    closeResources(raFile, input);\n    handleDownloadStatus();\n}\n\nprivate void setFilePosition(RandomAccessFile raFile) throws IOException {\n    if (appended && seekBytes > 0) {\n        raFile.seek(seekBytes);\n    }\n}\n\nprivate void downloadFile(RandomAccessFile raFile) throws IOException {\n    while (status != Status.CANCELED && status != Status.DONE) {\n        if (status == Status.DOWNLOADING) {\n            byte[] buff=new byte[buffSize];\n            int len;\n            while ((len=input.read(buff)) != -1) {\n                raFile.write(buff,0,len);\n                doneBytes+=len;\n                if (status == Status.CANCELED || status == Status.PAUSED) {\n                    break;\n                }\n            }\n            if (len == -1) {\n                synchronized (lock) {\n                    if (status != Status.CANCELED) {\n                        status=Status.DONE;\n                    }\n                }\n            }\n        }\n    }\n}\n\nprivate void closeResources(RandomAccessFile raFile, InputStream input) {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n        Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n}\n\nprivate void handleDownloadStatus() {\n    if (status == Status.DONE) {\n        fireOnSuccess();\n    }\n}"
+    },
+    "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+    "Start": 6005,
+    "Stop": 7715,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "doDownload"
+}

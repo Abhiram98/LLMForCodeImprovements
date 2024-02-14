@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of Generics",
+                "Change_Diff": "- List<Mono<Object>> monoList=new ArrayList<>();\n+ List<Mono<Object>> monoList=new ArrayList<Mono<Object>>();",
+                "Description": "The use of generics in the ArrayList declaration will avoid the need to do the unchecked cast. This will make the code safer, eliminating the potential for a ClassCastException at runtime.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Use of Java 8 stream API",
+                "Change_Diff": "- for (  Object arg : args) {\n-    Mono<Object> argMono=(arg instanceof Mono ? (Mono<Object>)arg : Mono.justOrEmpty(arg));\n-    monoList.add(argMono.defaultIfEmpty(NO_VALUE));\n-  }\n+ Arrays.stream(args)\n+        .map(arg -> (arg instanceof Mono ? (Mono<Object>) arg : Mono.justOrEmpty(arg)).defaultIfEmpty(NO_VALUE))\n+        .collect(Collectors.toList());",
+                "Description": "Instead of using the traditional for-each loop to convert array elements into Mono and add them to the list, we can use Java 8 stream API to achieve the same in a more readable and efficient way.",
+                "Start": 5,
+                "End": 8
+            },
+            {
+                "Improvement": "Use of array instead of varargs in Mono.zip",
+                "Change_Diff": "- return Mono.zip(monoList,values -> {\n+ return Mono.zip(monoList.toArray(new Mono[0]),values -> {",
+                "Description": "Mono.zip method accepts Iterable of Publisher extends T> as well as varargs of Publisher extends T>. Since we already have a List, it's better to use the Iterable version to avoid unnecessary array creation.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "protected Mono<Object[]> toArgsMono(Object[] args){\n  List<Mono<Object>> monoList= Arrays.stream(args)\n        .map(arg -> (arg instanceof Mono ? (Mono<Object>) arg : Mono.justOrEmpty(arg)).defaultIfEmpty(NO_VALUE))\n        .collect(Collectors.toList());\n  return Mono.zip(monoList.toArray(new Mono[0]),values -> {\n    for (int i=0; i < values.length; i++) {\n      if (values[i] == NO_VALUE) {\n        values[i]=null;\n      }\n    }\n    return values;\n  }\n);}"
+    },
+    "Old_Method": "/** \n * Use this method to resolve the arguments asynchronously. This is only useful when at least one of the values is a  {@link Mono}\n */\n@SuppressWarnings(\"unchecked\") protected Mono<Object[]> toArgsMono(Object[] args){\n  List<Mono<Object>> monoList=new ArrayList<>();\n  for (  Object arg : args) {\n    Mono<Object> argMono=(arg instanceof Mono ? (Mono<Object>)arg : Mono.justOrEmpty(arg));\n    monoList.add(argMono.defaultIfEmpty(NO_VALUE));\n  }\n  return Mono.zip(monoList,values -> {\n    for (int i=0; i < values.length; i++) {\n      if (values[i] == NO_VALUE) {\n        values[i]=null;\n      }\n    }\n    return values;\n  }\n);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/InvocableHandlerMethodSupport.java",
+    "Start": 4964,
+    "Stop": 5600,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "toArgsMono"
+}

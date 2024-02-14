@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract constants",
+                "Change_Diff": "- long size=3 * 1024 * 1024;\n- toFile(\"D:/download/test.zip\")\n+ private static final long SIZE = 3 * 1024 * 1024;\n+ private static final String FILE_PATH = \"D:/download/test.zip\";\n+ SIZE\n+ toFile(FILE_PATH)",
+                "Description": "The size calculation and the file path are hardcoded. It would be better to extract them as constants because they are not going to change and it would be easier to modify them in the future if necessary.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Improve method readability",
+                "Change_Diff": "- HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n-     if (end < totalSize) {\n-       download(totalSize,index + 1);\n-     }\n- else {\n-       println(\"下载完成\");\n-     }\n-   }\n- ).start();\n+ downloadFile(start, end);\n+ checkDownloadStatus(end, totalSize, index);",
+                "Description": "The download method is doing too many things at once, making it harder to read and maintain. It would be better to separate some of the tasks into their own methods.",
+                "Start": 2,
+                "End": 15
+            }
+        ],
+        "Final code": "private static final long SIZE = 3 * 1024 * 1024;\nprivate static final String FILE_PATH = \"D:/download/test.zip\";\n\nstatic void download(long totalSize,int index){\n  long start=index * SIZE;\n  long end=Math.min(start + SIZE,totalSize);\n  downloadFile(start, end);\n  checkDownloadStatus(end, totalSize, index);\n}\n\nstatic void downloadFile(long start, long end) {\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(FILE_PATH).setAppended().start();\n}\n\nstatic void checkDownloadStatus(long end, long totalSize, int index) {\n  if (end < totalSize) {\n    download(totalSize,index + 1);\n  } else {\n    println(\"下载完成\");\n  }\n}"
+    },
+    "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+    "Start": 680,
+    "Stop": 1474,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "download"
+}

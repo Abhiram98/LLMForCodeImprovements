@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use more expressive variable names",
+                "Change_Diff": "- Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n+ Bytes testBytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);",
+                "Description": "A variable should be a noun, such as 'buffer', 'index', or 'customerAddress'. Avoid single-character names and abbreviations. Variable names should indicate the role of the variable in the computation.",
+                "Start": 1,
+                "End": 30
+            },
+            {
+                "Improvement": "Avoid magic numbers",
+                "Change_Diff": "- assertTrue(bytes.bitAt(17));\n+ final int TEST_BIT_INDEX = 17;\n+ assertTrue(bytes.bitAt(TEST_BIT_INDEX));",
+                "Description": "Magic numbers are numeric values that appear in the source code without clear meaning. They should be replaced with named constants to improve code readability.",
+                "Start": 1,
+                "End": 30
+            },
+            {
+                "Improvement": "Use parameterized test instead of multiple similar assertions",
+                "Change_Diff": "- assertFalse(Bytes.from((byte)8).bitAt(0));\n  assertFalse(Bytes.from((byte)8).bitAt(1));\n  assertFalse(Bytes.from((byte)8).bitAt(2));\n  assertTrue(Bytes.from((byte)8).bitAt(3));\n  assertFalse(Bytes.from((byte)8).bitAt(4));\n+ for (int i = 0; i < 5; i++) {\n+   if (i == 3) {\n+     assertTrue(Bytes.from((byte)8).bitAt(i));\n+   } else {\n+     assertFalse(Bytes.from((byte)8).bitAt(i));\n+   }\n+ }",
+                "Description": "Instead of having multiple assertions that are very similar, it's more efficient and easier to maintain if we use a parameterized test. This way, we would only need to write the logic of the test once and simply provide different inputs.",
+                "Start": 1,
+                "End": 30
+            }
+        ],
+        "Final code": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  for (int i = 0; i < 5; i++) {\n    if (i == 3) {\n      assertTrue(Bytes.from((byte)8).bitAt(i));\n    } else {\n      assertFalse(Bytes.from((byte)8).bitAt(i));\n    }\n  }\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n  catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n  catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes testBytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  final int TEST_BIT_INDEX = 17;\n  assertTrue(testBytes.bitAt(0));\n  assertTrue(testBytes.bitAt(TEST_BIT_INDEX));\n  assertFalse(testBytes.bitAt(8));\n  assertFalse(testBytes.bitAt(31));\n}"
+    },
+    "Old_Method": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  assertFalse(Bytes.from((byte)8).bitAt(0));\n  assertFalse(Bytes.from((byte)8).bitAt(1));\n  assertFalse(Bytes.from((byte)8).bitAt(2));\n  assertTrue(Bytes.from((byte)8).bitAt(3));\n  assertFalse(Bytes.from((byte)8).bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BytesMiscTest.java",
+    "Start": 12738,
+    "Stop": 14127,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "bitAt"
+}

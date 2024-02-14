@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace System.out.println() with a logging framework",
+                "Change_Diff": "- System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n- e.printStackTrace(System.out);\n- System.out.println();\n+ Logger logger = LogManager.getLogger();\n+ logger.error(\"retry[\" + t.incrementAndGet() + \"] exception: \", e);",
+                "Description": "Using print statements for logging purposes is a bad practice as it's not very flexible and doesn't provide any control over where the output goes, among other things. It would be better to replace System.out.println() statements with a logging framework like log4j or SLF4J.",
+                "Start": 8,
+                "End": 11
+            },
+            {
+                "Improvement": "Avoid rethrowing exceptions",
+                "Change_Diff": "- try {\n-   return callable.call();\n- }\n- catch (    final Exception e) {\n-   Logger logger = LogManager.getLogger();\n-   logger.error(\"retry[\" + t.incrementAndGet() + \"] exception: \", e);\n-   throw e;\n- }\n+ return callable.call();",
+                "Description": "The method catches exceptions only to rethrow them immediately. This can obfuscate the original source of the error and make debugging more difficult. It would be better to remove the try-catch block and let the exception propagate up the call stack naturally.",
+                "Start": 7,
+                "End": 13
+            }
+        ],
+        "Final code": "protected final <T>T retry(final Context context,final Callable<T> callable) {\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> callable.call();\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n  catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}"
+    },
+    "Old_Method": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (    final Exception e) {\n      System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n      e.printStackTrace(System.out);\n      System.out.println();\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ATest.java",
+    "Start": 555,
+    "Stop": 1605,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "retry"
+}

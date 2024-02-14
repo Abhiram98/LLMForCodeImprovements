@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant 'final' keywords",
+                "Change_Diff": "- final Context context=new Context();\n- final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n- final String stackName=\"s3-virusscan-\" + this.random8String();\n- final String bucketName=\"s3-virusscan-\" + this.random8String();\n- final InfectedFileCache cache=new InfectedFileCache();\n+ Context context=new Context();\n+ String vpcStackName=\"vpc-2azs-\" + this.random8String();\n+ String stackName=\"s3-virusscan-\" + this.random8String();\n+ String bucketName=\"s3-virusscan-\" + this.random8String();\n+ InfectedFileCache cache=new InfectedFileCache();",
+                "Description": "In the method, the 'final' keyword is used with local variables, which is not necessary. Its usage can be restricted to instance variables that you want to make as constants. It will also make the code cleaner and easier to read.",
+                "Start": 2,
+                "End": 5
+            },
+            {
+                "Improvement": "Handle exceptions in a more granular way",
+                "Change_Diff": "- catch (final RuntimeException e) {\n+ catch (SpecificException1 | SpecificException2 e) {",
+                "Description": "Currently, all exceptions are being caught as 'RuntimeException' which is very generic. It would be better to catch specific exceptions that can be thrown by the method calls in the try block. This would also allow you to handle different exceptions in different ways if needed.",
+                "Start": 18,
+                "End": 25
+            }
+        ],
+        "Final code": "@Test public void test(){\n  Context context=new Context();\n  String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  String stackName=\"s3-virusscan-\" + this.random8String();\n  String bucketName=\"s3-virusscan-\" + this.random8String();\n  InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n        this.retry(context,() -> {\n          long count=this.countBucket(bucketName);\n          if (count != 0) {\n            throw new RuntimeException(\"there are \" + count + \" infected files left\");\n          }\n          return false;\n        }\n);\n      } catch (SpecificException1 | SpecificException2 e) {\n        List<String> objects=this.listBucket(bucketName,100);\n        System.out.println(\"Remaining objects:\");\n        for (String object : objects) {\n          System.out.println(object);\n        }\n        throw e;\n      } finally {\n        this.deleteBucket(context,bucketName);\n      }\n    } finally {\n      this.deleteStack(context,stackName);\n    }\n  } finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}"
+    },
+    "Old_Method": "@Test public void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n        this.retry(context,() -> {\n          final long count=this.countBucket(bucketName);\n          if (count != 0) {\n            throw new RuntimeException(\"there are \" + count + \" infected files left\");\n          }\n          return false;\n        }\n);\n      }\n catch (      final RuntimeException e) {\n        final List<String> objects=this.listBucket(bucketName,100);\n        System.out.println(\"Remaining objects:\");\n        for (        final String object : objects) {\n          System.out.println(object);\n        }\n        throw e;\n      }\n finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestRealworldFiles.java",
+    "Start": 247,
+    "Stop": 2293,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "test"
+}

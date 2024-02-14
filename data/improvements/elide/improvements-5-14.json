@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use switch statement instead of multiple if-else statements",
+            "Change_Diff": "- if (lowerCasePath.endsWith(\"db/variables.hjson\")) {...}\n- else if (lowerCasePath.endsWith(\"models/variables.hjson\")) {...}\n- else if (lowerCasePath.equals(\"models/security.hjson\")) {...}\n- else if (DB_FILE.matcher(lowerCasePath).matches()) {...}\n- else if (TABLE_FILE.matcher(lowerCasePath).matches()) {...}\n- else if (NAME_SPACE_FILE.matcher(lowerCasePath).matches()) {...}\n- else {...}\n+ switch (categorizePath(lowerCasePath)) {...}",
+            "Description": "The multiple if-else statements can be replaced by a switch statement. This will make the code easier to read and maintain. In this case, since we can't switch on the results of multiple conditions directly, we'll create a helper method to categorize the path into a string corresponding to the type, then switch on that string.",
+            "Start": 3,
+            "End": 15
+        }],
+        "Final code": "public static ConfigFile.ConfigFileType toType(String path){\n  String lowerCasePath=path.toLowerCase(Locale.ROOT);\n  switch (categorizePath(lowerCasePath)) {\n    case \"VARIABLE\":\n      return ConfigFile.ConfigFileType.VARIABLE;\n    case \"SECURITY\":\n      return ConfigFile.ConfigFileType.SECURITY;\n    case \"DATABASE\":\n      return ConfigFile.ConfigFileType.DATABASE;\n    case \"TABLE\":\n      return ConfigFile.ConfigFileType.TABLE;\n    case \"NAMESPACE\":\n      return ConfigFile.ConfigFileType.NAMESPACE;\n    default:\n      return ConfigFile.ConfigFileType.UNKNOWN;\n  }\n}\n\nprivate static String categorizePath(String path) {\n  if (path.endsWith(\"db/variables.hjson\") || path.endsWith(\"models/variables.hjson\")) {\n    return \"VARIABLE\";\n  } else if (path.equals(\"models/security.hjson\")) {\n    return \"SECURITY\";\n  } else if (DB_FILE.matcher(path).matches()) {\n    return \"DATABASE\";\n  } else if (TABLE_FILE.matcher(path).matches()) {\n    return \"TABLE\";\n  } else if (NAME_SPACE_FILE.matcher(path).matches()) {\n    return \"NAMESPACE\";\n  } else {\n    return \"UNKNOWN\";\n  }\n}"
+    },
+    "Old_Method": "public static ConfigFile.ConfigFileType toType(String path){\n  String lowerCasePath=path.toLowerCase(Locale.ROOT);\n  if (lowerCasePath.endsWith(\"db/variables.hjson\")) {\n    return ConfigFile.ConfigFileType.VARIABLE;\n  }\n else   if (lowerCasePath.endsWith(\"models/variables.hjson\")) {\n    return ConfigFile.ConfigFileType.VARIABLE;\n  }\n else   if (lowerCasePath.equals(\"models/security.hjson\")) {\n    return ConfigFile.ConfigFileType.SECURITY;\n  }\n else   if (DB_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.DATABASE;\n  }\n else   if (TABLE_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.TABLE;\n  }\n else   if (NAME_SPACE_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.NAMESPACE;\n  }\n else {\n    return ConfigFile.ConfigFileType.UNKNOWN;\n  }\n}\n",
+    "File_Path": "elide/elide-model-config/src/main/java/com/yahoo/elide/modelconfig/io/FileLoader.java",
+    "Start": 6753,
+    "Stop": 7690,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "toType"
+}

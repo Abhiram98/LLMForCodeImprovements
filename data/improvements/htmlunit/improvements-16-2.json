@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Eliminate duplicate code",
+                "Change_Diff": "- List<WebWindow> windows=new ArrayList<>(windows_);\n- for (final WebWindow window : windows) { ... /* repeated logic */ ... } \n- windows=new ArrayList<>(windows_);\n- for (final WebWindow window : windows) { ... /* repeated logic */ ... }",
+                "Description": "The same logic is repeated twice for closing the windows. This can be simplified by removing the duplicate code block.",
+                "Start": 7,
+                "End": 40
+            },
+            {
+                "Improvement": "Replace type checking with polymorphism",
+                "Change_Diff": "- if (window instanceof TopLevelWindow) { ... \n- else if (window instanceof DialogWindow) { ... } \n+ window.close();",
+                "Description": "Currently, the code checks the type of each window and calls different close methods accordingly. It would be better to define a common interface or superclass for TopLevelWindow and DialogWindow that includes a close method, allowing us to treat all windows the same way.",
+                "Start": 11,
+                "End": 39
+            }
+        ],
+        "Final code": "public void close() {\n  if (scriptEngine_ != null) {\n    scriptEngine_.prepareShutdown();\n  }\n  currentWindowTracker_ = new CurrentWindowTracker(this, false);\n  for (final WebWindow window : windows_) {\n    try {\n      window.close();\n    } catch (final Exception e) {\n      LOG.error(\"Exception while closing a window\", e);\n    }\n  }\n  // ... rest of the original code ...\n}"
+    },
+    "Old_Method": "/** \n * Closes all opened windows, stopping all background JavaScript processing. The WebClient is not really usable after this - you have to create a new one or use WebClient.reset() instead. <p> {@inheritDoc}\n */\n@Override public void close(){\n  if (scriptEngine_ != null) {\n    scriptEngine_.prepareShutdown();\n  }\n  currentWindowTracker_=new CurrentWindowTracker(this,false);\n  List<WebWindow> windows=new ArrayList<>(windows_);\n  for (  final WebWindow window : windows) {\n    if (window instanceof TopLevelWindow) {\n      final TopLevelWindow topLevelWindow=(TopLevelWindow)window;\n      try {\n        topLevelWindow.close(true);\n      }\n catch (      final Exception e) {\n        LOG.error(\"Exception while closing a TopLevelWindow\",e);\n      }\n    }\n else     if (window instanceof DialogWindow) {\n      final DialogWindow dialogWindow=(DialogWindow)window;\n      try {\n        dialogWindow.close();\n      }\n catch (      final Exception e) {\n        LOG.error(\"Exception while closing a DialogWindow\",e);\n      }\n    }\n  }\n  windows=new ArrayList<>(windows_);\n  for (  final WebWindow window : windows) {\n    if (window instanceof TopLevelWindow) {\n      final TopLevelWindow topLevelWindow=(TopLevelWindow)window;\n      try {\n        topLevelWindow.close(true);\n      }\n catch (      final Exception e) {\n        LOG.error(\"Exception while closing a TopLevelWindow\",e);\n      }\n    }\n else     if (window instanceof DialogWindow) {\n      final DialogWindow dialogWindow=(DialogWindow)window;\n      try {\n        dialogWindow.close();\n      }\n catch (      final Exception e) {\n        LOG.error(\"Exception while closing a DialogWindow\",e);\n      }\n    }\n  }\n  if (topLevelWindows_.size() > 0) {\n    LOG.error(\"Sill \" + topLevelWindows_.size() + \" top level windows are open. Please report this error!\");\n    topLevelWindows_.clear();\n  }\n  if (windows_.size() > 0) {\n    LOG.error(\"Sill \" + windows_.size() + \" windows are open. Please report this error!\");\n    windows_.clear();\n  }\n  currentWindow_=null;\n  ThreadDeath toThrow=null;\n  if (scriptEngine_ != null) {\n    try {\n      scriptEngine_.shutdown();\n    }\n catch (    final ThreadDeath td) {\n      toThrow=td;\n    }\ncatch (    final Exception e) {\n      LOG.error(\"Exception while shutdown the scriptEngine\",e);\n    }\n  }\n  scriptEngine_=null;\n  if (webConnection_ != null) {\n    try {\n      webConnection_.close();\n    }\n catch (    final Exception e) {\n      LOG.error(\"Exception while closing the connection\",e);\n    }\n  }\n  webConnection_=null;\nsynchronized (this) {\n    if (executor_ != null) {\n      try {\n        executor_.shutdownNow();\n      }\n catch (      final Exception e) {\n        LOG.error(\"Exception while shutdown the executor service\",e);\n      }\n    }\n  }\n  executor_=null;\n  msxmlActiveXObjectFactory_=null;\n  cache_.clear();\n  if (toThrow != null) {\n    throw toThrow;\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/WebClient.java",
+    "Start": 95255,
+    "Stop": 99605,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "close"
+}

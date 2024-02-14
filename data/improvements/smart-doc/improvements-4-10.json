@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract hard-coded values to constants or configuration files",
+                "Change_Diff": "- config.setServerUrl(\"http://127.0.0.1:8899\");\n- config.setOpenUrl(\"http://localhost:7700/api\");\n- config.setAppToken(\"be4211613a734b45888c075741680e49\");\n- config.setDebugEnvName(\"测试环境\");\n- config.setLanguage(DocLanguage.CHINESE);\n- config.setStyle(\"randomLight\");\n- config.setOutPath(\"D:\\\\smart-doc\\\\docs\\\\jmx1\");\n- config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\\\smart-doc\\\\test-project\"));\n- config.setPackageFilters(\"com.power.doc.controller.*\");\n- config.setBaseDir(\"D:\\\\smart-doc\\\\test-project\\\\smart-doc-example-cn-master\");\n- config.setCodePath(\"/src/main/java\");\n+ config.setServerUrl(SERVER_URL);\n+ config.setOpenUrl(OPEN_URL);\n+ config.setAppToken(APP_TOKEN);\n+ config.setDebugEnvName(DEBUG_ENV_NAME);\n+ config.setLanguage(LANGUAGE);\n+ config.setStyle(STYLE);\n+ config.setOutPath(OUT_PATH);\n+ config.setSourceCodePaths(SourceCodePath.builder().setDesc(PROJECT_DESC).setPath(PROJECT_PATH));\n+ config.setPackageFilters(PACKAGE_FILTERS);\n+ config.setBaseDir(BASE_DIR);\n+ config.setCodePath(CODE_PATH);",
+                "Description": "Hard-coded values within the method can limit the flexibility of the code and make it difficult to maintain. It's better to extract these values into constants or configuration files, which can be easily modified when necessary without changing the code itself.",
+                "Start": 5,
+                "End": 21
+            },
+            {
+                "Improvement": "Use a time measurement method that provides better readability",
+                "Change_Diff": "- long start=System.currentTimeMillis();\n- JMeterBuilder.buildApiDoc(config);\n- long end=System.currentTimeMillis();\n- DateTimeUtil.printRunTime(end,start);\n+ long startTime = System.nanoTime();\n+ JMeterBuilder.buildApiDoc(config);\n+ long endTime = System.nanoTime();\n+ long duration = (endTime - startTime) / 1_000_000;  // convert from nanoseconds to milliseconds\n+ System.out.println(\"Execution time: \" + duration + \" ms\");",
+                "Description": "Instead of manually calculating the runtime by calling `System.currentTimeMillis()` before and after the method to be measured, you can use the `System.nanoTime()` method which provides a more precise measurement of the elapsed time.",
+                "Start": 23,
+                "End": 29
+            }
+        ],
+        "Final code": "@Deprecated\n@Test\npublic void testJmxBuilderControllersApi(){\n    @Deprecated ApiConfig config=new ApiConfig();\n    config.setServerUrl(SERVER_URL);\n    config.setOpenUrl(OPEN_URL);\n    config.setAppToken(APP_TOKEN);\n    config.setDebugEnvName(DEBUG_ENV_NAME);\n    config.setLanguage(LANGUAGE);\n    config.setInlineEnum(true);\n    config.setStyle(STYLE);\n    config.setCreateDebugPage(false);\n    config.setAllInOne(true);\n    config.setCoverOld(false);\n    config.setOutPath(OUT_PATH);\n    config.setFramework(FrameworkEnum.SPRING.getFramework());\n    config.setSourceCodePaths(SourceCodePath.builder().setDesc(PROJECT_DESC).setPath(PROJECT_PATH));\n    config.setPackageFilters(PACKAGE_FILTERS);\n    config.setBaseDir(BASE_DIR);\n    config.setCodePath(CODE_PATH);\n    long startTime = System.nanoTime();\n    JMeterBuilder.buildApiDoc(config);\n    long endTime = System.nanoTime();\n    long duration = (endTime - startTime) / 1_000_000;  // convert from nanoseconds to milliseconds\n    System.out.println(\"Execution time: \" + duration + \" ms\");\n}"
+    },
+    "Old_Method": "/** \n * test jmeter\n */\n@Deprecated @Test public void testJmxBuilderControllersApi(){\n  @Deprecated ApiConfig config=new ApiConfig();\n  config.setServerUrl(\"http://127.0.0.1:8899\");\n  config.setOpenUrl(\"http://localhost:7700/api\");\n  config.setAppToken(\"be4211613a734b45888c075741680e49\");\n  config.setDebugEnvName(\"测试环境\");\n  config.setLanguage(DocLanguage.CHINESE);\n  config.setInlineEnum(true);\n  config.setStyle(\"randomLight\");\n  config.setCreateDebugPage(false);\n  config.setAllInOne(true);\n  config.setCoverOld(false);\n  config.setOutPath(\"D:\\\\smart-doc\\\\docs\\\\jmx1\");\n  config.setFramework(FrameworkEnum.SPRING.getFramework());\n  config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\\\smart-doc\\\\test-project\"));\n  config.setPackageFilters(\"com.power.doc.controller.*\");\n  config.setBaseDir(\"D:\\\\smart-doc\\\\test-project\\\\smart-doc-example-cn-master\");\n  config.setCodePath(\"/src/main/java\");\n  long start=System.currentTimeMillis();\n  JMeterBuilder.buildApiDoc(config);\n  long end=System.currentTimeMillis();\n  DateTimeUtil.printRunTime(end,start);\n}\n",
+    "File_Path": "smart-doc/src/test/java/com/ly/doc/ApiDocTest.java",
+    "Start": 2334,
+    "Stop": 3791,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "testJmxBuilderControllersApi"
+}

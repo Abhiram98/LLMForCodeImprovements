@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for the `adapter` field",
+                "Change_Diff": "+ if (this.adapter == null) {\n+     throw new IllegalStateException(\"No adapter available.\");\n+ }\n- if (!this.adapter.supports(container.getClass())) {",
+                "Description": "Check if `adapter` is null before calling its `supports` method to prevent a potential NullPointerException.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Use enhanced for loop for index tracking",
+                "Change_Diff": "- int index=0;\n- for (  T node : nodes) {\n-     String cursor=this.adapter.cursorAt(container,index++);\n+ AtomicInteger index = new AtomicInteger(0);\n+ nodes.forEach(node -> {\n+     String cursor = this.adapter.cursorAt(container, index.getAndIncrement());",
+                "Description": "Instead of manually managing the index for the nodes collection, use an enhanced for loop with an AtomicInteger to track the index. This makes the code cleaner and reduces the chance of off-by-one errors.",
+                "Start": 18,
+                "End": 22
+            }
+        ],
+        "Final code": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (this.adapter == null) {\n     throw new IllegalStateException(\"No adapter available.\");\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  AtomicInteger index = new AtomicInteger(0);\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  nodes.forEach(node -> {\n    String cursor = this.adapter.cursorAt(container, index.getAndIncrement());\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  });\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}"
+    },
+    "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+    "Start": 7935,
+    "Stop": 9024,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "adaptDataContainer"
+}

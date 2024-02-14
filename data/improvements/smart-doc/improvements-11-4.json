@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use Java 8 Stream API for list processing",
+            "Change_Diff": "- for (ApiParam apiParam : apiParamList) {\n-   apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n-   if (apiParam.getPid() == 0) {\n-     params.add(apiParam);\n-   }\n- }\n- for (ApiParam apiParam : params) {\n-   apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n- }\n+ apiParamList.stream()\n+ .peek(api -> api.setField(api.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\").replaceAll(\"&nbsp;\", \"\")))\n+ .filter(api -> api.getPid() == 0)\n+ .peek(api -> api.setChildren(getChild(api.getId(), apiParamList, 0)))\n+ .collect(Collectors.toList());",
+            "Description": "Java 8 Stream API can be used to process the lists in a more functional way, making the code more readable and compact.",
+            "Start": 2,
+            "End": 12
+        }],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  return apiParamList.stream()\n    .peek(api -> api.setField(api.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\").replaceAll(\"&nbsp;\", \"\")))\n    .filter(api -> api.getPid() == 0)\n    .peek(api -> api.setChildren(getChild(api.getId(), apiParamList, 0)))\n    .collect(Collectors.toList());\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

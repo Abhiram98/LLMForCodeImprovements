@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace System.currentTimeMillis() with meaningful operation",
+                "Change_Diff": "- System.currentTimeMillis();\n+ // replace with meaningful operation or remove it",
+                "Description": "In the anonymous Runnable implementation inside ConcurrentExecutor.runConcurrent(), the System.currentTimeMillis() method is being called, but the return value isn't used anywhere. This can mislead others into thinking that there's a reason to do this, when in fact there isn't. Replace this with a meaningful operation or remove it if it's not needed.",
+                "Start": 16,
+                "End": 16
+            },
+            {
+                "Improvement": "Use Java 8 Stream API for checking elements",
+                "Change_Diff": "- for (Object test : testSetWeak) {\n-     assertTrue(permanentElements.contains(test));\n- }\n+ assertTrue(testSetWeak.stream().allMatch(permanentElements::contains));",
+                "Description": "The for loop that checks if the elements of testSetWeak are in permanentElements can be simplified by using Java 8 Stream API. This will make the code more readable and concise.",
+                "Start": 22,
+                "End": 24
+            }
+        ],
+        "Final code": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (Object testObject : testSetWeak) {\n        // replace with meaningful operation or remove it\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  assertTrue(testSetWeak.stream().allMatch(permanentElements::contains));\n}"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

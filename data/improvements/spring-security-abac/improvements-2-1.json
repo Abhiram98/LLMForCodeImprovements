@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Change visibility of WebSecurityConfig()",
+                "Change_Diff": "- public WebSecurityConfig(){\n+ WebSecurityConfig(){",
+                "Description": "This constructor has default visibility which means it can be accessed only within the same package. If this class is intended to be used in different packages, you should change the visibility to public.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add logging",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ logger.error(\"Failed to load properties\", e);\n+ throw new RuntimeException(e);",
+                "Description": "Currently, when an IOException is caught, it is rethrown as a RuntimeException. Instead of just rethrowing, it would be helpful to log the exception to understand the context of the error.",
+                "Start": 11,
+                "End": 11
+            },
+            {
+                "Improvement": "Extract string constants",
+                "Change_Diff": "- \"application.properties\"\n+ APPLICATION_PROPERTIES\n- \"xacml.pdp.keyStore\"\n+ XACML_PDP_KEYSTORE\n- \"xacml.pdp.keyStore.password\"\n+ XACML_PDP_KEYSTORE_PASSWORD\n- \"xacml.pdp.cert.alias\"\n+ XACML_PDP_CERT_ALIAS\n- \"xacml.pdp.cert.password\"\n+ XACML_PDP_CERT_PASSWORD\n- \"xacml.idp.metadata.url\"\n+ XACML_IDP_METADATA_URL\n- \"idp.issuerid\"\n+ IDP_ISSUERID",
+                "Description": "There are multiple string constants used in this method. It would be better to extract them as class level constants for reusability and easy modifications in future.",
+                "Start": 3,
+                "End": 9
+            }
+        ],
+        "Final code": "public class WebSecurityConfig {\n\n    private static final String APPLICATION_PROPERTIES = \"application.properties\";\n    private static final String XACML_PDP_KEYSTORE = \"xacml.pdp.keyStore\";\n    private static final String XACML_PDP_KEYSTORE_PASSWORD = \"xacml.pdp.keyStore.password\";\n    private static final String XACML_PDP_CERT_ALIAS = \"xacml.pdp.cert.alias\";\n    private static final String XACML_PDP_CERT_PASSWORD = \"xacml.pdp.cert.password\";\n    private static final String XACML_IDP_METADATA_URL = \"xacml.idp.metadata.url\";\n    private static final String IDP_ISSUERID = \"idp.issuerid\";\n\n    public WebSecurityConfig() {\n        try {\n            Properties properties = PropertiesLoaderUtils.loadAllProperties(APPLICATION_PROPERTIES);\n            KEY_STORE = properties.getProperty(XACML_PDP_KEYSTORE);\n            KEY_STORE_PASSWORD = properties.getProperty(XACML_PDP_KEYSTORE_PASSWORD);\n            CERT_ALIAS = properties.getProperty(XACML_PDP_CERT_ALIAS);\n            CERT_PASSWORD = properties.getProperty(XACML_PDP_CERT_PASSWORD);\n            IDP_META_DATA_URL = properties.getProperty(XACML_IDP_METADATA_URL);\n            ISSUER_ID = properties.getProperty(IDP_ISSUERID);\n        } catch (IOException e) {\n            logger.error(\"Failed to load properties\", e);\n            throw new RuntimeException(e);\n        }\n    }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

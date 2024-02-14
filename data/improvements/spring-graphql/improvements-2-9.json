@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive code",
+                "Change_Diff": "- name=this.classNameExtractor.apply(clazz);\n- if (schema.containsType(name)) {\n-    return schema.getObjectType(name);\n- }",
+                "Description": "The same logic is repeated twice for checking if the schema contains a certain type and then getting that object type. This can be refactored into a separate method to avoid repetition.",
+                "Start": 8,
+                "End": 11
+            },
+            {
+                "Improvement": "Use Optional to handle null values",
+                "Change_Diff": "- @Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n+ private Optional<GraphQLObjectType> getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n...\n- return null;\n+ return Optional.empty();",
+                "Description": "Instead of returning null, it would be better to use Optional. This would make the code more robust by making it clear when a method might not return a value.",
+                "Start": 2,
+                "End": 24
+            }
+        ],
+        "Final code": "private Optional<GraphQLObjectType> getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n    if (clazz.getName().startsWith(\"java.\")) {\n        return Optional.empty();\n    }\n    String name=getMapping(clazz);\n    if (name != null) {\n        GraphQLObjectType objectType=schema.getObjectType(name);\n        if (objectType == null) {\n            throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n        }\n        return Optional.of(objectType);\n    }\n    name=this.classNameExtractor.apply(clazz);\n    return getObjectTypeFromSchema(name, schema);\n    for (Class<?> interfaceType : clazz.getInterfaces()) {\n        Optional<GraphQLObjectType> objectType=getTypeForClass(interfaceType,schema);\n        if (objectType.isPresent()) {\n            return objectType;\n        }\n    }\n    Class<?> superclass=clazz.getSuperclass();\n    if (superclass != Object.class && superclass != null) {\n        return getTypeForClass(superclass,schema);\n    }\n    return Optional.empty();\n}\n\nprivate Optional<GraphQLObjectType> getObjectTypeFromSchema(String name, GraphQLSchema schema) {\n    if (schema.containsType(name)) {\n        return Optional.ofNullable(schema.getObjectType(name));\n    }\n    return Optional.empty();\n}"
+    },
+    "Old_Method": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  if (clazz.getName().startsWith(\"java.\")) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  if (name != null) {\n    GraphQLObjectType objectType=schema.getObjectType(name);\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(clazz);\n  if (schema.containsType(name)) {\n    return schema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : clazz.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,schema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=clazz.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,schema);\n  }\n  return null;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/execution/ClassNameTypeResolver.java",
+    "Start": 2869,
+    "Stop": 3854,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getTypeForClass"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract constant for 'java.' prefix",
+                "Change_Diff": "- if (clazz.getName().startsWith(\"java.\")) {\n+ if (clazz.getName().startsWith(JAVA_PACKAGE_PREFIX)) {",
+                "Description": "It's a good practice to extract magic strings and numbers as constants to avoid typing mistakes and to make it easier to change the value in future. The string 'java.' appears to be a magic string so it should be extracted to a constant.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Refactor nested if conditions into separate methods",
+                "Change_Diff": "- if (name != null) {...}\n- if (schema.containsType(name)) {...}\n- for (Class<?> interfaceType : clazz.getInterfaces()) {...}\n+ return handleMappingNameIsNotNull(clazz, schema, name)\n+ return handleSchemaContainsName(clazz, schema, name)\n+ return handleInterfaceTypes(clazz, schema)",
+                "Description": "The method is doing too many things, and the deeply nested if conditions make it hard to understand. Each if condition could be refactored into a separate method with a descriptive name, which would make the code more readable and maintainable.",
+                "Start": 4,
+                "End": 21
+            }
+        ],
+        "Final code": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  final String JAVA_PACKAGE_PREFIX = \"java.\";\n  if (clazz.getName().startsWith(JAVA_PACKAGE_PREFIX)) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  return handleMappingNameIsNotNull(clazz, schema, name);\n  name=this.classNameExtractor.apply(clazz);\n  return handleSchemaContainsName(clazz, schema, name);\n  return handleInterfaceTypes(clazz, schema);\n  Class<?> superclass=clazz.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,schema);\n  }\n  return null;\n}"
+    },
+    "Old_Method": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  if (clazz.getName().startsWith(\"java.\")) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  if (name != null) {\n    GraphQLObjectType objectType=schema.getObjectType(name);\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(clazz);\n  if (schema.containsType(name)) {\n    return schema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : clazz.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,schema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=clazz.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,schema);\n  }\n  return null;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/execution/ClassNameTypeResolver.java",
+    "Start": 2869,
+    "Stop": 3854,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getTypeForClass"
+}

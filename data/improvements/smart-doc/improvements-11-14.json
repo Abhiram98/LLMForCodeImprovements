@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java Streams instead of traditional for loop",
+                "Change_Diff": "- for (  ApiParam apiParam : apiParamList) {\napiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\")).....\n}\n- for (  ApiParam apiParam : params) {\napiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n}\n+ apiParamList.stream()\n.forEach(apiParam -> apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\").replaceAll(\"&nbsp;\", \"\")));\n+ params.forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0)));",
+                "Description": "Instead of using traditional for loops to filter and manipulate the apiParamList, use Java Streams which are more readable and efficient.",
+                "Start": 4,
+                "End": 12
+            },
+            {
+                "Improvement": "Replace conditional check with Optional",
+                "Change_Diff": "- if (CollectionUtil.isEmpty(apiParamList)) {\nreturn new ArrayList<>(0);\n}\n+ return Optional.ofNullable(apiParamList)\n.orElse(new ArrayList<>(0));",
+                "Description": "Instead of checking if the list is empty before processing, use Java 8's Optional to handle possible null values in a safer way.",
+                "Start": 2,
+                "End": 4
+            }
+        ],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\nOptional.ofNullable(apiParamList)\n.orElse(new ArrayList<>());\nList<ApiParam> params = new ArrayList<>();\napiParamList.stream()\n.forEach(apiParam -> {\napiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\").replaceAll(\"&nbsp;\", \"\"));\nif (apiParam.getPid() == 0) {\nparams.add(apiParam);\n}\n});\nparams.forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0)));\nreturn params;\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

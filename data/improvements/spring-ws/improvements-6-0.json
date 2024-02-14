@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor `if` condition to early return style",
+                "Change_Diff": "- if (actionMap.isEmpty()) {\n...\n}\nelse {\n...\n}\n+\nif (actionMap.isEmpty()) {\n...\nreturn;\n}\n...",
+                "Description": "Instead of wrapping the main logic of the method in an `else` block, use an early return style to reduce the level of indentation and improve readability.",
+                "Start": 5,
+                "End": 17
+            },
+            {
+                "Improvement": "Remove unnecessary type checking and casting",
+                "Change_Diff": "- if (endpoint instanceof String) {\n- endpoint=((String)endpoint).trim();\n- }",
+                "Description": "The `endpoint` is always retrieved as an `Object` and then checked if it is a `String`. If it is, it's trimmed. This seems unnecessary as it could be assumed that the `endpoint` values in `actionMap` are already trimmed strings. If not, the responsibility of trimming them should be done before putting them into the `actionMap`.",
+                "Start": 12,
+                "End": 14
+            }
+        ],
+        "Final code": "protected void registerEndpoints(Map<URI,Object> actionMap) throws BeansException {\n    if (actionMap.isEmpty()) {\n        logger.warn(\"Neither 'actionMap' nor 'mappings' set on SimpleActionEndpointMapping\");\n        return;\n    }\n\n    for (Map.Entry<URI,Object> entry : actionMap.entrySet()) {\n        URI action = entry.getKey();\n        Object endpoint = entry.getValue();\n        registerEndpoint(action, endpoint);\n    }\n}"
+    },
+    "Old_Method": "/** \n * Register all endpoints specified in the action map.\n * @param actionMap Map with action URIs as keys and endppint beans or bean names as values\n * @throws BeansException if an endpoint couldn't be registered\n * @throws IllegalStateException if there is a conflicting endpoint registered\n */\nprotected void registerEndpoints(Map<URI,Object> actionMap) throws BeansException {\n  if (actionMap.isEmpty()) {\n    logger.warn(\"Neither 'actionMap' nor 'mappings' set on SimpleActionEndpointMapping\");\n  }\n else {\n    for (    Map.Entry<URI,Object> entry : actionMap.entrySet()) {\n      URI action=entry.getKey();\n      Object endpoint=entry.getValue();\n      if (endpoint instanceof String) {\n        endpoint=((String)endpoint).trim();\n      }\n      registerEndpoint(action,endpoint);\n    }\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/main/java/org/springframework/ws/soap/addressing/server/SimpleActionEndpointMapping.java",
+    "Start": 4019,
+    "Stop": 4866,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "registerEndpoints"
+}

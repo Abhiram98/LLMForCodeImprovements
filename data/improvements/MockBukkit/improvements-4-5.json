@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract game rules initialization into a separate method",
+                "Change_Diff": "- gameRules.put(GameRule.ANNOUNCE_ADVANCEMENTS,true);\n- gameRules.put(GameRule.COMMAND_BLOCK_OUTPUT,true);\n... // continues for all game rules\n- gameRules.put(GameRule.SPECTATORS_GENERATE_CHUNKS,true);\n+ initializeGameRules();",
+                "Description": "The constructor WorldMock is doing multiple things which is not recommended as per the Single Responsibility Principle. The initialization of the game rules can be extracted into a separate method.",
+                "Start": 32,
+                "End": 57
+            },
+            {
+                "Improvement": "Extract ticks per spawn initialization into a separate method",
+                "Change_Diff": "- ticksPerSpawn.put(SpawnCategory.ANIMAL,400);\n- ticksPerSpawn.put(SpawnCategory.MONSTER,1);\n... // continues for all spawn categories\n- ticksPerSpawn.put(SpawnCategory.AMBIENT,1);\n+ initializeTicksPerSpawn();",
+                "Description": "Similar to the game rules, the initialization of the ticks per spawn can also be extracted into a separate method. This will make the constructor more maintainable and readable.",
+                "Start": 21,
+                "End": 28
+            }
+        ],
+        "Final code": "public WorldMock(Material defaultBlock,Biome defaultBiome,int minHeight,int maxHeight,int grassHeight){\n  this.defaultBlock=defaultBlock;\n  this.defaultBiome=defaultBiome;\n  this.minHeight=minHeight;\n  this.maxHeight=maxHeight;\n  this.grassHeight=grassHeight;\n  this.server=MockBukkit.getMock();\n  if (this.server != null) {\n    this.pvp=this.server.getServerConfiguration().isPvpEnabled();\n    this.ticksPerSpawn.putAll(this.server.getServerConfiguration().getTicksPerSpawn());\n  }\n else {\n    this.pvp=true;\n    initializeTicksPerSpawn();\n  }\n  initializeGameRules();\n}\n\nprivate void initializeGameRules() {\n  gameRules.put(GameRule.ANNOUNCE_ADVANCEMENTS,true);\n  gameRules.put(GameRule.COMMAND_BLOCK_OUTPUT,true);\n  ... // continues for all game rules\n  gameRules.put(GameRule.SPECTATORS_GENERATE_CHUNKS,true);\n}\n\nprivate void initializeTicksPerSpawn() {\n  ticksPerSpawn.put(SpawnCategory.ANIMAL,400);\n  ticksPerSpawn.put(SpawnCategory.MONSTER,1);\n  ... // continues for all spawn categories\n  ticksPerSpawn.put(SpawnCategory.AMBIENT,1);\n}"
+    },
+    "Old_Method": "/** \n * Creates a new mock world.\n * @param defaultBlock The block that is spawned at locations 1 to {@code grassHeight}\n * @param defaultBiome The biome that every block will be in by default.\n * @param minHeight    The minimum height of the world.\n * @param maxHeight    The maximum height of the world.\n * @param grassHeight  The last {@code y} at which {@code defaultBlock} will spawn.\n */\npublic WorldMock(Material defaultBlock,Biome defaultBiome,int minHeight,int maxHeight,int grassHeight){\n  this.defaultBlock=defaultBlock;\n  this.defaultBiome=defaultBiome;\n  this.minHeight=minHeight;\n  this.maxHeight=maxHeight;\n  this.grassHeight=grassHeight;\n  this.server=MockBukkit.getMock();\n  if (this.server != null) {\n    this.pvp=this.server.getServerConfiguration().isPvpEnabled();\n    this.ticksPerSpawn.putAll(this.server.getServerConfiguration().getTicksPerSpawn());\n  }\n else {\n    this.pvp=true;\n    ticksPerSpawn.put(SpawnCategory.ANIMAL,400);\n    ticksPerSpawn.put(SpawnCategory.MONSTER,1);\n    ticksPerSpawn.put(SpawnCategory.WATER_AMBIENT,1);\n    ticksPerSpawn.put(SpawnCategory.WATER_UNDERGROUND_CREATURE,1);\n    ticksPerSpawn.put(SpawnCategory.WATER_ANIMAL,1);\n    ticksPerSpawn.put(SpawnCategory.AMBIENT,1);\n  }\n  gameRules.put(GameRule.ANNOUNCE_ADVANCEMENTS,true);\n  gameRules.put(GameRule.COMMAND_BLOCK_OUTPUT,true);\n  gameRules.put(GameRule.DISABLE_ELYTRA_MOVEMENT_CHECK,false);\n  gameRules.put(GameRule.DO_DAYLIGHT_CYCLE,true);\n  gameRules.put(GameRule.DO_ENTITY_DROPS,true);\n  gameRules.put(GameRule.DO_FIRE_TICK,true);\n  gameRules.put(GameRule.DO_LIMITED_CRAFTING,false);\n  gameRules.put(GameRule.DO_MOB_LOOT,true);\n  gameRules.put(GameRule.DO_MOB_SPAWNING,true);\n  gameRules.put(GameRule.DO_TILE_DROPS,true);\n  gameRules.put(GameRule.DO_WEATHER_CYCLE,true);\n  gameRules.put(GameRule.KEEP_INVENTORY,false);\n  gameRules.put(GameRule.LOG_ADMIN_COMMANDS,true);\n  gameRules.put(GameRule.MAX_COMMAND_CHAIN_LENGTH,65536);\n  gameRules.put(GameRule.MAX_ENTITY_CRAMMING,24);\n  gameRules.put(GameRule.MOB_GRIEFING,true);\n  gameRules.put(GameRule.NATURAL_REGENERATION,true);\n  gameRules.put(GameRule.RANDOM_TICK_SPEED,3);\n  gameRules.put(GameRule.REDUCED_DEBUG_INFO,false);\n  gameRules.put(GameRule.SEND_COMMAND_FEEDBACK,true);\n  gameRules.put(GameRule.SHOW_DEATH_MESSAGES,true);\n  gameRules.put(GameRule.SPAWN_RADIUS,10);\n  gameRules.put(GameRule.SPECTATORS_GENERATE_CHUNKS,true);\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/WorldMock.java",
+    "Start": 13099,
+    "Stop": 15638,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "WorldMock"
+}

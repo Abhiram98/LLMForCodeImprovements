@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor to separate functions",
+                "Change_Diff": "- @Nullable private MappingInfo getMappingInfo(Method method,Object handler,Class<?> handlerType){...}\n+ private Annotation findAnnotation(Method method){...}\n+ private String getTypeName(Annotation annotation, HandlerMethod handlerMethod, Class<?> handlerType, boolean batchMapping){...}\n+ private String getField(Annotation annotation, Method method){...}\n+ private boolean isBatchMapping(Annotation annotation){...}\n+ private int getMaxBatchSize(Annotation annotation){...}\n+ @Nullable private MappingInfo getMappingInfo(Method method, Object handler, Class<?> handlerType){...}",
+                "Description": "The method `getMappingInfo` is performing too many tasks which makes it hard to understand and maintain. It should be refactored such that each function performs a single task. We can create separate methods for tasks like finding the annotation, getting the typeName, getting the field, etc.",
+                "Start": 1,
+                "End": 44
+            },
+            {
+                "Improvement": "Avoid using magic numbers",
+                "Change_Diff": "- int batchSize=-1;\n+ int batchSize=UNDEFINED_BATCH_SIZE;",
+                "Description": "The use of the number -1 for batchSize is an example of a magic number. It is not immediately clear what this number signifies, which can lead to confusion. You should define a constant for this value.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "private static final int UNDEFINED_BATCH_SIZE = -1;\n\nprivate Annotation findAnnotation(Method method) {...}\n\nprivate String getTypeName(Annotation annotation, HandlerMethod handlerMethod, Class<?> handlerType, boolean batchMapping) {...}\n\nprivate String getField(Annotation annotation, Method method) {...}\n\nprivate boolean isBatchMapping(Annotation annotation) {...}\n\nprivate int getMaxBatchSize(Annotation annotation) {...}\n\n@Nullable private MappingInfo getMappingInfo(Method method, Object handler, Class<?> handlerType) { ... }"
+    },
+    "Old_Method": "@Nullable private MappingInfo getMappingInfo(Method method,Object handler,Class<?> handlerType){\n  Set<Annotation> annotations=AnnotatedElementUtils.findAllMergedAnnotations(method,new LinkedHashSet<>(Arrays.asList(BatchMapping.class,SchemaMapping.class)));\n  if (annotations.isEmpty()) {\n    return null;\n  }\n  if (annotations.size() != 1) {\n    throw new IllegalArgumentException(\"Expected either @BatchMapping or @SchemaMapping, not both: \" + method.toGenericString());\n  }\n  String typeName;\n  String field;\n  boolean batchMapping=false;\n  int batchSize=-1;\n  HandlerMethod handlerMethod=createHandlerMethod(method,handler,handlerType);\n  Annotation annotation=annotations.iterator().next();\n  if (annotation instanceof SchemaMapping) {\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n  }\n else {\n    BatchMapping mapping=(BatchMapping)annotation;\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n    batchMapping=true;\n    batchSize=mapping.maxBatchSize();\n  }\n  if (!StringUtils.hasText(typeName)) {\n    SchemaMapping mapping=AnnotatedElementUtils.findMergedAnnotation(handlerType,SchemaMapping.class);\n    if (mapping != null) {\n      typeName=mapping.typeName();\n    }\n  }\n  if (!StringUtils.hasText(typeName)) {\n    for (    MethodParameter parameter : handlerMethod.getMethodParameters()) {\n      if (!batchMapping) {\n        Assert.state(this.argumentResolvers != null,\"`argumentResolvers` is not initialized\");\n        HandlerMethodArgumentResolver resolver=this.argumentResolvers.getArgumentResolver(parameter);\n        if (resolver instanceof SourceMethodArgumentResolver) {\n          typeName=parameter.getParameterType().getSimpleName();\n          break;\n        }\n      }\n else {\n        if (Collection.class.isAssignableFrom(parameter.getParameterType())) {\n          typeName=parameter.nested().getNestedParameterType().getSimpleName();\n          break;\n        }\n      }\n    }\n  }\n  Assert.hasText(typeName,\"No parentType specified, and a source/parent method argument was also not found: \" + handlerMethod.getShortLogMessage());\n  return new MappingInfo(typeName,field,batchMapping,batchSize,handlerMethod);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/annotation/support/AnnotatedControllerConfigurer.java",
+    "Start": 16586,
+    "Stop": 18892,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getMappingInfo"
+}

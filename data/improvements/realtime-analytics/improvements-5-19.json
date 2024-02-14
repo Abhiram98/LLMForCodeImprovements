@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use the try-with-resource statement to automatically close resources",
+                "Change_Diff": "- Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n+ try (Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers()) {",
+                "Description": "The OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers() returns a map of memory managers that need to be closed after use to prevent memory leaks. The try-with-resource statement can be used to automatically close these resources.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Remove unnecessary null check",
+                "Change_Diff": "- if (manager != null) {\n-      builder.append(\"[\");\n-      builder.append(\"FreeMemory:\");\n-      builder.append(manager.getFreeMemory());\n-      builder.append(\";\");\n-      builder.append(\"MaxMemory:\");\n-      builder.append(manager.getMaxMemory());\n-      builder.append(\";\");\n-      builder.append(\"ReservedMemory:\");\n-      builder.append(manager.getReservedMemory());\n-      builder.append(\";\");\n-      builder.append(\"UsedMemory:\");\n-      builder.append(manager.getUsedMemory());\n-      builder.append(\";\");\n-      builder.append(\"OutOfMeomoryErrorCount:\");\n-      builder.append(manager.getOOMErrorCount());\n-      builder.append(\"]\");\n-    }",
+                "Description": "The null check for 'manager' is unnecessary because 'getMemoryManagers()' should not return null values. If a null value is possible, it should be handled at the time of retrieval, not during the iteration.",
+                "Start": 8,
+                "End": 18
+            }
+        ],
+        "Final code": "public String getInternalOffHeapManagerInfo(){\n  StringBuilder builder=new StringBuilder();\n  builder.append(\"InternalOffHeapManagerInfo:\");\n  try (Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers()) {\n  for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n    builder.append(\"MemoryManager-\");\n    builder.append(entry.getKey());\n    builder.append(\":\");\n    OffHeapMemoryManager manager=entry.getValue();\n    builder.append(\"[\");\n    builder.append(\"FreeMemory:\");\n    builder.append(manager.getFreeMemory());\n    builder.append(\";\");\n    builder.append(\"MaxMemory:\");\n    builder.append(manager.getMaxMemory());\n    builder.append(\";\");\n    builder.append(\"ReservedMemory:\");\n    builder.append(manager.getReservedMemory());\n    builder.append(\";\");\n    builder.append(\"UsedMemory:\");\n    builder.append(manager.getUsedMemory());\n    builder.append(\";\");\n    builder.append(\"OutOfMeomoryErrorCount:\");\n    builder.append(manager.getOOMErrorCount());\n    builder.append(\"]\");\n  }\n  return builder.toString();\n}"
+    },
+    "Old_Method": "public String getInternalOffHeapManagerInfo(){\n  StringBuilder builder=new StringBuilder();\n  builder.append(\"InternalOffHeapManagerInfo:\");\n  Map<String,OffHeapMemoryManager> memoryManagers=OffHeapMemoryManagerRegistry.getInstance().getMemoryManagers();\n  for (  Map.Entry<String,OffHeapMemoryManager> entry : memoryManagers.entrySet()) {\n    builder.append(\"MemoryManager-\");\n    builder.append(entry.getKey());\n    builder.append(\":\");\n    OffHeapMemoryManager manager=entry.getValue();\n    if (manager != null) {\n      builder.append(\"[\");\n      builder.append(\"FreeMemory:\");\n      builder.append(manager.getFreeMemory());\n      builder.append(\";\");\n      builder.append(\"MaxMemory:\");\n      builder.append(manager.getMaxMemory());\n      builder.append(\";\");\n      builder.append(\"ReservedMemory:\");\n      builder.append(manager.getReservedMemory());\n      builder.append(\";\");\n      builder.append(\"UsedMemory:\");\n      builder.append(manager.getUsedMemory());\n      builder.append(\";\");\n      builder.append(\"OutOfMeomoryErrorCount:\");\n      builder.append(manager.getOOMErrorCount());\n      builder.append(\"]\");\n    }\n  }\n  return builder.toString();\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 27123,
+    "Stop": 28572,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getInternalOffHeapManagerInfo"
+}

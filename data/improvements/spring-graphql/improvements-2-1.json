@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringUtils to check if class name starts with 'java.'",
+                "Change_Diff": "- if (clazz.getName().startsWith(\"java.\")) {\n+ if (StringUtils.startsWith(clazz.getName(), \"java.\")) {",
+                "Description": "Instead of using 'startsWith' method of String class to check if the class name starts with 'java.', we can use the 'startsWith' method of StringUtils class from Apache Commons Lang, which is null-safe.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Replace null check with Optional",
+                "Change_Diff": "- if (name != null) {\n+ Optional<String> optName = Optional.ofNullable(name);\n+ if (optName.isPresent()) {",
+                "Description": "Java 8 introduced the Optional class, which can help to avoid null pointer exceptions. Instead of returning null when the name is not found, we can return an Optional and then use its API to handle the absence of a value.",
+                "Start": 5,
+                "End": 17
+            },
+            {
+                "Improvement": "Replace superclass condition check with Optional",
+                "Change_Diff": "- if (superclass != Object.class && superclass != null) {\n+ Optional<Class<?>> optSuperclass = Optional.ofNullable(superclass);\n+ if (optSuperclass.isPresent() && optSuperclass.get() != Object.class) {",
+                "Description": "Similar to the previous improvement, we can use Optional to handle the absence of a superclass.",
+                "Start": 21,
+                "End": 23
+            }
+        ],
+        "Final code": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  if (StringUtils.startsWith(clazz.getName(), \"java.\")) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  Optional<String> optName = Optional.ofNullable(name);\n  if (optName.isPresent()) {\n    GraphQLObjectType objectType=schema.getObjectType(optName.get());\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ optName.get()+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(clazz);\n  if (schema.containsType(name)) {\n    return schema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : clazz.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,schema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=clazz.getSuperclass();\n  Optional<Class<?>> optSuperclass = Optional.ofNullable(superclass);\n  if (optSuperclass.isPresent() && optSuperclass.get() != Object.class) {\n    return getTypeForClass(optSuperclass.get(),schema);\n  }\n  return null;\n}"
+    },
+    "Old_Method": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  if (clazz.getName().startsWith(\"java.\")) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  if (name != null) {\n    GraphQLObjectType objectType=schema.getObjectType(name);\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(clazz);\n  if (schema.containsType(name)) {\n    return schema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : clazz.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,schema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=clazz.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,schema);\n  }\n  return null;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/execution/ClassNameTypeResolver.java",
+    "Start": 2869,
+    "Stop": 3854,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getTypeForClass"
+}

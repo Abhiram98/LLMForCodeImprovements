@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use logger instead of printStackTrace",
+                "Change_Diff": "- e.printStackTrace();\n+ LOGGER.error(\"Exception occurred\", e);",
+                "Description": "Instead of using `e.printStackTrace()`, a logger should be used. This is because a logger provides more flexibility (different levels, different targets) and it can be disabled for production environments.",
+                "Start": 94,
+                "End": 94
+            },
+            {
+                "Improvement": "Extract inner loop to separate methods",
+                "Change_Diff": "- while (batch.size() < stream.maxMessages) {\n... (removed code) ...\n+ fillBatchFromStream();",
+                "Description": "The inner loop that fills the batch from the stream could be extracted into a separate method. This would make the run method shorter and easier to read.",
+                "Start": 19,
+                "End": 42
+            },
+            {
+                "Improvement": "Replace while loop with for loop",
+                "Change_Diff": "- do {\n... (removed code) ...\n+ for(int i = 0; i < MAX_ATTEMPTS; i++) {\n... (remaining code) ...",
+                "Description": "In the section of code where a retryExecution is attempted, the while loop could be replaced by a for loop. This would make the number of attempts finite and the method would not hang indefinitely in case of continuous RejectedExecutionException.",
+                "Start": 70,
+                "End": 80
+            }
+        ],
+        "Final code": "public void run(){\n  int batchSize=0;\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (InterruptedException ignore) {\n      }\n      continue;\n    }\n    try {\n      fillBatchFromStream();\n      batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        }\n catch (Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        Stopwatch s=processTimeTracer.start();\n        boolean retryExecution=false;\n        for(int i = 0; i < MAX_ATTEMPTS; i++) {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          }\n catch (RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        }\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    }\n catch (Throwable e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        LOGGER.error(\"Exception occurred\", e);\n      }\n    }\n  }\n}\n\nprivate void fillBatchFromStream() {\n... (code of the extracted method) ..."
+    },
+    "Old_Method": "/** \n * Process messages from the queue, after grouping them into batches. \n */\npublic void run(){\n  int batchSize=0;\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    try {\n      if (batch.size() < stream.maxMessages) {\n        long now=System.nanoTime();\n        final long firstTime=now;\n        do {\n          if (stream.queue.drainTo(batch,stream.maxMessages - batch.size()) <= 0) {\n            long maxWait=firstTime + stream.maxDelay - now;\n            if (maxWait <= 0) {\n              break;\n            }\n            Object nextMessage=null;\n            try {\n              nextMessage=stream.queue.poll(maxWait,TimeUnit.NANOSECONDS);\n            }\n catch (            InterruptedException ignore) {\n            }\n            if (nextMessage == null) {\n              break;\n            }\n            batch.add(nextMessage);\n            now=System.nanoTime();\n          }\n        }\n while (batch.size() < stream.maxMessages);\n      }\n      batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        }\n catch (        Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        Stopwatch s=processTimeTracer.start();\n        boolean retryExecution=false;\n        do {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          }\n catch (          RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        }\n while (retryExecution);\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    }\n catch (    Throwable e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        e.printStackTrace();\n      }\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 14783,
+    "Stop": 18103,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "run"
+}

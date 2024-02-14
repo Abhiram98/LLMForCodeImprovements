@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use finally block to log '< init Robot'",
+                "Change_Diff": "- log(\"< init Robot\");\n+ finally {\n+   log(\"< init Robot\");\n+ }",
+                "Description": "The log('< init Robot') should be executed whether or not an exception is thrown. This can be ensured by putting this statement in a finally block.",
+                "Start": 29,
+                "End": 29
+            },
+            {
+                "Improvement": "Remove unnecessary loop",
+                "Change_Diff": "- while (true) {\n-   try {\n-     window=(JSObject)JSObject.getWindow(applet());\n-     break;\n-   }\n- catch (    Exception e) {\n-   }\n- }\n+ try {\n+   window=(JSObject)JSObject.getWindow(applet());\n+ } catch(Exception e) {\n+   log(\"Error getting window object: \" + e.getMessage());\n+ }",
+                "Description": "The infinite loop for getting window object from applet seems unnecessary and can lead to an infinite loop if window object is not obtained. Instead, if exception occurs, it should be properly handled and logged.",
+                "Start": 3,
+                "End": 9
+            },
+            {
+                "Improvement": "Handle SecurityException separately",
+                "Change_Diff": "- catch (      SecurityException e) {\n- }\n+ catch (      SecurityException e) {\n+   log(\"Security exception: \" + e.getMessage());\n+ }",
+                "Description": "In the current code, SecurityException is caught but not handled. It's better to log the exception message for debugging purposes.",
+                "Start": 30,
+                "End": 30
+            }
+        ],
+        "Final code": "public void run(){\n  log(\"Document root: ~\" + applet().getLocationOnScreen().toString());\n  try {\n    window=(JSObject)JSObject.getWindow(applet());\n  } catch(Exception e) {\n    log(\"Error getting window object: \" + e.getMessage());\n  }\n  AccessController.doPrivileged(new PrivilegedAction(){\n    public Object run(){\n      log(\"> init Robot\");\n      try {\n        SecurityManager oldsecurity=System.getSecurityManager();\n        boolean needsSecurityManager=applet().getParameter(\"needsSecurityManager\").equals(\"true\");\n        log(\"Socket connections managed? \" + needsSecurityManager);\n        try {\n          securitymanager=oldsecurity;\n          securitymanager.checkTopLevelWindow(null);\n          if (charMap == null) {\n            if (!confirm(\"DOH has detected that the current Web page is attempting to access DOH,\\n\" + \"but belongs to a different domain than the one you agreed to let DOH automate.\\n\" + \"If you did not intend to start a new DOH test by visiting this Web page,\\n\"+ \"press Cancel now and leave the Web page.\\n\"+ \"Otherwise, press OK to trust this domain to automate DOH tests.\")) {\n              stop();\n              return null;\n            }\n          }\n          log(\"Found old security manager\");\n        }\n catch (        Exception e) {\n          log(\"Making new security manager\");\n          securitymanager=new RobotSecurityManager(needsSecurityManager,oldsecurity);\n          securitymanager.checkTopLevelWindow(null);\n          System.setSecurityManager(securitymanager);\n        }\n      }\n catch (      SecurityException e) {\n        log(\"Security exception: \" + e.getMessage());\n      }\n catch (      Exception e) {\n        log(\"Error calling _init_: \" + e.getMessage());\n        key=-2;\n        e.printStackTrace();\n      } finally {\n        log(\"< init Robot\");\n      }\n      return null;\n    }\n  }\n);\n  if (key == -2) {\n    window.eval(\"doh.robot._appletDead=true;doh.run();\");\n  }\n else {\n    log(\"_initRobot\");\n    try {\n      dohrobot=(JSObject)window.eval(\"doh.robot\");\n      dohrobot.call(\"_initRobot\",new Object[]{applet()});\n    }\n catch (    Exception e) {\n      e.printStackTrace();\n    }\n  }\n}"
+    },
+    "Old_Method": "public void run(){\n  log(\"Document root: ~\" + applet().getLocationOnScreen().toString());\n  while (true) {\n    try {\n      window=(JSObject)JSObject.getWindow(applet());\n      break;\n    }\n catch (    Exception e) {\n    }\n  }\n  AccessController.doPrivileged(new PrivilegedAction(){\n    public Object run(){\n      log(\"> init Robot\");\n      try {\n        SecurityManager oldsecurity=System.getSecurityManager();\n        boolean needsSecurityManager=applet().getParameter(\"needsSecurityManager\").equals(\"true\");\n        log(\"Socket connections managed? \" + needsSecurityManager);\n        try {\n          securitymanager=oldsecurity;\n          securitymanager.checkTopLevelWindow(null);\n          if (charMap == null) {\n            if (!confirm(\"DOH has detected that the current Web page is attempting to access DOH,\\n\" + \"but belongs to a different domain than the one you agreed to let DOH automate.\\n\" + \"If you did not intend to start a new DOH test by visiting this Web page,\\n\"+ \"press Cancel now and leave the Web page.\\n\"+ \"Otherwise, press OK to trust this domain to automate DOH tests.\")) {\n              stop();\n              return null;\n            }\n          }\n          log(\"Found old security manager\");\n        }\n catch (        Exception e) {\n          log(\"Making new security manager\");\n          securitymanager=new RobotSecurityManager(needsSecurityManager,oldsecurity);\n          securitymanager.checkTopLevelWindow(null);\n          System.setSecurityManager(securitymanager);\n        }\n      }\n catch (      SecurityException e) {\n      }\ncatch (      Exception e) {\n        log(\"Error calling _init_: \" + e.getMessage());\n        key=-2;\n        e.printStackTrace();\n      }\n      log(\"< init Robot\");\n      return null;\n    }\n  }\n);\n  if (key == -2) {\n    window.eval(\"doh.robot._appletDead=true;doh.run();\");\n  }\n else {\n    log(\"_initRobot\");\n    try {\n      dohrobot=(JSObject)window.eval(\"doh.robot\");\n      dohrobot.call(\"_initRobot\",new Object[]{applet()});\n    }\n catch (    Exception e) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "htmlunit/src/test/resources/libraries/dojo/1.9.3/util/doh/robot/DOHRobot.java",
+    "Start": 4222,
+    "Stop": 6564,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "run"
+}

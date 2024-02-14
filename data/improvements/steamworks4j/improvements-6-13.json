@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor large method into smaller ones",
+                "Change_Diff": "- @Override protected void processInput(String input) throws SteamException {\n+ protected void processInput(String input) throws SteamException {\n+   if (input.startsWith(\"p2p send \")) {\n+       processP2pSend(input);\n+   } else if (input.startsWith(\"p2p close \")) {\n+       processP2pClose(input);\n+   } else if (input.equals(\"p2p list\")) {\n+       processP2pList();\n+   } else if (input.startsWith(\"auth ticket \")) {\n+       processAuthTicket(input);\n+   } else {\n+       friends.processInput(input);\n+   }\n+ }\n+ private void processP2pSend(String input) {...}\n+ private void processP2pClose(String input) {...}\n+ private void processP2pList() {...}\n+ private void processAuthTicket(String input) {...}",
+                "Description": "The processInput method does too many things. It processes different types of inputs and performs different operations depending on the input. Refactoring this large method into smaller ones, each performing a distinct operation, will improve its readability and maintainability.",
+                "Start": 1,
+                "End": 73
+            },
+            {
+                "Improvement": "Use constants for repeated Strings",
+                "Change_Diff": "- if (input.startsWith(\"p2p send \")) {\n+ if (input.startsWith(P2P_SEND)) {\n- int remoteID=Integer.parseInt(input.substring(\"p2p close \".length()));\n+ int remoteID=Integer.parseInt(input.substring(P2P_CLOSE.length()));\n- if (input.equals(\"p2p list\")) {\n+ if (input.equals(P2P_LIST)) {\n- String authCmd=input.substring(\"auth ticket \".length());\n+ String authCmd=input.substring(AUTH_TICKET.length());",
+                "Description": "There are many repeated String literals in the code such as \"p2p send \", \"p2p close \", \"p2p list\", \"auth ticket \". Using constants can avoid potential typing errors and make it easier to manage these Strings.",
+                "Start": 1,
+                "End": 73
+            },
+            {
+                "Improvement": "Replace System.out.println with a logger",
+                "Change_Diff": "- System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n+ LOGGER.error(\"Error: unknown userID {} (no friend, not connected)\", receiverID);",
+                "Description": "System.out.println is not ideal for production use. It is synchronous and can slow down your application. Also, it's not flexible in terms of formatting and it's not possible to turn off when not needed. A logger can solve these issues.",
+                "Start": 12,
+                "End": 12
+            }
+        ],
+        "Final code": "private static final String P2P_SEND = \"p2p send \";\nprivate static final String P2P_CLOSE = \"p2p close \";\nprivate static final String P2P_LIST = \"p2p list\";\nprivate static final String AUTH_TICKET = \"auth ticket \";\nprivate static final Logger LOGGER = Logger.getLogger(ClassName.class.getName());\n\n@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(P2P_SEND)) {\n    processP2pSend(input);\n  } else if (input.startsWith(P2P_CLOSE)) {\n    processP2pClose(input);\n  } else if (input.equals(P2P_LIST)) {\n    processP2pList();\n  } else if (input.startsWith(AUTH_TICKET)) {\n    processAuthTicket(input);\n  } else {\n    friends.processInput(input);\n  }\n}\n\nprivate void processP2pSend(String input) {...}\n\nprivate void processP2pClose(String input) {...}\n\nprivate void processP2pList() {...}\n\nprivate void processAuthTicket(String input) {...}"
+    },
+    "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(\"p2p send \")) {\n    String[] params=input.substring(\"p2p send \".length()).split(\" \");\n    int receiverID=Integer.parseInt(params[0]);\n    SteamID steamIDReceiver=null;\n    if (remoteUserIDs.containsKey(receiverID)) {\n      steamIDReceiver=remoteUserIDs.get(receiverID);\n    }\n else     if (friends.isFriendAccountID(receiverID)) {\n      steamIDReceiver=friends.getFriendSteamID(receiverID);\n    }\n else {\n      System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n    }\n    if (steamIDReceiver != null) {\n      packetSendBuffer.clear();\n      for (int i=1; i < params.length; i++) {\n        byte[] bytes=params[i].getBytes(messageCharset);\n        if (i > 1) {\n          packetSendBuffer.put((byte)0x20);\n        }\n        packetSendBuffer.put(bytes);\n      }\n      packetSendBuffer.flip();\n      networking.sendP2PPacket(steamIDReceiver,packetSendBuffer,SteamNetworking.P2PSend.Unreliable,defaultChannel);\n    }\n  }\n else   if (input.startsWith(\"p2p close \")) {\n    int remoteID=Integer.parseInt(input.substring(\"p2p close \".length()));\n    SteamID steamIDRemote=null;\n    if (remoteUserIDs.containsKey(remoteID)) {\n      steamIDRemote=remoteUserIDs.get(remoteID);\n    }\n else {\n      System.out.println(\"Error: unknown remote ID \" + remoteID + \" (not connected)\");\n    }\n    if (steamIDRemote != null) {\n      networking.closeP2PSessionWithUser(steamIDRemote);\n      unregisterRemoteSteamID(steamIDRemote);\n    }\n  }\n else   if (input.equals(\"p2p list\")) {\n    System.out.println(\"P2P connected users:\");\n    if (remoteUserIDs.size() == 0) {\n      System.out.println(\"  none\");\n    }\n    for (    SteamID steamIDUser : remoteUserIDs.values()) {\n      System.out.println(\"  \" + steamIDUser.getAccountID());\n    }\n  }\n else   if (input.startsWith(\"auth ticket \")) {\n    String authCmd=input.substring(\"auth ticket \".length());\n    if (authCmd.equals(\"get\")) {\n      getAuthTicket();\n    }\n else     if (authCmd.equals(\"cancel\")) {\n      cancelAuthTicket();\n    }\n else     if (authCmd.equals(\"send\")) {\n      broadcastAuthTicket();\n    }\n else     if (authCmd.equals(\"end\")) {\n      endAuthSession();\n    }\n  }\n  friends.processInput(input);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+    "Start": 5088,
+    "Stop": 7338,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processInput"
+}

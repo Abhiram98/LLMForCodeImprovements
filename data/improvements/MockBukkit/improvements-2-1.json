@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid calling task.isCancelled() twice",
+                "Change_Diff": "- if (task.getScheduledTick() == currentTick && !task.isCancelled()) {\n+ boolean isTaskCancelled = task.isCancelled();\n+ if (task.getScheduledTick() == currentTick && !isTaskCancelled) {",
+                "Description": "The method task.isCancelled() is called twice for each task in the loop. Instead of calling it twice, it should be called once and the result should be stored in a boolean variable. This will improve the readability and performance of the code.",
+                "Start": 6,
+                "End": 17
+            },
+            {
+                "Improvement": "Avoid modifying a list while iterating over it",
+                "Change_Diff": "- scheduledTasks.addTask(task);\n+ tasksToAdd.add(task);",
+                "Description": "The code is modifying the list `scheduledTasks` while iterating over it. This is a common source of ConcurrentModificationException. Instead of modifying the list while iterating over it, it's better to create a new list of tasks to be added and add them after the loop.",
+                "Start": 8,
+                "End": 18
+            }
+        ],
+        "Final code": "public synchronized void performOneTick(){\n  currentTick++;\n  List<ScheduledTask> oldTasks=scheduledTasks.getCurrentTaskList();\n  List<ScheduledTask> tasksToAdd = new ArrayList<>();\n  for (ScheduledTask task : oldTasks) {\n    boolean isTaskCancelled = task.isCancelled();\n    if (task.getScheduledTick() == currentTick && !isTaskCancelled) {\n      if (task.isSync()) {\n        wrapTask(task).run();\n      } else {\n        pool.submit(wrapTask(task));\n        task.submitted();\n      }\n      if (task instanceof RepeatingTask) {\n        if (!isTaskCancelled) {\n          repeatingTask.updateScheduledTick();\n          tasksToAdd.add(task);\n        }\n      } else {\n        task.cancel();\n      }\n    }\n  }\n  scheduledTasks.addAll(tasksToAdd);\n}"
+    },
+    "Old_Method": "/** \n * Perform one tick on the server.\n */\npublic synchronized void performOneTick(){\n  currentTick++;\n  List<ScheduledTask> oldTasks=scheduledTasks.getCurrentTaskList();\n  for (  ScheduledTask task : oldTasks) {\n    if (task.getScheduledTick() == currentTick && !task.isCancelled()) {\n      if (task.isSync()) {\n        wrapTask(task).run();\n      }\n else {\n        pool.submit(wrapTask(task));\n        task.submitted();\n      }\n      if (task instanceof RepeatingTask) {\n        if (!task.isCancelled()) {\n          repeatingTask.updateScheduledTick();\n          scheduledTasks.addTask(task);\n        }\n      }\n else {\n        task.cancel();\n      }\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMock.java",
+    "Start": 4806,
+    "Stop": 5483,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "performOneTick"
+}

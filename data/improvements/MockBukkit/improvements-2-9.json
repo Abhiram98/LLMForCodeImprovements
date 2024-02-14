@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant else statement",
+                "Change_Diff": "- else {\n-    pool.submit(wrapTask(task));\n-    task.submitted();\n+ pool.submit(wrapTask(task));\n+ task.submitted();",
+                "Description": "The `else` statement following `if (task.isSync())` is redundant and can be removed because if `task.isSync()` is true, the method will not reach the `else` block. Removing the `else` keyword can improve the readability of the code.",
+                "Start": 9,
+                "End": 11
+            },
+            {
+                "Improvement": "Use early return to avoid deep nesting",
+                "Change_Diff": "- if (task.getScheduledTick() == currentTick && !task.isCancelled()) {\n+ if (task.getScheduledTick() != currentTick || task.isCancelled()) continue;",
+                "Description": "Instead of nesting multiple `if` statements, you can use early return (or continue in the case of a loop) to avoid deep nesting and make the code more readable. This can be done by inverting the conditions and using a `continue` to skip the current iteration in the loop.",
+                "Start": 6,
+                "End": 21
+            }
+        ],
+        "Final code": "public synchronized void performOneTick(){\n  currentTick++;\n  List<ScheduledTask> oldTasks=scheduledTasks.getCurrentTaskList();\n  for (ScheduledTask task : oldTasks) {\n    if (task.getScheduledTick() != currentTick || task.isCancelled()) continue;\n    if (task.isSync()) {\n      wrapTask(task).run();\n    }\n    pool.submit(wrapTask(task));\n    task.submitted();\n    if (task instanceof RepeatingTask) {\n      if (!task.isCancelled()) {\n        repeatingTask.updateScheduledTick();\n        scheduledTasks.addTask(task);\n      }\n    } else {\n      task.cancel();\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Perform one tick on the server.\n */\npublic synchronized void performOneTick(){\n  currentTick++;\n  List<ScheduledTask> oldTasks=scheduledTasks.getCurrentTaskList();\n  for (  ScheduledTask task : oldTasks) {\n    if (task.getScheduledTick() == currentTick && !task.isCancelled()) {\n      if (task.isSync()) {\n        wrapTask(task).run();\n      }\n else {\n        pool.submit(wrapTask(task));\n        task.submitted();\n      }\n      if (task instanceof RepeatingTask) {\n        if (!task.isCancelled()) {\n          repeatingTask.updateScheduledTick();\n          scheduledTasks.addTask(task);\n        }\n      }\n else {\n        task.cancel();\n      }\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMock.java",
+    "Start": 4806,
+    "Stop": 5483,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "performOneTick"
+}

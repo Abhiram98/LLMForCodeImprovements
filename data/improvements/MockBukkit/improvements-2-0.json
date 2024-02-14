@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor long method",
+                "Change_Diff": "- public synchronized void performOneTick() {...}\n+ public synchronized void performOneTick() {\n+   incrementCurrentTick();\n+   List<ScheduledTask> oldTasks = retrieveCurrentTasks();\n+   processTasks(oldTasks);\n+ }",
+                "Description": "The method 'performOneTick' is doing too many things which makes it hard to understand, test, and maintain. Consider breaking it down into multiple smaller methods each doing one single thing.",
+                "Start": 2,
+                "End": 24
+            },
+            {
+                "Improvement": "Use Iterator instead of for-each loop for task removal",
+                "Change_Diff": "- for (ScheduledTask task : oldTasks) {...}\n+ Iterator<ScheduledTask> taskIterator = oldTasks.iterator();\n+ while (taskIterator.hasNext()) {\n+   ScheduledTask task = taskIterator.next();\n+   ... // process task\n+   if (shouldRemoveTask(task)) {\n+       taskIterator.remove();\n+   }\n+ }",
+                "Description": "The for-each loop is not safe for removing elements during iteration. An Iterator should be used instead to safely remove elements without causing ConcurrentModificationException.",
+                "Start": 6,
+                "End": 23
+            }
+        ],
+        "Final code": "public synchronized void performOneTick() {\n    incrementCurrentTick();\n    List<ScheduledTask> oldTasks = retrieveCurrentTasks();\n    processTasks(oldTasks);\n}\n\nprivate void incrementCurrentTick() {\n    currentTick++;\n}\n\nprivate List<ScheduledTask> retrieveCurrentTasks() {\n    return scheduledTasks.getCurrentTaskList();\n}\n\nprivate void processTasks(List<ScheduledTask> tasks) {\n    Iterator<ScheduledTask> taskIterator = tasks.iterator();\n    while (taskIterator.hasNext()) {\n        ScheduledTask task = taskIterator.next();\n        processTask(task);\n        if (shouldRemoveTask(task)) {\n            taskIterator.remove();\n        }\n    }\n}\n\nprivate void processTask(ScheduledTask task) {\n    if (task.getScheduledTick() == currentTick && !task.isCancelled()) {\n        if (task.isSync()) {\n            wrapTask(task).run();\n        } else {\n            pool.submit(wrapTask(task));\n            task.submitted();\n        }\n        if (task instanceof RepeatingTask && !task.isCancelled()) {\n            repeatingTask.updateScheduledTick();\n            scheduledTasks.addTask(task);\n        }\n    }\n}\n\nprivate boolean shouldRemoveTask(ScheduledTask task) {\n    return !(task instanceof RepeatingTask) && task.getScheduledTick() == currentTick;\n}"
+    },
+    "Old_Method": "/** \n * Perform one tick on the server.\n */\npublic synchronized void performOneTick(){\n  currentTick++;\n  List<ScheduledTask> oldTasks=scheduledTasks.getCurrentTaskList();\n  for (  ScheduledTask task : oldTasks) {\n    if (task.getScheduledTick() == currentTick && !task.isCancelled()) {\n      if (task.isSync()) {\n        wrapTask(task).run();\n      }\n else {\n        pool.submit(wrapTask(task));\n        task.submitted();\n      }\n      if (task instanceof RepeatingTask) {\n        if (!task.isCancelled()) {\n          repeatingTask.updateScheduledTick();\n          scheduledTasks.addTask(task);\n        }\n      }\n else {\n        task.cancel();\n      }\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMock.java",
+    "Start": 4806,
+    "Stop": 5483,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "performOneTick"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary 'Objects.requireNonNull' for 'bytes'",
+                "Change_Diff": "- Objects.requireNonNull(bytes,\"bytes\");\n",
+                "Description": "Since 'bytes' array is not used before the null check, it's not necessary to perform 'Objects.requireNonNull' on it. This can be removed to improve the efficiency of the code.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use enhanced for loop for iterating bytes array",
+                "Change_Diff": "- for (int i=1; i < length; i++) {\n+ for (byte b : bytes) {",
+                "Description": "Instead of using a traditional for loop to iterate over 'bytes' array, use an enhanced for loop. This simplifies the loop structure and improves code readability.",
+                "Start": 8,
+                "End": 16
+            },
+            {
+                "Improvement": "Use 'try-with-resources' to ensure 'out' is closed",
+                "Change_Diff": "- try {\n+ try (out) {",
+                "Description": "The 'out' object should be closed after its use to release system resources. A 'try-with-resources' can be used to ensure 'out' is closed at the end of the method.",
+                "Start": 6,
+                "End": 18
+            }
+        ],
+        "Final code": "private <A extends Appendable>A formatHex(A out,byte[] bytes,int fromIndex,int toIndex){\n  Objects.requireNonNull(out,\"out\");\n  int length=toIndex - fromIndex;\n  if (length > 0) {\n    try (out) {\n      String between=suffix + delimiter + prefix;\n      out.append(prefix);\n      toHexDigits(out,bytes[fromIndex]);\n      if (between.isEmpty()) {\n        for (byte b : bytes) {\n          toHexDigits(out,b);\n        }\n      }\n else {\n        for (byte b : bytes) {\n          out.append(between);\n          toHexDigits(out,b);\n        }\n      }\n      out.append(suffix);\n    }\n catch (IOException ioe) {\n      throw new RuntimeException(ioe.getMessage(),ioe);\n    }\n  }\n  return out;\n}"
+    },
+    "Old_Method": "private <A extends Appendable>A formatHex(A out,byte[] bytes,int fromIndex,int toIndex){\n  Objects.requireNonNull(out,\"out\");\n  Objects.requireNonNull(bytes,\"bytes\");\n  int length=toIndex - fromIndex;\n  if (length > 0) {\n    try {\n      String between=suffix + delimiter + prefix;\n      out.append(prefix);\n      toHexDigits(out,bytes[fromIndex]);\n      if (between.isEmpty()) {\n        for (int i=1; i < length; i++) {\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n else {\n        for (int i=1; i < length; i++) {\n          out.append(between);\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n      out.append(suffix);\n    }\n catch (    IOException ioe) {\n      throw new RuntimeException(ioe.getMessage(),ioe);\n    }\n  }\n  return out;\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/EncodingHexJmhBenchmark.java",
+    "Start": 17470,
+    "Stop": 18670,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "formatHex"
+}

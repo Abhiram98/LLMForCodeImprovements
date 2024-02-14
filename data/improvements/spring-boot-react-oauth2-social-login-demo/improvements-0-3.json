@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use multi-catch instead of multiple catch blocks",
+            "Change_Diff": "- catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n+ catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(\"An error occured while validating the token\", ex);\n  }",
+            "Description": "Instead of using multiple catches, you can use a single catch block to catch multiple exceptions. This will make your code more compact and easier to read.",
+            "Start": 6,
+            "End": 17
+        }],
+        "Final code": "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(\"An error occured while validating the token\", ex);\n  }\n  return false;\n}"
+    },
+    "Old_Method": "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n  return false;\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/TokenProvider.java",
+    "Start": 1471,
+    "Stop": 2183,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "validateToken"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove repeated code",
+                "Change_Diff": "- wh=putOffHeap(Memory.wrap(sv3csk.toByteArray()));...\n- wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed));...\n- wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer1(sv3csk));...",
+                "Description": "The same piece of code is repeated three times. It would be cleaner to put this code into a separate method and call it three times with different parameters.",
+                "Start": 14,
+                "End": 52
+            },
+            {
+                "Improvement": "Handle exceptions properly",
+                "Change_Diff": "- catch (Exception e) {\n- }\n+ catch (Exception e) {\n+    e.printStackTrace();\n+ }",
+                "Description": "Empty catch blocks are a bad practice, as they hide possible issues and make debugging harder. In this case, you should at least log the exception or, better yet, handle it properly.",
+                "Start": 21,
+                "End": 23
+            }
+        ],
+        "Final code": "public void checkWrapCompactSketchGivenDefaultSeed() {\n    final int k=64;\n    final long seed=ThetaUtil.DEFAULT_UPDATE_SEED;\n    final short seedHash=Util.computeSeedHash(seed);\n    UpdateSketch sv3usk=UpdateSketch.builder().setNominalEntries(k).setSeed(seed).build();\n    for (int i=0; i < k; i++) {\n        sv3usk.update(i);\n    }\n    CompactSketch sv3csk=sv3usk.compact();\n    testWrap(sv3csk.toByteArray(), sv3usk, seedHash, seed);\n    testWrap(BackwardConversions.convertSerVer3toSerVer2(sv3csk, seed), sv3usk, seedHash, seed);\n    testWrap(BackwardConversions.convertSerVer3toSerVer1(sv3csk), sv3usk, seedHash, seed);\n}\n\nprivate void testWrap(byte[] data, UpdateSketch sv3usk, short seedHash, long seed) {\n    WritableHandle wh=putOffHeap(Memory.wrap(data));\n    CompactSketch sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n    assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n    assertEquals(sv3cskResult.getSeedHash(),seedHash);\n    assertTrue(sv3cskResult.isDirect());\n    try {\n        wh.close();\n    } catch (Exception e) {\n        e.printStackTrace();\n    }\n}"
+    },
+    "Old_Method": "@Test public void checkWrapCompactSketchGivenDefaultSeed(){\n  final int k=64;\n  final long seed=ThetaUtil.DEFAULT_UPDATE_SEED;\n  final short seedHash=Util.computeSeedHash(seed);\n  UpdateSketch sv3usk=UpdateSketch.builder().setNominalEntries(k).setSeed(seed).build();\n  for (int i=0; i < k; i++) {\n    sv3usk.update(i);\n  }\n  CompactSketch sv3cskResult;\n  WritableHandle wh;\n  CompactSketch sv3csk=sv3usk.compact();\n  wh=putOffHeap(Memory.wrap(sv3csk.toByteArray()));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertTrue(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n  wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertFalse(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n  wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer1(sv3csk));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertFalse(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/HeapifyWrapSerVer1and2Test.java",
+    "Start": 14530,
+    "Stop": 16090,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkWrapCompactSketchGivenDefaultSeed"
+}

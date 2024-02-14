@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant checks in the first for loop",
+                "Change_Diff": "- for (; limit > 0; limit--) {\n-    char c=in.charAt(limit - 1);\n-    if (c != '=' && c != '\n' && c != '\r' && c != ' ' && c != '\t') {\n-      break;\n-    }\n-  }",
+                "Description": "In the first for loop, the code checks if the character is not '=' or '\n' or '\r' or ' ' or '\t' and breaks the loop. However, in the second for loop, it already skips these characters. So, the check in the first for loop is redundant and can be removed.",
+                "Start": 2,
+                "End": 7
+            },
+            {
+                "Improvement": "Use a switch statement instead of multiple if-else statements",
+                "Change_Diff": "- if (c >= 'A' && c <= 'Z') {\n-      bits=c - 65;\n-    }\n- else     if (c >= 'a' && c <= 'z') {\n-      bits=c - 71;\n-    }\n- else     if (c >= '0' && c <= '9') {\n-      bits=c + 4;\n-    }\n- else     if (c == '+' || c == '-') {\n-      bits=62;\n-    }\n- else     if (c == '/' || c == '_') {\n-      bits=63;\n-    }\n- else     if (c == '\n' || c == '\r' || c == ' ' || c == '\t') {\n-      continue;\n-    }\n- else {\n-      throw new IllegalArgumentException(\"invalid character to decode: \" + c);\n-    }",
+                "Description": "Instead of using multiple if-else statements to check for the value of 'c', you can use a switch statement. It will make the code cleaner and easier to read.",
+                "Start": 14,
+                "End": 34
+            }
+        ],
+        "Final code": "static byte[] decode(CharSequence in){\n  int limit=in.length();\n  byte[] out=new byte[(int)(limit * 6L / 8L)];\n  int outCount=0;\n  int inCount=0;\n  int word=0;\n  for (int pos=0; pos < limit; pos++) {\n    char c=in.charAt(pos);\n    int bits;\n    switch (c) {\n      case 'A': case 'B': case 'C': case 'D': case 'E': case 'F': case 'G': case 'H': case 'I': case 'J': case 'K': case 'L': case 'M': case 'N': case 'O': case 'P': case 'Q': case 'R': case 'S': case 'T': case 'U': case 'V': case 'W': case 'X': case 'Y': case 'Z':\n        bits=c - 65;\n        break;\n      case 'a': case 'b': case 'c': case 'd': case 'e': case 'f': case 'g': case 'h': case 'i': case 'j': case 'k': case 'l': case 'm': case 'n': case 'o': case 'p': case 'q': case 'r': case 's': case 't': case 'u': case 'v': case 'w': case 'x': case 'y': case 'z':\n        bits=c - 71;\n        break;\n      case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':\n        bits=c + 4;\n        break;\n      case '+': case '-':\n        bits=62;\n        break;\n      case '/': case '_':\n        bits=63;\n        break;\n      case '\n': case '\r': case ' ': case '\t':\n        continue;\n      default:\n        throw new IllegalArgumentException(\"invalid character to decode: \" + c);\n    }\n    word=(word << 6) | (byte)bits & 0xff;\n    inCount++;\n    if (inCount % 4 == 0) {\n      out[outCount++]=(byte)(word >> 16);\n      out[outCount++]=(byte)(word >> 8);\n      out[outCount++]=(byte)word;\n    }\n  }\n  int lastWordChars=inCount % 4;\n  if (lastWordChars == 1) {\n    return null;\n  }\n else   if (lastWordChars == 2) {\n    word=word << 12;\n    out[outCount++]=(byte)(word >> 16);\n  }\n else   if (lastWordChars == 3) {\n    word=word << 6;\n    out[outCount++]=(byte)(word >> 16);\n    out[outCount++]=(byte)(word >> 8);\n  }\n  if (outCount == out.length)   return out;\n  return Arrays.copyOfRange(out,0,outCount);\n}"
+    },
+    "Old_Method": "static byte[] decode(CharSequence in){\n  int limit=in.length();\n  for (; limit > 0; limit--) {\n    char c=in.charAt(limit - 1);\n    if (c != '=' && c != '\\n' && c != '\\r' && c != ' ' && c != '\\t') {\n      break;\n    }\n  }\n  byte[] out=new byte[(int)(limit * 6L / 8L)];\n  int outCount=0;\n  int inCount=0;\n  int word=0;\n  for (int pos=0; pos < limit; pos++) {\n    char c=in.charAt(pos);\n    int bits;\n    if (c >= 'A' && c <= 'Z') {\n      bits=c - 65;\n    }\n else     if (c >= 'a' && c <= 'z') {\n      bits=c - 71;\n    }\n else     if (c >= '0' && c <= '9') {\n      bits=c + 4;\n    }\n else     if (c == '+' || c == '-') {\n      bits=62;\n    }\n else     if (c == '/' || c == '_') {\n      bits=63;\n    }\n else     if (c == '\\n' || c == '\\r' || c == ' ' || c == '\\t') {\n      continue;\n    }\n else {\n      throw new IllegalArgumentException(\"invalid character to decode: \" + c);\n    }\n    word=(word << 6) | (byte)bits & 0xff;\n    inCount++;\n    if (inCount % 4 == 0) {\n      out[outCount++]=(byte)(word >> 16);\n      out[outCount++]=(byte)(word >> 8);\n      out[outCount++]=(byte)word;\n    }\n  }\n  int lastWordChars=inCount % 4;\n  if (lastWordChars == 1) {\n    return null;\n  }\n else   if (lastWordChars == 2) {\n    word=word << 12;\n    out[outCount++]=(byte)(word >> 16);\n  }\n else   if (lastWordChars == 3) {\n    word=word << 6;\n    out[outCount++]=(byte)(word >> 16);\n    out[outCount++]=(byte)(word >> 8);\n  }\n  if (outCount == out.length)   return out;\n  return Arrays.copyOfRange(out,0,outCount);\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Base64.java",
+    "Start": 1985,
+    "Stop": 4949,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "decode"
+}

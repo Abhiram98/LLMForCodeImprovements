@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Logger instead of System.out.println for logging",
+                "Change_Diff": "- System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n...\n- System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n- System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n- System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n...\n- System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n+ logger.info(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n...\n+ logger.info(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n+ logger.info(\"orig   :\\t\" + rnd.encodeHex());\n+ logger.info(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n...\n+ logger.info(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");",
+                "Description": "Using System.out.println for logging is not a good practice. It is better to use java.util.logging.Logger or any other logging framework like Log4j or SLF4J. This will provide better control over log levels and also provide other features like log rotation.",
+                "Start": 5,
+                "End": 19
+            },
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n- String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n- byte[] decoded=encoding.decode(encodedBigEndian);\n...\n+ encodeDecode(rnd, j);",
+                "Description": "The code to encode and decode is repeated for each radix. This code can be extracted into a separate method to reduce repetition and improve readability.",
+                "Start": 8,
+                "End": 19
+            }
+        ],
+        "Final code": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  Logger logger = Logger.getLogger(encodeDecodeRadix.class.getName());\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    logger.info(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      encodeDecode(rnd, j);\n    }\n  }\n  logger.info(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}\n\nprivate void encodeDecode(Bytes rnd, int radix) {\n  BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(radix);\n  String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n  byte[] decoded=encoding.decode(encodedBigEndian);\n  logger.info(\"radix\" + radix + \":\\t\"+ encodedBigEndian);\n  logger.info(\"orig   :\\t\" + rnd.encodeHex());\n  logger.info(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n  if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n    assertArrayEquals(rnd.array(),decoded);\n  }\n else {\n    leadingZeroHits++;\n    assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n  }\n}"
+    },
+    "Old_Method": "@Test public void encodeDecodeRadix(){\n  int leadingZeroHits=0;\n  int encodings=0;\n  for (int i=0; i < 64; i++) {\n    Bytes rnd=Bytes.random(i % 256);\n    System.out.println(\"\\n\\nNEW TEST: \" + i + \" bytes\\n\");\n    for (int j=2; j <= 36; j++) {\n      encodings++;\n      BinaryToTextEncoding.EncoderDecoder encoding=new BinaryToTextEncoding.BaseRadixNumber(j);\n      String encodedBigEndian=encoding.encode(rnd.array(),ByteOrder.BIG_ENDIAN);\n      byte[] decoded=encoding.decode(encodedBigEndian);\n      System.out.println(\"radix\" + j + \":\\t\"+ encodedBigEndian);\n      System.out.println(\"orig   :\\t\" + rnd.encodeHex());\n      System.out.println(\"enc    :\\t\" + Bytes.wrap(decoded).encodeHex());\n      if (rnd.length() <= 0 || rnd.byteAt(0) != 0) {\n        assertArrayEquals(rnd.array(),decoded);\n      }\n else {\n        leadingZeroHits++;\n        assertArrayEquals(rnd.resize(rnd.length() - 1).array(),decoded);\n      }\n    }\n  }\n  System.out.println(leadingZeroHits + \" leading zero mismatches of \" + encodings+ \" encodings\");\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BinaryToTextEncodingTest.java",
+    "Start": 3738,
+    "Stop": 5067,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "encodeDecodeRadix"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add meaningful comments",
+                "Change_Diff": "+ // Create an order\n AggregateId orderId=orderingService.createOrder();\n\n+ // Add products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n\n+ // Calculate the offer for the order\n Offer offer=orderingService.calculateOffer(orderId);\n\n+ // Add more products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n\n+ // Try to confirm the order with the old offer\n try {\n   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n   Assert.fail();\n }\n catch (  OfferChangedExcpetion e) {\n }\n",
+                "Description": "Adding comments in the code makes it easier to understand what the code does. This is useful for others who may read your code, or for yourself if you return to it after a break.",
+                "Start": 1,
+                "End": 13
+            },
+            {
+                "Improvement": "Handle the exception properly",
+                "Change_Diff": "- catch (  OfferChangedExcpetion e) {\n }\n\n+ catch (  OfferChangedExcpetion e) {\n+    e.printStackTrace();\n+ }\n",
+                "Description": "Instead of leaving the catch block empty, handle the exception properly by logging it or wrapping it in an unchecked exception so that the stack trace is not lost.",
+                "Start": 12,
+                "End": 13
+            }
+        ],
+        "Final code": "@Test public void canNotPurchaseIfOfferChanged(){\n\n // Create an order\n AggregateId orderId=orderingService.createOrder();\n\n // Add products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n\n // Calculate the offer for the order\n Offer offer=orderingService.calculateOffer(orderId);\n\n // Add more products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n\n // Try to confirm the order with the old offer\n try {\n   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n   Assert.fail();\n }\n catch (  OfferChangedExcpetion e) {\n   e.printStackTrace();\n }\n}"
+    },
+    "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+    "Start": 2542,
+    "Stop": 3087,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "canNotPurchaseIfOfferChanged"
+}

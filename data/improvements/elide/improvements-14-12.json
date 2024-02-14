@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce complexity by methods extraction",
+                "Change_Diff": "- @Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n+ @Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n+ String baseRoute=cleanBaseUrl(baseUrl);\n+ String[] extractedPath=extractPath(path);\n+ String apiVersion=extractApiVersion(extractedPath[0]);\n+ String route=extractRoute(extractedPath[1]);\n+ return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n+ }",
+                "Description": "The resolve method has high cyclomatic complexity due to the number of conditional statements, which makes it hard to read and maintain. Split it into smaller, more manageable methods for readability and testing purposes.",
+                "Start": 1,
+                "End": 59
+            },
+            {
+                "Improvement": "Remove unused parameter",
+                "Change_Diff": "- public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n+ public Route resolve(String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){",
+                "Description": "The parameter 'mediaType' is not used in the method, thus it should be removed. Unused parameters can lead to confusion.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "public Route resolve(String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n    String baseRoute=cleanBaseUrl(baseUrl);\n    String[] extractedPath=extractPath(path);\n    String apiVersion=extractApiVersion(extractedPath[0]);\n    String route=extractRoute(extractedPath[1]);\n    return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}"
+    },
+    "Old_Method": "@Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n  String baseRoute=baseUrl == null ? \"\" : baseUrl;\n  String route=path;\n  String apiVersion=NO_VERSION;\n  String apiVersionString=\"\";\n  int versionStart=-1;\n  int versionEnd=-1;\n  int pathStart=-1;\n  int pathEnd=-1;\n  int find=path.indexOf('/',0);\n  if (find != -1) {\n    if (find == 0) {\n      versionStart=1;\n      int findEnd=path.indexOf('/',1);\n      if (findEnd != -1) {\n        versionEnd=findEnd;\n        pathStart=findEnd;\n        pathEnd=path.length();\n      }\n else {\n        versionEnd=path.length();\n      }\n    }\n else {\n      versionStart=0;\n      versionEnd=find;\n      pathStart=find;\n      pathEnd=path.length();\n    }\n  }\n else {\n    versionStart=0;\n    versionEnd=path.length();\n  }\n  if (versionStart != -1 && versionEnd != -1) {\n    apiVersion=path.substring(versionStart,versionEnd);\n    apiVersionString=apiVersion;\n  }\n  if (!apiVersion.isEmpty() && !this.versionPrefix.isEmpty()) {\n    if (apiVersion.startsWith(this.versionPrefix)) {\n      apiVersion=apiVersion.substring(this.versionPrefix.length());\n    }\n  }\n  if (!apiVersion.isEmpty()) {\n    if (!apiVersionValidator.isValidApiVersion(apiVersion)) {\n      apiVersion=NO_VERSION;\n      pathStart=0;\n      pathEnd=path.length();\n      apiVersionString=\"\";\n    }\n  }\n  if (pathStart != -1 && pathEnd != -1) {\n    route=path.substring(pathStart,pathEnd);\n  }\n else {\n    route=\"\";\n  }\n  if (route.length() > 0 && route.charAt(0) == '/') {\n    route=route.substring(1);\n  }\n  if (baseRoute.length() > 0 && baseRoute.charAt(baseRoute.length() - 1) == '/') {\n    baseRoute=baseRoute + apiVersionString;\n  }\n else {\n    baseRoute=baseRoute + \"/\" + apiVersionString;\n  }\n  return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/core/request/route/PathRouteResolver.java",
+    "Start": 730,
+    "Stop": 3402,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "resolve"
+}

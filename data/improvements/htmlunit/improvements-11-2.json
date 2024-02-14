@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract method for checking element visibility",
+                "Change_Diff": "- if (elem.isHidden()) {\n-   return false;\n- }\n- if (elem instanceof HtmlDialog) {\n-   if (!((HtmlDialog)elem).isOpen()) {\n-     return false;\n-   }\n- }\n- else {\n+ if (!isElementVisible(elem)) {",
+                "Description": "The code for checking if an element is visible is repeated twice in the method. This can be extracted into a separate method for better code readability and maintainability.",
+                "Start": 19,
+                "End": 26
+            },
+            {
+                "Improvement": "Extract method for getting computed CSS style",
+                "Change_Diff": "- final ComputedCssStyleDeclaration style=window.getComputedStyle(elem,null);\n- if (DisplayStyle.NONE.value().equals(style.getDisplay())) {\n-   return false;\n- }\n+ if (isStyleDisplayNone(elem, window)) {",
+                "Description": "The code for getting the computed CSS style of an element is used multiple times in the method. This can be extracted into a separate method for better code readability and maintainability.",
+                "Start": 29,
+                "End": 32
+            }
+        ],
+        "Final code": "public boolean isDisplayed(){\n  if (!mayBeDisplayed()) {\n    return false;\n  }\n  final Page page=getPage();\n  final WebWindow window=page.getEnclosingWindow();\n  final WebClient webClient=window.getWebClient();\n  if (webClient.getOptions().isCssEnabled()) {\n    final List<Node> ancestors=getAncestors();\n    final ArrayList<ComputedCssStyleDeclaration> styles=new ArrayList<>(ancestors.size());\n    for (final Node node : ancestors) {\n      if (node instanceof HtmlElement) {\n        final HtmlElement elem=(HtmlElement)node;\n        if (!isElementVisible(elem)) {\n          return false;\n        }\n        if (isStyleDisplayNone(elem, window)) {\n          return false;\n        }\n        styles.add(style);\n      }\n    }\n    for (int i=styles.size() - 1; i >= 0; i--) {\n      final ComputedCssStyleDeclaration style=styles.get(i);\n      final String visibility=style.getStyleAttribute(StyleAttributes.Definition.VISIBILITY,true);\n      if (visibility.length() > 5) {\n        if (\"visible\".equals(visibility)) {\n          return true;\n        }\n        if (\"hidden\".equals(visibility) || \"collapse\".equals(visibility)) {\n          return false;\n        }\n      }\n    }\n  }\n  return true;\n}\n\nprivate boolean isElementVisible(HtmlElement elem) {\n  if (elem.isHidden()) {\n    return false;\n  }\n  if (elem instanceof HtmlDialog) {\n    if (!((HtmlDialog)elem).isOpen()) {\n      return false;\n    }\n  }\n  return true;\n}\n\nprivate boolean isStyleDisplayNone(HtmlElement elem, WebWindow window) {\n  final ComputedCssStyleDeclaration style=window.getComputedStyle(elem,null);\n  if (DisplayStyle.NONE.value().equals(style.getDisplay())) {\n    return false;\n  }\n  return true;\n}"
+    },
+    "Old_Method": "/** \n * <p>Returns  {@code true} if this node is displayed and can be visible to the user(ignoring screen size, scrolling limitations, color, font-size, or overlapping nodes).<\/p> <p><b>NOTE:<\/b> If CSS is {@link org.htmlunit.WebClientOptions#setCssEnabled(boolean) disabled}, this method does <b>not<\/b> take this element's style into consideration!<\/p>\n * @see <a href=\"http://www.w3.org/TR/CSS2/visufx.html#visibility\">CSS2 Visibility<\/a>\n * @see <a href=\"http://www.w3.org/TR/CSS2/visuren.html#propdef-display\">CSS2 Display<\/a>\n * @see <a href=\"http://msdn.microsoft.com/en-us/library/ms531180.aspx\">MSDN Documentation<\/a>\n * @return {@code true} if the node is visible to the user, {@code false} otherwise\n * @see #mayBeDisplayed()\n */\npublic boolean isDisplayed(){\n  if (!mayBeDisplayed()) {\n    return false;\n  }\n  final Page page=getPage();\n  final WebWindow window=page.getEnclosingWindow();\n  final WebClient webClient=window.getWebClient();\n  if (webClient.getOptions().isCssEnabled()) {\n    final List<Node> ancestors=getAncestors();\n    final ArrayList<ComputedCssStyleDeclaration> styles=new ArrayList<>(ancestors.size());\n    for (    final Node node : ancestors) {\n      if (node instanceof HtmlElement) {\n        final HtmlElement elem=(HtmlElement)node;\n        if (elem.isHidden()) {\n          return false;\n        }\n        if (elem instanceof HtmlDialog) {\n          if (!((HtmlDialog)elem).isOpen()) {\n            return false;\n          }\n        }\n else {\n          final ComputedCssStyleDeclaration style=window.getComputedStyle(elem,null);\n          if (DisplayStyle.NONE.value().equals(style.getDisplay())) {\n            return false;\n          }\n          styles.add(style);\n        }\n      }\n    }\n    for (int i=styles.size() - 1; i >= 0; i--) {\n      final ComputedCssStyleDeclaration style=styles.get(i);\n      final String visibility=style.getStyleAttribute(StyleAttributes.Definition.VISIBILITY,true);\n      if (visibility.length() > 5) {\n        if (\"visible\".equals(visibility)) {\n          return true;\n        }\n        if (\"hidden\".equals(visibility) || \"collapse\".equals(visibility)) {\n          return false;\n        }\n      }\n    }\n  }\n  return true;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/DomNode.java",
+    "Start": 20200,
+    "Stop": 23239,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "isDisplayed"
+}

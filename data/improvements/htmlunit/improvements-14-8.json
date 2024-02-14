@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check before calling methods on javaScriptExecutor_",
+                "Change_Diff": "- javaScriptExecutor_.shutdown();\n+ if (javaScriptExecutor_ != null) {\n    javaScriptExecutor_.shutdown();\n}",
+                "Description": "Adding a null check before calling methods on an object is a good practice to avoid NullPointerException.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Remove redundant null checks",
+                "Change_Diff": "- if (postponedActions_ != null) {\n    postponedActions_.remove();\n}\nif (javaScriptRunning_ != null) {\n    javaScriptRunning_.remove();\n}\n\n+ postponedActions_.remove();\n+ javaScriptRunning_.remove();",
+                "Description": "The null checks for postponedActions_ and javaScriptRunning_ before calling remove() method are redundant since remove() method can handle null values.",
+                "Start": 12,
+                "End": 15
+            }
+        ],
+        "Final code": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  webClient_=null;\n  contextFactory_=null;\n  jsConfig_=null;\n  if (javaScriptExecutor_ != null) {\n    javaScriptExecutor_.shutdown();\n    javaScriptExecutor_=null;\n  }\n  postponedActions_.remove();\n  javaScriptRunning_.remove();\n  holdPostponedActions_=false;\n}"
+    },
+    "Old_Method": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  webClient_=null;\n  contextFactory_=null;\n  jsConfig_=null;\n  if (javaScriptExecutor_ != null) {\n    javaScriptExecutor_.shutdown();\n    javaScriptExecutor_=null;\n  }\n  if (postponedActions_ != null) {\n    postponedActions_.remove();\n  }\n  if (javaScriptRunning_ != null) {\n    javaScriptRunning_.remove();\n  }\n  holdPostponedActions_=false;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/JavaScriptEngine.java",
+    "Start": 35868,
+    "Stop": 36412,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "shutdown"
+}

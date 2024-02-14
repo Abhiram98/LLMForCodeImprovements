@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional instead of null",
+                "Change_Diff": "- return null;\n+ return Optional.empty();",
+                "Description": "Instead of returning null in the catch block, it's better to use Optional. By returning an Optional object, you can clearly signal to the caller of the method that the return value might not exist. This forces the caller to handle this case explicitly.",
+                "Start": 22,
+                "End": 23
+            },
+            {
+                "Improvement": "Use specific exceptions",
+                "Change_Diff": "- catch (  Exception ex) {\n+ catch (  IOException | GeoIp2Exception ex) {",
+                "Description": "Catching Exception is too broad and can mask other unexpected or programming errors. It would be better to catch specific exceptions that could be thrown by the method calls within the try block.",
+                "Start": 21,
+                "End": 21
+            }
+        ],
+        "Final code": "private Optional<GeoInfo> _getGeoInfo(String ipAddress){\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return Optional.of(geoInfo);\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return Optional.of(geoInfo);\n  }\n catch (  IOException | GeoIp2Exception ex) {\n    return Optional.empty();\n  }\n}"
+    },
+    "Old_Method": "private GeoInfo _getGeoInfo(String ipAddress){\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return geoInfo;\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return geoInfo;\n  }\n catch (  Exception ex) {\n    return null;\n  }\n}\n",
+    "File_Path": "realtime-analytics/collector/src/main/java/com/ebay/pulsar/collector/udf/GeoEnrichmentUtil.java",
+    "Start": 1289,
+    "Stop": 2470,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "_getGeoInfo"
+}

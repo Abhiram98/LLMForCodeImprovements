@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated condition checks into methods",
+                "Change_Diff": "- while (status != Status.CANCELED && status != Status.DONE) {\n+ while (!isCanceled() && !isDone()) {\n\n...\n\n- if (status != Status.CANCELED) {\n+ if (!isCanceled()) {\n\n...\n\n- if (status != Status.CANCELED) {\n+ if (!isCanceled()) {\n\n...\n\n- if (status == Status.CANCELED && !file.delete()) {\n+ if (isCanceled() && !file.delete()) {\n\n...\n\n- if (status == Status.DONE) {\n+ if (isDone()) {",
+                "Description": "The checks `status != Status.CANCELED`, `status == Status.CANCELED` and `status == Status.DONE` are frequently repeated. It is better to encapsulate these checks into separate methods to improve code readability.",
+                "Start": 3,
+                "End": 38
+            },
+            {
+                "Improvement": "Use try-with-resources for automatic resource management",
+                "Change_Diff": "- private void doDownload(RandomAccessFile raFile){\n+ private void doDownload(){\n\n...\n\n- finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n...\n\n+ try (RandomAccessFile raFile = new RandomAccessFile(...); InputStream input = ... ) {\n    ...",
+                "Description": "Use try-with-resources to automatically close the resources after use. This eliminates the need of finally block just for closing the resources and it automatically handles any exceptions that are thrown while closing the resources.",
+                "Start": 2,
+                "End": 39
+            }
+        ],
+        "Final code": "private void doDownload(){\n  try (RandomAccessFile raFile = new RandomAccessFile(...); InputStream input = ... ) {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (!isCanceled() && !isDone()) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (isCanceled() || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (!isCanceled()) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (IOException e) {\nsynchronized (lock) {\n      if (!isCanceled()) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n  if (isCanceled() && !file.delete()) {\n    Platform.logError(\"can not delete canceled file: \" + file);\n  }\n  fireOnComplete();\n  if (isDone()) {\n    fireOnSuccess();\n  }\n}\n\nprivate boolean isCanceled() {\n  return status == Status.CANCELED;\n}\n\nprivate boolean isDone() {\n  return status == Status.DONE;\n}"
+    },
+    "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+    "Start": 6005,
+    "Stop": 7715,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "doDownload"
+}

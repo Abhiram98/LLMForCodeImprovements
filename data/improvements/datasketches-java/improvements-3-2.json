@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary clear() calls",
+                "Change_Diff": "- onHeapMem.clear();\n- offHeapMem.clear();",
+                "Description": "The clear() method is called on both onHeapMem and offHeapMem after each insert/extract operation. However, these calls are unnecessary and can be removed, as the insert operation effectively overwrites previous values.",
+                "Start": 9,
+                "End": 59
+            },
+            {
+                "Improvement": "Use JUnit's assertThrows to handle exceptions",
+                "Change_Diff": "- catch (  final Exception e) {\n- throw new RuntimeException(e);\n+ assertThrows(Exception.class, () -> { ... });",
+                "Description": "Instead of catching exceptions and throwing a RuntimeException, it is better to use JUnit's assertThrows method to test if the expected exception is thrown.",
+                "Start": 60,
+                "End": 63
+            },
+            {
+                "Improvement": "Refactor repetitive code into a separate method",
+                "Change_Diff": "- insertPreLongs(onHeapMem,v);\n- onH=extractPreLongs(onHeapMem);\n- assertEquals(onH,v);\n- insertPreLongs(offHeapMem,v);\n- offH=extractPreLongs(offHeapMem);\n- assertEquals(offH,v);\n+ testInsertAndExtract(onHeapMem, offHeapMem, v, this::insertPreLongs, this::extractPreLongs);",
+                "Description": "The code has repetitive blocks for inserting and extracting various types of data into/from onHeapMem and offHeapMem. These blocks can be refactored into a separate method to reduce code duplication.",
+                "Start": 7,
+                "End": 59
+            }
+        ],
+        "Final code": "@Test public void checkInsertsAndExtracts(){\n  final int bytes=32;\n  try (WritableHandle offHeapMemHandler=WritableMemory.allocateDirect(bytes)){\n    final WritableMemory offHeapMem=offHeapMemHandler.getWritable();\n    final WritableMemory onHeapMem=WritableMemory.writableWrap(new byte[bytes]);\n    int v=0XFF;\n    int onH, offH;\n    testInsertAndExtract(onHeapMem, offHeapMem, v, this::insertPreLongs, this::extractPreLongs);\n    testInsertAndExtract(onHeapMem, offHeapMem, v, this::insertSerVer, this::extractSerVer);\n    testInsertAndExtract(onHeapMem, offHeapMem, v, this::insertFamilyID, this::extractFamilyID);\n    testInsertAndExtract(onHeapMem, offHeapMem, v, this::insertFlags, this::extractFlags);\n    v=0XFFFF;\n    testInsertAndExtract(onHeapMem, offHeapMem, v, this::insertK, this::extractK);\n    long onHL, offHL, vL=1L << 30;\n    testInsertAndExtractLong(onHeapMem, offHeapMem, vL, this::insertN, this::extractN);\n    double onHD, offHD, vD=1L << 40;\n    testInsertAndExtractDouble(onHeapMem, offHeapMem, vD, this::insertMinDouble, this::extractMinDouble);\n    testInsertAndExtractDouble(onHeapMem, offHeapMem, vD, this::insertMaxDouble, this::extractMaxDouble);\n  }\n  assertThrows(Exception.class, () -> { ... });\n}\n\nprivate void testInsertAndExtract(WritableMemory mem1, WritableMemory mem2, int v, BiConsumer<WritableMemory, Integer> insert, ToIntFunction<WritableMemory> extract) {\n  insert.accept(mem1, v);\n  assertEquals(extract.applyAsInt(mem1), v);\n  insert.accept(mem2, v);\n  assertEquals(extract.applyAsInt(mem2), v);\n}\n\nprivate void testInsertAndExtractLong(WritableMemory mem1, WritableMemory mem2, long v, BiConsumer<WritableMemory, Long> insert, ToLongFunction<WritableMemory> extract) {\n  insert.accept(mem1, v);\n  assertEquals(extract.applyAsLong(mem1), v);\n  insert.accept(mem2, v);\n  assertEquals(extract.applyAsLong(mem2), v);\n}\n\nprivate void testInsertAndExtractDouble(WritableMemory mem1, WritableMemory mem2, double v, BiConsumer<WritableMemory, Double> insert, ToDoubleFunction<WritableMemory> extract) {\n  insert.accept(mem1, v);\n  assertEquals(extract.applyAsDouble(mem1), v);\n  insert.accept(mem2, v);\n  assertEquals(extract.applyAsDouble(mem2), v);\n}"
+    },
+    "Old_Method": "@Test public void checkInsertsAndExtracts(){\n  final int bytes=32;\n  try (WritableHandle offHeapMemHandler=WritableMemory.allocateDirect(bytes)){\n    final WritableMemory offHeapMem=offHeapMemHandler.getWritable();\n    final WritableMemory onHeapMem=WritableMemory.writableWrap(new byte[bytes]);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    int v=0XFF;\n    int onH, offH;\n    insertPreLongs(onHeapMem,v);\n    onH=extractPreLongs(onHeapMem);\n    assertEquals(onH,v);\n    insertPreLongs(offHeapMem,v);\n    offH=extractPreLongs(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertSerVer(onHeapMem,v);\n    onH=extractSerVer(onHeapMem);\n    assertEquals(onH,v);\n    insertSerVer(offHeapMem,v);\n    offH=extractSerVer(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertFamilyID(onHeapMem,v);\n    onH=extractFamilyID(onHeapMem);\n    assertEquals(onH,v);\n    insertFamilyID(offHeapMem,v);\n    offH=extractFamilyID(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertFlags(onHeapMem,v);\n    onH=extractFlags(onHeapMem);\n    assertEquals(onH,v);\n    insertFlags(offHeapMem,v);\n    offH=extractFlags(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    v=0XFFFF;\n    insertK(onHeapMem,v);\n    onH=extractK(onHeapMem);\n    assertEquals(onH,v);\n    insertK(offHeapMem,v);\n    offH=extractK(offHeapMem);\n    assertEquals(offH,v);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    long onHL, offHL, vL=1L << 30;\n    insertN(onHeapMem,vL);\n    onHL=extractN(onHeapMem);\n    assertEquals(onHL,vL);\n    insertN(offHeapMem,vL);\n    offHL=extractN(offHeapMem);\n    assertEquals(offHL,vL);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    double onHD, offHD, vD=1L << 40;\n    insertMinDouble(onHeapMem,vD);\n    onHD=extractMinDouble(onHeapMem);\n    assertEquals(onHD,vD);\n    insertMinDouble(offHeapMem,vD);\n    offHD=extractMinDouble(offHeapMem);\n    assertEquals(offHD,vD);\n    onHeapMem.clear();\n    offHeapMem.clear();\n    insertMaxDouble(onHeapMem,vD);\n    onHD=extractMaxDouble(onHeapMem);\n    assertEquals(onHD,vD);\n    insertMaxDouble(offHeapMem,vD);\n    offHD=extractMaxDouble(offHeapMem);\n    assertEquals(offHD,vD);\n    onHeapMem.clear();\n    offHeapMem.clear();\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/PreambleUtilTest.java",
+    "Start": 2333,
+    "Stop": 5225,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkInsertsAndExtracts"
+}

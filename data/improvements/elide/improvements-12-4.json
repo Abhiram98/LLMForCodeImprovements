@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "@Test public void testProcessQueryGraphQl() throws URISyntaxException {\n  AsyncQuery queryObj=new AsyncQuery();\n  String responseBody=\"{\\\"data\\\":{\\\"book\\\":{\\\"edges\\\":[{\\\"node\\\":{\\\"id\\\":\\\"1\\\",\\\"title\\\":\\\"Ender's Game\\\"}},\" + \"{\\\"node\\\":{\\\"id\\\":\\\"2\\\",\\\"title\\\":\\\"Song of Ice and Fire\\\"}},\" + \"{\\\"node\\\":{\\\"id\\\":\\\"3\\\",\\\"title\\\":\\\"For Whom the Bell Tolls\\\"}}]}}}\";\n  ElideResponse<String> response=ElideResponse.status(200).body(responseBody);\n  String query=\"{\\\"query\\\":\\\"{ group { edges { node { name commonName description } } } }\\\",\\\"variables\\\":null}\";\n  String id=\"edc4a871-dff2-4054-804e-d80075cf827d\";\n  queryObj.setId(id);\n  queryObj.setQuery(query);\n  queryObj.setQueryType(QueryType.GRAPHQL_V1_0);\n  when(runner.run(any(),any(),any(),any(),any())).thenReturn(response);\n  GraphQLAsyncQueryOperation graphQLOperation=new GraphQLAsyncQueryOperation(asyncExecutorService,queryObj,requestScope);\n  AsyncQueryResult queryResultObj=(AsyncQueryResult)graphQLOperation.call();\n  assertEquals(responseBody,queryResultObj.getResponseBody());\n  assertEquals(200,queryResultObj.getHttpStatus());\n  assertEquals(3,queryResultObj.getRecordCount());\n}\n",
+    "File_Path": "elide/elide-async/src/test/java/com/yahoo/elide/async/operation/GraphQLAsyncQueryOperationTest.java",
+    "Start": 1839,
+    "Stop": 3132,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "testProcessQueryGraphQl"
+}

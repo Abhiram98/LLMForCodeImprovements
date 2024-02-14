@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java's built-in `String.split()` method",
+                "Change_Diff": "- if (typeName.contains(\"<\")) {\n-    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n-  }\n- else {\n-    gicType=typeName;\n-  }\n-  if (gicType.contains(\"[\")) {\n-    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n-  }\n+ gicType = typeName.split(\"<|>|\\[\")[0];",
+                "Description": "Instead of using `String.substring()` and `String.indexOf()` to parse the `typeName`, we can use Java's `String.split()` method to simplify the code and make it easier to understand.",
+                "Start": 2,
+                "End": 10
+            },
+            {
+                "Improvement": "Avoid calling `toLowerCase()` in return statement",
+                "Change_Diff": "- return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n+ gicType = gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n+ return gicType;",
+                "Description": "To make the code cleaner, avoid calling `toLowerCase()` in the return statement. Instead, apply it when you initially set `gicType`.",
+                "Start": 11,
+                "End": 11
+            }
+        ],
+        "Final code": "private static String getType(String typeName){\n  String gicType;\n  gicType = typeName.split(\"<|>|\\[\")[0];\n  gicType = gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n  return gicType;\n}"
+    },
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

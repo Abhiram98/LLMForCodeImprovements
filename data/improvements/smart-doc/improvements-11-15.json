@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Stream API to simplify code",
+                "Change_Diff": "- for (  ApiParam apiParam : apiParamList) {\n+ apiParamList.stream().filter(apiParam -> apiParam.getPid() == 0).map(apiParam -> apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\")));\n- for (  ApiParam apiParam : params) {\n+ params.stream().forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0)));",
+                "Description": "The Java 8 Stream API allows for more readable and concise code. Instead of using traditional for loops, we can use the filter and map methods provided by the Stream API to achieve the same result.",
+                "Start": 5,
+                "End": 11
+            },
+            {
+                "Improvement": "Replace magic number with constant",
+                "Change_Diff": "- if (apiParam.getPid() == 0) {\n+ if (apiParam.getPid() == ROOT_PARAM_ID) {\n- apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n+ apiParam.setChildren(getChild(apiParam.getId(),apiParamList,ROOT_PARAM_ID));",
+                "Description": "Magic numbers, in this case '0', are generally considered bad practice. Instead, create a constant with a descriptive name to represent this value. This will make the code easier to understand and maintain.",
+                "Start": 8,
+                "End": 13
+            }
+        ],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  final int ROOT_PARAM_ID = 0;\n  List<ApiParam> params = apiParamList.stream()\n    .filter(apiParam -> apiParam.getPid() == ROOT_PARAM_ID)\n    .map(apiParam -> apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\")))\n    .collect(Collectors.toList());\n  params.stream().forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(),apiParamList,ROOT_PARAM_ID)));\n  return params;\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

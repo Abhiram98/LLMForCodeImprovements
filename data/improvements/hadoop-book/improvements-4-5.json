@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid using magic numbers",
+                "Change_Diff": "- int x=-1;\n- int y=-1;\n- int num=-1;\n+ final int UNDEFINED = -1;\n+ int x=UNDEFINED;\n+ int y=UNDEFINED;\n+ int num=UNDEFINED;",
+                "Description": "Magic numbers are numeric values with unexplained meaning in the code. They are called 'magic numbers' because they can cause unpredictable results. In this case, -1 is used as a magic number. To make the code more readable and maintainable, consider replacing these with symbolic constants.",
+                "Start": 9,
+                "End": 11
+            },
+            {
+                "Improvement": "Use StringBuilder instead of StringBuffer",
+                "Change_Diff": "- StringBuffer result=new StringBuffer();\n+ StringBuilder result=new StringBuilder();",
+                "Description": "StringBuilder is faster than StringBuffer for single-threaded programs, as StringBuilder doesn't need to synchronize methods for thread safety. In this case, the code is not multithreaded, so StringBuilder can be used to gain better performance.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Use Java 8 Streams for matrix construction",
+                "Change_Diff": "- for (int y=0; y < size; ++y) {\n-     for (int x=0; x < size; ++x) {\n-       result.append(picture[y][x]);\n-       result.append(\" \");\n-     }\n-     result.append(\"\\n\");\n- }\n+ IntStream.range(0, size).forEach(y -> {\n+     IntStream.range(0, size).forEach(x -> {\n+         result.append(picture[y][x]).append(' ');\n+     });\n+     result.append('\\n');\n+ });",
+                "Description": "Java 8 introduced the Streams API, which allows for a more declarative programming style. It can be used to replace complex for-loops with more readable stream operations. This allows for increased readability and maintainability of the code.",
+                "Start": 20,
+                "End": 26
+            }
+        ],
+        "Final code": "static String stringifySolution(int size,List<List<ColumnName>> solution){\n  final int UNDEFINED = -1;\n  int[][] picture=new int[size][size];\n  StringBuilder result=new StringBuilder();\n  for (List<ColumnName> row : solution) {\n    int x=UNDEFINED;\n    int y=UNDEFINED;\n    int num=UNDEFINED;\n    for (ColumnName item : row) {\n      if (item instanceof ColumnConstraint) {\n        x=((ColumnConstraint)item).column;\n        num=((ColumnConstraint)item).num;\n      } else if (item instanceof RowConstraint) {\n        y=((RowConstraint)item).row;\n      }\n    }\n    picture[y][x]=num;\n  }\n  IntStream.range(0, size).forEach(y -> {\n    IntStream.range(0, size).forEach(x -> {\n      result.append(picture[y][x]).append(' ');\n    });\n    result.append('\\n');\n  });\n  return result.toString();\n}"
+    },
+    "Old_Method": "/** \n * A string containing a representation of the solution.\n * @param size the size of the board\n * @param solution a list of list of column names\n * @return a string of the solution matrix\n */\nstatic String stringifySolution(int size,List<List<ColumnName>> solution){\n  int[][] picture=new int[size][size];\n  StringBuffer result=new StringBuffer();\n  for (  List<ColumnName> row : solution) {\n    int x=-1;\n    int y=-1;\n    int num=-1;\n    for (    ColumnName item : row) {\n      if (item instanceof ColumnConstraint) {\n        x=((ColumnConstraint)item).column;\n        num=((ColumnConstraint)item).num;\n      }\n else       if (item instanceof RowConstraint) {\n        y=((RowConstraint)item).row;\n      }\n    }\n    picture[y][x]=num;\n  }\n  for (int y=0; y < size; ++y) {\n    for (int x=0; x < size; ++x) {\n      result.append(picture[y][x]);\n      result.append(\" \");\n    }\n    result.append(\"\\n\");\n  }\n  return result.toString();\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Sudoku.java",
+    "Start": 1860,
+    "Stop": 3175,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "stringifySolution"
+}

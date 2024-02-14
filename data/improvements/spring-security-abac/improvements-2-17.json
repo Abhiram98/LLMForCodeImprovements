@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract property keys to constants",
+                "Change_Diff": "- \"xacml.pdp.keyStore\"\n+ KEY_STORE_KEY\n- \"xacml.pdp.keyStore.password\"\n+ KEY_STORE_PASSWORD_KEY\n- \"xacml.pdp.cert.alias\"\n+ CERT_ALIAS_KEY\n- \"xacml.pdp.cert.password\"\n+ CERT_PASSWORD_KEY\n- \"xacml.idp.metadata.url\"\n+ IDP_META_DATA_URL_KEY\n- \"idp.issuerid\"\n+ ISSUER_ID_KEY",
+                "Description": "Instead of using hardcoded strings for property keys, extract them to constant variables. This will reduce the risk of typos and make it easier to manage the property keys.",
+                "Start": 3,
+                "End": 9
+            },
+            {
+                "Improvement": "Handle IOException",
+                "Change_Diff": "- throw new RuntimeException(e)\n+ LOGGER.error(\"Failed to load properties: \" + e.getMessage())\n+ throw new IllegalStateException(\"Failed to load application properties\", e)",
+                "Description": "Instead of throwing a RuntimeException in case of an IOException, handle it properly by logging the error and provide a user-friendly error message.",
+                "Start": 10,
+                "End": 12
+            }
+        ],
+        "Final code": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(KEY_STORE_KEY);\n    KEY_STORE_PASSWORD=properties.getProperty(KEY_STORE_PASSWORD_KEY);\n    CERT_ALIAS=properties.getProperty(CERT_ALIAS_KEY);\n    CERT_PASSWORD=properties.getProperty(CERT_PASSWORD_KEY);\n    IDP_META_DATA_URL=properties.getProperty(IDP_META_DATA_URL_KEY);\n    ISSUER_ID=properties.getProperty(ISSUER_ID_KEY);\n  }\n catch ( IOException e) {\n    LOGGER.error(\"Failed to load properties: \" + e.getMessage());\n    throw new IllegalStateException(\"Failed to load application properties\", e);\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

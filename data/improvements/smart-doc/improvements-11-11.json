@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use modern Java features to simplify the code",
+            "Change_Diff": "- public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n-   if (CollectionUtil.isEmpty(apiParamList)) {\n-     return new ArrayList<>(0);\n-   }\n-   List<ApiParam> params=new ArrayList<>();\n-   for (  ApiParam apiParam : apiParamList) {\n-     apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n-     if (apiParam.getPid() == 0) {\n-       params.add(apiParam);\n-     }\n-   }\n-   for (  ApiParam apiParam : params) {\n-     apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n-   }\n-   return params;\n- }\n+ public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n+   return Optional.ofNullable(apiParamList)\n+     .orElseGet(Collections::emptyList)\n+     .stream()\n+     .peek(apiParam -> apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\").replaceAll(\"&nbsp;\", \"\")))\n+     .filter(apiParam -> apiParam.getPid() == 0)\n+     .peek(apiParam -> apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0)))\n+     .collect(Collectors.toList());\n+ }",
+            "Description": "The code can be simplified using modern Java features like Stream API and Optional class. This will make the code more readable and maintainable.",
+            "Start": 1,
+            "End": 17
+        }],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  return Optional.ofNullable(apiParamList)\n    .orElseGet(Collections::emptyList)\n    .stream()\n    .peek(apiParam -> apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX, \"\").replaceAll(\"&nbsp;\", \"\")))\n    .filter(apiParam -> apiParam.getPid() == 0)\n    .peek(apiParam -> apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0)))\n    .collect(Collectors.toList());\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

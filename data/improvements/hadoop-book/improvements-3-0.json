@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- ColumnHeader<ColumnName> top=columns.get(i);\n+ ColumnHeader<ColumnName> columnHeader=columns.get(i);\n- Node<ColumnName> bottom=top.up;\n+ Node<ColumnName> previousColumnHeader=columnHeader.up;\n- Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n+ Node<ColumnName> newNode=new Node<ColumnName>(null,null,previousColumnHeader,columnHeader,columnHeader);\n- Node<ColumnName> front=prev.right;\n+ Node<ColumnName> previousRightNode=prev.right;",
+                "Description": "Instead of using non-descriptive names like 'top', 'bottom', 'front', use more descriptive variable names that clearly represent their roles in the code.",
+                "Start": 9,
+                "End": 23
+            },
+            {
+                "Improvement": "Add comments to complex logic",
+                "Change_Diff": "+ // Iterate through the values array\n  for (int i=0; i < values.length; ++i) {\n+   // If the value is true, process the column\n    if (values[i]) {\n+     // Increase the size of the column\n      columnHeader.size+=1;\n+     // Create a new node and link it to previous nodes\n      Node<ColumnName> newNode=new Node<ColumnName>(null,null,previousColumnHeader,columnHeader,columnHeader);\n+     // Update links of adjacent nodes\n      previousRightNode.left=newNode;\n      newNode.right=previousRightNode;\n    }\n  }",
+                "Description": "The logic within the loop is complex and not straightforward. Adding comments to explain what is happening at each step would make the code easier to understand.",
+                "Start": 7,
+                "End": 23
+            },
+            {
+                "Improvement": "Use braces for all if statements",
+                "Change_Diff": "- if (values[i]) {\n+ if (values[i]) {\n\n- if (prev != null) {\n+ if (prev != null) {\n\n- else {\n+ } else {\n",
+                "Description": "Even if an 'if' statement is controlling just one statement, it's a good practice to use braces. This improves readability and reduces the chance of bugs slipping into the code when additional lines are added later.",
+                "Start": 7,
+                "End": 8
+            }
+        ],
+        "Final code": "public void addRow(boolean[] values){\n  // Initialize the previous node\n  Node<ColumnName> prev=null;\n  // Iterate through the values array\n  for (int i=0; i < values.length; ++i) {\n    // If the value is true, process the column\n    if (values[i]) {\n      ColumnHeader<ColumnName> columnHeader=columns.get(i);\n      // Increase the size of the column\n      columnHeader.size+=1;\n      Node<ColumnName> previousColumnHeader=columnHeader.up;\n      // Create a new node and link it to previous nodes\n      Node<ColumnName> newNode=new Node<ColumnName>(null,null,previousColumnHeader,columnHeader,columnHeader);\n      previousColumnHeader.down=newNode;\n      columnHeader.up=newNode;\n      if (prev != null) {\n        Node<ColumnName> previousRightNode=prev.right;\n        newNode.left=prev;\n        newNode.right=previousRightNode;\n        prev.right=newNode;\n        previousRightNode.left=newNode;\n      } else {\n        newNode.left=newNode;\n        newNode.right=newNode;\n      }\n      prev=newNode;\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Add a row to the table.\n * @param values the columns that are satisfied by this row\n */\npublic void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n      bottom.down=node;\n      top.up=node;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        node.left=prev;\n        node.right=front;\n        prev.right=node;\n        front.left=node;\n      }\n else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/DancingLinks.java",
+    "Start": 5022,
+    "Stop": 6050,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "addRow"
+}

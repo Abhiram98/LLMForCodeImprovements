@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional to avoid NullPointerException",
+                "Change_Diff": "- if (javaScriptExecutor_ != null) {\n+ Optional.ofNullable(javaScriptExecutor_).ifPresent(JavaScriptExecutor::shutdown);",
+                "Description": "Instead of checking if the objects are null before invoking a method, use Optional to avoid a NullPointerException.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Avoid unnecessary null assignments",
+                "Change_Diff": "- javaScriptExecutor_=null;\n+ // Removed unnecessary null assignment",
+                "Description": "Assigning null to a variable doesn't necessarily help the garbage collector and can make the code harder to read.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use Optional to avoid NullPointerException",
+                "Change_Diff": "- if (postponedActions_ != null) {\n-   postponedActions_.remove();\n+ Optional.ofNullable(postponedActions_).ifPresent(Actions::remove);",
+                "Description": "Instead of checking if the objects are null before invoking a method, use Optional to avoid a NullPointerException.",
+                "Start": 10,
+                "End": 11
+            },
+            {
+                "Improvement": "Use Optional to avoid NullPointerException",
+                "Change_Diff": "- if (javaScriptRunning_ != null) {\n-   javaScriptRunning_.remove();\n+ Optional.ofNullable(javaScriptRunning_).ifPresent(Running::remove);",
+                "Description": "Instead of checking if the objects are null before invoking a method, use Optional to avoid a NullPointerException.",
+                "Start": 12,
+                "End": 13
+            }
+        ],
+        "Final code": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  webClient_=null;\n  contextFactory_=null;\n  jsConfig_=null;\n  Optional.ofNullable(javaScriptExecutor_).ifPresent(JavaScriptExecutor::shutdown);\n  if (postponedActions_ != null) {\n    Optional.ofNullable(postponedActions_).ifPresent(Actions::remove);\n  }\n  if (javaScriptRunning_ != null) {\n    Optional.ofNullable(javaScriptRunning_).ifPresent(Running::remove);\n  }\n  holdPostponedActions_=false;\n}"
+    },
+    "Old_Method": "/** \n * Shutdown the JavaScriptEngine.\n */\n@Override public void shutdown(){\n  webClient_=null;\n  contextFactory_=null;\n  jsConfig_=null;\n  if (javaScriptExecutor_ != null) {\n    javaScriptExecutor_.shutdown();\n    javaScriptExecutor_=null;\n  }\n  if (postponedActions_ != null) {\n    postponedActions_.remove();\n  }\n  if (javaScriptRunning_ != null) {\n    javaScriptRunning_.remove();\n  }\n  holdPostponedActions_=false;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/JavaScriptEngine.java",
+    "Start": 35868,
+    "Stop": 36412,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "shutdown"
+}

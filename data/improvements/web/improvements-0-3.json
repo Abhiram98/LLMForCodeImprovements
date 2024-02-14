@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use fluent API effectively",
+                "Change_Diff": "- http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n- http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n+ http.formLogin().loginPage(\"/login.jsp\").loginProcessingUrl(\"/login\").defaultSuccessUrl(\"/home\").failureUrl(\"/?error=1\");\n+ http.logout().logoutUrl(\"/logout\").logoutSuccessUrl(\"/\").deleteCookies(\"JSESSIONID\");",
+                "Description": "The current code repeats 'formLogin()' and 'logout()' method calls multiple times while setting different properties. It would be more clear and concise to call these methods once and then set all properties in a chain.",
+                "Start": 2,
+                "End": 3
+            },
+            {
+                "Improvement": "Make anonymous class a separate class",
+                "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){...}\n+ CustomHeaderWriter headerWriter = new CustomHeaderWriter();",
+                "Description": "Instead of using an anonymous class for the HeaderWriter, it would be better to create a separate class. This will make the code more readable and maintainable. The new class can be named as CustomHeaderWriter.",
+                "Start": 13,
+                "End": 21
+            }
+        ],
+        "Final code": "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin().loginPage(\"/login.jsp\").loginProcessingUrl(\"/login\").defaultSuccessUrl(\"/home\").failureUrl(\"/?error=1\");\n  http.logout().logoutUrl(\"/logout\").logoutSuccessUrl(\"/\").deleteCookies(\"JSESSIONID\");\n  http.rememberMe().tokenValiditySeconds(1209600).rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  CustomHeaderWriter headerWriter = new CustomHeaderWriter();\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}\n\nclass CustomHeaderWriter implements HeaderWriter {\n  public void writeHeaders(HttpServletRequest request, HttpServletResponse response){\n    response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n    response.setHeader(\"Expires\",\"0\");\n    response.setHeader(\"Pragma\",\"no-cache\");\n    response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n    response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n    response.setHeader(\"x-content-type-options\",\"nosniff\");\n  }\n}"
+    },
+    "Old_Method": "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n  http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n  http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter=new HeaderWriter(){\n    public void writeHeaders(    HttpServletRequest request,    HttpServletResponse response){\n      response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n      response.setHeader(\"Expires\",\"0\");\n      response.setHeader(\"Pragma\",\"no-cache\");\n      response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n      response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n      response.setHeader(\"x-content-type-options\",\"nosniff\");\n    }\n  }\n;\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}\n",
+    "File_Path": "web/back/src/main/java/com/aitongyi/web/back/conf/SecurityConfig.java",
+    "Start": 1726,
+    "Stop": 3424,
+    "Project_Name": "data/projects/web",
+    "Method_Name": "configure"
+}

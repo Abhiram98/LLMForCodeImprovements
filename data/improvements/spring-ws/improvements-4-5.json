@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor if/else statements",
+                "Change_Diff": "- if (source instanceof DOMSource) { ... return; }\n- else if (StaxUtils.isStaxSource(source)) { ... return; }\n- else if (source instanceof SAXSource) { ... return; }\n- else if (source instanceof StreamSource) { ... return; }\n+ if (source instanceof DOMSource) { ... }\n+ else if (StaxUtils.isStaxSource(source)) { ... }\n+ else if (source instanceof SAXSource) { ... }\n+ else if (source instanceof StreamSource) { ... }",
+                "Description": "The nested if/else statements can be refactored for better readability and maintainability. We can remove the `return` statements and instead use `else if` to chain the conditions together. This way, only one condition will be executed, and there is no need to explicitly `return` after each one.",
+                "Start": 7,
+                "End": 36
+            },
+            {
+                "Improvement": "Eliminate redundant `else`",
+                "Change_Diff": "- else {\n+ {\n",
+                "Description": "The `else` statement on line 37 is not necessary. If the code reaches this point, it means none of the previous conditions have been met, so we can simply write the code block without the `else` keyword.",
+                "Start": 37,
+                "End": 37
+            },
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- XMLStreamReader streamReader=StaxUtils.getXMLStreamReader(source);\n- if (streamReader != null) { ...\n- XMLEventReader eventReader=StaxUtils.getXMLEventReader(source);\n- if (eventReader != null) { ...\n+ try (XMLStreamReader streamReader=StaxUtils.getXMLStreamReader(source)) { ...\n+ try (XMLEventReader eventReader=StaxUtils.getXMLEventReader(source)) { ...",
+                "Description": "To ensure that the XMLStreamReader and XMLEventReader objects are properly closed after use, they should be created in a try-with-resources statement. This will automatically close them at the end of the statement, even if exceptions are thrown.",
+                "Start": 9,
+                "End": 16
+            }
+        ],
+        "Final code": "public static void doWithSource(Source source, SourceCallback callback) throws Exception {\n    if (source instanceof DOMSource) {\n        callback.domSource(((DOMSource)source).getNode());\n    }\n    else if (StaxUtils.isStaxSource(source)) {\n        try (XMLStreamReader streamReader = StaxUtils.getXMLStreamReader(source)) {\n            if (streamReader != null) {\n                callback.staxSource(streamReader);\n            }\n            try (XMLEventReader eventReader = StaxUtils.getXMLEventReader(source)) {\n                if (eventReader != null) {\n                    callback.staxSource(eventReader);\n                }\n            }\n        }\n    }\n    else if (source instanceof SAXSource) {\n        SAXSource saxSource = (SAXSource)source;\n        callback.saxSource(saxSource.getXMLReader(), saxSource.getInputSource());\n    }\n    else if (source instanceof StreamSource) {\n        StreamSource streamSource = (StreamSource)source;\n        if (streamSource.getInputStream() != null) {\n            callback.streamSource(streamSource.getInputStream());\n        }\n        else if (streamSource.getReader() != null) {\n            callback.streamSource(streamSource.getReader());\n        }\n    }\n    if (StringUtils.hasLength(source.getSystemId())) {\n        String systemId = source.getSystemId();\n        callback.source(systemId);\n    }\n    else {\n        throw new IllegalArgumentException(\"Unknown Source type: \" + source.getClass());\n    }\n}"
+    },
+    "Old_Method": "/** \n * Performs the given  {@linkplain SourceCallback callback} operation on a {@link Source}. Supports both the JAXP 1.4 {@link StAXSource} and the Spring 3.0 {@link StaxUtils#createStaxSource StaxSource}.\n * @param source source to look at\n * @param callback the callback to invoke for each kind of source\n */\npublic static void doWithSource(Source source,SourceCallback callback) throws Exception {\n  if (source instanceof DOMSource) {\n    callback.domSource(((DOMSource)source).getNode());\n    return;\n  }\n else   if (StaxUtils.isStaxSource(source)) {\n    XMLStreamReader streamReader=StaxUtils.getXMLStreamReader(source);\n    if (streamReader != null) {\n      callback.staxSource(streamReader);\n      return;\n    }\n else {\n      XMLEventReader eventReader=StaxUtils.getXMLEventReader(source);\n      if (eventReader != null) {\n        callback.staxSource(eventReader);\n        return;\n      }\n    }\n  }\n else   if (source instanceof SAXSource) {\n    SAXSource saxSource=(SAXSource)source;\n    callback.saxSource(saxSource.getXMLReader(),saxSource.getInputSource());\n    return;\n  }\n else   if (source instanceof StreamSource) {\n    StreamSource streamSource=(StreamSource)source;\n    if (streamSource.getInputStream() != null) {\n      callback.streamSource(streamSource.getInputStream());\n      return;\n    }\n else     if (streamSource.getReader() != null) {\n      callback.streamSource(streamSource.getReader());\n      return;\n    }\n  }\n  if (StringUtils.hasLength(source.getSystemId())) {\n    String systemId=source.getSystemId();\n    callback.source(systemId);\n  }\n else {\n    throw new IllegalArgumentException(\"Unknown Source type: \" + source.getClass());\n  }\n}\n",
+    "File_Path": "spring-ws/spring-xml/src/main/java/org/springframework/xml/transform/TraxUtils.java",
+    "Start": 2162,
+    "Stop": 3804,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "doWithSource"
+}

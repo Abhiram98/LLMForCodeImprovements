@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor the code to reduce string duplications",
+                "Change_Diff": "- if (input.startsWith('p2p send ')) {\n+ if (input.startsWith(P2P_SEND)) {\n- if (input.startsWith('p2p close ')) {\n+ if (input.startsWith(P2P_CLOSE)) { \n- if (input.startsWith('auth ticket ')) {\n+ if (input.startsWith(AUTH_TICKET)) {",
+                "Description": "The string literals used to check the command input are duplicated multiple times, for example 'p2p send ', 'p2p close ', 'auth ticket '. These could be declared as final static variables and reused, bringing better readability and maintainability.",
+                "Start": 2,
+                "End": 52
+            },
+            {
+                "Improvement": "Replace System.out.println with a logging library",
+                "Change_Diff": "- System.out.println('Error: unknown userID ' + receiverID + ' (no friend, not connected)');\n+ LOGGER.error('Error: unknown userID ' + receiverID + ' (no friend, not connected)'); \n- System.out.println('Error: unknown remote ID ' + remoteID + ' (not connected)');\n+ LOGGER.error('Error: unknown remote ID ' + remoteID + ' (not connected)');",
+                "Description": "Instead of using System.out.println for error messages, use a logging library like Log4J or SLF4J. This allows for better control over the logging level, output, and also supports log rotation.",
+                "Start": 16,
+                "End": 45
+            }
+        ],
+        "Final code": "final static String P2P_SEND = 'p2p send '; \nfinal static String P2P_CLOSE = 'p2p close '; \nfinal static String AUTH_TICKET = 'auth ticket '; \n@Override protected void processInput(String input) throws SteamException { \nif (input.startsWith(P2P_SEND)) { \n...\n} else if (input.startsWith(P2P_CLOSE)) { \n...\n} else if (input.startsWith(AUTH_TICKET)) { \n...\n} \nfriends.processInput(input); \n}"
+    },
+    "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(\"p2p send \")) {\n    String[] params=input.substring(\"p2p send \".length()).split(\" \");\n    int receiverID=Integer.parseInt(params[0]);\n    SteamID steamIDReceiver=null;\n    if (remoteUserIDs.containsKey(receiverID)) {\n      steamIDReceiver=remoteUserIDs.get(receiverID);\n    }\n else     if (friends.isFriendAccountID(receiverID)) {\n      steamIDReceiver=friends.getFriendSteamID(receiverID);\n    }\n else {\n      System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n    }\n    if (steamIDReceiver != null) {\n      packetSendBuffer.clear();\n      for (int i=1; i < params.length; i++) {\n        byte[] bytes=params[i].getBytes(messageCharset);\n        if (i > 1) {\n          packetSendBuffer.put((byte)0x20);\n        }\n        packetSendBuffer.put(bytes);\n      }\n      packetSendBuffer.flip();\n      networking.sendP2PPacket(steamIDReceiver,packetSendBuffer,SteamNetworking.P2PSend.Unreliable,defaultChannel);\n    }\n  }\n else   if (input.startsWith(\"p2p close \")) {\n    int remoteID=Integer.parseInt(input.substring(\"p2p close \".length()));\n    SteamID steamIDRemote=null;\n    if (remoteUserIDs.containsKey(remoteID)) {\n      steamIDRemote=remoteUserIDs.get(remoteID);\n    }\n else {\n      System.out.println(\"Error: unknown remote ID \" + remoteID + \" (not connected)\");\n    }\n    if (steamIDRemote != null) {\n      networking.closeP2PSessionWithUser(steamIDRemote);\n      unregisterRemoteSteamID(steamIDRemote);\n    }\n  }\n else   if (input.equals(\"p2p list\")) {\n    System.out.println(\"P2P connected users:\");\n    if (remoteUserIDs.size() == 0) {\n      System.out.println(\"  none\");\n    }\n    for (    SteamID steamIDUser : remoteUserIDs.values()) {\n      System.out.println(\"  \" + steamIDUser.getAccountID());\n    }\n  }\n else   if (input.startsWith(\"auth ticket \")) {\n    String authCmd=input.substring(\"auth ticket \".length());\n    if (authCmd.equals(\"get\")) {\n      getAuthTicket();\n    }\n else     if (authCmd.equals(\"cancel\")) {\n      cancelAuthTicket();\n    }\n else     if (authCmd.equals(\"send\")) {\n      broadcastAuthTicket();\n    }\n else     if (authCmd.equals(\"end\")) {\n      endAuthSession();\n    }\n  }\n  friends.processInput(input);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+    "Start": 5088,
+    "Stop": 7338,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processInput"
+}

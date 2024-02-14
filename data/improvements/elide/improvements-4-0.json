@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional to handle potential null values",
+                "Change_Diff": "- QueryPlan mergedPlan=mergedPlans.get(0);\n- Query merged=(mergedPlan == null) ? QueryPlanTranslator.addHiddenProjections(metaDataStore,query).build() : queryPlanTranslator.translate(mergedPlan);\n+ Optional<QueryPlan> mergedPlanOptional = Optional.ofNullable(mergedPlans.get(0));\n+ Query merged = mergedPlanOptional.map(queryPlanTranslator::translate).orElseGet(() -> QueryPlanTranslator.addHiddenProjections(metaDataStore, query).build());",
+                "Description": "The `mergedPlan` variable can be null according to the ternary operation. To avoid NullPointerExceptions, it's better to use Optional. This way, we can provide a more elegant way of handling null values.",
+                "Start": 9,
+                "End": 10
+            },
+            {
+                "Improvement": "Use lambda expression in the loop",
+                "Change_Diff": "- for (  Optimizer optimizer : optimizers) {\n-   SQLTable table=(SQLTable)query.getSource();\n-   if (table.getHints().contains(optimizer.negateHint())) {\n-     continue;\n-   }\n-   if (!table.getHints().contains(optimizer.hint())) {\n-     continue;\n-   }\n-   if (optimizer.canOptimize(merged)) {\n-     merged=optimizer.optimize(merged);\n-   }\n- }\n+ optimizers.stream()\n+   .filter(optimizer -> {\n+       SQLTable table = (SQLTable) query.getSource();\n+       return !table.getHints().contains(optimizer.negateHint()) && table.getHints().contains(optimizer.hint()) && optimizer.canOptimize(merged);\n+   })\n+   .forEach(optimizer -> merged = optimizer.optimize(merged));",
+                "Description": "The loop that iterates through the `optimizers` list can be simplified using a lambda expression. This makes the code more concise and readable.",
+                "Start": 12,
+                "End": 19
+            }
+        ],
+        "Final code": "private Query expandMetricQueryPlans(Query query){\n  List<QueryPlan> toMerge=query.getMetricProjections().stream().map(projection -> projection.resolve(query)).collect(Collectors.toList());\n  List<QueryPlan> mergedPlans=merger.merge(toMerge);\n  if (mergedPlans.size() != 1) {\n    throw new UnsupportedOperationException(\"Incompatible metrics in client query.  Cannot merge \" + \"into a single query\");\n  }\n  Optional<QueryPlan> mergedPlanOptional = Optional.ofNullable(mergedPlans.get(0));\n  QueryPlanTranslator queryPlanTranslator=new QueryPlanTranslator(query,metaDataStore,merger);\n  Query merged = mergedPlanOptional.map(queryPlanTranslator::translate).orElseGet(() -> QueryPlanTranslator.addHiddenProjections(metaDataStore, query).build());\n  optimizers.stream()\n    .filter(optimizer -> {\n        SQLTable table = (SQLTable) query.getSource();\n        return !table.getHints().contains(optimizer.negateHint()) && table.getHints().contains(optimizer.hint()) && optimizer.canOptimize(merged);\n    })\n    .forEach(optimizer -> merged = optimizer.optimize(merged));\n  return merged;\n}"
+    },
+    "Old_Method": "/** \n * Transforms a client query into a potentially nested/complex query by expanding each metric into its respective query plan - and then merging the plans together into a consolidated query.\n * @param query The client query.\n * @return A query that reflects each metric's individual query plan.\n */\nprivate Query expandMetricQueryPlans(Query query){\n  List<QueryPlan> toMerge=query.getMetricProjections().stream().map(projection -> projection.resolve(query)).collect(Collectors.toList());\n  List<QueryPlan> mergedPlans=merger.merge(toMerge);\n  if (mergedPlans.size() != 1) {\n    throw new UnsupportedOperationException(\"Incompatible metrics in client query.  Cannot merge \" + \"into a single query\");\n  }\n  QueryPlan mergedPlan=mergedPlans.get(0);\n  QueryPlanTranslator queryPlanTranslator=new QueryPlanTranslator(query,metaDataStore,merger);\n  Query merged=(mergedPlan == null) ? QueryPlanTranslator.addHiddenProjections(metaDataStore,query).build() : queryPlanTranslator.translate(mergedPlan);\n  for (  Optimizer optimizer : optimizers) {\n    SQLTable table=(SQLTable)query.getSource();\n    if (table.getHints().contains(optimizer.negateHint())) {\n      continue;\n    }\n    if (!table.getHints().contains(optimizer.hint())) {\n      continue;\n    }\n    if (optimizer.canOptimize(merged)) {\n      merged=optimizer.optimize(merged);\n    }\n  }\n  return merged;\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/queryengines/sql/SQLQueryEngine.java",
+    "Start": 16011,
+    "Stop": 18007,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "expandMetricQueryPlans"
+}

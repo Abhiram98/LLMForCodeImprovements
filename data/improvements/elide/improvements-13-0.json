@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add parameters to the method",
+                "Change_Diff": "- private void splitFilters(){\n+ private void splitFilters(FilterExpression filterExpression){",
+                "Description": "Instead of directly getting the FilterExpression from entityProjection within the method, it would be better to pass the FilterExpression as a parameter to the method. This makes the method more versatile and easier to test.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Return a result instead of setting class fields",
+                "Change_Diff": "- whereFilter=constraints.getWhereExpression();\n- havingFilter=constraints.getHavingExpression();\n+ return new Pair<>(constraints.getWhereExpression(), constraints.getHavingExpression());",
+                "Description": "Instead of setting the whereFilter and havingFilter directly in the method, return a Pair of these filters. This makes the method more functional and easier to test.",
+                "Start": 5,
+                "End": 9
+            }
+        ],
+        "Final code": "private Pair<Expression, Expression> splitFilters(FilterExpression filterExpression){\n  if (filterExpression == null) {\n    return new Pair<>(null, null);\n  }\n  SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints constraints=filterExpression.accept(visitor);\n  return new Pair<>(constraints.getWhereExpression(), constraints.getHavingExpression());\n}"
+    },
+    "Old_Method": "/** \n * Gets whereFilter and havingFilter based on provided filter expression from  {@link EntityProjection}.\n */\nprivate void splitFilters(){\n  FilterExpression filterExpression=entityProjection.getFilterExpression();\n  if (filterExpression == null) {\n    whereFilter=null;\n    havingFilter=null;\n    return;\n  }\n  SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints constraints=filterExpression.accept(visitor);\n  whereFilter=constraints.getWhereExpression();\n  havingFilter=constraints.getHavingExpression();\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/EntityProjectionTranslator.java",
+    "Start": 3706,
+    "Stop": 4367,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "splitFilters"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid checking null at multiple places",
+                "Change_Diff": "- Annotation[] anns=this.combinedAnnotations;\n- if (anns == null) {\n-   anns=super.getParameterAnnotations();\n+ Annotation[] anns = (this.combinedAnnotations != null) ? this.combinedAnnotations : super.getParameterAnnotations();",
+                "Description": "Instead of checking if 'anns' is null at multiple places, we can assign the result of 'super.getParameterAnnotations()' to 'anns' at the beginning and then proceed with the rest of the code.",
+                "Start": 3,
+                "End": 5
+            },
+            {
+                "Improvement": "Use Java Stream API for better readability and efficiency",
+                "Change_Diff": "- List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n- merged.addAll(Arrays.asList(anns));\n- for (Annotation paramAnn : paramAnns) {\n-   boolean existingType=false;\n-   for (Annotation ann : anns) {\n-     if (ann.annotationType() == paramAnn.annotationType()) {\n-       existingType=true;\n-       break;\n-     }\n-   }\n-   if (!existingType) {\n-     merged.add(adaptAnnotation(paramAnn));\n-   }\n- }\n- anns=merged.toArray(new Annotation[0]);\n+ List<Annotation> merged = Stream.concat(Arrays.stream(anns), Arrays.stream(paramAnns).filter(pa -> Arrays.stream(anns).noneMatch(a -> a.annotationType() == pa.annotationType()))).map(this::adaptAnnotation).collect(Collectors.toList());\n+ anns = merged.toArray(new Annotation[0]);",
+                "Description": "Java Stream API can be used to filter and collect the annotations, which can enhance the readability and efficiency of the code.",
+                "Start": 11,
+                "End": 27
+            }
+        ],
+        "Final code": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns = (this.combinedAnnotations != null) ? this.combinedAnnotations : super.getParameterAnnotations();\n  int index=getParameterIndex();\n  if (index >= 0) {\n    for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n      if (index < ifcAnns.length) {\n        Annotation[] paramAnns=ifcAnns[index];\n        if (paramAnns.length > 0) {\n          List<Annotation> merged = Stream.concat(Arrays.stream(anns), Arrays.stream(paramAnns).filter(pa -> Arrays.stream(anns).noneMatch(a -> a.annotationType() == pa.annotationType()))).map(this::adaptAnnotation).collect(Collectors.toList());\n          anns = merged.toArray(new Annotation[0]);\n        }\n      }\n    }\n  }\n  this.combinedAnnotations=anns;\n  return anns;\n}"
+    },
+    "Old_Method": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns=this.combinedAnnotations;\n  if (anns == null) {\n    anns=super.getParameterAnnotations();\n    int index=getParameterIndex();\n    if (index >= 0) {\n      for (      Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n        if (index < ifcAnns.length) {\n          Annotation[] paramAnns=ifcAnns[index];\n          if (paramAnns.length > 0) {\n            List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n            merged.addAll(Arrays.asList(anns));\n            for (            Annotation paramAnn : paramAnns) {\n              boolean existingType=false;\n              for (              Annotation ann : anns) {\n                if (ann.annotationType() == paramAnn.annotationType()) {\n                  existingType=true;\n                  break;\n                }\n              }\n              if (!existingType) {\n                merged.add(adaptAnnotation(paramAnn));\n              }\n            }\n            anns=merged.toArray(new Annotation[0]);\n          }\n        }\n      }\n    }\n    this.combinedAnnotations=anns;\n  }\n  return anns;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/HandlerMethod.java",
+    "Start": 12864,
+    "Stop": 13925,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getParameterAnnotations"
+}

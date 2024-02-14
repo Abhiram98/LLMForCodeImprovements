@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "/** \n * @throws Exception if an error occurs\n */\n@Test @Alerts(\"SecRet\") public void basicAuthenticationUserFromUrlOverwrite() throws Exception {\n  final String html=\"<html><body onload='alert(\\\"SecRet\\\")'><\/body><\/html>\";\n  getMockWebConnection().setDefaultResponse(html);\n  getWebClient().getCredentialsProvider().clear();\n  try {\n    loadPage(html,URL_FIRST);\n    fail(\"Should not be authorized\");\n  }\n catch (  final FailingHttpStatusCodeException e) {\n  }\n  final boolean urlWithCredentials=!getBrowserVersion().isIE();\n  try {\n    final URL url=new URL(\"http://jetty:jetty@localhost:\" + PORT + \"/\");\n    loadPageWithAlerts(url);\n    if (!urlWithCredentials) {\n      fail(\"Should not be authorized\");\n    }\n  }\n catch (  final FailingHttpStatusCodeException e) {\n    if (urlWithCredentials) {\n      throw e;\n    }\n  }\n  try {\n    loadPageWithAlerts(URL_FIRST);\n    if (!urlWithCredentials) {\n      fail(\"Should not be authorized\");\n    }\n  }\n catch (  final FailingHttpStatusCodeException e) {\n    if (urlWithCredentials) {\n      throw e;\n    }\n  }\n  try {\n    final URL url=new URL(\"http://jetty:wrong@localhost:\" + PORT + \"/\");\n    loadPage(html,url);\n    fail(\"Should not be authorized\");\n  }\n catch (  final FailingHttpStatusCodeException e) {\n  }\n}\n",
+    "File_Path": "htmlunit/src/test/java/org/htmlunit/DefaultCredentialsProvider2Test.java",
+    "Start": 8048,
+    "Stop": 9826,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "basicAuthenticationUserFromUrlOverwrite"
+}

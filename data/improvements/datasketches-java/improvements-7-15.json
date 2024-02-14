@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method visibility",
+                "Change_Diff": "- @Override HllSketchImpl couponUpdate(final int coupon){\n+ @Override public HllSketchImpl couponUpdate(final int coupon){",
+                "Description": "The method should declare its visibility explicitly. As per Java best practices, it's a good idea to be explicit about the access level, even if it's package-private.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Replace magic number with constant",
+                "Change_Diff": "- insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n+ final int SHIFT_FACTOR = 2;\n+ insertInt(wmem,HASH_SET_INT_ARR_START + (~index << SHIFT_FACTOR),coupon);",
+                "Description": "The number 2 in `(~index << 2)` seems to be a magic number. It's best to replace magic numbers with named constants to improve code readability.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Add null check for 'wmem'",
+                "Change_Diff": "- if (wmem == null) {\n-    noWriteAccess();\n+ if (wmem == null) {\n+    noWriteAccess();\n+    return null;\n }",
+                "Description": "Before performing operations on 'wmem', it's a good practice to check whether it's null. This can prevent NullPointer Exception from being thrown at runtime.",
+                "Start": 2,
+                "End": 4
+            }
+        ],
+        "Final code": "@Override public HllSketchImpl couponUpdate(final int coupon) {\n  if (wmem == null) {\n    noWriteAccess();\n    return null;\n  }\n  final int index=find(mem,getLgCouponArrInts(),coupon);\n  if (index >= 0) {\n    return this;\n  }\n  final int SHIFT_FACTOR = 2;\n  insertInt(wmem,HASH_SET_INT_ARR_START + (~index << SHIFT_FACTOR),coupon);\n  insertHashSetCount(wmem,getCouponCount() + 1);\n  final boolean promote=checkGrowOrPromote();\n  if (!promote) {\n    return this;\n  }\n  return promoteListOrSetToHll(this);\n}"
+    },
+    "Old_Method": "@Override HllSketchImpl couponUpdate(final int coupon){\n  if (wmem == null) {\n    noWriteAccess();\n  }\n  final int index=find(mem,getLgCouponArrInts(),coupon);\n  if (index >= 0) {\n    return this;\n  }\n  insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n  insertHashSetCount(wmem,getCouponCount() + 1);\n  final boolean promote=checkGrowOrPromote();\n  if (!promote) {\n    return this;\n  }\n  return promoteListOrSetToHll(this);\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/hll/DirectCouponHashSet.java",
+    "Start": 2926,
+    "Stop": 3436,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "couponUpdate"
+}

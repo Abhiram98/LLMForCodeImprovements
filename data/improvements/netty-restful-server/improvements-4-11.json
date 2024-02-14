@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < selectFields.length; i++) {\n+ for (String selectField : selectFields) {",
+                "Description": "Instead of using a traditional for loop to iterate over `selectFields`, use an enhanced for loop. This makes the code more readable and eliminates the need for an index variable.",
+                "Start": 10,
+                "End": 31
+            },
+            {
+                "Improvement": "Handle exceptions appropriately",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.error(\"Error instantiating class\", e);\n+ throw new CustomException(\"Error instantiating class\", e);",
+                "Description": "Currently, in case of an exception, the method is printing the stack trace for IllegalAccessException, ClassNotFoundException, or InstantiationException. However, it would be better to log the error and re-throw it as a custom checked exception. This would allow the calling method to decide how to handle the exception.",
+                "Start": 34,
+                "End": 37
+            }
+        ],
+        "Final code": "public A resultSet(String[] selectFields,ResultSet resultSet) throws CustomException{\n  A bean=null;\n  try {\n    bean=(A)Class.forName(clazz.getName()).newInstance();\n    for (String selectField : selectFields) {\n      if (!fieldMap.containsKey(selectField)) {\n        continue;\n      }\n      Field field=fieldMap.get(selectField);\n      field.setAccessible(true);\n      Class fieldClass=field.getType();\n      int j=Arrays.asList(selectFields).indexOf(selectField) + 1;\n      if (fieldClass == String.class) {\n        field.set(bean,resultSet.getString(j));\n      }\n else if (fieldClass == int.class || fieldClass == Integer.class) {\n        field.set(bean,resultSet.getInt(j));\n      }\n else if (fieldClass == float.class || fieldClass == Float.class) {\n        field.set(bean,resultSet.getFloat(j));\n      }\n else if (fieldClass == double.class || fieldClass == Double.class) {\n        field.set(bean,resultSet.getDouble(j));\n      }\n else if (fieldClass == long.class || fieldClass == Long.class) {\n        field.set(bean,resultSet.getLong(j));\n      }\n else if (fieldClass == Date.class) {\n        field.set(bean,resultSet.getDate(j));\n      }\n    }\n  }\n catch (SQLException e) {\n    logger.error(\"resultSet parse error\",e);\n  }\ncatch (IllegalAccessException|ClassNotFoundException|InstantiationException e) {\n    logger.error(\"Error instantiating class\", e);\n    throw new CustomException(\"Error instantiating class\", e);\n  }\n  return bean;\n}"
+    },
+    "Old_Method": "/** \n * 根据 fieldMap 里字段名和 bean 属性名的对应关系,根据查询字段取出对应的属性名 然后通过反射设置值\n * @param selectFields\n * @param resultSet\n * @return\n */\n@SuppressWarnings(\"unchecked\") public A resultSet(String[] selectFields,ResultSet resultSet){\n  A bean=null;\n  try {\n    bean=(A)Class.forName(clazz.getName()).newInstance();\n    for (int i=0; i < selectFields.length; i++) {\n      int j=i + 1;\n      if (!fieldMap.containsKey(selectFields[i])) {\n        continue;\n      }\n      Field field=fieldMap.get(selectFields[i]);\n      field.setAccessible(true);\n      Class fieldClass=field.getType();\n      if (fieldClass == String.class) {\n        field.set(bean,resultSet.getString(j));\n      }\n else       if (fieldClass == int.class || fieldClass == Integer.class) {\n        field.set(bean,resultSet.getInt(j));\n      }\n else       if (fieldClass == float.class || fieldClass == Float.class) {\n        field.set(bean,resultSet.getFloat(j));\n      }\n else       if (fieldClass == double.class || fieldClass == Double.class) {\n        field.set(bean,resultSet.getDouble(j));\n      }\n else       if (fieldClass == long.class || fieldClass == Long.class) {\n        field.set(bean,resultSet.getLong(j));\n      }\n else       if (fieldClass == Date.class) {\n        field.set(bean,resultSet.getDate(j));\n      }\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"resultSet parse error\",e);\n  }\ncatch (  IllegalAccessException|ClassNotFoundException|InstantiationException e) {\n    e.printStackTrace();\n  }\n  return bean;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 1900,
+    "Stop": 3717,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "resultSet"
+}

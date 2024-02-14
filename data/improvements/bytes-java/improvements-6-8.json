@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use switch-case instead of multiple if-else statements",
+                "Change_Diff": "- if (byteOrder == ByteOrder.BIG_ENDIAN) {\n...\n}\nelse {\n...\n}\n+ switch(byteOrder) {\n+ case BIG_ENDIAN:\n...\nbreak;\n+ case LITTLE_ENDIAN:\n...\nbreak;\n+ default:\n+ throw new IllegalArgumentException(\"Invalid byte order\");\n+ }",
+                "Description": "The if-else statements that check the byteOrder can be replaced with a switch-case statement. This makes the code more readable and maintainable, particularly if more cases are added in the future.",
+                "Start": 12,
+                "End": 38
+            },
+            {
+                "Improvement": "Add comments to explain complex operations",
+                "Change_Diff": "+ //Shift the source byte to the left by the shift modulo\nbyte dst=(byte)(src << shiftMod);\n+ //If the next byte in the array exists, shift it to the right by the remaining bits and apply the carry mask\nif (sourceIndex + 1 < byteArray.length) {\ndst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n}",
+                "Description": "Some lines in the code perform complex bitwise operations. It would be beneficial to add comments explaining what these operations do, to make the code more understandable for other developers.",
+                "Start": 17,
+                "End": 23
+            }
+        ],
+        "Final code": "static byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  switch(byteOrder) {\n    case BIG_ENDIAN:\n      for (int i=0; i < byteArray.length; i++) {\n        sourceIndex=i + offsetBytes;\n        if (sourceIndex >= byteArray.length) {\n          byteArray[i]=0;\n        }\n        else {\n          byte src=byteArray[sourceIndex];\n          //Shift the source byte to the left by the shift modulo\n          byte dst=(byte)(src << shiftMod);\n          //If the next byte in the array exists, shift it to the right by the remaining bits and apply the carry mask\n          if (sourceIndex + 1 < byteArray.length) {\n            dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n          }\n          byteArray[i]=dst;\n        }\n      }\n    break;\n    case LITTLE_ENDIAN:\n      for (int i=byteArray.length - 1; i >= 0; i--) {\n        sourceIndex=i - offsetBytes;\n        if (sourceIndex < 0) {\n          byteArray[i]=0;\n        }\n        else {\n          byte src=byteArray[sourceIndex];\n          byte dst=(byte)(src << shiftMod);\n          if (sourceIndex - 1 >= 0) {\n            dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n          }\n          byteArray[i]=dst;\n        }\n      }\n    break;\n    default:\n      throw new IllegalArgumentException(\"Invalid byte order\");\n  }\n  return byteArray;\n}"
+    },
+    "Old_Method": "/** \n * Light shift of whole byte array by shiftBitCount bits. This method will alter the input byte array. <p> <strong>Analysis<\/strong> <ul> <li>Time Complexity: <code>O(n)<\/code><\/li> <li>Space Complexity: <code>O(1)<\/code><\/li> <li>Alters Parameters: <code>true<\/code><\/li> <\/ul> <\/p>\n * @param byteArray     to shift\n * @param shiftBitCount how many bits to shift\n * @param byteOrder     endianness of given byte array\n * @return shifted byte array\n */\nstatic byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      if (sourceIndex >= byteArray.length) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex + 1 < byteArray.length) {\n          dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      if (sourceIndex < 0) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex - 1 >= 0) {\n          dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n  return byteArray;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Util.java",
+    "Start": 9808,
+    "Stop": 12110,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "shiftLeft"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method comments",
+                "Change_Diff": "+ /**\n+ * This method handles service requests and responses.\n+ * @param HttpServletRequest request\n+ * @param HttpServletResponse response\n+ * @throws ServletException, IOException\n+ */",
+                "Description": "It's a good practice to add comments to methods, especially for public ones, to describe what the method does, its parameters, and return values.",
+                "Start": 1,
+                "End": 25
+            },
+            {
+                "Improvement": "Use a better exception handling approach",
+                "Change_Diff": "- catch (  Throwable ex) {\n-    String requestTxt=readRequest(request);\n-    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n+  catch (ServletException | IOException ex) {\n+    String requestTxt = (requestTxt == null || requestTxt.isEmpty() ) ? readRequest(request) : requestTxt;\n+    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);",
+                "Description": "Catching Throwable is generally not recommended. Instead, you should catch more specific exceptions to handle them properly. Also, the readRequest method is called twice which might not be needed.",
+                "Start": 17,
+                "End": 23
+            },
+            {
+                "Improvement": "Use constants for repeated literals",
+                "Change_Diff": "- response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n+ response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, \"*\");\n+ response.addHeader(ACCESS_CONTROL_ALLOW_METHODS, \"*\");\n+ response.addHeader(ACCESS_CONTROL_ALLOW_HEADERS, CONTENT_TYPE);",
+                "Description": "It's better to use constants for repeated literals such as \"Access-Control-Allow-Origin\", \"Access-Control-Allow-Methods\", \"Access-Control-Allow-Headers\", and \"Content-Type\".",
+                "Start": 24,
+                "End": 26
+            }
+        ],
+        "Final code": "    /**\n     * This method handles service requests and responses.\n     * @param HttpServletRequest request\n     * @param HttpServletResponse response\n     * @throws ServletException, IOException\n     */\n    @Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n      ServletInputStream inputStream=request.getInputStream();\n      if (inputStream != null) {\n        inputStream.mark(Integer.MAX_VALUE);\n      }\n      try {\n        String pathInfo=request.getPathInfo();\n        if (pathInfo.startsWith(PATH_PING)) {\n          ping(request,pathInfo,response);\n        } else if (pathInfo.startsWith(PATH_COUNTER)) {\n          stats.incQueryRequestCount();\n          getCounters(request,pathInfo,response);\n        } else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n          stats.incQueryRequestCount();\n          getMetrics(request,pathInfo,response);\n        } else {\n          stats.incInvalidRequestCount();\n          response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n        }\n      } catch (ServletException | IOException ex) {\n        String requestTxt = (requestTxt == null || requestTxt.isEmpty() ) ? readRequest(request) : requestTxt;\n        stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n        stats.registerError(ex);\n        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n      } finally {\n        response.addHeader(ACCESS_CONTROL_ALLOW_ORIGIN, \"*\");\n        response.addHeader(ACCESS_CONTROL_ALLOW_METHODS, \"*\");\n        response.addHeader(ACCESS_CONTROL_ALLOW_HEADERS, CONTENT_TYPE);\n      }\n    }"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

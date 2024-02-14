@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Streams to simplify the method",
+                "Change_Diff": "- List<ApiReqParam> apiReqHeaders=new ArrayList<>();\n- for (JavaParameter javaParameter : parameters) {...\n+ List<ApiReqParam> apiReqHeaders = parameters.stream()\n+ ...",
+                "Description": "The method can be simplified and made more readable by using Java 8 Streams to handle iteration and filtering. Also, this can avoid explicit creation of empty `ArrayList`.",
+                "Start": 6,
+                "End": 31
+            },
+            {
+                "Improvement": "Extract complex logic into separate methods",
+                "Change_Diff": "- for (JavaAnnotation annotation : annotations) {...\n+ apiReqHeaders.add(handleAnnotations(javaParameter, constantsMap, method));",
+                "Description": "The method is too complex and contains several responsibilities. Extracting some parts of it into separate methods can improve readability and maintainability. For example, the logic for handling annotations and setting `ApiReqParam` fields can be encapsulated into a new method.",
+                "Start": 12,
+                "End": 31
+            }
+        ],
+        "Final code": "public List<ApiReqParam> handle(JavaMethod method, ProjectDocConfigBuilder projectBuilder) {\n    Map<String, String> constantsMap = projectBuilder.getConstantsMap();\n    List<JavaParameter> parameters = method.getParameters();\n    return parameters.stream()\n            .map(param -> handleAnnotations(param, constantsMap, method))\n            .collect(Collectors.toList());\n}\n\nprivate ApiReqParam handleAnnotations(JavaParameter javaParameter, Map<String, String> constantsMap, JavaMethod method) {\n    List<JavaAnnotation> annotations = javaParameter.getAnnotations();\n    ApiReqParam apiReqHeader = new ApiReqParam();\n    String defaultValue = \"\";\n    for (JavaAnnotation annotation : annotations) {\n        // ... existing logic for handling annotations and setting ApiReqParam fields ...\n    }\n    return apiReqHeader;\n}"
+    },
+    "Old_Method": "/** \n * Handle JAX RS Header\n * @param method         method\n * @param projectBuilder ProjectDocConfigBuilder\n * @return list of ApiReqParam\n */\npublic List<ApiReqParam> handle(JavaMethod method,ProjectDocConfigBuilder projectBuilder){\n  Map<String,String> constantsMap=projectBuilder.getConstantsMap();\n  List<ApiReqParam> apiReqHeaders=new ArrayList<>();\n  List<JavaParameter> parameters=method.getParameters();\n  for (  JavaParameter javaParameter : parameters) {\n    List<JavaAnnotation> annotations=javaParameter.getAnnotations();\n    String paramName=javaParameter.getName();\n    ApiReqParam apiReqHeader=new ApiReqParam();\n    String defaultValue=\"\";\n    for (    JavaAnnotation annotation : annotations) {\n      String annotationName=annotation.getType().getFullyQualifiedName();\n      if (JakartaJaxrsAnnotations.JAX_DEFAULT_VALUE_FULLY.equals(annotationName) || JAXRSAnnotations.JAX_DEFAULT_VALUE_FULLY.equals(annotationName)) {\n        defaultValue=StringUtil.removeQuotes(DocUtil.getRequestHeaderValue(annotation));\n        defaultValue=DocUtil.handleConstants(constantsMap,defaultValue);\n      }\n      apiReqHeader.setValue(defaultValue);\n      if (JakartaJaxrsAnnotations.JAX_HEADER_PARAM_FULLY.equals(annotationName) || JAXRSAnnotations.JAX_HEADER_PARAM_FULLY.equals(annotationName)) {\n        String name=StringUtil.removeQuotes(DocUtil.getRequestHeaderValue(annotation));\n        name=DocUtil.handleConstants(constantsMap,name);\n        apiReqHeader.setName(name);\n        String typeName=javaParameter.getType().getValue().toLowerCase();\n        apiReqHeader.setType(DocClassUtil.processTypeNameForParams(typeName));\n        String className=method.getDeclaringClass().getCanonicalName();\n        Map<String,String> paramMap=DocUtil.getCommentsByTag(method,DocTags.PARAM,className);\n        String paramComments=paramMap.get(paramName);\n        apiReqHeader.setDesc(getComments(defaultValue,paramComments));\n        apiReqHeaders.add(apiReqHeader);\n      }\n    }\n  }\n  return apiReqHeaders;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/handler/JaxrsHeaderHandler.java",
+    "Start": 1598,
+    "Stop": 4138,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "handle"
+}

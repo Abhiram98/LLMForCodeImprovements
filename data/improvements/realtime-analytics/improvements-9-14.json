@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code redundancy by using Optional",
+                "Change_Diff": "- if (username != null && password != null) {\n+ Optional.ofNullable(username).ifPresent(u -> builder.withCredentials(u, password));\n- if (reconnectionPolicy != null) {\n+ Optional.ofNullable(reconnectionPolicy).ifPresent(builder::withReconnectionPolicy);\n- if (retryPolicy != null) {\n+ Optional.ofNullable(retryPolicy).ifPresent(builder::withRetryPolicy);\n- if (sslOptions != null) {\n+ Optional.ofNullable(sslOptions).ifPresent(builder::withSSL);",
+                "Description": "For the condition checks where you are checking if a value is not null and then assigning it, you can use Java 8 Optional to reduce code redundancy and improve readability.",
+                "Start": 5,
+                "End": 26
+            },
+            {
+                "Improvement": "Improve SocketOptions creation by using a separate method",
+                "Change_Diff": "- SocketOptions opts=new SocketOptions();\n... // rest of the SocketOptions creation\n- builder.withSocketOptions(opts);\n+ builder.withSocketOptions(createSocketOptions());",
+                "Description": "The creation of the SocketOptions object is a bit lengthy. It would be more readable and maintainable if you extract this code into a separate method.",
+                "Start": 27,
+                "End": 40
+            }
+        ],
+        "Final code": "public Builder createBuilder(){\n  Builder builder=Cluster.builder();\n  for (String address : contactPoints) {\n    builder.addContactPoint(address);\n  }\n  builder.withCompression(compression);\n  Optional.ofNullable(username).ifPresent(u -> builder.withCredentials(u, password));\n  Optional.ofNullable(reconnectionPolicy).ifPresent(builder::withReconnectionPolicy);\n  Optional.ofNullable(retryPolicy).ifPresent(builder::withRetryPolicy);\n  builder.withPort(port);\n  if (!jmxEnabled) {\n    builder.withoutJMXReporting();\n  }\n  if (!metricsEnabled) {\n    builder.withoutMetrics();\n  }\n  Optional.ofNullable(sslOptions).ifPresent(builder::withSSL);\n  copyPoolingOptions(builder);\n  builder.withSocketOptions(createSocketOptions());\n  return builder;\n}\n\nprivate SocketOptions createSocketOptions() {\n  SocketOptions opts=new SocketOptions();\n  opts.setConnectTimeoutMillis(connectTimeoutMillis);\n  opts.setReadTimeoutMillis(readTimeoutMillis);\n  Optional.ofNullable(receiveBufferSize).ifPresent(opts::setReceiveBufferSize);\n  Optional.ofNullable(sendBufferSize).ifPresent(opts::setSendBufferSize);\n  Optional.ofNullable(soLinger).ifPresent(opts::setSoLinger);\n  Optional.ofNullable(keepAlive).ifPresent(opts::setKeepAlive);\n  Optional.ofNullable(reuseAddress).ifPresent(opts::setReuseAddress);\n  Optional.ofNullable(tcpNoDelay).ifPresent(opts::setTcpNoDelay);\n  return opts;\n}"
+    },
+    "Old_Method": "public Builder createBuilder(){\n  Builder builder=Cluster.builder();\n  for (  String address : contactPoints) {\n    builder.addContactPoint(address);\n  }\n  builder.withCompression(compression);\n  if (username != null && password != null) {\n    builder.withCredentials(username,password);\n  }\n  if (reconnectionPolicy != null) {\n    builder.withReconnectionPolicy(reconnectionPolicy);\n  }\n  if (retryPolicy != null) {\n    builder.withRetryPolicy(retryPolicy);\n  }\n  builder.withPort(port);\n  if (!jmxEnabled) {\n    builder.withoutJMXReporting();\n  }\n  if (!metricsEnabled) {\n    builder.withoutMetrics();\n  }\n  if (sslOptions != null) {\n    builder.withSSL(sslOptions);\n  }\n  copyPoolingOptions(builder);\n  SocketOptions opts=new SocketOptions();\n  opts.setConnectTimeoutMillis(connectTimeoutMillis);\n  opts.setReadTimeoutMillis(readTimeoutMillis);\n  if (receiveBufferSize != null) {\n    opts.setReceiveBufferSize(receiveBufferSize);\n  }\n  if (sendBufferSize != null) {\n    opts.setSendBufferSize(sendBufferSize);\n  }\n  if (soLinger != null) {\n    opts.setSoLinger(soLinger);\n  }\n  if (keepAlive != null) {\n    opts.setKeepAlive(keepAlive);\n  }\n  if (reuseAddress != null) {\n    opts.setReuseAddress(reuseAddress);\n  }\n  if (tcpNoDelay != null) {\n    opts.setTcpNoDelay(tcpNoDelay);\n  }\n  builder.withSocketOptions(opts);\n  return builder;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/cassandra/CassandraConfig.java",
+    "Start": 4542,
+    "Stop": 6218,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "createBuilder"
+}

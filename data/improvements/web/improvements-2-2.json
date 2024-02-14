@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use log placeholders instead of string concatenation",
+                "Change_Diff": "- logger.info(\"mysql url:\" + dbUrl);\n+ logger.info(\"mysql url: {}\", dbUrl);",
+                "Description": "In logger statements, we should use placeholders instead of string concatenation. This is because string concatenation is evaluated even when the log level is turned off and hence could lead to unnecessary computation.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Add null checks for mandatory properties",
+                "Change_Diff": "+ if(jdbcDriver == null || dbUrl == null || username == null || password == null) {\n+     throw new IllegalArgumentException(\"Mandatory properties are missing\");\n+ }",
+                "Description": "The properties like jdbcDriver, dbUrl, username, and password are mandatory for creating a DataSource. Hence, we should add null checks for these properties to avoid null pointer exceptions.",
+                "Start": 4,
+                "End": 7
+            }
+        ],
+        "Final code": "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(\"mysql url: {}\", dbUrl);\n  if(jdbcDriver == null || dbUrl == null || username == null || password == null) {\n     throw new IllegalArgumentException(\"Mandatory properties are missing\");\n  }\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}"
+    },
+    "Old_Method": "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(\"mysql url:\" + dbUrl);\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}\n",
+    "File_Path": "web/dao/src/main/java/com/aitongyi/web/dao/conf/DatabaseConfig.java",
+    "Start": 1211,
+    "Stop": 1703,
+    "Project_Name": "data/projects/web",
+    "Method_Name": "dataSource"
+}

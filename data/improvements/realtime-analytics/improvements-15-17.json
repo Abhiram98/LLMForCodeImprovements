@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive code into separate method",
+                "Change_Diff": "- stats.incQueryRequestCount();\n- stats.incQueryRequestCount();\n- stats.incInvalidRequestCount();\n+ incrementQueryRequestCount(pathInfo);",
+                "Description": "The three calls to 'stats.incQueryRequestCount()' are repetitive and can be refactored into a separate method. This makes the code more readable and maintainable.",
+                "Start": 10,
+                "End": 18
+            },
+            {
+                "Improvement": "Use constants for HTTP headers",
+                "Change_Diff": "- response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n+ response.addHeader(HEADER_ALLOW_ORIGIN, \"*\");\n+ response.addHeader(HEADER_ALLOW_METHODS, \"*\");\n+ response.addHeader(HEADER_ALLOW_HEADERS, \"Content-Type\");",
+                "Description": "The 'Access-Control-Allow-Origin', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' strings are used repetitively and can be replaced with constants. This can prevent potential bugs due to typing errors.",
+                "Start": 33,
+                "End": 35
+            }
+        ],
+        "Final code": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    incrementQueryRequestCount(pathInfo);\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else if (pathInfo.startsWith(PATH_COUNTER)) {\n      getCounters(request,pathInfo,response);\n    }\n else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(HEADER_ALLOW_ORIGIN, \"*\");\n    response.addHeader(HEADER_ALLOW_METHODS, \"*\");\n    response.addHeader(HEADER_ALLOW_HEADERS, \"Content-Type\");\n  }\n}\n\nprivate void incrementQueryRequestCount(String pathInfo) {\n  if (pathInfo.startsWith(PATH_PING) || pathInfo.startsWith(PATH_COUNTER) || pathInfo.startsWith(PATH_METRICGROUP)) {\n    stats.incQueryRequestCount();\n  } else {\n    stats.incInvalidRequestCount();\n  }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

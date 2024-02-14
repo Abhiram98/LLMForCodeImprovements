@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive code into a method",
+                "Change_Diff": "- try {\n    inter.intersect(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  // Repeated code removed...\n+ checkIntersection(inter, skExact, skSmallSeed2A);",
+                "Description": "The same sequence of operations is repeated multiple times with different arguments. This can be refactored into a separate method to improve readability and maintainability.",
+                "Start": 19,
+                "End": 96
+            },
+            {
+                "Improvement": "Use JUnit's ExpectedException rule",
+                "Change_Diff": "- try {\n    inter.intersect(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  // Repeated code removed...\n+ expectedException.expect(Exception.class);\n  inter.intersect(skExact,skSmallSeed2A);",
+                "Description": "Instead of manually catching exceptions and asserting failure, the ExpectedException rule provided by JUnit can be used. This will make the test more readable and idiomatic.",
+                "Start": 19,
+                "End": 96
+            }
+        ],
+        "Final code": "@Test public void checkSeedHash(){\n  int k=64;\n  UpdateSketch tmp1=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp1.update(1);\n  tmp1.update(3);\n  CompactSketch skSmallSeed2A=tmp1.compact(true,null);\n  UpdateSketch tmp2=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp2.update(1);\n  tmp2.update(2);\n  CompactSketch skSmallSeed2B=tmp2.compact(true,null);\n  CompactSketch skExact=generate(EXACT,k);\n  CompactSketch skHeap=generate(EST_HEAP,2 * k);\n  Intersection inter=SetOperation.builder().buildIntersection();\n  AnotB aNotB=SetOperation.builder().buildANotB();\n  Union union=SetOperation.builder().setNominalEntries(k).buildUnion();\n\n  @Rule\n  public ExpectedException expectedException = ExpectedException.none();\n\n  checkIntersection(inter, skExact, skSmallSeed2A);\n  checkIntersection(inter, skExact, skSmallSeed2B);\n  checkIntersection(inter, skSmallSeed2B, skExact);\n  checkIntersection(inter, skHeap, skSmallSeed2B);\n  checkAnotB(aNotB, skExact, skSmallSeed2A);\n  checkAnotB(aNotB, skExact, skSmallSeed2B);\n  checkAnotB(aNotB, skSmallSeed2B, skExact);\n  checkAnotB(aNotB, skHeap, skSmallSeed2B);\n  checkUnion(union, skExact, skSmallSeed2A);\n  checkUnion(union, skExact, skSmallSeed2B);\n  checkUnion(union, skSmallSeed2B, skExact);\n  checkUnion(union, skHeap, skSmallSeed2B);\n}\n\nprivate void checkIntersection(Intersection inter, CompactSketch sk1, CompactSketch sk2) {\n  expectedException.expect(Exception.class);\n  inter.intersect(sk1, sk2);\n}\n\nprivate void checkAnotB(AnotB aNotB, CompactSketch sk1, CompactSketch sk2) {\n  expectedException.expect(Exception.class);\n  aNotB.aNotB(sk1, sk2);\n}\n\nprivate void checkUnion(Union union, CompactSketch sk1, CompactSketch sk2) {\n  expectedException.expect(Exception.class);\n  union.union(sk1, sk2);\n}"
+    },
+    "Old_Method": "@Test public void checkSeedHash(){\n  int k=64;\n  UpdateSketch tmp1=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp1.update(1);\n  tmp1.update(3);\n  CompactSketch skSmallSeed2A=tmp1.compact(true,null);\n  UpdateSketch tmp2=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp2.update(1);\n  tmp2.update(2);\n  CompactSketch skSmallSeed2B=tmp2.compact(true,null);\n  CompactSketch skExact=generate(EXACT,k);\n  CompactSketch skHeap=generate(EST_HEAP,2 * k);\n  Intersection inter=SetOperation.builder().buildIntersection();\n  AnotB aNotB=SetOperation.builder().buildANotB();\n  Union union=SetOperation.builder().setNominalEntries(k).buildUnion();\n  try {\n    inter.intersect(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    inter.intersect(skExact,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    inter.intersect(skSmallSeed2B,skExact);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    inter.intersect(skHeap,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skExact,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skSmallSeed2B,skExact);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skHeap,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skExact,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skSmallSeed2B,skExact);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skHeap,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/SetOpsCornerCasesTest.java",
+    "Start": 10314,
+    "Stop": 12460,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSeedHash"
+}

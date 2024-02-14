@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of constants instead of hardcoded values",
+                "Change_Diff": "- for (int i=0; i < 8; i++) {\n+ for (int i=0; i < BIT_SIZE; i++) {\n\n- assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n+ assertTrue(Bytes.from((byte)ALL_BITS_ON).bitAt(i));\n\n- assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n+ assertFalse(Bytes.from((byte)BIT_PATTERN_1).bitAt(0));",
+                "Description": "Instead of using hardcoded values like 8, 0xFF, 0b11010000, etc., constants should be defined and used. This increases the readability and maintainability of the code. If these values need to be changed in the future, we can do it at one place.",
+                "Start": 3,
+                "End": 24
+            },
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- assertTrue(Bytes.from((byte)8).bitAt(3));\n+ assertTrue(bitAtPosition((byte)8, 3));\n\n- assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n+ assertFalse(bitAtPosition((byte)0b0010_1000, 4));",
+                "Description": "The code for generating Bytes and checking bits appears multiple times. This code can be extracted into a method, reducing duplication and making the code cleaner.",
+                "Start": 5,
+                "End": 24
+            }
+        ],
+        "Final code": "@Test public void bitAt(){\n  final int BIT_SIZE = 8;\n  final byte ALL_BITS_ON = (byte)0xFF;\n  final byte BIT_PATTERN_1 = (byte)0b11010000;\n\n  for (int i=0; i < BIT_SIZE; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < BIT_SIZE; i++) {\n    assertTrue(Bytes.from(ALL_BITS_ON).bitAt(i));\n  }\n  assertFalse(bitAtPosition((byte)8, 0));\n  assertFalse(bitAtPosition((byte)8, 1));\n  assertFalse(bitAtPosition((byte)8, 2));\n  assertTrue(bitAtPosition((byte)8, 3));\n  assertFalse(bitAtPosition((byte)8, 4));\n  assertFalse(bitAtPosition(BIT_PATTERN_1, 0));\n  assertFalse(bitAtPosition((byte)0b10010000, 0));\n  assertTrue(bitAtPosition((byte)0b10010001, 0));\n  assertFalse(bitAtPosition((byte)0b0010_1000, 4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  testOutOfBounds(Bytes.allocate(1), 8);\n  testOutOfBounds(Bytes.allocate(16), -1);\n\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n\nprivate boolean bitAtPosition(byte b, int position) {\n  return Bytes.from(b).bitAt(position);\n}\n\nprivate void testOutOfBounds(Bytes bytes, int position) {\n  try {\n    bytes.bitAt(position);\n    fail();\n  } catch (IndexOutOfBoundsException ignored) {\n  }\n}"
+    },
+    "Old_Method": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  assertFalse(Bytes.from((byte)8).bitAt(0));\n  assertFalse(Bytes.from((byte)8).bitAt(1));\n  assertFalse(Bytes.from((byte)8).bitAt(2));\n  assertTrue(Bytes.from((byte)8).bitAt(3));\n  assertFalse(Bytes.from((byte)8).bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BytesMiscTest.java",
+    "Start": 12738,
+    "Stop": 14127,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "bitAt"
+}

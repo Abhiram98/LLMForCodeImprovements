@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for Thread management",
+                "Change_Diff": "- Thread[] tArray=new Thread[noOfThreads];\n...\n- tArray[i].start();\n...\n- tArray[i].join();\n+ ExecutorService executor = Executors.newFixedThreadPool(noOfThreads);\n...\n+ executor.submit(t1);\n...\n+ executor.shutdown();\n+ executor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);",
+                "Description": "Instead of manually starting and joining threads, use a ExecutorService to manage the threads. This will automatically manage the lifecycle of the threads and free up resources when they are not in use.",
+                "Start": 11,
+                "End": 63
+            },
+            {
+                "Improvement": "Avoid using System.out.println for logging",
+                "Change_Diff": "- System.out.println(\"The number of messages added to async batcher console: \" + numAddedConsole);\n...\n+ Logger logger = Logger.getLogger(TestBlitz4j.class);\n+ logger.info(\"The number of messages added to async batcher console: \" + numAddedConsole);",
+                "Description": "Instead of using System.out.println, use a Logger for logging. This provides more flexibility in terms of output format and destination, and also provides severity levels.",
+                "Start": 65,
+                "End": 68
+            }
+        ],
+        "Final code": "@Test public void testAsyncAppendersWithWhiteSpace() throws Exception {\n...\nExecutorService executor = Executors.newFixedThreadPool(noOfThreads);\nfor (int i=0; i < noOfThreads; i++) {\nThread t1=new Thread(new Runnable(){\n...\nexecutor.submit(t1);\n}\nexecutor.shutdown();\nexecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);\nThread t2=new Thread(new Runnable(){\n...\nint numSummarizedConsole=0;\ntry {\nnumSummarizedConsole=Integer.valueOf(getMonitoringData(consoleSummarizeEvent));\n} catch ( Throwable e) {}\nint numAddedConsole=Integer.valueOf(getMonitoringData(consoleEventsProcessed));\nLogger logger = Logger.getLogger(TestBlitz4j.class);\nlogger.info(\"The number of messages added to async batcher console: \" + numAddedConsole);\nlogger.info(\"The number of messages summarized from async batcher console : \" + numSummarizedConsole);\nlogger.info(\"Total number of messages to asyncBatcher console: \" + (numAddedConsole + numSummarizedConsole));\nAssert.assertTrue(((numAddedConsole + numSummarizedConsole) >= 100000));\nLoggingConfiguration.getInstance().stop();\n}"
+    },
+    "Old_Method": "@Test public void testAsyncAppendersWithWhiteSpace() throws Exception {\n  props.setProperty(\"log4j.rootCategory\",\"OFF\");\n  props.setProperty(\"log4j.logger.com.netflix.blitz4j.TestBlitz4j\",\"INFO, stdout\");\n  props.setProperty(\"log4j.logger.com.netflix.blitz4j.TestBlitz4j$1\",\"INFO,stdout\");\n  props.setProperty(\"log4j.appender.stdout\",\"org.apache.log4j.ConsoleAppender\");\n  props.setProperty(\"log4j.appender.stdout.layout\",\"com.netflix.logging.log4jAdapter.NFPatternLayout\");\n  props.setProperty(\"log4j.appender.stdout.layout.ConversionPattern\",\"%d %-5p %C:%L [%t] [%M] %m%n\");\n  props.setProperty(\"log4j.logger.asyncAppenders\",\"INFO,stdout\");\n  props.setProperty(\"batcher.com.netflix.logging.AsyncAppender.stdout.waitTimeinMillis\",\"120000\");\n  LoggingConfiguration.getInstance().configure(props);\n  int noOfThreads=100;\n  Thread[] tArray=new Thread[noOfThreads];\n  for (int i=0; i < noOfThreads; i++) {\n    Thread t1=new Thread(new Runnable(){\n      public void run(){\n        int i=0;\n        while (i < 1000) {\n          i++;\n          Logger slflogger=LoggerFactory.getLogger(TestBlitz4j.class);\n          slflogger.info(\"Testing named log with this string {}\",\"Test String\");\n          Thread.yield();\n          try {\n            Thread.sleep(10);\n          }\n catch (          InterruptedException e) {\n            e.printStackTrace();\n          }\n        }\n      }\n    }\n);\n    tArray[i]=t1;\n  }\n  Thread t2=new Thread(new Runnable(){\n    public void run(){\n      int i=0;\n      while (i <= 1000) {\n        try {\n          ConfigurationManager.getConfigInstance().setProperty(\"log4j.junk\",(i++) + \"\");\n          Thread.sleep(10);\n          Thread.yield();\n        }\n catch (        Exception e) {\n          e.printStackTrace();\n        }\n      }\n    }\n  }\n);\n  for (int i=0; i < noOfThreads; i++) {\n    tArray[i].start();\n  }\n  t2.start();\n  t2.join();\n  for (int i=0; i < noOfThreads; i++) {\n    tArray[i].join();\n  }\n  int numSummarizedConsole=0;\n  try {\n    numSummarizedConsole=Integer.valueOf(getMonitoringData(consoleSummarizeEvent));\n  }\n catch (  Throwable e) {\n  }\n  int numAddedConsole=Integer.valueOf(getMonitoringData(consoleEventsProcessed));\n  System.out.println(\"The number of messages added to async batcher console: \" + numAddedConsole);\n  System.out.println(\"The number of messages summarized from async batcher console : \" + numSummarizedConsole);\n  System.out.println(\"Total number of messages to asyncBatcher console: \" + (numAddedConsole + numSummarizedConsole));\n  Assert.assertTrue(((numAddedConsole + numSummarizedConsole) >= 100000));\n  LoggingConfiguration.getInstance().stop();\n}\n",
+    "File_Path": "blitz4j/src/test/java/com/netflix/blitz4j/TestBlitz4j.java",
+    "Start": 5898,
+    "Stop": 9749,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "testAsyncAppendersWithWhiteSpace"
+}

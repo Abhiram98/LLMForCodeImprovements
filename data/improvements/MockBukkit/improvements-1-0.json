@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid Repetitive Code",
+                "Change_Diff": "- Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n- Preconditions.checkNotNull(event,\"Event cannot be null\");\n+ checkNotNull(registration, event);",
+                "Description": "The code contains identical checks for null registration and event. Use a method to handle multiple null checks.",
+                "Start": 2,
+                "End": 3
+            },
+            {
+                "Improvement": "Replace Nested Conditionals with Guard Clauses",
+                "Change_Diff": "- if (!(event instanceof ServerExceptionEvent)) {\n-   String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n-   callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n- }\n- if (ex instanceof RuntimeException) {\n-   throw r;\n- }\n- else {\n-   throw new EventHandlerException(ex);\n- }\n+ if (event instanceof ServerExceptionEvent) return;\n+ String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n+ callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n+ if (ex instanceof RuntimeException) throw r;\n+ throw new EventHandlerException(ex);",
+                "Description": "Instead of nesting conditionals, use guard clauses for better readability and less complexity.",
+                "Start": 10,
+                "End": 19
+            }
+        ],
+        "Final code": "private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event){\n  checkNotNull(registration, event);\n  if (!registration.getPlugin().isEnabled()) {\n    return;\n  }\n  try {\n    registration.callEvent(event);\n  }\n catch (EventException eventException) {\n    Throwable ex=eventException.getCause();\n    if (event instanceof ServerExceptionEvent) return;\n    String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n    callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n    if (ex instanceof RuntimeException) throw r;\n    throw new EventHandlerException(ex);\n  }\n}\n\nprivate void checkNotNull(RegisteredListener registration, Event event) {\n  Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n  Preconditions.checkNotNull(event,\"Event cannot be null\");\n}"
+    },
+    "Old_Method": "private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event){\n  Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n  Preconditions.checkNotNull(event,\"Event cannot be null\");\n  if (!registration.getPlugin().isEnabled()) {\n    return;\n  }\n  try {\n    registration.callEvent(event);\n  }\n catch (  EventException eventException) {\n    Throwable ex=eventException.getCause();\n    if (!(event instanceof ServerExceptionEvent)) {\n      String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n      callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n    }\n    if (ex instanceof RuntimeException) {\n      throw r;\n    }\n else {\n      throw new EventHandlerException(ex);\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/plugin/PluginManagerMock.java",
+    "Start": 18429,
+    "Stop": 19391,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "callRegisteredListener"
+}

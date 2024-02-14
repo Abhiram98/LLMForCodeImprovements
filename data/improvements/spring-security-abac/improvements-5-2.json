@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Move constant strings to constants",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties('application.properties');\n+ Properties properties=PropertiesLoaderUtils.loadAllProperties(APP_PROPERTIES);\n\n- this.restHeaders.set('WSO2-Identity-User', 'admin');\n+ this.restHeaders.set(HEADER_IDENTITY_USER, ADMIN_USER);",
+                "Description": "Instead of hardcoding strings like 'application.properties', 'WSO2-Identity-User' and 'admin', it would be better to define them as constants. This way, if you need to change the value, you only need to change it in one place.",
+                "Start": 2,
+                "End": 31
+            },
+            {
+                "Improvement": "Handle null properties",
+                "Change_Diff": "+ if (TRUST_STORE == null || TRUST_STORE_PASSWORD == null || KEY_STORE == null || KEY_STORE_PASSWORD == null) {\n+     logger.error('One or more required properties are null in application.properties');\n+     stopApplication();\n+ }",
+                "Description": "After loading the properties, we should check if all required properties are not null. If any of them is null, we should log an error and stop the application.",
+                "Start": 3,
+                "End": 8
+            },
+            {
+                "Improvement": "Move cache initialization to a separate method",
+                "Change_Diff": "- CacheManager cacheManager=EhCacheManager.getInstance();\n- this.authCache=cacheManager.getCache('authCache',String.class,String.class,60,100);\n- this.entitlementAttributesCache=cacheManager.getCache('entitlementCache',String.class,JSONObject.class,60,100);\n- this.apiResourceListCache=cacheManager.getCache('apiResourceList',String.class,JSONObject.class,60,100);\n+ initializeCaches();",
+                "Description": "The initialization of the caches is a separate concern from the rest of the constructor. It would be cleaner to move this code to a separate method.",
+                "Start": 16,
+                "End": 18
+            }
+        ],
+        "Final code": "public XacmlAttributeHandler(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(APP_PROPERTIES);\n    XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty('xacml.pdp.url.entitlement.service');\n    TRUST_STORE=properties.getProperty('xacml.pdp.trustStore');\n    TRUST_STORE_PASSWORD=properties.getProperty('xacml.pdp.trustStore.password');\n    KEY_STORE=properties.getProperty('xacml.pdp.keyStore');\n    KEY_STORE_PASSWORD=properties.getProperty('xacml.pdp.keyStore.password');\n  }\n catch (  IOException e) {\n    logger.error('Failed to read properties from application.properties',e);\n    stopApplication();\n  }\n  if (TRUST_STORE == null || TRUST_STORE_PASSWORD == null || KEY_STORE == null || KEY_STORE_PASSWORD == null) {\n    logger.error('One or more required properties are null in application.properties');\n    stopApplication();\n  }\n  initializeCaches();\n  try {\n    this.httpClient=HttpClients.custom().setSSLContext(SSLContextBuilder.create().loadKeyMaterial(loadPfx('classpath:'.concat(KEY_STORE),KEY_STORE_PASSWORD.toCharArray()),KEY_STORE_PASSWORD.toCharArray()).loadTrustMaterial(ResourceUtils.getFile('classpath:'.concat(TRUST_STORE)),TRUST_STORE_PASSWORD.toCharArray()).build()).build();\n  }\n catch (  Exception e) {\n    logger.error('Failed to read trustStore/keyStore',e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  this.restHeaders=new HttpHeaders();\n  this.restHeaders.setContentType(MediaType.APPLICATION_JSON);\n  this.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\n  this.restHeaders.set(HEADER_IDENTITY_USER, ADMIN_USER);\n  logger.info('XacmlAttributeHandler successfully initiated');\n}\n\nprivate void initializeCaches() {\n  CacheManager cacheManager=EhCacheManager.getInstance();\n  this.authCache=cacheManager.getCache('authCache',String.class,String.class,60,100);\n  this.entitlementAttributesCache=cacheManager.getCache('entitlementCache',String.class,JSONObject.class,60,100);\n  this.apiResourceListCache=cacheManager.getCache('apiResourceList',String.class,JSONObject.class,60,100);\n}"
+    },
+    "Old_Method": "public XacmlAttributeHandler(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n    TRUST_STORE=properties.getProperty(\"xacml.pdp.trustStore\");\n    TRUST_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.trustStore.password\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n  }\n catch (  IOException e) {\n    logger.error(\"Failed to read properties from application.properties\",e);\n    stopApplication();\n  }\n  if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n    logger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\n    stopApplication();\n  }\n  CacheManager cacheManager=EhCacheManager.getInstance();\n  this.authCache=cacheManager.getCache(\"authCache\",String.class,String.class,60,100);\n  this.entitlementAttributesCache=cacheManager.getCache(\"entitlementCache\",String.class,JSONObject.class,60,100);\n  this.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\n  try {\n    this.httpClient=HttpClients.custom().setSSLContext(SSLContextBuilder.create().loadKeyMaterial(loadPfx(\"classpath:\".concat(KEY_STORE),KEY_STORE_PASSWORD.toCharArray()),KEY_STORE_PASSWORD.toCharArray()).loadTrustMaterial(ResourceUtils.getFile(\"classpath:\".concat(TRUST_STORE)),TRUST_STORE_PASSWORD.toCharArray()).build()).build();\n  }\n catch (  Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\",e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  this.restHeaders=new HttpHeaders();\n  this.restHeaders.setContentType(MediaType.APPLICATION_JSON);\n  this.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\n  this.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\n  logger.info(\"XacmlAttributeHandler successfully initiated\");\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 1818,
+    "Stop": 4341,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "XacmlAttributeHandler"
+}

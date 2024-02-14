@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Throw exception instead of returning null",
+                "Change_Diff": "- catch (  Exception ex) {\n-    return null;\n+ catch (  Exception ex) {\n+    throw new RuntimeException(\"Error retrieving geo info\", ex);",
+                "Description": "It's generally a bad practice to return null in case of exceptions. It would be better to rethrow the exception, or wrap it in a custom exception and throw that.",
+                "Start": 24,
+                "End": 26
+            },
+            {
+                "Improvement": "Validate IP address before processing",
+                "Change_Diff": "- if (ipAddress == null) {\n-    return geoInfo;\n+ if (ipAddress == null || ipAddress.isEmpty() || !isValidIPAddress(ipAddress)) {\n+    throw new IllegalArgumentException(\"Invalid IP address: \" + ipAddress);",
+                "Description": "Before trying to get GeoInfo of an IP address, it's better to validate the input ipAddress to ensure it's not empty and it conforms to the standard IP address format. This can save unnecessary operations for invalid input and provide clearer error messages.",
+                "Start": 3,
+                "End": 5
+            }
+        ],
+        "Final code": "private GeoInfo _getGeoInfo(String ipAddress) throws RuntimeException, IllegalArgumentException {\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null || ipAddress.isEmpty() || !isValidIPAddress(ipAddress)) {\n    throw new IllegalArgumentException(\"Invalid IP address: \" + ipAddress);\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return geoInfo;\n  } catch (  Exception ex) {\n    throw new RuntimeException(\"Error retrieving geo info\", ex);\n  }\n}"
+    },
+    "Old_Method": "private GeoInfo _getGeoInfo(String ipAddress){\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return geoInfo;\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return geoInfo;\n  }\n catch (  Exception ex) {\n    return null;\n  }\n}\n",
+    "File_Path": "realtime-analytics/collector/src/main/java/com/ebay/pulsar/collector/udf/GeoEnrichmentUtil.java",
+    "Start": 1289,
+    "Stop": 2470,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "_getGeoInfo"
+}

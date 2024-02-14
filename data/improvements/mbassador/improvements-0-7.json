@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional instead of returning null",
+                "Change_Diff": "- public T next(){\n-   if (current == null) {\n-     return null;\n-   }\n+ public Optional<T> next(){\n+   if (current == null) {\n+     return Optional.empty();\n+   }",
+                "Description": "Returning null from a method could potentially lead to NullPointerExceptions. We can use Java 8's Optional to better handle these situations and make the code safer.",
+                "Start": 27,
+                "End": 31
+            },
+            {
+                "Improvement": "Check for null in remove() method",
+                "Change_Diff": "- public void remove(){\n-   ISetEntry<T> newCurrent=current.next();\n+ public void remove(){\n+   if (current == null) {\n+     return;\n+   }\n+   ISetEntry<T> newCurrent=current.next();",
+                "Description": "The remove() method calls current.getValue() without checking if current is null. We should add a null check to prevent NullPointerExceptions.",
+                "Start": 35,
+                "End": 37
+            }
+        ],
+        "Final code": "public Iterator<T> iterator(){\n  return new Iterator<T>(){\n    private ISetEntry<T> current=head;\n    private void removeOrphans(){\n      Lock writelock=lock.writeLock();\n      try {\n        writelock.lock();\n        do {\n          ISetEntry orphaned=current;\n          current=current.next();\n          if (orphaned == head) {\n            head=head.next();\n          }\n          orphaned.remove();\n        }\n while (current != null && current.getValue() == null);\n      }\n  finally {\n        writelock.unlock();\n      }\n    }\n    public boolean hasNext(){\n      if (current == null)       return false;\n      if (current.getValue() == null) {\n        removeOrphans();\n        return current != null;\n      }\n else {\n        return true;\n      }\n    }\n    public Optional<T> next(){\n      if (current == null) {\n        return Optional.empty();\n      }\n      T value=current.getValue();\n      if (value == null) {\n        removeOrphans();\n        return next();\n      }\n else {\n        current=current.next();\n        return Optional.of(value);\n      }\n    }\n    public void remove(){\n      if (current == null) {\n        return;\n      }\n      ISetEntry<T> newCurrent=current.next();\n      WeakConcurrentSet.this.remove(current.getValue());\n      current=newCurrent;\n    }\n  }\n;\n}"
+    },
+    "Old_Method": "public Iterator<T> iterator(){\n  return new Iterator<T>(){\n    private ISetEntry<T> current=head;\n    private void removeOrphans(){\n      Lock writelock=lock.writeLock();\n      try {\n        writelock.lock();\n        do {\n          ISetEntry orphaned=current;\n          current=current.next();\n          if (orphaned == head) {\n            head=head.next();\n          }\n          orphaned.remove();\n        }\n while (current != null && current.getValue() == null);\n      }\n  finally {\n        writelock.unlock();\n      }\n    }\n    public boolean hasNext(){\n      if (current == null)       return false;\n      if (current.getValue() == null) {\n        removeOrphans();\n        return current != null;\n      }\n else {\n        return true;\n      }\n    }\n    public T next(){\n      if (current == null) {\n        return null;\n      }\n      T value=current.getValue();\n      if (value == null) {\n        removeOrphans();\n        return next();\n      }\n else {\n        current=current.next();\n        return value;\n      }\n    }\n    public void remove(){\n      if (current == null) {\n        return;\n      }\n      ISetEntry<T> newCurrent=current.next();\n      WeakConcurrentSet.this.remove(current.getValue());\n      current=newCurrent;\n    }\n  }\n;\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/common/WeakConcurrentSet.java",
+    "Start": 643,
+    "Stop": 3187,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "iterator"
+}

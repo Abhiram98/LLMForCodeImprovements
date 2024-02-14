@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Handle possible null return of getApplet() method",
+                "Change_Diff": "- if (applet == null) {\n-    return;\n-  }\n+ if (applet == null) {\n+    throw new NullPointerException(\"Applet is null\");\n+  }",
+                "Description": "The getApplet() method might return null. Although there is a null check, an explicit message when the applet is null, can help in debugging when null is returned. It's generally a good practice to throw an exception with an informative message.",
+                "Start": 3,
+                "End": 6
+            },
+            {
+                "Improvement": "Refactor out `method.invoke(applet,realArgs)` call into a separate method",
+                "Change_Diff": "- try {\n-    return method.invoke(applet,realArgs);\n- } catch (final Exception e) {\n-    throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n- }\n+ return invokeMethod(method, applet, realArgs);",
+                "Description": "Refactoring the method invocation into a separate method can help in improving the readability of the code and make it easier to handle exceptions.",
+                "Start": 12,
+                "End": 22
+            }
+        ],
+        "Final code": "private void createAppletMethodAndProperties() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  final Applet applet=appletNode.getApplet();\n  if (applet == null) {\n    throw new NullPointerException(\"Applet is null\");\n  }\n  for (final Method method : applet.getClass().getMethods()) {\n    final Function f=new BaseFunction(){\n      @Override public Object call(final Context cx, final Scriptable scope, final Scriptable thisObj, final Object[] args){\n        final Object[] realArgs=new Object[method.getParameterTypes().length];\n        for (int i=0; i < realArgs.length; i++) {\n          final Object arg;\n          if (i > args.length) {\n            arg=null;\n          } else {\n            arg=Context.jsToJava(args[i],method.getParameterTypes()[i]);\n          }\n          realArgs[i]=arg;\n        }\n        return invokeMethod(method, applet, realArgs);\n      }\n    };\n    ScriptableObject.defineProperty(this,method.getName(),f,ScriptableObject.READONLY);\n  }\n}\n\nprivate Object invokeMethod(Method method, Applet applet, Object[] args) {\n  try {\n    return method.invoke(applet, args);\n  } catch (final Exception e) {\n    throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n  }\n}"
+    },
+    "Old_Method": "private void createAppletMethodAndProperties() throws Exception {\n  final HtmlObject appletNode=(HtmlObject)getDomNodeOrDie();\n  final Applet applet=appletNode.getApplet();\n  if (applet == null) {\n    return;\n  }\n  for (  final Method method : applet.getClass().getMethods()) {\n    final Function f=new BaseFunction(){\n      @Override public Object call(      final Context cx,      final Scriptable scope,      final Scriptable thisObj,      final Object[] args){\n        final Object[] realArgs=new Object[method.getParameterTypes().length];\n        for (int i=0; i < realArgs.length; i++) {\n          final Object arg;\n          if (i > args.length) {\n            arg=null;\n          }\n else {\n            arg=Context.jsToJava(args[i],method.getParameterTypes()[i]);\n          }\n          realArgs[i]=arg;\n        }\n        try {\n          return method.invoke(applet,realArgs);\n        }\n catch (        final Exception e) {\n          throw JavaScriptEngine.throwAsScriptRuntimeEx(e);\n        }\n      }\n    }\n;\n    ScriptableObject.defineProperty(this,method.getName(),f,ScriptableObject.READONLY);\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/html/HTMLObjectElement.java",
+    "Start": 3134,
+    "Stop": 4723,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "createAppletMethodAndProperties"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use switch case instead of multiple if else statements",
+                "Change_Diff": "- if (lowerCasePath.endsWith(\"db/variables.hjson\")) {\n+ switch (getFileName(lowerCasePath)) {\n+ case \"db/variables.hjson\":",
+                "Description": "Instead of using multiple if else statements, use a switch case. This will make the code more readable and organized. This can be achieved by extracting the filename from the path and using switch case on it.",
+                "Start": 3,
+                "End": 16
+            },
+            {
+                "Improvement": "Use a helper function to extract filename",
+                "Change_Diff": "- public static ConfigFile.ConfigFileType toType(String path){\n+ public static ConfigFile.ConfigFileType toType(String path){\n+ String fileName = getFileName(path.toLowerCase(Locale.ROOT));",
+                "Description": "By using a helper function to extract the filename from the path, the code can be more organized and reusable. This helper function can be used in switch case to compare filenames instead of entire paths.",
+                "Start": 1,
+                "End": 16
+            }
+        ],
+        "Final code": "public static ConfigFile.ConfigFileType toType(String path){\n    String fileName = getFileName(path.toLowerCase(Locale.ROOT));\n    switch (fileName) {\n        case \"db/variables.hjson\":\n        case \"models/variables.hjson\":\n            return ConfigFile.ConfigFileType.VARIABLE;\n        case \"models/security.hjson\":\n            return ConfigFile.ConfigFileType.SECURITY;\n        case DB_FILE.matcher(fileName).matches():\n            return ConfigFile.ConfigFileType.DATABASE;\n        case TABLE_FILE.matcher(fileName).matches():\n            return ConfigFile.ConfigFileType.TABLE;\n        case NAME_SPACE_FILE.matcher(fileName).matches():\n            return ConfigFile.ConfigFileType.NAMESPACE;\n        default:\n            return ConfigFile.ConfigFileType.UNKNOWN;\n    }\n}\n\npublic static String getFileName(String path) {\n    return path.substring(path.lastIndexOf(\"/\") + 1);\n}"
+    },
+    "Old_Method": "public static ConfigFile.ConfigFileType toType(String path){\n  String lowerCasePath=path.toLowerCase(Locale.ROOT);\n  if (lowerCasePath.endsWith(\"db/variables.hjson\")) {\n    return ConfigFile.ConfigFileType.VARIABLE;\n  }\n else   if (lowerCasePath.endsWith(\"models/variables.hjson\")) {\n    return ConfigFile.ConfigFileType.VARIABLE;\n  }\n else   if (lowerCasePath.equals(\"models/security.hjson\")) {\n    return ConfigFile.ConfigFileType.SECURITY;\n  }\n else   if (DB_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.DATABASE;\n  }\n else   if (TABLE_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.TABLE;\n  }\n else   if (NAME_SPACE_FILE.matcher(lowerCasePath).matches()) {\n    return ConfigFile.ConfigFileType.NAMESPACE;\n  }\n else {\n    return ConfigFile.ConfigFileType.UNKNOWN;\n  }\n}\n",
+    "File_Path": "elide/elide-model-config/src/main/java/com/yahoo/elide/modelconfig/io/FileLoader.java",
+    "Start": 6753,
+    "Stop": 7690,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "toType"
+}

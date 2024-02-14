@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Separate concerns in different methods",
+                "Change_Diff": "- static String stringifySolution(int size,List<List<ColumnName>> solution){\n...\n... all the code ...\n...\nreturn result.toString();\n}\n+ static int[][] populatePicture(int size, List<List<ColumnName>> solution) { ... }\n+ static String formatPicture(int[][] picture) { ... }\n+ static String stringifySolution(int size, List<List<ColumnName>> solution) {\n+   int[][] picture = populatePicture(size, solution);\n+   return formatPicture(picture);\n+ }",
+                "Description": "The stringifySolution method is doing too many things at once: populating the picture array and formatting the result string. This makes the method harder to understand and test. It's best to separate these two tasks into their own methods.",
+                "Start": 13,
+                "End": 38
+            },
+            {
+                "Improvement": "Replace StringBuffer with StringBuilder",
+                "Change_Diff": "- StringBuffer result=new StringBuffer();\n+ StringBuilder result=new StringBuilder();",
+                "Description": "StringBuilder is faster than StringBuffer for single-threaded scenarios, which is the case here. Therefore, it's recommended to use StringBuilder instead of StringBuffer for better performance.",
+                "Start": 30,
+                "End": 30
+            }
+        ],
+        "Final code": "static int[][] populatePicture(int size, List<List<ColumnName>> solution) {\n    int[][] picture = new int[size][size];\n    for (List<ColumnName> row : solution) {\n        int x = -1, y = -1, num = -1;\n        for (ColumnName item : row) {\n            if (item instanceof ColumnConstraint) {\n                x = ((ColumnConstraint)item).column;\n                num = ((ColumnConstraint)item).num;\n            } else if (item instanceof RowConstraint) {\n                y = ((RowConstraint)item).row;\n            }\n        }\n        picture[y][x] = num;\n    }\n    return picture;\n}\n\nstatic String formatPicture(int[][] picture) {\n    StringBuilder result = new StringBuilder();\n    for (int[] row : picture) {\n        for (int num : row) {\n            result.append(num).append(' ');\n        }\n        result.append('\\n');\n    }\n    return result.toString();\n}\n\nstatic String stringifySolution(int size, List<List<ColumnName>> solution) {\n    int[][] picture = populatePicture(size, solution);\n    return formatPicture(picture);\n}"
+    },
+    "Old_Method": "/** \n * A string containing a representation of the solution.\n * @param size the size of the board\n * @param solution a list of list of column names\n * @return a string of the solution matrix\n */\nstatic String stringifySolution(int size,List<List<ColumnName>> solution){\n  int[][] picture=new int[size][size];\n  StringBuffer result=new StringBuffer();\n  for (  List<ColumnName> row : solution) {\n    int x=-1;\n    int y=-1;\n    int num=-1;\n    for (    ColumnName item : row) {\n      if (item instanceof ColumnConstraint) {\n        x=((ColumnConstraint)item).column;\n        num=((ColumnConstraint)item).num;\n      }\n else       if (item instanceof RowConstraint) {\n        y=((RowConstraint)item).row;\n      }\n    }\n    picture[y][x]=num;\n  }\n  for (int y=0; y < size; ++y) {\n    for (int x=0; x < size; ++x) {\n      result.append(picture[y][x]);\n      result.append(\" \");\n    }\n    result.append(\"\\n\");\n  }\n  return result.toString();\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Sudoku.java",
+    "Start": 1860,
+    "Stop": 3175,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "stringifySolution"
+}

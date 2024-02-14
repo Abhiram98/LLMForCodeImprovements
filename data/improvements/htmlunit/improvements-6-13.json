@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary else",
+                "Change_Diff": "- else {\n+ ",
+                "Description": "The else statement is not necessary because the if block ends with a return statement. This can make the code more readable by reducing the level of indentation.",
+                "Start": 9,
+                "End": 18
+            },
+            {
+                "Improvement": "Extract repeated code to a variable",
+                "Change_Diff": "- final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n+ final String css = getTextContent();\n+ final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(css);",
+                "Description": "The method `getTextContent()` is called twice in the method. It would be better to call it once and store its result in a variable which can be used later. This improves performance by reducing redundant method calls.",
+                "Start": 8,
+                "End": 14
+            },
+            {
+                "Improvement": "Add more specific error handling",
+                "Change_Diff": "- LOG.error(e.getMessage(),e);\n+ throw new CustomException(\"Error creating InputSource\", e);",
+                "Description": "The catch block currently only logs the error message, which may not be enough in a production environment. It would be better to do some sort of error handling or throw a custom exception.",
+                "Start": 18,
+                "End": 20
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final String css = getTextContent();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(css);\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n    return sheet_;\n  }\n  try (InputSource source=new InputSource(new StringReader(css))){\n    sheet_=new CssStyleSheet(this,source,uri);\n    cache.cache(css,sheet_.getWrappedSheet());\n  }\n  catch (final IOException e) {\n    throw new CustomException(\"Error creating InputSource\", e);\n  }\n  return sheet_;\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

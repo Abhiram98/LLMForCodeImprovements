@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract string literals as constants",
+                "Change_Diff": "- HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n+ HttpUtils.sync(DOWNLOAD_URL).setRange(start,end).get().getBody().toFile(DOWNLOAD_PATH).setAppended().setOnSuccess((  File file) -> {",
+                "Description": "It's a good idea to define string literals such as file paths or URLs as constants. This makes the code easier to maintain and you can avoid repeated hard coding of the same string in different places.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Use meaningful message for println",
+                "Change_Diff": "- println(\"下载完成\");\n+ println(\"Download completed.\");",
+                "Description": "The message '下载完成' can be replaced with a more meaningful message, such as 'Download completed.' It is also desirable to print this in English, unless this is a localized application specifically for Mandarin-speaking users.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  final String DOWNLOAD_URL = \"/download/test.zip\";\n  final String DOWNLOAD_PATH = \"D:/download/test.zip\";\n  HttpUtils.sync(DOWNLOAD_URL).setRange(start,end).get().getBody().toFile(DOWNLOAD_PATH).setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"Download completed.\");\n    }\n  }\n).start();\n}"
+    },
+    "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+    "Start": 680,
+    "Stop": 1474,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "download"
+}

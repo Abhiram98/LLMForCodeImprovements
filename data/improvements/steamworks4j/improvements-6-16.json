@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace string comparisons with switch-case statement",
+                "Change_Diff": "- if (input.startsWith(\"p2p send \")) {...\n- } else if (input.startsWith(\"p2p close \")) {...\n- } else if (input.equals(\"p2p list\")) {...\n- } else if (input.startsWith(\"auth ticket \")) {...\n+ switch (input.split(\" \")[0]) {\n+     case \"p2p send\": {... break;}\n+     case \"p2p close\": {... break;}\n+     case \"p2p list\": {... break;}\n+     case \"auth ticket\": {... break;}\n+ }",
+                "Description": "The string comparisons used to check the command type are not optimal. It is better to use a switch-case block which offers better performance, especially when dealing with a large number of cases.",
+                "Start": 2,
+                "End": 68
+            },
+            {
+                "Improvement": "Replace if-else checks with a map",
+                "Change_Diff": "- if (remoteUserIDs.containsKey(receiverID)) {...\n- } else if (friends.isFriendAccountID(receiverID)) {...\n- } else {...\n+ steamIDReceiver = lookupSteamID(receiverID);",
+                "Description": "The if-else checks used to get the SteamIDReceiver can be replaced with a map. The receiverID can be used as a key and the SteamID can be the value. This will help in reducing the number of lines and improve the readability of the code.",
+                "Start": 4,
+                "End": 15
+            },
+            {
+                "Improvement": "Handle NumberFormatException",
+                "Change_Diff": "- int receiverID=Integer.parseInt(params[0]);\n+ int receiverID;\n+ try {\n+     receiverID = Integer.parseInt(params[0]);\n+ } catch (NumberFormatException e) {\n+     System.out.println(\"Error: invalid receiverID \" + params[0]);\n+     return;\n+ }",
+                "Description": "The parseInt method can throw a NumberFormatException if the input is not a valid number. It's a good practice to handle this exception and provide a user-friendly error message.",
+                "Start": 4,
+                "End": 4
+            }
+        ],
+        "Final code": "    @Override protected void processInput(String input) throws SteamException {\n      String[] command = input.split(\" \");\n      switch (command[0]) {\n        case \"p2p send\":\n         processP2PSendCommand(command);\n         break;\n        case \"p2p close\":\n         processP2PCloseCommand(command);\n         break;\n        case \"p2p list\":\n         processP2PListCommand();\n         break;\n        case \"auth ticket\":\n         processAuthTicketCommand(command);\n         break;\n        default:\n         friends.processInput(input);\n         break;\n      }\n    }\n\n    private void processP2PSendCommand(String[] command) throws SteamException {...}\n    private void processP2PCloseCommand(String[] command) throws SteamException {...}\n    private void processP2PListCommand() throws SteamException {...}\n    private void processAuthTicketCommand(String[] command) throws SteamException {...}\n    private SteamID lookupSteamID(int receiverID) {...}"
+    },
+    "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(\"p2p send \")) {\n    String[] params=input.substring(\"p2p send \".length()).split(\" \");\n    int receiverID=Integer.parseInt(params[0]);\n    SteamID steamIDReceiver=null;\n    if (remoteUserIDs.containsKey(receiverID)) {\n      steamIDReceiver=remoteUserIDs.get(receiverID);\n    }\n else     if (friends.isFriendAccountID(receiverID)) {\n      steamIDReceiver=friends.getFriendSteamID(receiverID);\n    }\n else {\n      System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n    }\n    if (steamIDReceiver != null) {\n      packetSendBuffer.clear();\n      for (int i=1; i < params.length; i++) {\n        byte[] bytes=params[i].getBytes(messageCharset);\n        if (i > 1) {\n          packetSendBuffer.put((byte)0x20);\n        }\n        packetSendBuffer.put(bytes);\n      }\n      packetSendBuffer.flip();\n      networking.sendP2PPacket(steamIDReceiver,packetSendBuffer,SteamNetworking.P2PSend.Unreliable,defaultChannel);\n    }\n  }\n else   if (input.startsWith(\"p2p close \")) {\n    int remoteID=Integer.parseInt(input.substring(\"p2p close \".length()));\n    SteamID steamIDRemote=null;\n    if (remoteUserIDs.containsKey(remoteID)) {\n      steamIDRemote=remoteUserIDs.get(remoteID);\n    }\n else {\n      System.out.println(\"Error: unknown remote ID \" + remoteID + \" (not connected)\");\n    }\n    if (steamIDRemote != null) {\n      networking.closeP2PSessionWithUser(steamIDRemote);\n      unregisterRemoteSteamID(steamIDRemote);\n    }\n  }\n else   if (input.equals(\"p2p list\")) {\n    System.out.println(\"P2P connected users:\");\n    if (remoteUserIDs.size() == 0) {\n      System.out.println(\"  none\");\n    }\n    for (    SteamID steamIDUser : remoteUserIDs.values()) {\n      System.out.println(\"  \" + steamIDUser.getAccountID());\n    }\n  }\n else   if (input.startsWith(\"auth ticket \")) {\n    String authCmd=input.substring(\"auth ticket \".length());\n    if (authCmd.equals(\"get\")) {\n      getAuthTicket();\n    }\n else     if (authCmd.equals(\"cancel\")) {\n      cancelAuthTicket();\n    }\n else     if (authCmd.equals(\"send\")) {\n      broadcastAuthTicket();\n    }\n else     if (authCmd.equals(\"end\")) {\n      endAuthSession();\n    }\n  }\n  friends.processInput(input);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+    "Start": 5088,
+    "Stop": 7338,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processInput"
+}

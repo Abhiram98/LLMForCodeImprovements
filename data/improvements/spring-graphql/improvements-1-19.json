@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional for null checks",
+                "Change_Diff": "- if (container == null) {\n+ if (Optional.ofNullable(container).isEmpty()) {",
+                "Description": "Java 8 introduced the Optional class to handle nullability. It can be used to represent the optional values that either contain a value or don't (in the context of the null). We can use Optional to wrap the `container` object and make the null check more expressive and less error prone.",
+                "Start": 2,
+                "End": 4
+            },
+            {
+                "Improvement": "Use Java Stream API for Collection operations",
+                "Change_Diff": "- for (T node : nodes) {\n-    String cursor=this.adapter.cursorAt(container,index++);\n-    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n+ IntStream.range(0, nodes.size()).forEach(index -> {\n+    String cursor = this.adapter.cursorAt(container, index);\n+    edges.add(new DefaultEdge<>(nodes.get(index), new DefaultConnectionCursor(cursor)));\n+ });",
+                "Description": "Java 8 Stream API can be used to process collections of objects. A stream is a sequence of objects that supports various methods which can be pipelined to produce the desired result. The operations performed on a stream do not modify its source. For example, filtering a Stream obtained from a collection produces a new Stream. We can use Stream API to replace the traditional for loop used for adding elements to `edges`.",
+                "Start": 13,
+                "End": 17
+            }
+        ],
+        "Final code": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (Optional.ofNullable(container).isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  IntStream.range(0, nodes.size()).forEach(index -> {\n    String cursor = this.adapter.cursorAt(container, index);\n    edges.add(new DefaultEdge<>(nodes.get(index), new DefaultConnectionCursor(cursor)));\n  });\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}"
+    },
+    "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+    "Start": 7935,
+    "Stop": 9024,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "adaptDataContainer"
+}

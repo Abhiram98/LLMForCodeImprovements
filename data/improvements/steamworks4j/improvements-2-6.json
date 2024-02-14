@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < numControllers; i++) {\n-    SteamControllerHandle handle=controllerHandles[i];\n+ for (SteamControllerHandle handle : controllerHandles) {",
+                "Description": "Instead of using a traditional for loop to iterate over `controllerHandles`, use an enhanced for loop. This reduces the chances of off-by-one errors and makes the code cleaner.",
+                "Start": 5,
+                "End": 28
+            },
+            {
+                "Improvement": "Extract repeated code into a separate method",
+                "Change_Diff": "- if (digitalActionHandle != null) {...}\n- if (analogActionHandle != null) {...}\n+ processActionData(handle, digitalActionHandle, digitalActionData);\n+ processActionData(handle, analogActionHandle, analogActionData);\n...\nprivate void processActionData(SteamControllerHandle handle, ActionHandle actionHandle, ActionData actionData) {...}",
+                "Description": "The code for getting action data and printing it is repeated for both digital and analog actions. This code can be extracted into a separate method, which would make the code cleaner and more maintainable.",
+                "Start": 8,
+                "End": 28
+            }
+        ],
+        "Final code": "@Override protected void processUpdate() throws SteamException {\n  if (setHandle == null || getNativeHandle(setHandle) == 0) {\n    return;\n  }\n  for (SteamControllerHandle handle : controllerHandles) {\n    controller.activateActionSet(handle, setHandle);\n    processActionData(handle, digitalActionHandle, digitalActionData);\n    processActionData(handle, analogActionHandle, analogActionData);\n  }\n}\n\nprivate void processActionData(SteamControllerHandle handle, ActionHandle actionHandle, ActionData actionData) {\n  if (actionHandle != null) {\n    controller.getActionData(handle, actionHandle, actionData);\n    if (actionData.getActive()) {\n      if (actionData instanceof DigitalActionData && actionData.getState()) {\n        System.out.println(\"  digital action: \" + getNativeHandle(actionHandle));\n      }\n      else if (actionData instanceof AnalogActionData) {\n        float x = actionData.getX();\n        float y = actionData.getY();\n        SteamController.SourceMode mode = actionData.getMode();\n        if (Math.abs(x) > 0.0001f && Math.abs(y) > 0.001f) {\n          System.out.println(\"  analog action: \" + x + \", \" + y + \", \" + mode.name());\n        }\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void processUpdate() throws SteamException {\n  if (setHandle == null || getNativeHandle(setHandle) == 0) {\n    return;\n  }\n  for (int i=0; i < numControllers; i++) {\n    SteamControllerHandle handle=controllerHandles[i];\n    controller.activateActionSet(handle,setHandle);\n    if (digitalActionHandle != null) {\n      controller.getDigitalActionData(handle,digitalActionHandle,digitalActionData);\n      if (digitalActionData.getActive() && digitalActionData.getState()) {\n        System.out.println(\"  digital action: \" + getNativeHandle(digitalActionHandle));\n      }\n    }\n    if (analogActionHandle != null) {\n      controller.getAnalogActionData(handle,analogActionHandle,analogActionData);\n      if (analogActionData.getActive()) {\n        float x=analogActionData.getX();\n        float y=analogActionData.getY();\n        SteamController.SourceMode mode=analogActionData.getMode();\n        if (Math.abs(x) > 0.0001f && Math.abs(y) > 0.001f) {\n          System.out.println(\"  analog action: \" + analogActionData.getX() + \", \"+ analogActionData.getY()+ \", \"+ mode.name());\n        }\n      }\n    }\n  }\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamControllerTest.java",
+    "Start": 1216,
+    "Stop": 3060,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processUpdate"
+}

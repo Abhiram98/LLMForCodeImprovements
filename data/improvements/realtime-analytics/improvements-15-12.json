@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace Throwable with specific exception",
+                "Change_Diff": "- catch (  Throwable ex) {\n+ catch (Exception ex) {",
+                "Description": "Catching Throwable is generally a bad practice since this would catch both Exceptions and Errors. It's better to catch specific exceptions and handle them accordingly.",
+                "Start": 20,
+                "End": 24
+            },
+            {
+                "Improvement": "Move CORS headers to a filter",
+                "Change_Diff": "- response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");",
+                "Description": "Cross-Origin Resource Sharing (CORS) headers are typically handled in a filter rather than in the service method. This way every response can have the CORS headers without having to duplicate the code in each method.",
+                "Start": 28,
+                "End": 30
+            },
+            {
+                "Improvement": "Remove unnecessary InputStream marking",
+                "Change_Diff": "- if (inputStream != null) {\n-   inputStream.mark(Integer.MAX_VALUE);\n- }",
+                "Description": "The code marks the input stream but never resets it. Unless there's a specific need to go back to the start of the stream later, this marking is unnecessary.",
+                "Start": 3,
+                "End": 5
+            }
+        ],
+        "Final code": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    } else if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    } else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    } else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  } catch (Exception ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

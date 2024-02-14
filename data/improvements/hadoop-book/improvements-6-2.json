@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java logging instead of System.out.println",
+                "Change_Diff": "- System.out.println(\"Usage: writer <out-dir>\");\n+ logger.info(\"Usage: writer <out-dir>\");",
+                "Description": "Using the System.out.println statement for logging purposes is not recommended because it is not as flexible as using a logging API. For example, with System.out.println, you cannot categorize log messages or adjust the log level at runtime. Using a logging API provides flexibility for outputting logs and can help with debugging and auditing.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Use Java logging instead of System.err.println",
+                "Change_Diff": "- System.err.println(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n+ logger.error(\"Cannot have test.randomwrite.bytes_per_map set to 0\");",
+                "Description": "The System.err.println statement is not recommended for error handling in a professional Java application because it can't be controlled from a central location. It's better to use the logging APIs provided by Java, which have several advantages over System.err.println, such as maintaining log files, rotating them, keeping log files open for certain time periods, etc.",
+                "Start": 27,
+                "End": 27
+            }
+        ],
+        "Final code": "import java.util.logging.Logger;\n\npublic int run(String[] args) throws Exception {\n  Logger logger = Logger.getLogger(RandomWriter.class.getName());\n  if (args.length == 0) {\n    logger.info(\"Usage: writer <out-dir>\");\n    ToolRunner.printGenericCommandUsage(System.out);\n    return -1;\n  }\n  // ... rest of the code\n  if (numBytesToWritePerMap == 0) {\n    logger.error(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n    return -2;\n  }\n  // ... rest of the code\n}"
+    },
+    "Old_Method": "/** \n * This is the main routine for launching a distributed random write job. It runs 10 maps/node and each node writes 1 gig of data to a DFS file. The reduce doesn't do anything.\n * @throws IOException\n */\npublic int run(String[] args) throws Exception {\n  if (args.length == 0) {\n    System.out.println(\"Usage: writer <out-dir>\");\n    ToolRunner.printGenericCommandUsage(System.out);\n    return -1;\n  }\n  Path outDir=new Path(args[0]);\n  JobConf job=new JobConf(getConf());\n  job.setJarByClass(RandomWriter.class);\n  job.setJobName(\"random-writer\");\n  FileOutputFormat.setOutputPath(job,outDir);\n  job.setOutputKeyClass(BytesWritable.class);\n  job.setOutputValueClass(BytesWritable.class);\n  job.setInputFormat(RandomInputFormat.class);\n  job.setMapperClass(Map.class);\n  job.setReducerClass(IdentityReducer.class);\n  job.setOutputFormat(SequenceFileOutputFormat.class);\n  JobClient client=new JobClient(job);\n  ClusterStatus cluster=client.getClusterStatus();\n  int numMapsPerHost=job.getInt(\"test.randomwriter.maps_per_host\",10);\n  long numBytesToWritePerMap=job.getLong(\"test.randomwrite.bytes_per_map\",1 * 1024 * 1024* 1024);\n  if (numBytesToWritePerMap == 0) {\n    System.err.println(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n    return -2;\n  }\n  long totalBytesToWrite=job.getLong(\"test.randomwrite.total_bytes\",numMapsPerHost * numBytesToWritePerMap * cluster.getTaskTrackers());\n  int numMaps=(int)(totalBytesToWrite / numBytesToWritePerMap);\n  if (numMaps == 0 && totalBytesToWrite > 0) {\n    numMaps=1;\n    job.setLong(\"test.randomwrite.bytes_per_map\",totalBytesToWrite);\n  }\n  job.setNumMapTasks(numMaps);\n  System.out.println(\"Running \" + numMaps + \" maps.\");\n  job.setNumReduceTasks(0);\n  Date startTime=new Date();\n  System.out.println(\"Job started: \" + startTime);\n  JobClient.runJob(job);\n  Date endTime=new Date();\n  System.out.println(\"Job ended: \" + endTime);\n  System.out.println(\"The job took \" + (endTime.getTime() - startTime.getTime()) / 1000 + \" seconds.\");\n  return 0;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/RandomWriter.java",
+    "Start": 8237,
+    "Stop": 10671,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "run"
+}

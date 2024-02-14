@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor large method into smaller, more manageable methods",
+                "Change_Diff": "- @Override public void run(){\n+ @Override public void run(){\n+ handleLocalQueue();\n+ handleResponseQueue();\n+ handleRequestQueue();",
+                "Description": "The run method is quite large and handles many different cases. This can make the method difficult to read, understand, and maintain. Consider refactoring this method into smaller, more manageable methods. Each of these smaller methods can handle one specific case.",
+                "Start": 1,
+                "End": 98
+            },
+            {
+                "Improvement": "Use try-with-resources to ensure resources are closed",
+                "Change_Diff": "Depends on the actual resources used in the code, which are not visible in the provided code snippet",
+                "Description": "This code does not appear to close all resources (like database connections, file streams etc) which could lead to resource leaks. If such resources are used, consider using try-with-resources statement to ensure that each resource is closed at the end of the statement.",
+                "Start": 1,
+                "End": 98
+            },
+            {
+                "Improvement": "Extract string constants",
+                "Change_Diff": "- String eventType=(String)event.get(JS_EVENT_TYPE);\n+ String eventType=(String)event.get(EVENT_TYPE_CONSTANT);",
+                "Description": "There are several string literals that are used multiple times throughout the method. Extracting these literals into constants can reduce the risk of errors (from typos), make the code easier to read, and simplify changes if the string value ever changes in the future.",
+                "Start": 1,
+                "End": 98
+            }
+        ],
+        "Final code": "This is not possible to provide without more context about the surrounding class and the usage of this method within that class."
+    },
+    "Old_Method": "@Override public void run(){\n  while (running) {\n    JetstreamEvent event;\n    while ((event=localQueue.poll()) != null) {\n      @SuppressWarnings(\"unchecked\") LinkedList<SessionizationInfo> pendingSessionizers=(LinkedList<SessionizationInfo>)event.get(SESSIONIZER_LIST);\n      SessionizationInfo next=pendingSessionizers.removeFirst();\n      if (pendingSessionizers.isEmpty()) {\n        event.remove(SESSIONIZER_LIST);\n      }\n      processSessionizableEvent(event,sessionizerMap.get(next.getName()),next);\n    }\n    try {\n      event=responseQueue.poll();\n      if (event == null) {\n        event=requestQueue.take();\n      }\n    }\n catch (    InterruptedException e) {\n      continue;\n    }\n    if (REFRESH_EVENT == event) {\n      refreshCounter.incrementAndGet();\n      continue;\n    }\n else     if (RESET_EVENT == event) {\n      resetHighWaterMark();\n      continue;\n    }\n else     if (CONFIG_REFRESH_EVENT == event) {\n      try {\n        updateConfig(config);\n      }\n catch (      Throwable ex) {\n        exceptionCounter.incrementAndGet();\n        errorManager.registerError(ex,ErrorType.Unexpected);\n      }\n      continue;\n    }\n    try {\n      if (TIMER_EVENT == event || event == CONTINUE_EXPIRATION_EVENT) {\n        expiredTimeoutSessions(event);\n      }\n else {\n        String eventType=(String)event.get(JS_EVENT_TYPE);\n        if (!interEventTypes.contains(eventType)) {\n          eventCounters[taskId]++;\n          Map<String,SessionizationInfo> m=selector.process(event);\n          if (m == null || m.isEmpty()) {\n            bypassEventCounter++;\n            sendRawEvent(event);\n          }\n else           if (m.size() == 1) {\n            Entry<String,SessionizationInfo> entry=m.entrySet().iterator().next();\n            event.put(CURRENT_SESSIOIZERINFO,entry.getValue());\n            processSessionizableEvent(event,sessionizerMap.get(entry.getKey()),entry.getValue());\n          }\n else {\n            LinkedList<SessionizationInfo> slist=new LinkedList<SessionizationInfo>(m.values());\n            event.put(SESSIONIZER_LIST,slist);\n            SessionizationInfo sessionizationInfo=slist.removeFirst();\n            event.put(CURRENT_SESSIOIZERINFO,sessionizationInfo);\n            processSessionizableEvent(event,sessionizerMap.get(sessionizationInfo.getName()),sessionizationInfo);\n          }\n        }\n else {\n          handleInternalEvent(event,eventType);\n        }\n      }\n    }\n catch (    Throwable ex) {\n      exceptionCounter.incrementAndGet();\n      errorManager.registerError(ex,event,ErrorType.Unexpected);\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 32821,
+    "Stop": 36449,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "run"
+}

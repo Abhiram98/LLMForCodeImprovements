@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant null check",
+                "Change_Diff": "- if (session != null)",
+                "Description": "The check `if (session != null)` is redundant, as we are already inside an `if (session == null)` block and we know session cannot be null.",
+                "Start": 26,
+                "End": 26
+            },
+            {
+                "Improvement": "Reduce nesting with early returns",
+                "Change_Diff": "various changes, see final code",
+                "Description": "The code can be simplified by using early returns to reduce the level of nesting. This makes the code easier to read and understand.",
+                "Start": 16,
+                "End": 38
+            }
+        ],
+        "Final code": "private void handleTransferedSession(String identifier, String uid, JetstreamEvent event, Sessionizer sessionizer) {\n  String ak = (String) event.get(AFFINITY_KEY);\n  Session transferInSession = reconstructSession(event, uid);\n  if (transferInSession == null) {\n    return;\n  }\n  event.put(Constants.EVENT_PAYLOAD_SESSION_OBJ, transferInSession);\n  sessionizer.updateSessionId(transferInSession);\n  if (transferInSession.getExpirationTime() <= System.currentTimeMillis() && recentlyExpiredSessions.containsKey(transferInSession.getSessionId())) {\n    String s = recentlyExpiredSessions.get(transferInSession.getSessionId());\n    if (Long.parseLong(s.split(\":\")[1]) == transferInSession.getExpirationTime()) {\n      return;\n    }\n  }\n  Session localSession = localSessionCache.get(uid);\n  if (localSession != null) {\n    handleLocalSession(identifier, transferInSession, sessionizer);\n    return;\n  }\n  if (pendingReadEvents.containsKey(uid)) {\n    return;\n  }\n  RemoteStoreProvider remoteDAO = provider;\n  if (remoteDAO == null) {\n    updateRemoteSession(uid, identifier, transferInSession, sessionizer);\n    return;\n  }\n  if (!remoteDAO.asyncLoadSupport()) {\n    handleSyncLoad(remoteDAO, uid, identifier, transferInSession, sessionizer);\n  } else {\n    asyncLoadFromRemoteStore(event, uid, remoteDAO, ak);\n  }\n}\n\nprivate void handleLocalSession(String identifier, Session transferInSession, Sessionizer sessionizer) {\n  if (transferInSession.getFirstEventTimestamp() != localSession.getFirstEventTimestamp()) {\n    transferInSession.setIdentifier(identifier);\n    transferInSession.setType(sessionizer.getType());\n    fireSessionEndMarkerEvent(transferInSession, sessionizer);\n  }\n}\n\nprivate void handleSyncLoad(RemoteStoreProvider remoteDAO, String uid, String identifier, Session transferInSession, Sessionizer sessionizer) {\n  Session session = remoteDAO.load(uid);\n  if (session == null) {\n    session = transferInSession;\n    updateRemoteSession(uid, identifier, session, sessionizer);\n  } else if (session.getFirstEventTimestamp() != transferInSession.getFirstEventTimestamp()) {\n    transferInSession.setIdentifier(identifier);\n    transferInSession.setType(sessionizer.getType());\n    fireSessionEndMarkerEvent(transferInSession, sessionizer);\n  }\n}"
+    },
+    "Old_Method": "private void handleTransferedSession(String identifier,String uid,JetstreamEvent event,Sessionizer sessionizer){\n  String ak=(String)event.get(AFFINITY_KEY);\n  Session transferInSession=reconstructSession(event,uid);\n  if (transferInSession == null) {\n    return;\n  }\n  event.put(Constants.EVENT_PAYLOAD_SESSION_OBJ,transferInSession);\n  sessionizer.updateSessionId(transferInSession);\n  if (transferInSession.getExpirationTime() <= System.currentTimeMillis() && recentlyExpiredSessions.containsKey(transferInSession.getSessionId())) {\n    String s=recentlyExpiredSessions.get(transferInSession.getSessionId());\n    if (Long.parseLong(s.split(\":\")[1]) == transferInSession.getExpirationTime()) {\n      return;\n    }\n  }\n  Session localSession=localSessionCache.get(uid);\n  if (localSession == null && !pendingReadEvents.containsKey(uid)) {\n    RemoteStoreProvider remoteDAO=provider;\n    if (remoteDAO != null && remoteDAO.asyncLoadSupport()) {\n      asyncLoadFromRemoteStore(event,uid,remoteDAO,ak);\n    }\n else     if (remoteDAO != null) {\n      Session session=remoteDAO.load(uid);\n      if (session == null) {\n        session=transferInSession;\n        if (session != null) {\n          updateRemoteSession(uid,identifier,session,sessionizer);\n        }\n      }\n else {\n        if (session.getFirstEventTimestamp() != transferInSession.getFirstEventTimestamp()) {\n          transferInSession.setIdentifier(identifier);\n          transferInSession.setType(sessionizer.getType());\n          fireSessionEndMarkerEvent(transferInSession,sessionizer);\n        }\n      }\n    }\n else {\n      updateRemoteSession(uid,identifier,transferInSession,sessionizer);\n    }\n  }\n else   if (localSession != null) {\n    if (transferInSession.getFirstEventTimestamp() != localSession.getFirstEventTimestamp()) {\n      transferInSession.setIdentifier(identifier);\n      transferInSession.setType(sessionizer.getType());\n      fireSessionEndMarkerEvent(transferInSession,sessionizer);\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 28078,
+    "Stop": 31334,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "handleTransferedSession"
+}

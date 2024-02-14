@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Logger instead of System.out and System.err",
+                "Change_Diff": "- System.out.println(\"Usage: writer <out-dir>\");\n- ToolRunner.printGenericCommandUsage(System.out);\n- System.err.println(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n- System.out.println(\"Running \" + numMaps + \" maps.\");\n- System.out.println(\"Job started: \" + startTime);\n- System.out.println(\"Job ended: \" + endTime);\n- System.out.println(\"The job took \" + (endTime.getTime() - startTime.getTime()) / 1000 + \" seconds.\");\n+ LOGGER.info(\"Usage: writer <out-dir>\");\n+ LOGGER.info(ToolRunner.printGenericCommandUsage());\n+ LOGGER.severe(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n+ LOGGER.info(\"Running \" + numMaps + \" maps.\");\n+ LOGGER.info(\"Job started: \" + startTime);\n+ LOGGER.info(\"Job ended: \" + endTime);\n+ LOGGER.info(\"The job took \" + (endTime.getTime() - startTime.getTime()) / 1000 + \" seconds.\");",
+                "Description": "Using System.out and System.err for logging messages is not a good practice as it is not flexible and it doesn't provide functionalities like levels of logging, filtering logs, redirecting logs to different desired outputs, formatting logs etc. The java.util.logging package provides the logging capabilities via the Logger class.",
+                "Start": 6,
+                "End": 39
+            },
+            {
+                "Improvement": "Add try/catch block for JobClient.runJob(job)",
+                "Change_Diff": "- JobClient.runJob(job);\n+ try {\n+    JobClient.runJob(job);\n+ } catch (IOException e) {\n+    LOGGER.severe(\"Error running job: \" + e.getMessage());\n+ }",
+                "Description": "This method can throw an IOException, which should be caught and handled appropriately. Unhandled exceptions can lead to unexpected application termination.",
+                "Start": 36,
+                "End": 36
+            }
+        ],
+        "Final code": "import java.util.logging.Logger;\n\npublic int run(String[] args) throws Exception {\n\n  Logger LOGGER = Logger.getLogger(RandomWriter.class.getName());\n\n  if (args.length == 0) {\n    LOGGER.info(\"Usage: writer <out-dir>\");\n    LOGGER.info(ToolRunner.printGenericCommandUsage());\n    return -1;\n  }\n\n  // ... rest of the code ...\n\n  if (numBytesToWritePerMap == 0) {\n    LOGGER.severe(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n    return -2;\n  }\n\n  // ... rest of the code ...\n\n  LOGGER.info(\"Running \" + numMaps + \" maps.\");\n\n  // ... rest of the code ...\n\n  Date startTime=new Date();\n  LOGGER.info(\"Job started: \" + startTime);\n\n  try {\n    JobClient.runJob(job);\n  } catch (IOException e) {\n    LOGGER.severe(\"Error running job: \" + e.getMessage());\n  }\n\n  Date endTime=new Date();\n  LOGGER.info(\"Job ended: \" + endTime);\n  LOGGER.info(\"The job took \" + (endTime.getTime() - startTime.getTime()) / 1000 + \" seconds.\");\n\n  return 0;\n}"
+    },
+    "Old_Method": "/** \n * This is the main routine for launching a distributed random write job. It runs 10 maps/node and each node writes 1 gig of data to a DFS file. The reduce doesn't do anything.\n * @throws IOException\n */\npublic int run(String[] args) throws Exception {\n  if (args.length == 0) {\n    System.out.println(\"Usage: writer <out-dir>\");\n    ToolRunner.printGenericCommandUsage(System.out);\n    return -1;\n  }\n  Path outDir=new Path(args[0]);\n  JobConf job=new JobConf(getConf());\n  job.setJarByClass(RandomWriter.class);\n  job.setJobName(\"random-writer\");\n  FileOutputFormat.setOutputPath(job,outDir);\n  job.setOutputKeyClass(BytesWritable.class);\n  job.setOutputValueClass(BytesWritable.class);\n  job.setInputFormat(RandomInputFormat.class);\n  job.setMapperClass(Map.class);\n  job.setReducerClass(IdentityReducer.class);\n  job.setOutputFormat(SequenceFileOutputFormat.class);\n  JobClient client=new JobClient(job);\n  ClusterStatus cluster=client.getClusterStatus();\n  int numMapsPerHost=job.getInt(\"test.randomwriter.maps_per_host\",10);\n  long numBytesToWritePerMap=job.getLong(\"test.randomwrite.bytes_per_map\",1 * 1024 * 1024* 1024);\n  if (numBytesToWritePerMap == 0) {\n    System.err.println(\"Cannot have test.randomwrite.bytes_per_map set to 0\");\n    return -2;\n  }\n  long totalBytesToWrite=job.getLong(\"test.randomwrite.total_bytes\",numMapsPerHost * numBytesToWritePerMap * cluster.getTaskTrackers());\n  int numMaps=(int)(totalBytesToWrite / numBytesToWritePerMap);\n  if (numMaps == 0 && totalBytesToWrite > 0) {\n    numMaps=1;\n    job.setLong(\"test.randomwrite.bytes_per_map\",totalBytesToWrite);\n  }\n  job.setNumMapTasks(numMaps);\n  System.out.println(\"Running \" + numMaps + \" maps.\");\n  job.setNumReduceTasks(0);\n  Date startTime=new Date();\n  System.out.println(\"Job started: \" + startTime);\n  JobClient.runJob(job);\n  Date endTime=new Date();\n  System.out.println(\"Job ended: \" + endTime);\n  System.out.println(\"The job took \" + (endTime.getTime() - startTime.getTime()) / 1000 + \" seconds.\");\n  return 0;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/RandomWriter.java",
+    "Start": 8237,
+    "Stop": 10671,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "run"
+}

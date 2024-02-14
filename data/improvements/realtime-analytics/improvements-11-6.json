@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce Replication of Null Check and HashMap creation",
+                "Change_Diff": "- if (subSession.getDynamicAttributes() == null) {\n+ checkAndSetAttributes(subSession::getDynamicAttributes, subSession::setDynamicAttributes);\n- if (subSession.getInitialAttributes() == null) {\n+ checkAndSetAttributes(subSession::getInitialAttributes, subSession::setInitialAttributes);",
+                "Description": "The null checks for dynamic and initial attributes are identical for the sub session. These can be bundled into a private method to reduce code replication.",
+                "Start": 5,
+                "End": 8
+            },
+            {
+                "Improvement": "Use method reference instead of traditional method calling",
+                "Change_Diff": "- sessionVariable.resetAttributes(subSession.getDynamicAttributes());\n+ resetAttributes(sessionVariable::resetAttributes, subSession::getDynamicAttributes);\n- sessionVariable.resetSessionData(subSession,session);\n+ resetSessionData(sessionVariable::resetSessionData, subSession, session);",
+                "Description": "Instead of directly calling `resetAttributes()` and `resetSessionData()` methods, you can use method reference which makes the code more readable.",
+                "Start": 9,
+                "End": 15
+            }
+        ],
+        "Final code": "public void process(SubSession subSession,Session session,JetstreamEvent event){\n  context.setCurrentSession(subSession);\n  context.setMainSession(session);\n  context.setEvent(event);\n  checkAndSetAttributes(subSession::getDynamicAttributes, subSession::setDynamicAttributes);\n  checkAndSetAttributes(subSession::getInitialAttributes, subSession::setInitialAttributes);\n  resetAttributes(sessionVariable::resetAttributes, subSession::getDynamicAttributes());\n  resetSessionData(sessionVariable::resetSessionData, subSession,session);\n  resetAttributes(metadataVariable::resetAttributes, subSession::getInitialAttributes());\n  resetAttributes(parentMetadataVariable::resetAttributes, session::getInitialAttributes());\n  resetAttributes(parentSessionVariable::resetAttributes, session::getDynamicAttributes());\n  resetSessionData(parentSessionVariable::resetSessionData, session,session);\n  processEPL(event);\n}\n\nprivate <T> void checkAndSetAttributes(Supplier<Map<String, T>> getter, Consumer<Map<String, T>> setter) {\n  if (getter.get() == null) {\n    setter.accept(new HashMap<>());\n  }\n}\n\nprivate <T> void resetAttributes(Consumer<T> resetMethod, Supplier<T> supplier) {\n  resetMethod.accept(supplier.get());\n}\n\nprivate void resetSessionData(BiConsumer<SubSession, Session> resetMethod, SubSession subSession, Session session) {\n  resetMethod.accept(subSession, session);\n}"
+    },
+    "Old_Method": "public void process(SubSession subSession,Session session,JetstreamEvent event){\n  context.setCurrentSession(subSession);\n  context.setMainSession(session);\n  context.setEvent(event);\n  if (subSession.getDynamicAttributes() == null) {\n    subSession.setDynamicAttributes(new HashMap<String,Object>());\n  }\n  if (subSession.getInitialAttributes() == null) {\n    subSession.setInitialAttributes(new HashMap<String,Object>());\n  }\n  sessionVariable.resetAttributes(subSession.getDynamicAttributes());\n  sessionVariable.resetSessionData(subSession,session);\n  metadataVariable.resetAttributes(subSession.getInitialAttributes());\n  parentMetadataVariable.resetAttributes(session.getInitialAttributes());\n  parentSessionVariable.resetAttributes(session.getDynamicAttributes());\n  parentSessionVariable.resetSessionData(session,session);\n  processEPL(event);\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 24361,
+    "Stop": 25325,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "process"
+}

@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants for property keys",
+                "Change_Diff": "- properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n+ properties.getProperty(XACML_PDP_URL_KEY);",
+                "Description": "Instead of hardcoding the keys to retrieve properties, define them as constants at the class level. This makes the code more maintainable and less error-prone.",
+                "Start": 3,
+                "End": 8
+            },
+            {
+                "Improvement": "Use Optional instead of null check",
+                "Change_Diff": "- if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n+ if (Optional.ofNullable(XACML_PDP_ENTITLEMENT_SERVICE_URL).isEmpty()) {",
+                "Description": "Instead of checking if a property is null, use Optional.ofNullable to make the code more readable and avoid NullPointerExceptions.",
+                "Start": 13,
+                "End": 16
+            },
+            {
+                "Improvement": "Extract SSL context creation to a separate method",
+                "Change_Diff": "- this.httpClient=HttpClients.custom().setSSLContext(...).build();\n+ this.httpClient=buildHttpClient();",
+                "Description": "The creation of the SSL context is a complex operation that can be isolated in a separate method to improve readability and maintainability.",
+                "Start": 26,
+                "End": 30
+            },
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- try {\n...\n}\ncatch (IOException e) {\n...\n}\n...\ntry {\n...\n}\ncatch (Exception e) {\n...\n}\n+ try (Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\")) {\n...\n} catch (IOException e) {\n...\n}\n...\ntry {\n...\n} catch (Exception e) {\n...\n}",
+                "Description": "Use try-with-resources to ensure that any resources will be closed when they are no longer needed.",
+                "Start": 2,
+                "End": 31
+            }
+        ],
+        "Final code": "public XacmlAttributeHandler(){\ntry (Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\")) {\nXACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(XACML_PDP_URL_KEY);\nTRUST_STORE=properties.getProperty(TRUST_STORE_KEY);\nTRUST_STORE_PASSWORD=properties.getProperty(TRUST_STORE_PASSWORD_KEY);\nKEY_STORE=properties.getProperty(KEY_STORE_KEY);\nKEY_STORE_PASSWORD=properties.getProperty(KEY_STORE_PASSWORD_KEY);\n}\ncatch (IOException e) {\nlogger.error(\"Failed to read properties from application.properties\",e);\nstopApplication();\n}\nif (Optional.ofNullable(XACML_PDP_ENTITLEMENT_SERVICE_URL).isEmpty()) {\nlogger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\nstopApplication();\n}\nCacheManager cacheManager=EhCacheManager.getInstance();\nthis.authCache=cacheManager.getCache(\"authCache\",String.class,String.class,60,100);\nthis.entitlementAttributesCache=cacheManager.getCache(\"entitlementCache\",String.class,JSONObject.class,60,100);\nthis.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\ntry {\nthis.httpClient=buildHttpClient();\n}\ncatch (Exception e) {\nlogger.error(\"Failed to read trustStore/keyStore\",e);\nSpringApplication.run(XacmlAttributeHandler.class).close();\n}\nthis.restHeaders=new HttpHeaders();\nthis.restHeaders.setContentType(MediaType.APPLICATION_JSON);\nthis.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\nthis.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\nlogger.info(\"XacmlAttributeHandler successfully initiated\");\n}"
+    },
+    "Old_Method": "public XacmlAttributeHandler(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n    TRUST_STORE=properties.getProperty(\"xacml.pdp.trustStore\");\n    TRUST_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.trustStore.password\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n  }\n catch (  IOException e) {\n    logger.error(\"Failed to read properties from application.properties\",e);\n    stopApplication();\n  }\n  if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n    logger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\n    stopApplication();\n  }\n  CacheManager cacheManager=EhCacheManager.getInstance();\n  this.authCache=cacheManager.getCache(\"authCache\",String.class,String.class,60,100);\n  this.entitlementAttributesCache=cacheManager.getCache(\"entitlementCache\",String.class,JSONObject.class,60,100);\n  this.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\n  try {\n    this.httpClient=HttpClients.custom().setSSLContext(SSLContextBuilder.create().loadKeyMaterial(loadPfx(\"classpath:\".concat(KEY_STORE),KEY_STORE_PASSWORD.toCharArray()),KEY_STORE_PASSWORD.toCharArray()).loadTrustMaterial(ResourceUtils.getFile(\"classpath:\".concat(TRUST_STORE)),TRUST_STORE_PASSWORD.toCharArray()).build()).build();\n  }\n catch (  Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\",e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  this.restHeaders=new HttpHeaders();\n  this.restHeaders.setContentType(MediaType.APPLICATION_JSON);\n  this.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\n  this.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\n  logger.info(\"XacmlAttributeHandler successfully initiated\");\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 1818,
+    "Stop": 4341,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "XacmlAttributeHandler"
+}

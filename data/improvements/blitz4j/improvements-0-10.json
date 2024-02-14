@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Handle exceptions properly",
+                "Change_Diff": "- e.printStackTrace();\n+ LOGGER.log(Level.SEVERE, \"Failed to register object\", e);",
+                "Description": "Instead of simply printing the stack trace when an exception is caught, it's usually better to log the exception, as this provides more flexibility and more control over the output. This also allows you to add more context to the log message.",
+                "Start": 27,
+                "End": 31
+            },
+            {
+                "Improvement": "Use constants for repeated string values",
+                "Change_Diff": "- Monitors.newTimer('queue_size');\n+ Monitors.newTimer(QUEUE_SIZE);",
+                "Description": "The string values 'queue_size', 'waitTimeforBuffer', 'batch_size', 'messages_processed', 'thread_invocation_time', 'message_processTime' and 'queue_overflow' are used to create new timers and counters. It's a best practice to define such string literals as constants.",
+                "Start": 10,
+                "End": 20
+            }
+        ],
+        "Final code": "public MessageBatcher(String name,MessageProcessor target){\n    this.name=BATCHER_PREFIX + name;\n    this.target=target;\n    queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n    setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n    batch=new ArrayList<Object>(maxMessages);\n    setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n    collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n    createProcessor(this.name);\n    queueSizeTracer=Monitors.newTimer(QUEUE_SIZE);\n    batchSyncPutTracer=Monitors.newTimer(WAIT_TIME_FOR_BUFFER);\n    avgBatchSizeTracer=Monitors.newTimer(BATCH_SIZE);\n    processCount=Monitors.newCounter(MESSAGES_PROCESSED);\n    threadSubmitTracer=Monitors.newTimer(THREAD_INVOCATION_TIME);\n    processTimeTracer=Monitors.newTimer(MESSAGE_PROCESS_TIME);\n    queueOverflowCounter=Monitors.newCounter(QUEUE_OVERFLOW);\n    blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n    collector.setDaemon(true);\n    collector.start();\n    try {\n        Monitors.registerObject(this.name,this);\n    } catch (Throwable e) {\n        if (CONFIGURATION.shouldPrintLoggingErrors()) {\n            LOGGER.log(Level.SEVERE, \"Failed to register object\", e);\n        }\n    }\n}"
+    },
+    "Old_Method": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n catch (  Throwable e) {\n    if (CONFIGURATION.shouldPrintLoggingErrors()) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 4433,
+    "Stop": 5937,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "MessageBatcher"
+}

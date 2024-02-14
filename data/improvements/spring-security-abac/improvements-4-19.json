@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 feature Stream API instead of Iterator",
+                "Change_Diff": "- Iterator<String> keys=jsonObject.keys();\n- while (keys.hasNext()) {\n- String key=keys.next();\n+ jsonObject.keys().forEachRemaining(key -> {",
+                "Description": "Stream API in Java 8 provides a more compact and readable way to iterate over a collection. In this case, we can iterate over the keys of the JSONObject using the stream() method and forEach() method.",
+                "Start": 3,
+                "End": 9
+            },
+            {
+                "Improvement": "Use Optional for possible null values",
+                "Change_Diff": "- value=httpServletRequest.getHeader(value);\n+ value= Optional.ofNullable(httpServletRequest.getHeader(value)).orElse(\"\");\n\n- value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\n+ value= Optional.ofNullable(GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value)).orElse(\"\");\n\n- value=httpServletRequest.getParameter(value);\n+ value= Optional.ofNullable(httpServletRequest.getParameter(value)).orElse(\"\");\n\n- value=httpServletRequest.getParameter(value);\n+ value= Optional.ofNullable(httpServletRequest.getParameter(value)).orElse(\"\");\n\n- value=extractPathParam(httpServletRequest,value);\n+ value= Optional.ofNullable(extractPathParam(httpServletRequest,value)).orElse(\"\");",
+                "Description": "It's good practice to use Optional when dealing with values that could potentially be null. This helps avoid NullPointerExceptions and makes the code more robust. In this case, the values obtained from the HttpServletRequest could potentially be null.",
+                "Start": 19,
+                "End": 26
+            }
+        ],
+        "Final code": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  jsonObject.keys().forEachRemaining(key -> {\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\n    switch (propertyType) {\n    case HEADER:\n      value=Optional.ofNullable(httpServletRequest.getHeader(value)).orElse(\"\");\n      break;\n    case COOKIE:\n      value=Optional.ofNullable(GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value)).orElse(\"\");\n      break;\n    case QUERY_PARAM:\n      value=Optional.ofNullable(httpServletRequest.getParameter(value)).orElse(\"\");\n      break;\n    case FORM_DATA:\n      value=Optional.ofNullable(httpServletRequest.getParameter(value)).orElse(\"\");\n      break;\n    case PATH_PARAM:\n      value=Optional.ofNullable(extractPathParam(httpServletRequest,value)).orElse(\"\");\n      break;\n    }\n    templateData.put(key,value);\n  });\n  return templateData;\n}"
+    },
+    "Old_Method": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\nswitch (propertyType) {\ncase HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\ncase COOKIE:\n  value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\nbreak;\ncase QUERY_PARAM:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase FORM_DATA:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase PATH_PARAM:\nvalue=extractPathParam(httpServletRequest,value);\nbreak;\n}\ntemplateData.put(key,value);\n}\nreturn templateData;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 2835,
+    "Stop": 4525,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "generateFreemakerTemplateData"
+}

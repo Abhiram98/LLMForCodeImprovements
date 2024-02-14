@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code complexity by creating a helper method",
+                "Change_Diff": "- SessionizerConfig newBean=(SessionizerConfig)(bcInfo.getApplicationContext().getBean(config.getBeanName()));\n... (lines omitted for brevity) ...\n config.setRawEventDefinition(newBean.getRawEventDefinition());\n+ updateConfig(newBean);",
+                "Description": "The current method is doing too much and is difficult to understand. You can reduce the complexity by creating a separate helper method to handle the configuration updates.",
+                "Start": 4,
+                "End": 31
+            },
+            {
+                "Improvement": "Use try-with-resources for managing resources",
+                "Change_Diff": "- try {\n... (lines omitted for brevity) ...\n} finally {\n... (lines omitted for brevity) ...\n}\n+ try (CompiledConfig compiledConfig = new CompiledConfig(config, tasks)) {\n... (lines omitted for brevity) ...\n}",
+                "Description": "The current method is manually managing the resources, which is not reliable and prone to errors. You can use try-with-resources to automatically manage resources, which ensures that the resources are closed when they are no longer needed.",
+                "Start": 35,
+                "End": 47
+            }
+        ],
+        "Final code": "@Override protected void processApplicationEvent(ApplicationEvent event){\n  if (event instanceof ContextBeanChangedEvent) {\n    ContextBeanChangedEvent bcInfo=(ContextBeanChangedEvent)event;\n    SessionizerConfig newBean=(SessionizerConfig)(bcInfo.getApplicationContext().getBean(config.getBeanName()));\n    if (newBean != lastConfig) {\n      lastConfig=newBean;\n      updateConfig(newBean);\n      refreshConfig();\n    }\n  }\n}\n\nprivate void updateConfig(SessionizerConfig newBean) {\n  SessionizerConfigValidator validator=new SessionizerConfigValidator(config,newBean);\n  List<String> errors=validator.validate();\n  if (!errors.isEmpty()) {\n    throw new IllegalArgumentException(\"Config error: \" + errors);\n  }\n  config.setReadQueryTimeout(newBean.getReadQueryTimeout());\n  config.setEnableReadOptimization(newBean.getEnableReadOptimization());\n  config.setMaxIdleTime(newBean.getMaxIdleTime());\n  config.setMainSessionProfiles(newBean.getMainSessionProfiles());\n  config.setEpl(newBean.getEpl());\n  config.setImports(newBean.getImports());\n  config.setRawEventDefinition(newBean.getRawEventDefinition());\n  try (CompiledConfig compiledConfig = new CompiledConfig(config, tasks)) {\n    for (SessionizerRunnable task : tasks) {\n      task.newCompiledConfig=compiledConfig;\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void processApplicationEvent(ApplicationEvent event){\n  if (event instanceof ContextBeanChangedEvent) {\n    ContextBeanChangedEvent bcInfo=(ContextBeanChangedEvent)event;\n    SessionizerConfig newBean=(SessionizerConfig)(bcInfo.getApplicationContext().getBean(config.getBeanName()));\n    if (newBean != lastConfig) {\n      lastConfig=newBean;\n      SessionizerConfigValidator validator=new SessionizerConfigValidator(config,newBean);\n      List<String> errors=validator.validate();\n      if (!errors.isEmpty()) {\n        throw new IllegalArgumentException(\"Config error: \" + errors);\n      }\n      int readQueryTimeout=config.getReadQueryTimeout();\n      boolean enableReadOptimization=config.getEnableReadOptimization();\n      int maxIdleTime=config.getMaxIdleTime();\n      List<SessionProfile> mainSessionProfiles=config.getMainSessionProfiles();\n      EPL epl=config.getEpl();\n      List<String> imports=config.getImports();\n      EsperDeclaredEvents rawEventDefinition=config.getRawEventDefinition();\n      config.setReadQueryTimeout(newBean.getReadQueryTimeout());\n      config.setEnableReadOptimization(newBean.getEnableReadOptimization());\n      config.setMaxIdleTime(newBean.getMaxIdleTime());\n      config.setMainSessionProfiles(newBean.getMainSessionProfiles());\n      config.setEpl(newBean.getEpl());\n      config.setImports(newBean.getImports());\n      config.setRawEventDefinition(newBean.getRawEventDefinition());\n      boolean isSuccess=false;\n      try {\n        for (        SessionizerRunnable task : tasks) {\n          task.newCompiledConfig=new CompiledConfig(config,task);\n        }\n        isSuccess=true;\n      }\n  finally {\n        if (!isSuccess) {\n          for (          SessionizerRunnable task : tasks) {\n            if (task.newCompiledConfig != null) {\n              task.newCompiledConfig.destroy();\n              task.newCompiledConfig=null;\n            }\n          }\n          config.setReadQueryTimeout(readQueryTimeout);\n          config.setEnableReadOptimization(enableReadOptimization);\n          config.setMaxIdleTime(maxIdleTime);\n          config.setMainSessionProfiles(mainSessionProfiles);\n          config.setEpl(epl);\n          config.setImports(imports);\n          config.setRawEventDefinition(rawEventDefinition);\n        }\n      }\n      refreshConfig();\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 70925,
+    "Stop": 73856,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "processApplicationEvent"
+}

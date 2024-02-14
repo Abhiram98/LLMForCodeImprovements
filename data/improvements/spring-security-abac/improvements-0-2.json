@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch for JSON operations",
+                "Change_Diff": "- JSONObject responseObj=new JSONObject(cachedResponse);\n- JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n+ try {\n+   JSONObject responseObj=new JSONObject(cachedResponse);\n+   JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n+ } catch (JSONException e) {\n+   return false;\n+ }",
+                "Description": "JSON operations may throw exceptions, so they should be enclosed in a try-catch block. If an exception occurs, return false to indicate authorization failure.",
+                "Start": 18,
+                "End": 28
+            },
+            {
+                "Improvement": "Remove redundant HttpStatus check",
+                "Change_Diff": "- if (response.getStatusCode() == HttpStatus.OK) {\n-     this.authCache.putIfAbsent(authRequest,cachedResponse);\n- }\n+ this.authCache.putIfAbsent(authRequest,cachedResponse);",
+                "Description": "The HttpStatus check is repeated twice. This is redundant and can be removed.",
+                "Start": 14,
+                "End": 16
+            }
+        ],
+        "Final code": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    this.authCache.putIfAbsent(authRequest,cachedResponse);\n  }\n  try {\n    JSONObject responseObj=new JSONObject(cachedResponse);\n    JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n    if (responseDataArr.isEmpty()) {\n      return false;\n    }\n    for (Object Response : responseDataArr) {\n      JSONObject currentResponse=(JSONObject)Response;\n      if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n        return false;\n      }\n    }\n  } catch (JSONException e) {\n    return false;\n  }\n  return true;\n}"
+    },
+    "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 4347,
+    "Stop": 5782,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "authorize"
+}

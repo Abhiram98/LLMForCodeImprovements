@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use the join method of the String class instead of manual concatenation",
+                "Change_Diff": "- StringBuilder b=new StringBuilder();\n- b.append(values.get(0));\n- for (int i=1, t=values.size(); i < t; i++) {\n-   b.append(\",\");\n-   b.append(values.get(i));\n- }\n- return b.toString();\n+ return String.join(\",\", values);",
+                "Description": "The String class in Java has a built-in join method that can be used to concatenate elements of a List into a single String with a specified delimiter. This will make the code cleaner and more readable.",
+                "Start": 9,
+                "End": 13
+            },
+            {
+                "Improvement": "Use Generics for List declaration",
+                "Change_Diff": "- List<Object> values=(List<Object>)value;\n+ List<?> values=(List<?>)value;",
+                "Description": "Generics provide a way for you to communicate the type of a collection to the compiler, so it can be checked. Once the compiler knows the element type of the collection, the compiler can check that you have used the collection consistently and can insert the correct casts on values being taken out of the collection.",
+                "Start": 4,
+                "End": 4
+            }
+        ],
+        "Final code": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<?> values=(List<?>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    return String.join(\",\", values);\n  }\n else {\n    return value;\n  }\n}"
+    },
+    "Old_Method": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    StringBuilder b=new StringBuilder();\n    b.append(values.get(0));\n    for (int i=1, t=values.size(); i < t; i++) {\n      b.append(\",\");\n      b.append(values.get(i));\n    }\n    return b.toString();\n  }\n else {\n    return value;\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 4288,
+    "Stop": 4905,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "normailizeValue"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of final keyword for constants",
+                "Change_Diff": "- KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n+ final KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n\n- KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n+ final KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n\n- CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n+ final CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n\n- CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n+ final CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n\n- IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n+ final IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n\n- ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n+ final ISSUER_ID=properties.getProperty(\"idp.issuerid\");",
+                "Description": "Constants should be declared as final to indicate that they are not supposed to be changed after the initial assignment.",
+                "Start": 4,
+                "End": 9
+            },
+            {
+                "Improvement": "Add logging for exceptions",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ logger.error(\"Exception while loading properties: \" + e.getMessage());\n+ throw new RuntimeException(e);",
+                "Description": "Instead of just throwing a RuntimeException when an IOException occurs, it would be better to log the exception message to make debugging easier in the future.",
+                "Start": 11,
+                "End": 13
+            }
+        ],
+        "Final code": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    final KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    final KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    final CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    final CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    final IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    final ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n  catch (  IOException e) {\n    logger.error(\"Exception while loading properties: \" + e.getMessage());\n    throw new RuntimeException(e);\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce complexity by breaking method into smaller methods",
+                "Change_Diff": "- public CssStyleSheet getSheet(){\n+ public CssStyleSheet getSheet(){\n+ if (sheet_ == null) {\n+ sheet_ = getStyleSheet();\n+ }\n+ return sheet_;\n+ }\n+ \n+ private CssStyleSheet getStyleSheet() {",
+                "Description": "The getSheet() method is doing too many things: it checks if a sheet already exists, retrieves a cache, gets a cached style sheet, creates a new style sheet if none is cached, and handles an IOException. Each of these could be broken down into its own method to make the code easier to read and maintain.",
+                "Start": 2,
+                "End": 22
+            },
+            {
+                "Improvement": "Improve error handling",
+                "Change_Diff": "- LOG.error(e.getMessage(),e);\n+ throw new RuntimeException(\"Error reading CSS\", e);",
+                "Description": "Instead of logging the error message and continuing with the program, you should throw an exception to indicate that an unexpected situation has occurred. This makes it easier to diagnose and fix issues.",
+                "Start": 20,
+                "End": 22
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n    if (sheet_ == null) {\n        sheet_ = getStyleSheet();\n    }\n    return sheet_;\n}\n\nprivate CssStyleSheet getStyleSheet() {\n    final Cache cache=getPage().getWebClient().getCache();\n    final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n    final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n    if (cached != null) {\n        sheet_=new CssStyleSheet(this,cached,uri);\n    } else {\n        final String css=getTextContent();\n        try (InputSource source=new InputSource(new StringReader(css))){\n            sheet_=new CssStyleSheet(this,source,uri);\n            cache.cache(css,sheet_.getWrappedSheet());\n        } catch (final IOException e) {\n            throw new RuntimeException(\"Error reading CSS\", e);\n        }\n    }\n    return sheet_;\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

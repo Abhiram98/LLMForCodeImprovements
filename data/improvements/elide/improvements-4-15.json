@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for 'query' parameter",
+                "Change_Diff": "+ if (query == null) {\n+     throw new IllegalArgumentException(\"Query cannot be null\");\n+ }\n",
+                "Description": "It's a good practice to check if the input parameter is null before invoking methods on it to prevent a NullPointerException.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Combine consecutive if conditions",
+                "Change_Diff": "- if (table.getHints().contains(optimizer.negateHint())) {\n-     continue;\n- }\n- if (!table.getHints().contains(optimizer.hint())) {\n+ if (table.getHints().contains(optimizer.negateHint()) || !table.getHints().contains(optimizer.hint())) {\n",
+                "Description": "The consecutive if conditions checking for the presence and absence of a hint can be combined into one if condition using logical AND operator.",
+                "Start": 19,
+                "End": 22
+            }
+        ],
+        "Final code": "private Query expandMetricQueryPlans(Query query){\n  if (query == null) {\n      throw new IllegalArgumentException(\"Query cannot be null\");\n  }\n  List<QueryPlan> toMerge=query.getMetricProjections().stream().map(projection -> projection.resolve(query)).collect(Collectors.toList());\n  List<QueryPlan> mergedPlans=merger.merge(toMerge);\n  if (mergedPlans.size() != 1) {\n    throw new UnsupportedOperationException(\"Incompatible metrics in client query.  Cannot merge \" + \"into a single query\");\n  }\n  QueryPlan mergedPlan=mergedPlans.get(0);\n  QueryPlanTranslator queryPlanTranslator=new QueryPlanTranslator(query,metaDataStore,merger);\n  Query merged=(mergedPlan == null) ? QueryPlanTranslator.addHiddenProjections(metaDataStore,query).build() : queryPlanTranslator.translate(mergedPlan);\n  for (  Optimizer optimizer : optimizers) {\n    SQLTable table=(SQLTable)query.getSource();\n    if (table.getHints().contains(optimizer.negateHint()) || !table.getHints().contains(optimizer.hint())) {\n      continue;\n    }\n    if (optimizer.canOptimize(merged)) {\n      merged=optimizer.optimize(merged);\n    }\n  }\n  return merged;\n}"
+    },
+    "Old_Method": "/** \n * Transforms a client query into a potentially nested/complex query by expanding each metric into its respective query plan - and then merging the plans together into a consolidated query.\n * @param query The client query.\n * @return A query that reflects each metric's individual query plan.\n */\nprivate Query expandMetricQueryPlans(Query query){\n  List<QueryPlan> toMerge=query.getMetricProjections().stream().map(projection -> projection.resolve(query)).collect(Collectors.toList());\n  List<QueryPlan> mergedPlans=merger.merge(toMerge);\n  if (mergedPlans.size() != 1) {\n    throw new UnsupportedOperationException(\"Incompatible metrics in client query.  Cannot merge \" + \"into a single query\");\n  }\n  QueryPlan mergedPlan=mergedPlans.get(0);\n  QueryPlanTranslator queryPlanTranslator=new QueryPlanTranslator(query,metaDataStore,merger);\n  Query merged=(mergedPlan == null) ? QueryPlanTranslator.addHiddenProjections(metaDataStore,query).build() : queryPlanTranslator.translate(mergedPlan);\n  for (  Optimizer optimizer : optimizers) {\n    SQLTable table=(SQLTable)query.getSource();\n    if (table.getHints().contains(optimizer.negateHint())) {\n      continue;\n    }\n    if (!table.getHints().contains(optimizer.hint())) {\n      continue;\n    }\n    if (optimizer.canOptimize(merged)) {\n      merged=optimizer.optimize(merged);\n    }\n  }\n  return merged;\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/queryengines/sql/SQLQueryEngine.java",
+    "Start": 16011,
+    "Stop": 18007,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "expandMetricQueryPlans"
+}

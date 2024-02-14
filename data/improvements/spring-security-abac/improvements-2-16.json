@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove hardcoded properties filenames",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n+ Properties properties=PropertiesLoaderUtils.loadAllProperties(propertiesFilename);",
+                "Description": "Properties filenames are hardcoded in the method, which can lead to problems if the filename changes or if you want to use different properties files for different environments. It's better to inject this dependency.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Add logging instead of throwing a RuntimeException",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ logger.error(\"Error loading properties file\", e);",
+                "Description": "Instead of throwing a RuntimeException when you catch an IOException, it would be better to log an error message. This would not stop the execution of the program and it would provide more information about the error for debugging purposes.",
+                "Start": 14,
+                "End": 14
+            },
+            {
+                "Improvement": "Move properties loading to a separate method",
+                "Change_Diff": "-   try {\n...\n  }\n catch (  IOException e) {\n...\n  }\n+   loadProperties();",
+                "Description": "Loading properties is a separate concern and should be done in its own method. This will make the constructor cleaner and easier to read.",
+                "Start": 2,
+                "End": 14
+            }
+        ],
+        "Final code": "public WebSecurityConfig(String propertiesFilename, Logger logger){\n  loadProperties(propertiesFilename, logger);\n}\n\nprivate void loadProperties(String propertiesFilename, Logger logger) {\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(propertiesFilename);\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n  catch (IOException e) {\n    logger.error(\"Error loading properties file\", e);\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

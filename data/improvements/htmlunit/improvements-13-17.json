@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Handle MalformedURLException",
+                "Change_Diff": "- catch (  final MalformedURLException e) {\n  }\n+ catch (  final MalformedURLException e) {\n+     System.out.println(\"Malformed URL Exception: \" + e);\n+ }",
+                "Description": "If the code in try block throws a MalformedURLException, it is currently being ignored. We should handle it and log it properly to debug in case of an error.",
+                "Start": 13,
+                "End": 15
+            },
+            {
+                "Improvement": "Code Duplication",
+                "Change_Diff": "- final String action=getHtmlForm().getActionAttribute();\n- try {\n-     return ((HtmlPage)getHtmlForm().getPage()).getFullyQualifiedUrl(action).toExternalForm();\n+ HtmlForm form = getHtmlForm();\n+ final String action=form.getActionAttribute();\n+ try {\n+     return ((HtmlPage)form.getPage()).getFullyQualifiedUrl(action).toExternalForm();",
+                "Description": "The getHtmlForm() method is called multiple times to get the same HtmlForm object. It would be better to call this method once and store the result in a variable, to reduce the number of method calls.",
+                "Start": 6,
+                "End": 12
+            }
+        ],
+        "Final code": "/** \n * Returns the value of the property  {@code action}.\n * @return the value of this property\n */\n@JsxGetter public String getAction(){\n  HtmlForm form = getHtmlForm();\n  final String action=form.getActionAttribute();\n  if (ATTRIBUTE_NOT_DEFINED == action && !getBrowserVersion().hasFeature(JS_FORM_ACTION_EXPANDURL_NOT_DEFINED)) {\n    return action;\n  }\n  try {\n    return ((HtmlPage)form.getPage()).getFullyQualifiedUrl(action).toExternalForm();\n  }\n catch (  final MalformedURLException e) {\n     System.out.println(\"Malformed URL Exception: \" + e);\n  }\n  return action;\n}"
+    },
+    "Old_Method": "/** \n * Returns the value of the property  {@code action}.\n * @return the value of this property\n */\n@JsxGetter public String getAction(){\n  final String action=getHtmlForm().getActionAttribute();\n  if (ATTRIBUTE_NOT_DEFINED == action && !getBrowserVersion().hasFeature(JS_FORM_ACTION_EXPANDURL_NOT_DEFINED)) {\n    return action;\n  }\n  try {\n    return ((HtmlPage)getHtmlForm().getPage()).getFullyQualifiedUrl(action).toExternalForm();\n  }\n catch (  final MalformedURLException e) {\n  }\n  return action;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/html/HTMLFormElement.java",
+    "Start": 6297,
+    "Stop": 6957,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getAction"
+}

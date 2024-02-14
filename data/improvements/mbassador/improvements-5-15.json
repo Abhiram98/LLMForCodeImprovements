@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < length; i++) {\n- messageHandler=messageHandlers[i];\n+ for (MessageHandler messageHandler : messageHandlers) {",
+                "Description": "Instead of using a traditional for loop to iterate over `messageHandlers`, use an enhanced for loop. This makes the code more readable and avoids the need for an index variable.",
+                "Start": 16,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract code blocks into separate methods",
+                "Change_Diff": "- Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n- //... code to create subscriptions ...\n+ Subscription[] subscriptionsByListener=createSubscriptions(listener);\n\n- //... code to subscribe to subscriptions ...\n+ subscribeToSubscriptions(listener, subscriptionsByListener);",
+                "Description": "The method is doing several things and is quite long. The code can be made more maintainable and readable by extracting the blocks of code into separate methods. For example, the block of code that creates subscriptions can be extracted into a `createSubscriptions` method and the block that subscribes a listener to subscriptions can be extracted into a `subscribeToSubscriptions` method.",
+                "Start": 1,
+                "End": 34
+            }
+        ],
+        "Final code": "public void subscribe(Object listener) {\n  try {\n    Class<?> listenerClass = listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener = createSubscriptions(listener);\n    if (subscriptionsByListener == null) {\n      nonListeners.add(listenerClass);\n      return;\n    }\n    subscribeToSubscriptions(listener, subscriptionsByListener);\n  } catch (Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n\nprivate Subscription[] createSubscriptions(Object listener) {\n  //... code to create subscriptions ...\n}\n\nprivate void subscribeToSubscriptions(Object listener, Subscription[] subscriptionsByListener) {\n  //... code to subscribe to subscriptions ...\n}"
+    },
+    "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+    "Start": 3620,
+    "Stop": 5539,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "subscribe"
+}

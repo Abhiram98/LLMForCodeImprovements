@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- Node<ColumnName> prev=null;\n+ Node<ColumnName> previousNode=null;\n- ColumnHeader<ColumnName> top=columns.get(i);\n+ ColumnHeader<ColumnName> columnHeader=columns.get(i);\n- Node<ColumnName> bottom=top.up;\n+ Node<ColumnName> bottom=columnHeader.up;\n- Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n+ Node<ColumnName> newNode=new Node<ColumnName>(null,null,bottom,columnHeader,columnHeader);\n- Node<ColumnName> front=prev.right;\n+ Node<ColumnName> nextNode=previousNode.right;",
+                "Description": "It's a good practice to use meaningful variable names so that the code is more readable. For example, 'top' could be renamed to 'columnHeader', 'prev' to 'previousNode', 'node' to 'newNode', and 'front' to 'nextNode'.",
+                "Start": 7,
+                "End": 30
+            },
+            {
+                "Improvement": "Add comments to complex logic",
+                "Change_Diff": "+ // create a new node and link it to its upper and lower nodes\n- Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n+ Node<ColumnName> newNode=new Node<ColumnName>(null,null,bottom,columnHeader,columnHeader);\n+ // link the new node with its left and right nodes\n- Node<ColumnName> front=prev.right;\n- node.left=prev;\n+ Node<ColumnName> nextNode=previousNode.right;\n+ newNode.left=previousNode;",
+                "Description": "Complex logic in your code should be commented for better readability and maintainability. In this case, the logic inside the if and else blocks is a bit hard to follow without comments.",
+                "Start": 14,
+                "End": 29
+            }
+        ],
+        "Final code": "public void addRow(boolean[] values){\n  Node<ColumnName> previousNode=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> columnHeader=columns.get(i);\n      columnHeader.size+=1;\n      Node<ColumnName> bottom=columnHeader.up;\n      // create a new node and link it to its upper and lower nodes\n      Node<ColumnName> newNode=new Node<ColumnName>(null,null,bottom,columnHeader,columnHeader);\n      bottom.down=newNode;\n      columnHeader.up=newNode;\n      if (previousNode != null) {\n        Node<ColumnName> nextNode=previousNode.right;\n        // link the new node with its left and right nodes\n        newNode.left=previousNode;\n        newNode.right=nextNode;\n        previousNode.right=newNode;\n        nextNode.left=newNode;\n      }\n else {\n        newNode.left=newNode;\n        newNode.right=newNode;\n      }\n      previousNode=newNode;\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Add a row to the table.\n * @param values the columns that are satisfied by this row\n */\npublic void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n      bottom.down=node;\n      top.up=node;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        node.left=prev;\n        node.right=front;\n        prev.right=node;\n        front.left=node;\n      }\n else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/DancingLinks.java",
+    "Start": 5022,
+    "Stop": 6050,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "addRow"
+}

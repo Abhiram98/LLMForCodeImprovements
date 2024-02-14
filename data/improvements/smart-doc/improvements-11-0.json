@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid repeated string replacements",
+                "Change_Diff": "- apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n+ apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX + \"|&nbsp;\", \"\"));",
+                "Description": "In the current code, the 'replaceAll' method is called twice on the 'apiParam.getField()' string. It would be more efficient to chain these calls into a single 'replaceAll' call using a regular expression.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Extract method for children setting",
+                "Change_Diff": "- for (ApiParam apiParam : params) {\n-    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n- }\n+ setChildrenForParams(params, apiParamList);",
+                "Description": "Instead of looping through the params just to set the children, it would be better to extract a method which accepts a param as an argument and sets its children.",
+                "Start": 13,
+                "End": 15
+            }
+        ],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX + \"|&nbsp;\", \"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  setChildrenForParams(params, apiParamList);\n  return params;\n}\n\nprivate static void setChildrenForParams(List<ApiParam> params, List<ApiParam> apiParamList) {\n  for (ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method visibility",
+                "Change_Diff": "- Alphabet(char[] chars){\n+ public Alphabet(char[] chars){",
+                "Description": "Java methods should have an explicit visibility modifier. If this method is intended to be used only within the same class, the 'private' keyword should be used. If it is intended to be used by any class in the same package or subclasses, then the 'protected' keyword should be used. If it is intended to be used by any class from any package, then the 'public' keyword should be used.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add comments to improve code readability",
+                "Change_Diff": "Add comments throughout the function to explain the purpose of each line or block of code.",
+                "Description": "Adding comments to code can greatly enhance its readability and maintainability. This especially holds true for sections of code where the purpose or functionality might not be immediately clear to others.",
+                "Start": 1,
+                "End": 15
+            }
+        ],
+        "Final code": "public Alphabet(char[] chars){\n  // Require that chars is not null\n  this.chars=Objects.requireNonNull(chars);\n  // Calculate bits per char\n  this.bitsPerChar=log2(chars.length);\n  // Calculate gcd\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  // Calculate chars per chunk\n  this.charsPerChunk=8 / gcd;\n  // Calculate bytes per chunk\n  this.bytesPerChunk=bitsPerChar / gcd;\n  // Set mask to the length of chars - 1\n  this.mask=chars.length - 1;\n  // Initialize decodabet to an array of bytes the size of ASCII_MAX + 1\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  // Fill decodabet with -1\n  Arrays.fill(decodabet,(byte)-1);\n  // Populate decodabet with the indices of chars\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  // Store decodabet\n  this.decodabet=decodabet;\n}"
+    },
+    "Old_Method": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  this.decodabet=decodabet;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/BaseEncoding.java",
+    "Start": 6069,
+    "Stop": 6946,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "Alphabet"
+}

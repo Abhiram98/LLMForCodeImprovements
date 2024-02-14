@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid creating new RestTemplate for each request",
+                "Change_Diff": "- RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n- RestTemplate rt=restTemplateBuilder.build();",
+                "Description": "Creating a new RestTemplate for each request is not a good practice as it is heavy and can be reused. You should create it once and reuse it.",
+                "Start": 4,
+                "End": 6
+            },
+            {
+                "Improvement": "Avoid unnecessary toString() call",
+                "Change_Diff": "- cachedResponse=response.getBody().toString();\n+ cachedResponse=response.getBody();",
+                "Description": "Calling toString() on a string is unnecessary, as it does nothing. You should remove this call.",
+                "Start": 11,
+                "End": 11
+            },
+            {
+                "Improvement": "Remove redundant status code check",
+                "Change_Diff": "- if (response.getStatusCode() == HttpStatus.OK) {\n+ // redundant check removed",
+                "Description": "You are checking if the status code is OK twice. This is redundant and you should remove the second check",
+                "Start": 12,
+                "End": 12
+            },
+            {
+                "Improvement": "Use equalsIgnoreCase instead of equals",
+                "Change_Diff": "- if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n+ if (!currentResponse.getString(\"Decision\").equalsIgnoreCase(\"Permit\")) {",
+                "Description": "Using equalsIgnoreCase instead of equals can make your code more robust as it will still work if the returned decision is not in the expected case.",
+                "Start": 23,
+                "End": 23
+            }
+        ],
+        "Final code": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity<String> response=this.restTemplate.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody();\n    this.authCache.putIfAbsent(authRequest,cachedResponse);\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equalsIgnoreCase(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}"
+    },
+    "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 4347,
+    "Stop": 5782,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "authorize"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactoring repetitive try-catch blocks",
+                "Change_Diff": "- try {\n    inter.intersect(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    inter.intersect(skExact,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  ...\n+ executeAndExpectException(() -> inter.intersect(skExact, skSmallSeed2A));\n+ executeAndExpectException(() -> inter.intersect(skExact, skSmallSeed2B));\n ...",
+                "Description": "Instead of having multiple try-catch blocks, we should refactor these repetitive blocks into a separate method. This will make the code easier to read and maintain.",
+                "Start": 22,
+                "End": 68
+            },
+            {
+                "Improvement": "Using lambdas for operations",
+                "Change_Diff": "- inter.intersect(skExact,skSmallSeed2A);\n- inter.intersect(skExact,skSmallSeed2B);\n ...\n+ executeAndExpectException(() -> inter.intersect(skExact, skSmallSeed2A));\n+ executeAndExpectException(() -> inter.intersect(skExact, skSmallSeed2B));\n ...",
+                "Description": "The operations can be performed using lambda expressions. This eliminates the need for creating multiple almost identical methods and improves code readability.",
+                "Start": 22,
+                "End": 68
+            }
+        ],
+        "Final code": "@Test public void checkSeedHash(){\n  int k=64;\n  UpdateSketch tmp1=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp1.update(1);\n  tmp1.update(3);\n  CompactSketch skSmallSeed2A=tmp1.compact(true,null);\n  UpdateSketch tmp2=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp2.update(1);\n  tmp2.update(2);\n  CompactSketch skSmallSeed2B=tmp2.compact(true,null);\n  CompactSketch skExact=generate(EXACT,k);\n  CompactSketch skHeap=generate(EST_HEAP,2 * k);\n  Intersection inter=SetOperation.builder().buildIntersection();\n  AnotB aNotB=SetOperation.builder().buildANotB();\n  Union union=SetOperation.builder().setNominalEntries(k).buildUnion();\n  executeAndExpectException(() -> inter.intersect(skExact, skSmallSeed2A));\n  executeAndExpectException(() -> inter.intersect(skExact, skSmallSeed2B));\n  executeAndExpectException(() -> inter.intersect(skSmallSeed2B, skExact));\n  executeAndExpectException(() -> inter.intersect(skHeap, skSmallSeed2B));\n  executeAndExpectException(() -> aNotB.aNotB(skExact, skSmallSeed2A));\n  executeAndExpectException(() -> aNotB.aNotB(skExact, skSmallSeed2B));\n  executeAndExpectException(() -> aNotB.aNotB(skSmallSeed2B, skExact));\n  executeAndExpectException(() -> aNotB.aNotB(skHeap, skSmallSeed2B));\n  executeAndExpectException(() -> union.union(skExact, skSmallSeed2A));\n  executeAndExpectException(() -> union.union(skExact, skSmallSeed2B));\n  executeAndExpectException(() -> union.union(skSmallSeed2B, skExact));\n  executeAndExpectException(() -> union.union(skHeap, skSmallSeed2B));\n}\n\nprivate void executeAndExpectException(Runnable runnable) {\n  try {\n    runnable.run();\n    Assert.fail();\n  } catch (Exception e) {\n  }\n}"
+    },
+    "Old_Method": "@Test public void checkSeedHash(){\n  int k=64;\n  UpdateSketch tmp1=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp1.update(1);\n  tmp1.update(3);\n  CompactSketch skSmallSeed2A=tmp1.compact(true,null);\n  UpdateSketch tmp2=Sketches.updateSketchBuilder().setNominalEntries(k).setSeed(123).build();\n  tmp2.update(1);\n  tmp2.update(2);\n  CompactSketch skSmallSeed2B=tmp2.compact(true,null);\n  CompactSketch skExact=generate(EXACT,k);\n  CompactSketch skHeap=generate(EST_HEAP,2 * k);\n  Intersection inter=SetOperation.builder().buildIntersection();\n  AnotB aNotB=SetOperation.builder().buildANotB();\n  Union union=SetOperation.builder().setNominalEntries(k).buildUnion();\n  try {\n    inter.intersect(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    inter.intersect(skExact,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    inter.intersect(skSmallSeed2B,skExact);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    inter.intersect(skHeap,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skExact,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skSmallSeed2B,skExact);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    aNotB.aNotB(skHeap,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skExact,skSmallSeed2A);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skExact,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skSmallSeed2B,skExact);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n  try {\n    union.union(skHeap,skSmallSeed2B);\n    Assert.fail();\n  }\n catch (  Exception e) {\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/SetOpsCornerCasesTest.java",
+    "Start": 10314,
+    "Stop": 12460,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSeedHash"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method access modifier",
+                "Change_Diff": "- Alphabet(char[] chars){\n+ public Alphabet(char[] chars){",
+                "Description": "All methods in Java should have an access modifier to specify where this method can be accessed from. If none is provided, it defaults to package-private, which may not be intended. If this method should be accessible anywhere, use the 'public' modifier. If it should only be accessible within this class, use the 'private' modifier.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use final keyword where possible",
+                "Change_Diff": "- this.chars=Objects.requireNonNull(chars);\n+ final this.chars=Objects.requireNonNull(chars);\n- this.bitsPerChar=log2(chars.length);\n+ final this.bitsPerChar=log2(chars.length);\n- this.charsPerChunk=8 / gcd;\n+ final this.charsPerChunk=8 / gcd;\n- this.bytesPerChunk=bitsPerChar / gcd;\n+ final this.bytesPerChunk=bitsPerChar / gcd;\n- this.mask=chars.length - 1;\n+ final this.mask=chars.length - 1;\n- this.decodabet=decodabet;\n+ final this.decodabet=decodabet;",
+                "Description": "If a variable is intended to not change after its initial assignment, it should be marked with the 'final' keyword. This makes the code safer, as it prevents accidental modification of these variables. 'chars', 'bitsPerChar', 'charsPerChunk', 'bytesPerChunk', 'mask', and 'decodabet' seem to fit this criteria.",
+                "Start": 2,
+                "End": 9
+            }
+        ],
+        "Final code": "public Alphabet(final char[] chars){\n  final this.chars=Objects.requireNonNull(chars);\n  final this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  final this.charsPerChunk=8 / gcd;\n  final this.bytesPerChunk=bitsPerChar / gcd;\n  final this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  final this.decodabet=decodabet;\n}"
+    },
+    "Old_Method": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  this.decodabet=decodabet;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/BaseEncoding.java",
+    "Start": 6069,
+    "Stop": 6946,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "Alphabet"
+}

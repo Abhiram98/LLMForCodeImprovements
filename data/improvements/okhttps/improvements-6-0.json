@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid return in lambda expression",
+                "Change_Diff": "- if (value == null) return;\n+ if (value != null) { ... }",
+                "Description": "You are using a return statement in a lambda expression. This is not recommended because it makes the code more complicated. Instead, you can use an if statement to check if the value is not null before executing the logic.",
+                "Start": 7,
+                "End": 12
+            },
+            {
+                "Improvement": "Avoid deep nesting",
+                "Change_Diff": "- if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) { ... }\n+ if (bodyParams == null && files == null) return emptyRequestBody();",
+                "Description": "Your method has too many nested conditionals. This makes the method hard to read and understand. You can improve this by returning early when a condition is not met.",
+                "Start": 2,
+                "End": 30
+            }
+        ],
+        "Final code": "private RequestBody buildRequestBody(){\n  if (bodyParams == null && files == null) {\n    return emptyRequestBody();\n  }\n\n  MultipartBody.Builder builder=multipartBodyBuilder();\n  if (bodyParams != null) {\n    bodyParams.forEach((key,value) -> {\n      if (value != null) {\n        byte[] content=value.toString().getBytes(charset);\n        RequestBody body=RequestBody.create(null,content);\n        builder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      }\n    });\n  }\n\n  if (files != null) {\n    files.forEach((name,file) -> {\n      MediaType type=httpClient.mediaType(file.getType());\n      builder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n    });\n  }\n\n  return builder.build();\n}"
+    },
+    "Old_Method": "private RequestBody buildRequestBody(){\n  if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n    MultipartBody.Builder builder=multipartBodyBuilder();\n    if (bodyParams != null) {\n      bodyParams.forEach((key,value) -> {\n        if (value == null)         return;\n        byte[] content=value.toString().getBytes(charset);\n        RequestBody body=RequestBody.create(null,content);\n        builder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      }\n);\n    }\n    if (files != null) {\n      files.forEach((name,file) -> {\n        MediaType type=httpClient.mediaType(file.getType());\n        builder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n      }\n);\n    }\n    return builder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (bodyParams == null) {\n    return emptyRequestBody();\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder=new FormBody.Builder(charset);\n    bodyParams.forEach((key,value) -> {\n      if (value == null)       return;\n      builder.add(key,value.toString());\n    }\n);\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+    "Start": 19603,
+    "Stop": 21270,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "buildRequestBody"
+}

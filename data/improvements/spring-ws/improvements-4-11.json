@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace multiple return statements with a single one",
+                "Change_Diff": "- return;\n+ // Do not use return here, let the code flow to single return at the end",
+                "Description": "Having multiple return statements in a method can make the code harder to read and debug. In our case, we can refactor the code to use a single return statement by introducing a local variable to hold the source.",
+                "Start": 11,
+                "End": 34
+            },
+            {
+                "Improvement": "Replace if-else chains with a switch statement",
+                "Change_Diff": "- else if (source instanceof SAXSource) {\n+ switch (source.getClass().getSimpleName()) {\n+ case \"SAXSource\":",
+                "Description": "When you have a series of if-else statements that all check a variable against some constant value, it can be more readable and efficient to use a switch statement instead.",
+                "Start": 6,
+                "End": 34
+            }
+        ],
+        "Final code": "public static void doWithSource(Source source, SourceCallback callback) throws Exception {\n    Object sourceObject = null;\n    switch (source.getClass().getSimpleName()) {\n        case \"DOMSource\":\n            sourceObject = ((DOMSource) source).getNode();\n            break;\n        case \"StaxSource\":\n            XMLStreamReader streamReader = StaxUtils.getXMLStreamReader(source);\n            if (streamReader != null) {\n                sourceObject = streamReader;\n            } else {\n                XMLEventReader eventReader = StaxUtils.getXMLEventReader(source);\n                if (eventReader != null) {\n                    sourceObject = eventReader;\n                }\n            }\n            break;\n        case \"SAXSource\":\n            SAXSource saxSource = (SAXSource) source;\n            sourceObject = new Object[]{saxSource.getXMLReader(), saxSource.getInputSource()};\n            break;\n        case \"StreamSource\":\n            StreamSource streamSource = (StreamSource) source;\n            if (streamSource.getInputStream() != null) {\n                sourceObject = streamSource.getInputStream();\n            } else if (streamSource.getReader() != null) {\n                sourceObject = streamSource.getReader();\n            }\n            break;\n    }\n    if (sourceObject != null) {\n        callback.source(sourceObject);\n    } else if (StringUtils.hasLength(source.getSystemId())) {\n        String systemId = source.getSystemId();\n        callback.source(systemId);\n    } else {\n        throw new IllegalArgumentException(\"Unknown Source type: \" + source.getClass());\n    }\n}"
+    },
+    "Old_Method": "/** \n * Performs the given  {@linkplain SourceCallback callback} operation on a {@link Source}. Supports both the JAXP 1.4 {@link StAXSource} and the Spring 3.0 {@link StaxUtils#createStaxSource StaxSource}.\n * @param source source to look at\n * @param callback the callback to invoke for each kind of source\n */\npublic static void doWithSource(Source source,SourceCallback callback) throws Exception {\n  if (source instanceof DOMSource) {\n    callback.domSource(((DOMSource)source).getNode());\n    return;\n  }\n else   if (StaxUtils.isStaxSource(source)) {\n    XMLStreamReader streamReader=StaxUtils.getXMLStreamReader(source);\n    if (streamReader != null) {\n      callback.staxSource(streamReader);\n      return;\n    }\n else {\n      XMLEventReader eventReader=StaxUtils.getXMLEventReader(source);\n      if (eventReader != null) {\n        callback.staxSource(eventReader);\n        return;\n      }\n    }\n  }\n else   if (source instanceof SAXSource) {\n    SAXSource saxSource=(SAXSource)source;\n    callback.saxSource(saxSource.getXMLReader(),saxSource.getInputSource());\n    return;\n  }\n else   if (source instanceof StreamSource) {\n    StreamSource streamSource=(StreamSource)source;\n    if (streamSource.getInputStream() != null) {\n      callback.streamSource(streamSource.getInputStream());\n      return;\n    }\n else     if (streamSource.getReader() != null) {\n      callback.streamSource(streamSource.getReader());\n      return;\n    }\n  }\n  if (StringUtils.hasLength(source.getSystemId())) {\n    String systemId=source.getSystemId();\n    callback.source(systemId);\n  }\n else {\n    throw new IllegalArgumentException(\"Unknown Source type: \" + source.getClass());\n  }\n}\n",
+    "File_Path": "spring-ws/spring-xml/src/main/java/org/springframework/xml/transform/TraxUtils.java",
+    "Start": 2162,
+    "Stop": 3804,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "doWithSource"
+}

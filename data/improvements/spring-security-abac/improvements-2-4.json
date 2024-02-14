@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor to read properties from a configuration class",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n- KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n- KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n- CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n- CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n- IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n- ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n+ AppConfig config = AppConfig.getInstance();\n+ KEY_STORE = config.getKeyStore();\n+ KEY_STORE_PASSWORD = config.getKeyStorePassword();\n+ CERT_ALIAS = config.getCertAlias();\n+ CERT_PASSWORD = config.getCertPassword();\n+ IDP_META_DATA_URL = config.getIdpMetaDataUrl();\n+ ISSUER_ID = config.getIssuerId();",
+                "Description": "Instead of directly reading properties file in the constructor, it's better to read these properties from a configuration class. This will make the code cleaner, easier to manage and test.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Replace RuntimeException with a more specific exception",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new IOException(\"Error loading properties file\", e);",
+                "Description": "It's better to throw a more specific exception that accurately represents the error scenario. This will make error handling more efficient and the error cause more clear.",
+                "Start": 12,
+                "End": 14
+            }
+        ],
+        "Final code": "public WebSecurityConfig(){\n  try {\n    AppConfig config = AppConfig.getInstance();\n    KEY_STORE = config.getKeyStore();\n    KEY_STORE_PASSWORD = config.getKeyStorePassword();\n    CERT_ALIAS = config.getCertAlias();\n    CERT_PASSWORD = config.getCertPassword();\n    IDP_META_DATA_URL = config.getIdpMetaDataUrl();\n    ISSUER_ID = config.getIssuerId();\n  }\n catch (  IOException e) {\n    throw new IOException(\"Error loading properties file\", e);\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

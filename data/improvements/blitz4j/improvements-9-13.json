@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder instead of String concatenation",
+                "Change_Diff": "- String valueString=\"\";\n+ StringBuilder valueString = new StringBuilder();\n- valueString=valueString + oneValue + \",\";\n+ valueString.append(oneValue).append(\",\");\n- valueString=valueString + oneValue;\n+ valueString.append(oneValue);",
+                "Description": "String concatenation in Java is inefficient because it creates a new String object each time a concatenation occurs. Using StringBuilder is a more efficient way of concatenating Strings in a loop.",
+                "Start": 30,
+                "End": 39
+            },
+            {
+                "Improvement": "Replace null check with StringUtils.isNotBlank method",
+                "Change_Diff": "- if (oneValue == null) {\n+ if (StringUtils.isBlank(oneValue)) {",
+                "Description": "The Apache Commons Lang library provides helpful String utilities such as isNotBlank. This method checks if a String is not empty (\"\"), not null and not whitespace only, which is a more comprehensive check than a simple null check.",
+                "Start": 33,
+                "End": 33
+            },
+            {
+                "Improvement": "Remove unnecessary toString call",
+                "Change_Diff": "- String key=mapEntry.getKey().toString();\n+ String key=(String) mapEntry.getKey();",
+                "Description": "The getKey method of Map.Entry returns an object of type Object. There's no need to call toString on it explicitly, as it will be implicitly called when you concatenate it with Strings.",
+                "Start": 24,
+                "End": 24
+            }
+        ],
+        "Final code": "private void convertConfiguredAppendersToAsync(Properties props) throws ConfigurationException, FileNotFoundException {\n  for (  Map.Entry<String,String> originalAsyncAppenderMapEntry : originalAsyncAppenderNameMap.entrySet()) {\n    String asyncAppenderName=originalAsyncAppenderMapEntry.getValue();\n    props.setProperty(LOG4J_APPENDER_PREFIX + LOG4J_APPENDER_DELIMITER + asyncAppenderName,AsyncAppender.class.getName());\n    String originalAppenderName=originalAsyncAppenderMapEntry.getKey();\n    props.setProperty(LOG4J_APPENDER_PREFIX + LOG4J_APPENDER_DELIMITER + asyncAppenderName+ LOG4J_APPENDER_DELIMITER+ PROP_LOG4J_ORIGINAL_APPENDER_NAME,originalAppenderName);\n    this.initialProps.setProperty(\"batcher.\" + AsyncAppender.class.getName() + \".\"+ originalAppenderName+ \".\"+ \"rejectWhenFull\",\"true\");\n    String maxThreads=this.initialProps.getProperty(\"batcher.\" + AsyncAppender.class.getName() + \".\"+ originalAppenderName+ \".\"+ \"maxThreads\");\n    if (maxThreads == null) {\n      this.initialProps.setProperty(\"batcher.\" + AsyncAppender.class.getName() + \".\"+ originalAppenderName+ \".\"+ \"maxThreads\",\"1\");\n    }\n    for (    Map.Entry mapEntry : props.entrySet()) {\n      String key=(String) mapEntry.getKey();\n      if ((key.contains(LOG4J_PREFIX) || key.contains(ROOT_CATEGORY) || key.contains(ROOT_LOGGER)) && !key.contains(PROP_LOG4J_ASYNC_APPENDERS) && !key.contains(PROP_LOG4J_ORIGINAL_APPENDER_NAME)) {\n        Object value=mapEntry.getValue();\n        if (value != null) {\n          String[] values=(String.class.cast(value)).split(\",\");\n          StringBuilder valueString = new StringBuilder();\n          int ctr=0;\n          for (          String oneValue : values) {\n            if (StringUtils.isBlank(oneValue)) {\n              continue;\n            }\n            ++ctr;\n            if (originalAppenderName.equals(oneValue.trim())) {\n              oneValue=asyncAppenderName;\n            }\n            if (ctr != values.length) {\n              valueString.append(oneValue).append(\",\");\n            }\n else {\n              valueString.append(oneValue);\n            }\n          }\n          mapEntry.setValue(valueString.toString());\n        }\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Convert appenders specified by the property <code>log4j.logger.asyncAppender<\/code> to the blitz4j Asynchronous appenders.\n * @param props - The properties that need to be passed into the log4j for configuration.\n * @throws ConfigurationException\n * @throws FileNotFoundException\n */\nprivate void convertConfiguredAppendersToAsync(Properties props) throws ConfigurationException, FileNotFoundException {\n  for (  Map.Entry<String,String> originalAsyncAppenderMapEntry : originalAsyncAppenderNameMap.entrySet()) {\n    String asyncAppenderName=originalAsyncAppenderMapEntry.getValue();\n    props.setProperty(LOG4J_APPENDER_PREFIX + LOG4J_APPENDER_DELIMITER + asyncAppenderName,AsyncAppender.class.getName());\n    String originalAppenderName=originalAsyncAppenderMapEntry.getKey();\n    props.setProperty(LOG4J_APPENDER_PREFIX + LOG4J_APPENDER_DELIMITER + asyncAppenderName+ LOG4J_APPENDER_DELIMITER+ PROP_LOG4J_ORIGINAL_APPENDER_NAME,originalAppenderName);\n    this.initialProps.setProperty(\"batcher.\" + AsyncAppender.class.getName() + \".\"+ originalAppenderName+ \".\"+ \"rejectWhenFull\",\"true\");\n    String maxThreads=this.initialProps.getProperty(\"batcher.\" + AsyncAppender.class.getName() + \".\"+ originalAppenderName+ \".\"+ \"maxThreads\");\n    if (maxThreads == null) {\n      this.initialProps.setProperty(\"batcher.\" + AsyncAppender.class.getName() + \".\"+ originalAppenderName+ \".\"+ \"maxThreads\",\"1\");\n    }\n    for (    Map.Entry mapEntry : props.entrySet()) {\n      String key=mapEntry.getKey().toString();\n      if ((key.contains(LOG4J_PREFIX) || key.contains(ROOT_CATEGORY) || key.contains(ROOT_LOGGER)) && !key.contains(PROP_LOG4J_ASYNC_APPENDERS) && !key.contains(PROP_LOG4J_ORIGINAL_APPENDER_NAME)) {\n        Object value=mapEntry.getValue();\n        if (value != null) {\n          String[] values=(String.class.cast(value)).split(\",\");\n          String valueString=\"\";\n          int ctr=0;\n          for (          String oneValue : values) {\n            if (oneValue == null) {\n              continue;\n            }\n            ++ctr;\n            if (originalAppenderName.equals(oneValue.trim())) {\n              oneValue=asyncAppenderName;\n            }\n            if (ctr != values.length) {\n              valueString=valueString + oneValue + \",\";\n            }\n else {\n              valueString=valueString + oneValue;\n            }\n          }\n          mapEntry.setValue(valueString);\n        }\n      }\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/blitz4j/LoggingConfiguration.java",
+    "Start": 19085,
+    "Stop": 22519,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "convertConfiguredAppendersToAsync"
+}

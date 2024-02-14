@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove excessive System.out.println() statements",
+                "Change_Diff": "- System.out.println(...)\n- System.out.println(...)\n...",
+                "Description": "The multiple System.out.println() statements are cluttering the method and making it less readable. Consider using a logging framework (like Log4j or SLF4J) or reducing the amount of debug output.",
+                "Start": 2,
+                "End": 20
+            },
+            {
+                "Improvement": "Create a separate method for printing debug info",
+                "Change_Diff": "+ private void printDebugInfo() { ... }\n\nregisterInterfaces(){\n... \nprintDebugInfo();\n}",
+                "Description": "You could separate the debug information printing into a separate method. This would make the registerInterfaces() method more focused on its primary task and improve the readability of the code.",
+                "Start": 1,
+                "End": 20
+            }
+        ],
+        "Final code": "    @Override protected void registerInterfaces(){\n        user=new SteamUser(userCallback);\n        userStats=new SteamUserStats(userStatsCallback);\n        remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n        ugc=new SteamUGC(ugcCallback);\n        utils=new SteamUtils(utilsCallback);\n        apps=new SteamApps();\n        friends=new SteamFriends(friendsCallback);\n        printDebugInfo();\n    }\n\n    private void printDebugInfo() {\n        System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n        System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n        System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n        System.out.println(\"App ID: \" + utils.getAppID());\n        System.out.println(\"App build ID: \" + apps.getAppBuildId());\n        System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n        System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n        System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());\n    }"
+    },
+    "Old_Method": "@Override protected void registerInterfaces(){\n  System.out.println(\"Register user ...\");\n  user=new SteamUser(userCallback);\n  System.out.println(\"Register user stats callback ...\");\n  userStats=new SteamUserStats(userStatsCallback);\n  System.out.println(\"Register remote storage ...\");\n  remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n  System.out.println(\"Register UGC ...\");\n  ugc=new SteamUGC(ugcCallback);\n  System.out.println(\"Register Utils ...\");\n  utils=new SteamUtils(utilsCallback);\n  System.out.println(\"Register Apps ...\");\n  apps=new SteamApps();\n  System.out.println(\"Register Friends ...\");\n  friends=new SteamFriends(friendsCallback);\n  System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n  System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n  System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n  System.out.println(\"App ID: \" + utils.getAppID());\n  System.out.println(\"App build ID: \" + apps.getAppBuildId());\n  System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n  System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n  System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+    "Start": 13419,
+    "Stop": 14725,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "registerInterfaces"
+}

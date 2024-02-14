@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Consolidate exception handling",
+            "Change_Diff": "- catch (SignatureException ex) {\n-     logger.error('Invalid JWT signature');\n- }\n- catch (MalformedJwtException ex) {\n-     logger.error('Invalid JWT token');\n- }\n- catch (ExpiredJwtException ex) {\n-     logger.error('Expired JWT token');\n- }\n- catch (UnsupportedJwtException ex) {\n-     logger.error('Unsupported JWT token');\n- }\n- catch (IllegalArgumentException ex) {\n-     logger.error('JWT claims string is empty.');\n- }\n+ catch (JwtException ex) {\n+     if (ex instanceof SignatureException) {\n+         logger.error('Invalid JWT signature');\n+     } else if (ex instanceof MalformedJwtException) {\n+         logger.error('Invalid JWT token');\n+     } else if (ex instanceof ExpiredJwtException) {\n+         logger.error('Expired JWT token');\n+     } else if (ex instanceof UnsupportedJwtException) {\n+         logger.error('Unsupported JWT token');\n+     } else if (ex instanceof IllegalArgumentException) {\n+         logger.error('JWT claims string is empty.');\n+     } else {\n+         logger.error('Unknown JWT exception');\n+     }\n+ }",
+            "Description": "Instead of catching each exception type individually, you can catch `JwtException` which is the parent class for all those exceptions. This will make your code cleaner and easier to maintain. If you want to log different messages for each exception, you could use `instanceof` within the catch block.",
+            "Start": 5,
+            "End": 16
+        }],
+        "Final code": "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (JwtException ex) {\n    if (ex instanceof SignatureException) {\n        logger.error('Invalid JWT signature');\n    } else if (ex instanceof MalformedJwtException) {\n        logger.error('Invalid JWT token');\n    } else if (ex instanceof ExpiredJwtException) {\n        logger.error('Expired JWT token');\n    } else if (ex instanceof UnsupportedJwtException) {\n        logger.error('Unsupported JWT token');\n    } else if (ex instanceof IllegalArgumentException) {\n        logger.error('JWT claims string is empty.');\n    } else {\n        logger.error('Unknown JWT exception');\n    }\n    return false;\n  }\n}"
+    },
+    "Old_Method": "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n  return false;\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/TokenProvider.java",
+    "Start": 1471,
+    "Stop": 2183,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "validateToken"
+}

@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method visibility",
+                "Change_Diff": "- Alphabet(char[] chars){\n+ public Alphabet(char[] chars){",
+                "Description": "Every Java method should have an access modifier. If no access modifier is specified, then it defaults to 'package-private', which may not be intended.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add JavaDocs for methods",
+                "Change_Diff": "+ /**\n+  * Constructs an Alphabet object with the specified character array.\n+  *\n+  * @param chars the character array to initialize the Alphabet object\n+  */\n Alphabet(char[] chars){",
+                "Description": "JavaDocs are important for understanding the purpose of the method and its parameters. It improves the readability of the method.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n+ int greatestCommonDivisor=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n- byte[] decodabet=new byte[ASCII_MAX + 1];\n+ byte[] decodabetArray=new byte[ASCII_MAX + 1];",
+                "Description": "Using meaningful variable names makes your code easier to read and understand. It helps others to understand what your code is doing.",
+                "Start": 3,
+                "End": 9
+            },
+            {
+                "Improvement": "Add comments to complex calculations",
+                "Change_Diff": "+ // Calculate the greatest common divisor of 8 and the lowest one bit of bitsPerChar\n int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n+ // Calculate the number of characters and bytes per chunk\n this.charsPerChunk=8 / gcd;\n this.bytesPerChunk=bitsPerChar / gcd;",
+                "Description": "Comments are used to explain complex sections of code. They make your code easier to understand.",
+                "Start": 3,
+                "End": 6
+            }
+        ],
+        "Final code": "    /**\n     * Constructs an Alphabet object with the specified character array.\n     *\n     * @param chars the character array to initialize the Alphabet object\n     */\n    public Alphabet(char[] chars){\n      this.chars=Objects.requireNonNull(chars);\n      this.bitsPerChar=log2(chars.length);\n      // Calculate the greatest common divisor of 8 and the lowest one bit of bitsPerChar\n      int greatestCommonDivisor=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n      // Calculate the number of characters and bytes per chunk\n      this.charsPerChunk=8 / greatestCommonDivisor;\n      this.bytesPerChunk=bitsPerChar / greatestCommonDivisor;\n      this.mask=chars.length - 1;\n      byte[] decodabetArray=new byte[ASCII_MAX + 1];\n      Arrays.fill(decodabetArray,(byte)-1);\n      for (int i=0; i < chars.length; i++) {\n        char c=chars[i];\n        decodabetArray[c]=(byte)i;\n      }\n      this.decodabet=decodabetArray;\n    }"
+    },
+    "Old_Method": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  this.decodabet=decodabet;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/BaseEncoding.java",
+    "Start": 6069,
+    "Stop": 6946,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "Alphabet"
+}

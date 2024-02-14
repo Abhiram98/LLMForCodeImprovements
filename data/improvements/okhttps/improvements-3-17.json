@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor exception handling",
+                "Change_Diff": "- throw new OkHttpsException(\"url 不能为空！\");\n+ List<String> errors = new ArrayList<>();\n...\n- throw new OkHttpsException(\"PathPara [ \" + name + \" ] 不存在于 url [ \"+ urlPath+ \" ]\");\n+ errors.add(\"PathPara [ \" + name + \" ] 不存在于 url [ \"+ urlPath+ \" ]\");\n...\n- throw new OkHttpsException(\"url 格式错误，'?' 后没有发现 '='\");\n+ errors.add(\"url 格式错误，'?' 后没有发现 '='\");\n...\n+ if (!errors.isEmpty()) throw new OkHttpsException(errors.toString());",
+                "Description": "Instead of throwing exceptions inside the loops, collect all the errors and throw them at the end of the method. This will allow all of the errors to be caught at once instead of stopping at the first one.",
+                "Start": 5,
+                "End": 35
+            },
+            {
+                "Improvement": "Use Optional for null check",
+                "Change_Diff": "- if (pathParams != null) {\n+ Optional.ofNullable(pathParams).ifPresent(params -> {\n...\n- if (urlParams != null) {\n+ Optional.ofNullable(urlParams).ifPresent(params -> {",
+                "Description": "Instead of checking for null value of pathParams and urlParams, use Optional to handle null cases to make the code cleaner and avoid NullPointerException.",
+                "Start": 5,
+                "End": 35
+            }
+        ],
+        "Final code": "private String buildUrlPath(){\n  List<String> errors = new ArrayList<>();\n  if (Platform.isBlank(urlPath)) {\n    errors.add(\"url 不能为空！\");\n  }\n  StringBuilder sb=new StringBuilder(urlPath);\n  Optional.ofNullable(pathParams).ifPresent(params -> {\n    params.forEach((name,value) -> {\n      String target=\"{\" + name + \"}\";\n      int start=sb.indexOf(target);\n      if (start >= 0) {\n        String newValue=value != null ? value.toString() : \"\";\n        sb.replace(start,start + target.length(),newValue);\n      } else {\n        errors.add(\"PathPara [ \" + name + \" ] 不存在于 url [ \"+ urlPath+ \" ]\");\n      }\n    });\n  });\n  Optional.ofNullable(urlParams).ifPresent(params -> {\n    if (sb.indexOf(\"?\") >= 0) {\n      int lastIndex=sb.length() - 1;\n      if (sb.lastIndexOf(\"?\") < lastIndex) {\n        if (sb.lastIndexOf(\"=\") < sb.lastIndexOf(\"?\") + 2) {\n          errors.add(\"url 格式错误，'?' 后没有发现 '='\");\n        }\n        if (sb.lastIndexOf(\"&\") < lastIndex) {\n          sb.append('&');\n        }\n      }\n    } else {\n      sb.append('?');\n    }\n    params.forEach((name,value) -> {\n      if (value == null)       return;\n      sb.append(name).append('=').append(value).append('&');\n    });\n    sb.delete(sb.length() - 1,sb.length());\n  });\n  if (!errors.isEmpty()) throw new OkHttpsException(errors.toString());\n  return sb.toString();\n}"
+    },
+    "Old_Method": "private String buildUrlPath(){\n  if (Platform.isBlank(urlPath)) {\n    throw new OkHttpsException(\"url 不能为空！\");\n  }\n  StringBuilder sb=new StringBuilder(urlPath);\n  if (pathParams != null) {\n    pathParams.forEach((name,value) -> {\n      String target=\"{\" + name + \"}\";\n      int start=sb.indexOf(target);\n      if (start >= 0) {\n        String newValue=value != null ? value.toString() : \"\";\n        sb.replace(start,start + target.length(),newValue);\n      }\n else {\n        throw new OkHttpsException(\"PathPara [ \" + name + \" ] 不存在于 url [ \"+ urlPath+ \" ]\");\n      }\n    }\n);\n  }\n  if (urlParams != null) {\n    if (sb.indexOf(\"?\") >= 0) {\n      int lastIndex=sb.length() - 1;\n      if (sb.lastIndexOf(\"?\") < lastIndex) {\n        if (sb.lastIndexOf(\"=\") < sb.lastIndexOf(\"?\") + 2) {\n          throw new OkHttpsException(\"url 格式错误，'?' 后没有发现 '='\");\n        }\n        if (sb.lastIndexOf(\"&\") < lastIndex) {\n          sb.append('&');\n        }\n      }\n    }\n else {\n      sb.append('?');\n    }\n    urlParams.forEach((name,value) -> {\n      if (value == null)       return;\n      sb.append(name).append('=').append(value).append('&');\n    }\n);\n    sb.delete(sb.length() - 1,sb.length());\n  }\n  return sb.toString();\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+    "Start": 22867,
+    "Stop": 24516,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "buildUrlPath"
+}

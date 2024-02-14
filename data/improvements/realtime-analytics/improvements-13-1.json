@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants for repeated string values",
+                "Change_Diff": "- if (entry.getKey().toLowerCase().contains(\"total\")) {\n+ if (entry.getKey().toLowerCase().contains(TOTAL_KEY)) {",
+                "Description": "Instead of using the same string values multiple times, it is better to define them as constant variables and reuse them. This can improve readability and maintainability of the code.",
+                "Start": 0,
+                "End": 100
+            },
+            {
+                "Improvement": "Avoid deep nesting",
+                "Change_Diff": "- if (MCCounterHelper.isMCCounterEvent(event)) {\n-   // nested code\n- } \n+ processMCCounterEvent(event);",
+                "Description": "Deeply nested code can be hard to read and understand. Consider breaking up the method into smaller methods.",
+                "Start": 0,
+                "End": 100
+            },
+            {
+                "Improvement": "Avoid null checks",
+                "Change_Diff": "- if (event.get(MCConstant.METRIC_COUNT) != null) {\n+ Optional.ofNullable(event.get(MCConstant.METRIC_COUNT)).ifPresent(count -> {",
+                "Description": "There are several null checks in your program. Consider using Optional in Java 8 to avoid null checks and avoid NullPointerException.",
+                "Start": 0,
+                "End": 100
+            }
+        ],
+        "Final code": "private static final String TOTAL_KEY = \"total\";\n\n@Override public void sendEvent(JetstreamEvent event) throws EventException {\n  if (isPaused() || shutdownFlag.get()) {\n    super.incrementEventDroppedCounter();\n    return;\n  }\n  incrementEventRecievedCounter();\n  processEvent(event);\n}\n\nprivate void processEvent(JetstreamEvent event) {\n  if (MCCounterHelper.isMCCounterEvent(event)) {\n    processMCCounterEvent(event);\n  } else if (MCCounterHelper.isMCMultiCounterEvent(event)) {\n    processMCMultiCounterEvent(event);\n  } else if (MCCounterHelper.isGroupByCounterEvent(event)) {\n    processGroupByCounterEvent(event);\n  } else {\n    evaluateRawEvent(event);\n  }\n}\n\nprivate void processMCCounterEvent(JetstreamEvent event) {\n  // implementation\n}\n\nprivate void processMCMultiCounterEvent(JetstreamEvent event) {\n  // implementation\n}\n\nprivate void processGroupByCounterEvent(JetstreamEvent event) {\n  // implementation\n}"
+    },
+    "Old_Method": "@Override public void sendEvent(JetstreamEvent event) throws EventException {\n  if (isPaused() || shutdownFlag.get()) {\n    super.incrementEventDroppedCounter();\n    return;\n  }\n  incrementEventRecievedCounter();\n  if (MCCounterHelper.isMCCounterEvent(event)) {\n    String metricName=(String)event.get(MCConstant.METRIC_NAME);\n    Long total=null;\n    if (MCCounterHelper.isAvgEvent(metricName)) {\n      for (      Map.Entry<String,Object> entry : event.entrySet()) {\n        if (entry.getKey().toLowerCase().contains(\"total\")) {\n          total=(Long)entry.getValue();\n          break;\n        }\n      }\n    }\n    if (event.get(MCConstant.METRIC_COUNT) != null) {\n      Long count=(Long)event.get(MCConstant.METRIC_COUNT);\n      if (total != null) {\n        ((AvgCounter)getCounterByMetricName(metricName,true)).inc(count,total);\n      }\n else       getCounterByMetricName(metricName,false).inc(count);\n    }\n else {\n      getCounterByMetricName(metricName,false).inc();\n    }\n  }\n else   if (MCCounterHelper.isMCMultiCounterEvent(event)) {\n    for (    Map.Entry<String,Object> entry : event.entrySet()) {\n      if (entry.getKey().toLowerCase().contains(\"count\")) {\n        String metricName=entry.getKey();\n        Long count=(Long)entry.getValue();\n        if (count != null) {\n          getCounterByMetricName(metricName,false).inc(count);\n        }\n else {\n          LOGGER.warn(\"Null Count returned by EPL, CountName:\" + metricName);\n        }\n      }\n    }\n  }\n else   if (MCCounterHelper.isGroupByCounterEvent(event)) {\n    if (getConfiguration().isEnableGroupByCounter()) {\n      String metricName=(String)event.get(MCConstant.METRIC_NAME);\n      String groupId=(String)event.get(MCConstant.GROUP_ID);\n      if (groupId != null && groupId.trim().length() != 0) {\n        long registerdFreq=getFrequencyByMetricName(metricName);\n        if (event.get(MCConstant.FREQUENCY_IN_MIN) == null && registerdFreq <= 0) {\n          setMetricFrequency(metricName,MetricFrequency.ONE_MINUTE.getValue());\n        }\n else         if (event.get(MCConstant.FREQUENCY_IN_MIN) != null) {\n          Integer frequencyInMin=(Integer)event.get(MCConstant.FREQUENCY_IN_MIN);\n          long frequency=frequencyInMin * MetricFrequency.ONE_MINUTE.getValue();\n          if (frequency > 0 && frequency != registerdFreq) {\n            setMetricFrequency(metricName,frequency);\n          }\n        }\n        metricTables.put(metricName,event.getEventType());\n        Map<String,String> tags=new HashMap<String,String>(5);\n        MCCounterHelper.isGroupByCounterEventWithTag(event,tags);\n        Long total=null;\n        if (MCCounterHelper.isAvgEvent(metricName)) {\n          for (          Map.Entry<String,Object> entry : event.entrySet()) {\n            if (entry.getKey().toLowerCase().contains(\"total\")) {\n              total=(Long)entry.getValue();\n              break;\n            }\n          }\n        }\n        if (event.get(MCConstant.METRIC_COUNT) != null) {\n          Long count=(Long)event.get(MCConstant.METRIC_COUNT);\n          if (total != null) {\n            getCounterByMetricDemensionAndInc(metricName,groupId,tags,true,count,total);\n          }\n else {\n            getCounterByMetricDemensionAndInc(metricName,groupId,tags,false,count,null);\n          }\n        }\n else {\n          getCounterByMetricDemensionAndInc(metricName,groupId,tags,false,null,null);\n        }\n      }\n else {\n        LOGGER.warn(\"Null or empty groupId returned by EPL, metricName:\" + metricName);\n      }\n    }\n  }\n else {\n    evaluateRawEvent(event);\n  }\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 18706,
+    "Stop": 23760,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "sendEvent"
+}

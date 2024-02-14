@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract codes to different methods for better readability",
+                "Change_Diff": "- public void append(final LoggingEvent event){\n... \n}\n+ public void append(final LoggingEvent event){\n...\n}\n+ private void generateLocationInfo(LoggingEvent event) {...}\n+ private void saveThreadLocalAndPutInBuffer(LoggingEvent event) {...}\n+ private void summarizeEvent(LoggingEvent event, String loggerKey) {...}\n+ private void incrementDiscardEventCounter() {...}",
+                "Description": "The method append() is doing too many things. It is recommended to split this method into smaller methods, each doing one thing. This will improve the readability and maintainability of the code.",
+                "Start": 1,
+                "End": 50
+            },
+            {
+                "Improvement": "Remove unnecessary checks",
+                "Change_Diff": "- if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {...}\n- else if (!CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {...}\n+ if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {...}\n+ else {...}",
+                "Description": "The check for CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) is done twice in both if and else if conditions. This can be simplified by checking it once and using else condition for the other scenario.",
+                "Start": 11,
+                "End": 50
+            }
+        ],
+        "Final code": "public void append(final LoggingEvent event){\n  boolean isBufferSpaceAvailable=(batcher.isSpaceAvailable() && (logSummaryMap.size() == 0));\n  boolean isBufferPutSuccessful=false;\n  String loggerKey = generateLocationInfo(event);\n  if (isBufferSpaceAvailable) {\n    saveThreadLocalAndPutInBuffer(event);\n    isBufferPutSuccessful=putInBuffer(event);\n  }\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    summarizeEvent(event, loggerKey);\n  }\n else {\n    incrementDiscardEventCounter();\n  }\n}\n\nprivate void generateLocationInfo(LoggingEvent event) {...}\n\nprivate void saveThreadLocalAndPutInBuffer(LoggingEvent event) {...}\n\nprivate void summarizeEvent(LoggingEvent event, String loggerKey) {...}\n\nprivate void incrementDiscardEventCounter() {...}"
+    },
+    "Old_Method": "public void append(final LoggingEvent event){\n  boolean isBufferSpaceAvailable=(batcher.isSpaceAvailable() && (logSummaryMap.size() == 0));\n  boolean isBufferPutSuccessful=false;\n  LocationInfo locationInfo=null;\n  Stopwatch s=locationInfoTimer.start();\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName)) {\n    if (CONFIGURATION.shouldGenerateBlitz4jLocationInfo()) {\n      locationInfo=LoggingContext.getInstance().generateLocationInfo(event);\n    }\n else     if (CONFIGURATION.shouldGenerateLog4jLocationInfo()) {\n      locationInfo=event.getLocationInformation();\n    }\n  }\n  s.stop();\n  if (isBufferSpaceAvailable) {\n    Stopwatch sThreadLocal=saveThreadLocalTimer.start();\n    saveThreadLocalInfo(event);\n    sThreadLocal.stop();\n    isBufferPutSuccessful=putInBuffer(event);\n  }\n  if (CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    summarizeEventCounter.increment();\n    Stopwatch t=putDiscardMapTimeTracer.start();\n    String loggerKey=event.getLoggerName();\n    if (locationInfo != null) {\n      loggerKey=locationInfo.getClassName() + \"_\" + locationInfo.getLineNumber();\n    }\n    LogSummary summary=(LogSummary)logSummaryMap.get(loggerKey);\n    if (summary == null) {\n      saveThreadLocalInfo(event);\n      summary=new LogSummary(event);\n      logSummaryMap.put(loggerKey,summary);\n    }\n else {\n      summary.add(event);\n    }\n    t.stop();\n  }\n else   if (!CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName) && (!isBufferPutSuccessful)) {\n    discardEventCounter.increment();\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/blitz4j/AsyncAppender.java",
+    "Start": 8263,
+    "Stop": 10867,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "append"
+}

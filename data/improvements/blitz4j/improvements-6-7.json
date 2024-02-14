@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of Logger",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.error(\"An error occurred\", e);",
+                "Description": "Instead of printing the stack trace to the standard error output, it would be better to use a Logger. This will provide more control over the output format and where the output is sent.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Exception Specificity",
+                "Change_Diff": "- catch (    Exception e) {\n+ catch (    InterruptedException e) {\n+ catch (    ConfigurationException e) {",
+                "Description": "It is better to catch specific exceptions, rather than catching the generic Exception class. This can help with debugging as you can handle each type of exception differently if needed.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Thread Interruption",
+                "Change_Diff": "- Thread.sleep(10);\n+ Thread.sleep(10);\n+ if (Thread.currentThread().isInterrupted()) {\n+     throw new InterruptedException(\"Thread was interrupted\");\n+ }",
+                "Description": "If the thread is interrupted while sleeping, it is good practice to preserve the interrupt status so that callers can also check whether the current thread was interrupted and handle it accordingly.",
+                "Start": 7,
+                "End": 7
+            }
+        ],
+        "Final code": "public void run(){\n  int i=0;\n  while (i <= 1000) {\n    try {\n      ConfigurationManager.getConfigInstance().setProperty(\"log4j.junk\",(i++) + \"\");\n      Thread.sleep(10);\n      if (Thread.currentThread().isInterrupted()) {\n        throw new InterruptedException(\"Thread was interrupted\");\n      }\n      Thread.yield();\n    }\n    catch (InterruptedException e) {\n      logger.error(\"Thread was interrupted\", e);\n    }\n    catch (ConfigurationException e) {\n      logger.error(\"An error occurred while setting configuration property\", e);\n    }\n  }\n}"
+    },
+    "Old_Method": "public void run(){\n  int i=0;\n  while (i <= 1000) {\n    try {\n      ConfigurationManager.getConfigInstance().setProperty(\"log4j.junk\",(i++) + \"\");\n      Thread.sleep(10);\n      Thread.yield();\n    }\n catch (    Exception e) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/test/java/com/netflix/blitz4j/TestBlitz4j.java",
+    "Start": 7912,
+    "Stop": 8617,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "run"
+}

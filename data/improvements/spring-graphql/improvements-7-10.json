@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Stream API to merge annotations",
+                "Change_Diff": "- for (Annotation paramAnn : paramAnns) {\n-     boolean existingType = false;\n-     for (Annotation ann : anns) { \n-         if (ann.annotationType() == paramAnn.annotationType()) {\n-             existingType = true;\n-             break;\n-         }\n-     }\n-     if (!existingType) {\n-         merged.add(adaptAnnotation(paramAnn));\n-     }\n- }\n+ Stream.of(anns, paramAnns)\n+     .flatMap(Stream::of)\n+     .collect(Collectors.toMap(Annotation::annotationType, Function.identity(), (existing, replacement) -> existing))\n+     .values()\n+     .toArray(new Annotation[0]);",
+                "Description": "Instead of using traditional for loops to merge annotations, use Java 8 Stream API. This will make the code more concise and readable.",
+                "Start": 8,
+                "End": 21
+            },
+            {
+                "Improvement": "Remove redundant null check",
+                "Change_Diff": "- Annotation[] anns = this.combinedAnnotations;\n- if (anns == null) {\n-     anns = super.getParameterAnnotations();\n- }",
+                "Description": "The null check for `anns` is redundant. The `getParameterAnnotations()` method would never return null, it would return an empty array if there are no parameter annotations. So this null check can be safely removed.",
+                "Start": 2,
+                "End": 4
+            }
+        ],
+        "Final code": "@Override public Annotation[] getParameterAnnotations(){\n    Annotation[] anns=super.getParameterAnnotations();\n    int index=getParameterIndex();\n    if (index >= 0) {\n        for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n            if (index < ifcAnns.length) {\n                Annotation[] paramAnns=ifcAnns[index];\n                if (paramAnns.length > 0) {\n                    List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n                    merged.addAll(Arrays.asList(anns));\n                    anns = Stream.of(anns, paramAnns)\n                        .flatMap(Stream::of)\n                        .collect(Collectors.toMap(Annotation::annotationType, Function.identity(), (existing, replacement) -> existing))\n                        .values()\n                        .toArray(new Annotation[0]);\n                }\n            }\n        }\n    }\n    this.combinedAnnotations=anns;\n    return anns;\n}"
+    },
+    "Old_Method": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns=this.combinedAnnotations;\n  if (anns == null) {\n    anns=super.getParameterAnnotations();\n    int index=getParameterIndex();\n    if (index >= 0) {\n      for (      Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n        if (index < ifcAnns.length) {\n          Annotation[] paramAnns=ifcAnns[index];\n          if (paramAnns.length > 0) {\n            List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n            merged.addAll(Arrays.asList(anns));\n            for (            Annotation paramAnn : paramAnns) {\n              boolean existingType=false;\n              for (              Annotation ann : anns) {\n                if (ann.annotationType() == paramAnn.annotationType()) {\n                  existingType=true;\n                  break;\n                }\n              }\n              if (!existingType) {\n                merged.add(adaptAnnotation(paramAnn));\n              }\n            }\n            anns=merged.toArray(new Annotation[0]);\n          }\n        }\n      }\n    }\n    this.combinedAnnotations=anns;\n  }\n  return anns;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/HandlerMethod.java",
+    "Start": 12864,
+    "Stop": 13925,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getParameterAnnotations"
+}

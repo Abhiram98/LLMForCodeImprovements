@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract platform specific code to separate methods",
+                "Change_Diff": "- if (os.indexOf(\"MAC\") != -1) {...} else {...} \n+ if (isMacPlatform()) {handleMacPlatform()} else {handleNonMacPlatform()}",
+                "Description": "Given that the code within the `run` method is quite lengthly and there seems to be platform specific code (for MAC and non-MAC), it's a good practice to break the code into smaller methods. This makes the code easier to manage, read and test.",
+                "Start": 6,
+                "End": 93
+            },
+            {
+                "Improvement": "Remove unnecessary semicolon",
+                "Change_Diff": "- ;",
+                "Description": "There's an unnecessary semicolon after the `Thread.sleep(100);` statement. As per Java syntax, it's not necessary and should be removed.",
+                "Start": 96,
+                "End": 96
+            },
+            {
+                "Improvement": "Avoid magic numbers",
+                "Change_Diff": "- int x=p.x + 16;\n- int y=p.y + 8;\n- for (i=0; i < 50 && !inited; i++) {...}\n+ final int X_OFFSET = 16;\n+ final int Y_OFFSET = 8;\n+ final int MAX_ATTEMPTS = 50;\n+ int x=p.x + X_OFFSET;\n+ int y=p.y + Y_OFFSET;\n+ for (i=0; i < MAX_ATTEMPTS && !inited; i++) {...}",
+                "Description": "The code has several 'magic numbers', i.e., numbers that appear without explanation. It's better to replace them with named constants to improve readability and maintainability.",
+                "Start": 101,
+                "End": 109
+            }
+        ],
+        "Final code": "public void run(){\n  if (!isSecure(sec)) {\n    return;\n  }\n  AccessController.doPrivileged(new PrivilegedAction(){\n    public Object run(){\n      Point p=getLocationOnScreen();\n      if (isMacPlatform()) {\n        handleMacPlatform();\n      } else {\n        handleNonMacPlatform();\n      }\n      log(\"Document root: ~\" + p.toString());\n      final int X_OFFSET = 16;\n      final int Y_OFFSET = 8;\n      int x=p.x + X_OFFSET;\n      int y=p.y + Y_OFFSET;\n      try {\n        Thread.sleep(100);\n      } catch (Exception e) {}\n      try {\n        robot=new Robot();\n        robot.setAutoWaitForIdle(true);\n        robot.mouseMove(x,y);\n        Thread.sleep(100);\n        final int MAX_ATTEMPTS = 50;\n        int i=0;\n        for (i=0; i < MAX_ATTEMPTS && !inited; i++) {\n          robot.mousePress(InputEvent.BUTTON1_MASK);\n          Thread.sleep(100);\n          robot.mouseRelease(InputEvent.BUTTON1_MASK);\n          Thread.sleep(100);\n          log(\"mouse clicked\");\n        }\n        if (i == MAX_ATTEMPTS) {\n          applet().stop();\n        }\n      } catch (Exception e) {\n        e.printStackTrace();\n      }\n      log(\"< _callLoaded Robot\");\n      return null;\n    }\n  }\n);}"
+    },
+    "Old_Method": "public void run(){\n  if (!isSecure(sec)) {\n    return;\n  }\n  AccessController.doPrivileged(new PrivilegedAction(){\n    public Object run(){\n      Point p=getLocationOnScreen();\n      if (os.indexOf(\"MAC\") != -1) {\n        p=new Point();\n        int screen=0;\n        dohscreen=-1;\n        int mindifference=Integer.MAX_VALUE;\n        GraphicsDevice[] screens=GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();\n        try {\n          for (screen=0; screen < screens.length; screen++) {\n            Rectangle bounds=screens[screen].getDefaultConfiguration().getBounds();\n            DisplayMode mode=screens[screen].getDisplayMode();\n            int width=mode.getWidth();\n            int height=mode.getHeight();\n            int twidth=trackingImage.getWidth();\n            int theight=trackingImage.getHeight();\n            Robot screenshooter=new Robot(screens[screen]);\n            log(\"screen dimensions: \" + width + \" \"+ height);\n            BufferedImage screenshot=screenshooter.createScreenCapture(new Rectangle(0,0,width,height));\n            int x=0, y=0;\n            for (x=0; x <= width - twidth; x++) {\n              for (y=0; y <= height - theight; y++) {\n                int count=0;\n                int difference=0;\n                scanImage:                 for (int x2=0; x2 < twidth; x2++) {\n                  for (int y2=0; y2 < theight; y2++) {\n                    int rgbdiff=Math.abs(screenshot.getRGB(x + x2,y + y2) - trackingImage.getRGB(x2,y2));\n                    difference=difference + rgbdiff;\n                    if (difference >= mindifference) {\n                      break scanImage;\n                    }\n                  }\n                }\n                if (difference < mindifference) {\n                  p.x=x + (int)bounds.getX();\n                  p.y=y + (int)bounds.getY();\n                  mindifference=difference;\n                  dohscreen=screen;\n                }\n              }\n            }\n          }\n          robot=new Robot(screens[dohscreen]);\n          robot.setAutoWaitForIdle(true);\n        }\n catch (        Exception e) {\n          e.printStackTrace();\n        }\n        if (p.x == 0 && p.y == 0) {\n          throw new RuntimeException(\"Robot not found on screen\");\n        }\n        locationOnScreen=p;\n      }\n else {\n        try {\n          robot=new Robot();\n          robot.setAutoWaitForIdle(true);\n        }\n catch (        Exception e) {\n        }\n      }\n      log(\"Document root: ~\" + p.toString());\n      int x=p.x + 16;\n      int y=p.y + 8;\n      try {\n        Thread.sleep(100);\n      }\n catch (      Exception e) {\n      }\n      ;\n      try {\n        robot=new Robot();\n        robot.setAutoWaitForIdle(true);\n        robot.mouseMove(x,y);\n        Thread.sleep(100);\n        int i=0;\n        for (i=0; i < 50 && !inited; i++) {\n          robot.mousePress(InputEvent.BUTTON1_MASK);\n          Thread.sleep(100);\n          robot.mouseRelease(InputEvent.BUTTON1_MASK);\n          Thread.sleep(100);\n          log(\"mouse clicked\");\n        }\n        if (i == 50) {\n          applet().stop();\n        }\n      }\n catch (      Exception e) {\n        e.printStackTrace();\n      }\n      log(\"< _callLoaded Robot\");\n      return null;\n    }\n  }\n);\n}\n",
+    "File_Path": "htmlunit/src/test/resources/libraries/dojo/1.9.3/util/doh/robot/DOHRobot.java",
+    "Start": 9522,
+    "Stop": 13535,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "run"
+}

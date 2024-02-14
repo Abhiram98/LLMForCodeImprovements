@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant code",
+                "Change_Diff": "- expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n+ Predicate<Author> hasMemberPredicate = new HasMemberPredicate(paths,null).accept(visitor);\n+ Predicate<Author> hasNoMemberPredicate = new HasNoMemberPredicate(paths,null).accept(visitor);\n+ assertTrue(hasMemberPredicate.test(author));\n+ assertFalse(hasNoMemberPredicate.test(author));",
+                "Description": "The code is creating a new Predicate and testing it twice with the same inputs. This is redundant and can be simplified by just creating the Predicate once and testing it.",
+                "Start": 12,
+                "End": 21
+            },
+            {
+                "Improvement": "Use more descriptive variable names",
+                "Change_Diff": "- expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n+ Predicate<Author> testExpression = new HasMemberPredicate(paths,null);\n+ Predicate<Author> predicate = testExpression.accept(visitor);",
+                "Description": "The variable names 'fn' and 'expression' do not clearly indicate what they are used for. Consider using more descriptive names, like 'predicate' and 'testExpression'.",
+                "Start": 8,
+                "End": 29
+            }
+        ],
+        "Final code": "@Test public void hasMemberPredicateToManyNullTest() throws Exception {\n  author=new Author();\n  author.setId(1L);\n  Book book=new Book();\n  book.setId(1L);\n  book.setLanguage(\"en\");\n  Book book2=new Book();\n  book2.setId(2L);\n  book2.setLanguage(\"de\");\n  author.getBooks().add(book2);\n  PathElement bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n  Path paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n  Predicate<Author> testExpression = new HasMemberPredicate(paths,null);\n  Predicate<Author> predicate = testExpression.accept(visitor);\n  assertFalse(predicate.test(author));\n  testExpression = new HasNoMemberPredicate(paths,null);\n  predicate = testExpression.accept(visitor);\n  assertTrue(predicate.test(author));\n  testExpression = new HasMemberPredicate(paths,\"null\");\n  predicate = testExpression.accept(visitor);\n  assertFalse(predicate.test(author));\n  testExpression = new HasNoMemberPredicate(paths,\"null\");\n  predicate = testExpression.accept(visitor);\n  assertTrue(predicate.test(author));\n  book2.setLanguage(null);\n  Predicate<Author> hasMemberPredicate = new HasMemberPredicate(paths,null).accept(visitor);\n  Predicate<Author> hasNoMemberPredicate = new HasNoMemberPredicate(paths,null).accept(visitor);\n  assertTrue(hasMemberPredicate.test(author));\n  assertFalse(hasNoMemberPredicate.test(author));\n}"
+    },
+    "Old_Method": "@Test public void hasMemberPredicateToManyNullTest() throws Exception {\n  author=new Author();\n  author.setId(1L);\n  Book book=new Book();\n  book.setId(1L);\n  book.setLanguage(\"en\");\n  Book book2=new Book();\n  book2.setId(2L);\n  book2.setLanguage(\"de\");\n  author.getBooks().add(book2);\n  PathElement bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n  Path paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n  expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  book2.setLanguage(null);\n  expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n}\n",
+    "File_Path": "elide/elide-core/src/test/java/com/yahoo/elide/core/filter/expression/InMemoryFilterExecutorTest.java",
+    "Start": 10344,
+    "Stop": 12059,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "hasMemberPredicateToManyNullTest"
+}

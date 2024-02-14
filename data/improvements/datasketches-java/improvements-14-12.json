@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- final int k1=8;\n- final int n1=2 * k1;\n- final int k2=4;\n- final int n2=5 * k2;\n+ final int multiplier1=8;\n+ final int product1=2 * multiplier1;\n+ final int multiplier2=4;\n+ final int product2=5 * multiplier2;",
+                "Description": "Instead of variables like 'k1', 'n1', 'k2', 'n2', use descriptive names that can help other developers understand the purpose of these variables.",
+                "Start": 2,
+                "End": 5
+            },
+            {
+                "Improvement": "Remove unnecessary final keywords",
+                "Change_Diff": "- final int k1=8;\n- final int n1=2 * k1;\n- final int k2=4;\n- final int n2=5 * k2;\n- final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n- final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n- final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(k1).build(skMem);\n- final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n- final WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n- final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n+ int multiplier1=8;\n+ int product1=2 * multiplier1;\n+ int multiplier2=4;\n+ int product2=5 * multiplier2;\n+ int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n+ WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n+ UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(multiplier1).build(skMem);\n+ CompactDoublesSketch sketchIn1=sketchIn0.compact();\n+ WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n+ DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);",
+                "Description": "The 'final' keyword is used for variables that should not be reassigned. However, a lot of variables in the function are only used once. Therefore, using 'final' here is unnecessary and can be removed for simplicity.",
+                "Start": 2,
+                "End": 14
+            }
+        ],
+        "Final code": "@Test public void checkUnion4DirectCompact(){\n  int multiplier1=8;\n  int product1=2 * multiplier1;\n  int multiplier2=4;\n  int product2=5 * multiplier2;\n  int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n  WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n  UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(multiplier1).build(skMem);\n  for (int i=0; i < product1; i++) {\n    sketchIn0.update(i + 1);\n  }\n  CompactDoublesSketch sketchIn1=sketchIn0.compact();\n  WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n  DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n  union.union(sketchIn1);\n  assertEquals(union.getResult().getN(),product1);\n  assertEquals(union.getMaxK(),256);\n  assertEquals(union.getEffectiveK(),multiplier1);\n  DoublesSketch result=union.getResult();\n  assertEquals(result.getN(),16);\n  assertEquals(result.getMaxItem(),product1,0.0);\n  assertEquals(result.getMinItem(),1.0,0.0);\n  assertEquals(result.getK(),multiplier1);\n  CompactDoublesSketch sketchIn2=buildAndLoadDQS(multiplier2,product2,17).compact();\n  union.reset();\n  union.union(sketchIn2);\n  result=union.getResult();\n  assertEquals(result.getMaxItem(),product2 + 17,0.0);\n  assertEquals(result.getMinItem(),1.0 + 17,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}"
+    },
+    "Old_Method": "@Test public void checkUnion4DirectCompact(){\n  final int k1=8;\n  final int n1=2 * k1;\n  final int k2=4;\n  final int n2=5 * k2;\n  final int bytes=DoublesSketch.getUpdatableStorageBytes(256,50);\n  final WritableMemory skMem=WritableMemory.writableWrap(new byte[bytes]);\n  final UpdateDoublesSketch sketchIn0=DoublesSketch.builder().setK(k1).build(skMem);\n  for (int i=0; i < n1; i++) {\n    sketchIn0.update(i + 1);\n  }\n  final CompactDoublesSketch sketchIn1=sketchIn0.compact();\n  final WritableMemory uMem=WritableMemory.writableWrap(new byte[bytes]);\n  final DoublesUnion union=DoublesUnion.builder().setMaxK(256).build(uMem);\n  union.union(sketchIn1);\n  assertEquals(union.getResult().getN(),n1);\n  assertEquals(union.getMaxK(),256);\n  assertEquals(union.getEffectiveK(),k1);\n  DoublesSketch result=union.getResult();\n  assertEquals(result.getN(),16);\n  assertEquals(result.getMaxItem(),n1,0.0);\n  assertEquals(result.getMinItem(),1.0,0.0);\n  assertEquals(result.getK(),k1);\n  final CompactDoublesSketch sketchIn2=buildAndLoadDQS(k2,n2,17).compact();\n  union.reset();\n  union.union(sketchIn2);\n  result=union.getResult();\n  assertEquals(result.getMaxItem(),n2 + 17,0.0);\n  assertEquals(result.getMinItem(),1.0 + 17,0.0);\n  println(\"\\nFinal\" + union.getResult().toString(true,true));\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/DoublesUnionImplTest.java",
+    "Start": 9412,
+    "Stop": 10835,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkUnion4DirectCompact"
+}

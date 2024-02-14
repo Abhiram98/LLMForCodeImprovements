@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Move the calculation of bytesPerChunk after calculation of mask",
+                "Change_Diff": "- this.bytesPerChunk=bitsPerChar / gcd;\n+ // Moved to line 6",
+                "Description": "The calculation of 'bytesPerChunk' variable is dependent on 'bitsPerChar' which is calculated from 'chars.length'. Hence it would be more readable if it's calculated after 'mask' variable.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Add comments for better understanding",
+                "Change_Diff": "+ // Explanation for each line",
+                "Description": "Adding comments to explain the logic behind each line of code would make it easier for others to understand the code.",
+                "Start": 2,
+                "End": 12
+            }
+        ],
+        "Final code": "Alphabet(char[] chars){\n  // Assigning the received chars after validating it's not null\n  this.chars=Objects.requireNonNull(chars);\n\n  // Calculate bits per character, based on the length of chars\n  this.bitsPerChar=log2(chars.length);\n\n  // Calculate greatest common divisor of 8 and lowest bit of bitsPerChar\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n\n  // Calculate chars per chunk based on gcd\n  this.charsPerChunk=8 / gcd;\n\n  // Calculate mask as difference between length of chars and 1\n  this.mask=chars.length - 1;\n\n  // Moved from line 5\n  this.bytesPerChunk=bitsPerChar / gcd;\n\n  // Initialize decodabet array\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n\n  // Fill decodabet with -1\n  Arrays.fill(decodabet,(byte)-1);\n\n  // Assign respective index values to decodabet from chars\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n\n  // Assign decodabet to this instance\n  this.decodabet=decodabet;\n}"
+    },
+    "Old_Method": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  this.decodabet=decodabet;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/BaseEncoding.java",
+    "Start": 6069,
+    "Stop": 6946,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "Alphabet"
+}

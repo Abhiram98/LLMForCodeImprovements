@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Stream API",
+                "Change_Diff": "- for (Annotation paramAnn : paramAnns) {\n-   boolean existingType=false;\n-   for (Annotation ann : anns) {\n-     if (ann.annotationType() == paramAnn.annotationType()) {\n-       existingType=true;\n-       break;\n-     }\n-   }\n-   if (!existingType) {\n-     merged.add(adaptAnnotation(paramAnn));\n-   }\n- }",
+                "Description": "Java 8 introduced the Stream API, which provides a more declarative approach to working with collections. In this case, the Stream API can be used to simplify the process of merging annotations, making the code more readable and easier to understand.",
+                "Start": 9,
+                "End": 23
+            },
+            {
+                "Improvement": "Use Optional to handle potential null values",
+                "Change_Diff": "- anns=super.getParameterAnnotations();",
+                "Description": "The use of Optional can help avoid potential NullPointerExceptions and make the code more robust. In this case, Optional can be used to safely handle the situation where super.getParameterAnnotations() may return null.",
+                "Start": 4,
+                "End": 5
+            }
+        ],
+        "Final code": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns=this.combinedAnnotations;\n  if (anns == null) {\n    anns=Optional.ofNullable(super.getParameterAnnotations()).orElse(new Annotation[0]);\n    int index=getParameterIndex();\n    if (index >= 0) {\n      for (Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n        if (index < ifcAnns.length) {\n          Annotation[] paramAnns=ifcAnns[index];\n          if (paramAnns.length > 0) {\n            List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n            merged.addAll(Arrays.asList(anns));\n            Arrays.stream(paramAnns)\n              .filter(paramAnn -> Arrays.stream(anns)\n                .noneMatch(ann -> ann.annotationType() == paramAnn.annotationType()))\n              .map(this::adaptAnnotation)\n              .forEach(merged::add);\n            anns=merged.toArray(new Annotation[0]);\n          }\n        }\n      }\n    }\n    this.combinedAnnotations=anns;\n  }\n  return anns;\n}"
+    },
+    "Old_Method": "@Override public Annotation[] getParameterAnnotations(){\n  Annotation[] anns=this.combinedAnnotations;\n  if (anns == null) {\n    anns=super.getParameterAnnotations();\n    int index=getParameterIndex();\n    if (index >= 0) {\n      for (      Annotation[][] ifcAnns : getInterfaceParameterAnnotations()) {\n        if (index < ifcAnns.length) {\n          Annotation[] paramAnns=ifcAnns[index];\n          if (paramAnns.length > 0) {\n            List<Annotation> merged=new ArrayList<>(anns.length + paramAnns.length);\n            merged.addAll(Arrays.asList(anns));\n            for (            Annotation paramAnn : paramAnns) {\n              boolean existingType=false;\n              for (              Annotation ann : anns) {\n                if (ann.annotationType() == paramAnn.annotationType()) {\n                  existingType=true;\n                  break;\n                }\n              }\n              if (!existingType) {\n                merged.add(adaptAnnotation(paramAnn));\n              }\n            }\n            anns=merged.toArray(new Annotation[0]);\n          }\n        }\n      }\n    }\n    this.combinedAnnotations=anns;\n  }\n  return anns;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/HandlerMethod.java",
+    "Start": 12864,
+    "Stop": 13925,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getParameterAnnotations"
+}

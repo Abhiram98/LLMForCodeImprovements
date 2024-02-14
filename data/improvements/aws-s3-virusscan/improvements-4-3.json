@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch block to handle potential exceptions",
+                "Change_Diff": "+ try {\n  ObjectListing objectListing=s3.listObjects(name);\n+ } catch (AmazonS3Exception e) {\n+   // handle exception\n+ } catch (SdkClientException e) {\n+   // handle exception\n+ }",
+                "Description": "The method s3.listObjects can throw AmazonS3Exception or SdkClientException. It's important to handle these exceptions to prevent your application from crashing unexpectedly.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Improve formatting and indentation",
+                "Change_Diff": "- protected long countBucket(final String name){\n-   long count=0;\n-   ObjectListing objectListing=s3.listObjects(name);\n-   while (true) {\n-     count+=objectListing.getObjectSummaries().size();\n-     if (objectListing.isTruncated()) {\n-       objectListing=s3.listNextBatchOfObjects(objectListing);\n-     }\n-  else {\n-       break;\n-     }\n-   }\n-   return count;\n- }\n+ protected long countBucket(final String name) {\n+     long count = 0;\n+     try {\n+         ObjectListing objectListing = s3.listObjects(name);\n+         while (true) {\n+             count += objectListing.getObjectSummaries().size();\n+             if (objectListing.isTruncated()) {\n+                 objectListing = s3.listNextBatchOfObjects(objectListing);\n+             } else {\n+                 break;\n+             }\n+         }\n+     } catch (AmazonS3Exception e) {\n+         // handle exception\n+     } catch (SdkClientException e) {\n+         // handle exception\n+     }\n+     return count;\n+ }",
+                "Description": "Properly format and indent your code. This makes your code more readable and understandable.",
+                "Start": 1,
+                "End": 15
+            }
+        ],
+        "Final code": "protected long countBucket(final String name) {\n    long count = 0;\n    try {\n        ObjectListing objectListing = s3.listObjects(name);\n        while (true) {\n            count += objectListing.getObjectSummaries().size();\n            if (objectListing.isTruncated()) {\n                objectListing = s3.listNextBatchOfObjects(objectListing);\n            } else {\n                break;\n            }\n        }\n    } catch (AmazonS3Exception e) {\n        // handle exception\n    } catch (SdkClientException e) {\n        // handle exception\n    }\n    return count;\n}"
+    },
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

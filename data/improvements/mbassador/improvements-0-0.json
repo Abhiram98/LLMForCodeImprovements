@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactoring nested if-else conditions",
+                "Change_Diff": "- if (current == null) return false;\n- if (current.getValue() == null) {\n- removeOrphans();\n- return current != null;\n- } else {\n- return true;\n- }\n+ return current != null && current.getValue() != null;",
+                "Description": "The nested if-else conditions within the `hasNext()` and `next()` methods can be simplified by using a single if-else statement. This makes the code cleaner and easier to understand.",
+                "Start": 20,
+                "End": 34
+            },
+            {
+                "Improvement": "Avoiding direct manipulation of `head` within `removeOrphans()`",
+                "Change_Diff": "- ISetEntry orphaned=current;\n- current=current.next();\n- if (orphaned == head) {\n- head=head.next();\n- }\n- orphaned.remove();\n+ removeCurrentAndMoveNext();",
+                "Description": "Direct manipulation of `head` within `removeOrphans()` can lead to problems if `head` is concurrently modified by other threads. It would be safer to encapsulate the manipulation of `head` within a separate synchronized method.",
+                "Start": 8,
+                "End": 14
+            }
+        ],
+        "Final code": "public Iterator<T> iterator(){\n  return new Iterator<T>(){\n    private ISetEntry<T> current=head;\n    private void removeOrphans(){\n      Lock writelock=lock.writeLock();\n      try {\n        writelock.lock();\n        removeCurrentAndMoveNext();\n      } finally {\n        writelock.unlock();\n      }\n    }\n    private synchronized void removeCurrentAndMoveNext() {\n      ISetEntry<T> orphaned = current;\n      current = current.next();\n      if (orphaned == head) {\n        head = head.next();\n      }\n      orphaned.remove();\n    }\n    public boolean hasNext(){\n      return current != null && current.getValue() != null;\n    }\n    public T next(){\n      if (current == null || current.getValue() == null) {\n        removeOrphans();\n        return next();\n      } else {\n        T value = current.getValue();\n        current = current.next();\n        return value;\n      }\n    }\n    public void remove(){\n      if (current == null) {\n        return;\n      }\n      ISetEntry<T> newCurrent=current.next();\n      WeakConcurrentSet.this.remove(current.getValue());\n      current=newCurrent;\n    }\n  }\n;\n}"
+    },
+    "Old_Method": "public Iterator<T> iterator(){\n  return new Iterator<T>(){\n    private ISetEntry<T> current=head;\n    private void removeOrphans(){\n      Lock writelock=lock.writeLock();\n      try {\n        writelock.lock();\n        do {\n          ISetEntry orphaned=current;\n          current=current.next();\n          if (orphaned == head) {\n            head=head.next();\n          }\n          orphaned.remove();\n        }\n while (current != null && current.getValue() == null);\n      }\n  finally {\n        writelock.unlock();\n      }\n    }\n    public boolean hasNext(){\n      if (current == null)       return false;\n      if (current.getValue() == null) {\n        removeOrphans();\n        return current != null;\n      }\n else {\n        return true;\n      }\n    }\n    public T next(){\n      if (current == null) {\n        return null;\n      }\n      T value=current.getValue();\n      if (value == null) {\n        removeOrphans();\n        return next();\n      }\n else {\n        current=current.next();\n        return value;\n      }\n    }\n    public void remove(){\n      if (current == null) {\n        return;\n      }\n      ISetEntry<T> newCurrent=current.next();\n      WeakConcurrentSet.this.remove(current.getValue());\n      current=newCurrent;\n    }\n  }\n;\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/common/WeakConcurrentSet.java",
+    "Start": 643,
+    "Stop": 3187,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "iterator"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants instead of hard-coded values",
+                "Change_Diff": "- ElideResponse<String> response=ElideResponse.status(200).body(responseBody);\n+ ElideResponse<String> response=ElideResponse.status(STATUS_OK).body(RESPONSE_BODY);\n\n- String query=\"{\\\"query\\\":\\\"{ group { edges { node { name commonName description } } } }\\\",\\\"variables\\\":null}\";\n+ String query=QUERY_STRING;\n\n- String id=\"edc4a871-dff2-4054-804e-d80075cf827d\";\n+ String id=QUERY_ID;",
+                "Description": "Hard-coded values like status code '200', query string, responseBody etc. should be replaced by constants. This makes the code more readable and maintainable as these values are used in multiple places.",
+                "Start": 3,
+                "End": 6
+            },
+            {
+                "Improvement": "Remove unnecessary casting",
+                "Change_Diff": "- AsyncQueryResult queryResultObj=(AsyncQueryResult)graphQLOperation.call();\n+ AsyncQueryResult queryResultObj=graphQLOperation.call();",
+                "Description": "The casting of the result to 'AsyncQueryResult' is unnecessary and can be removed.",
+                "Start": 12,
+                "End": 12
+            }
+        ],
+        "Final code": "@Test public void testProcessQueryGraphQl() throws URISyntaxException {\n  AsyncQuery queryObj=new AsyncQuery();\n  String responseBody=RESPONSE_BODY;\n  ElideResponse<String> response=ElideResponse.status(STATUS_OK).body(responseBody);\n  String query=QUERY_STRING;\n  String id=QUERY_ID;\n  queryObj.setId(id);\n  queryObj.setQuery(query);\n  queryObj.setQueryType(QueryType.GRAPHQL_V1_0);\n  when(runner.run(any(),any(),any(),any(),any())).thenReturn(response);\n  GraphQLAsyncQueryOperation graphQLOperation=new GraphQLAsyncQueryOperation(asyncExecutorService,queryObj,requestScope);\n  AsyncQueryResult queryResultObj=graphQLOperation.call();\n  assertEquals(responseBody,queryResultObj.getResponseBody());\n  assertEquals(STATUS_OK,queryResultObj.getHttpStatus());\n  assertEquals(RECORD_COUNT,queryResultObj.getRecordCount());\n}"
+    },
+    "Old_Method": "@Test public void testProcessQueryGraphQl() throws URISyntaxException {\n  AsyncQuery queryObj=new AsyncQuery();\n  String responseBody=\"{\\\"data\\\":{\\\"book\\\":{\\\"edges\\\":[{\\\"node\\\":{\\\"id\\\":\\\"1\\\",\\\"title\\\":\\\"Ender's Game\\\"}},\" + \"{\\\"node\\\":{\\\"id\\\":\\\"2\\\",\\\"title\\\":\\\"Song of Ice and Fire\\\"}},\" + \"{\\\"node\\\":{\\\"id\\\":\\\"3\\\",\\\"title\\\":\\\"For Whom the Bell Tolls\\\"}}]}}}\";\n  ElideResponse<String> response=ElideResponse.status(200).body(responseBody);\n  String query=\"{\\\"query\\\":\\\"{ group { edges { node { name commonName description } } } }\\\",\\\"variables\\\":null}\";\n  String id=\"edc4a871-dff2-4054-804e-d80075cf827d\";\n  queryObj.setId(id);\n  queryObj.setQuery(query);\n  queryObj.setQueryType(QueryType.GRAPHQL_V1_0);\n  when(runner.run(any(),any(),any(),any(),any())).thenReturn(response);\n  GraphQLAsyncQueryOperation graphQLOperation=new GraphQLAsyncQueryOperation(asyncExecutorService,queryObj,requestScope);\n  AsyncQueryResult queryResultObj=(AsyncQueryResult)graphQLOperation.call();\n  assertEquals(responseBody,queryResultObj.getResponseBody());\n  assertEquals(200,queryResultObj.getHttpStatus());\n  assertEquals(3,queryResultObj.getRecordCount());\n}\n",
+    "File_Path": "elide/elide-async/src/test/java/com/yahoo/elide/async/operation/GraphQLAsyncQueryOperationTest.java",
+    "Start": 1839,
+    "Stop": 3132,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "testProcessQueryGraphQl"
+}

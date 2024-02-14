@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add Method Description",
+                "Change_Diff": "+ /**\n+  * This method subscribes a listener.\n+  * @param listener the listener to be subscribed\n+  */",
+                "Description": "It is important to add a brief description of what the method does, which can be added above the method declaration. This will help other developers understand the purpose of this method.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use Try-With-Resources for Exception Handling",
+                "Change_Diff": "- try {\n+ try (AutoCloseable ac = (AutoCloseable) listener) {",
+                "Description": "Java 7 introduced a new exception handling construct called 'try-with-resources' (TWR) which automatically closes the resources used within the try catch block. This helps avoid memory leaks.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- int length=messageHandlers.length;\n+ int messageHandlersLength=messageHandlers.length;",
+                "Description": "Using meaningful variable names makes the code easier to read and understand. For instance, the variable 'length' could be renamed to 'messageHandlersLength' to be more descriptive.",
+                "Start": 8,
+                "End": 8
+            }
+        ],
+        "Final code": "    /**\n     * This method subscribes a listener.\n     * @param listener the listener to be subscribed\n     */\n    public void subscribe(Object listener){\n        try (AutoCloseable ac = (AutoCloseable) listener) {\n            Class<?> listenerClass=listener.getClass();\n            if (nonListeners.contains(listenerClass)) {\n                return;\n            }\n            Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n            if (subscriptionsByListener == null) {\n                MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n                int messageHandlersLength=messageHandlers.length;\n                if (messageHandlersLength == 0) {\n                    nonListeners.add(listenerClass);\n                    return;\n                }\n                subscriptionsByListener=new Subscription[messageHandlersLength];\n                MessageHandler messageHandler;\n                for (int i=0; i < messageHandlersLength; i++) {\n                    messageHandler=messageHandlers[i];\n                    subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n                }\n                subscribe(listener,subscriptionsByListener);\n            }\n            else {\n                for (Subscription sub : subscriptionsByListener) {\n                    sub.subscribe(listener);\n                }\n            }\n        }\n        catch (Exception e) {\n            throw new RuntimeException(e);\n        }\n    }"
+    },
+    "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+    "Start": 3620,
+    "Stop": 5539,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "subscribe"
+}

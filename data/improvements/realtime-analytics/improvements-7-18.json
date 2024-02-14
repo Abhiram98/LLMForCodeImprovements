@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code complexity by breaking up the method",
+                "Change_Diff": "N/A",
+                "Description": "The method is quite large and performs many operations. It would be beneficial to break it down into smaller, more manageable methods. This would make the code easier to read and maintain.",
+                "Start": 1,
+                "End": 75
+            },
+            {
+                "Improvement": "Avoid unnecessary synchronization",
+                "Change_Diff": "- synchronized (this) {\n+ // No synchronization needed\n",
+                "Description": "The method uses synchronization, but it is not clear if this is necessary. If the method is always called from a single thread, then the synchronization can be removed. If the method can be called from multiple threads, then consider using a concurrent data structure instead of synchronizing the entire method.",
+                "Start": 16,
+                "End": 19
+            },
+            {
+                "Improvement": "Avoid null checks by using Optional",
+                "Change_Diff": "- if (counterMap == null)   return Collections.emptyList();\n+ Optional.ofNullable(counterMap).orElse(Collections.emptyList());",
+                "Description": "Instead of checking if a variable is null before using it, consider using Java 8's Optional class. This can help avoid NullPointerExceptions and make the code more readable.",
+                "Start": 3,
+                "End": 5
+            },
+            {
+                "Improvement": "Remove redundant conditional checks",
+                "Change_Diff": "- if (conf != null) {...} else if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {...}\n+ if (conf != null || counterMap.size() > getConfiguration().getGroupCounterMax()) {...}",
+                "Description": "The method checks if 'conf' is null twice in two different if-else blocks. This is redundant and can be simplified by merging the two conditions.",
+                "Start": 14,
+                "End": 30
+            }
+        ],
+        "Final code": "N/A"
+    },
+    "Old_Method": "private List<JetstreamEvent> createJetStreamGroupbyCountEventsWithTags(String metricName){\n  Map<MCMetricGroupDemension,Counter> counterMap=groupbyWithTagsMetricMap.get(metricName);\n  if (counterMap == null)   return Collections.emptyList();\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  Integer threshold=getConfiguration().getMetricsThreshold().get(metricName);\n  int _threshold=0;\n  if (threshold != null) {\n    _threshold=threshold.intValue();\n  }\n  boolean mapClear=false;\n  if (conf != null) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterOffHeapCache(metricName,conf);\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n else   if (conf == null && counterMap.size() > getConfiguration().getGroupCounterMax()) {\nsynchronized (this) {\n      Map<MCMetricGroupDemension,Counter> newCounterMap=CacheManager.getCounterCache();\n      groupbyWithTagsMetricMap.put(metricName,newCounterMap);\n    }\n    mapClear=true;\n  }\n  List<JetstreamEvent> result=new ArrayList<JetstreamEvent>(counterMap.size());\n  long now=System.currentTimeMillis();\n  for (  Map.Entry<MCMetricGroupDemension,Counter> entry : counterMap.entrySet()) {\n    MCMetricGroupDemension groupDemension=entry.getKey();\n    Counter counter=entry.getValue();\n    counter.mark();\n    boolean timeBasedMetric=false;\n    if (groupDemension.getDimensions() != null && groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME) != null) {\n      timeBasedMetric=true;\n    }\n    if (counter.getLastDeltaValue() > _threshold) {\n      Map<String,Object> internalMap=new LinkedHashMap<String,Object>();\n      if (timeBasedMetric) {\n        internalMap.put(MCConstant.METRIC_TIME,Long.valueOf(groupDemension.getDimensions().get(MCCounterHelper.TAG_METRICTIME)));\n      }\n else {\n        internalMap.put(MCConstant.METRIC_TIME,now);\n      }\n      if (counter instanceof AvgCounter) {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,((AvgCounter)counter).getLatestAvgValue());\n      }\n else {\n        internalMap.put(MCConstant.AGGREGATED_COUNT,counter.getLastDeltaValue());\n      }\n      internalMap.put(MCConstant.METRIC_NAME,metricName);\n      internalMap.put(MCConstant.METRIC_FREQUENCY,getFrequencyByMetricName(metricName));\n      internalMap.put(MCConstant.METRIC_DEMENSION,groupDemension);\n      if (counter.getLastCounterTime() != null) {\n        internalMap.put(MCConstant.TAG_TIME_IGNORE,counter.getLastCounterTime());\n      }\n      if (shutdownFlag.get()) {\n        internalMap.put(MCConstant.SHUTDOWN_FLUSH,MCConstant.SHUTDOWN_FLUSH);\n      }\n      if ((metricCollectionCounts.get(metricName) != null) && metricCollectionCounts.get(metricName).get() == 1) {\n        internalMap.put(MCConstant.FIRST_FLUSH,MCConstant.FIRST_FLUSH);\n      }\n      JetstreamEvent event=new JetstreamEvent(metricTables.get(metricName),null,internalMap);\n      result.add(event);\n    }\n    if (timeBasedMetric && counter.getLastDeltaValue() == 0) {\n      counterMap.remove(groupDemension);\n    }\n  }\n  if (result.size() > 0) {\n    JetstreamEvent lastEvent=result.get(result.size() - 1);\n    lastEvent.put(\"LastEventInBatch\",\"true\");\n  }\n  if (mapClear) {\n    counterMap.clear();\n    counterMap=null;\n    mapClearCount.increment();\n  }\n  return result;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 13857,
+    "Stop": 18700,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "createJetStreamGroupbyCountEventsWithTags"
+}

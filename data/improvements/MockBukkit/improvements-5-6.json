@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use getClass instead of instanceof to check objects",
+                "Change_Diff": "- if (!(obj instanceof LeatherArmorMeta)) {\n+ if (!(obj.getClass().equals(this.getClass()))) {",
+                "Description": "Instead of using instanceof to check if obj is a LeatherArmorMeta, use getClass. This is because getClass checks that the runtime classes are exactly the same while instanceof only checks that obj is assignable to LeatherArmorMeta",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Early return for false conditions",
+                "Change_Diff": "- if (this == obj) {\n-    return true;\n-  }\n-  if (!super.equals(obj)) {\n-    return false;\n-  }\n-  if (!(obj instanceof LeatherArmorMeta)) {\n-    return false;\n-  }\n-  return Objects.equals(color,other.getColor());\n+ if (this != obj && !super.equals(obj) && !(obj.getClass().equals(this.getClass()))) {\n+    return false;\n+  }\n+  return Objects.equals(color,other.getColor());",
+                "Description": "Instead of having multiple return statements, you can return false as early as possible when the conditions are not met. This makes the code cleaner and easier to read",
+                "Start": 2,
+                "End": 7
+            }
+        ],
+        "Final code": "@Override public boolean equals(Object obj) {\n  if (this != obj && !super.equals(obj) && !(obj.getClass().equals(this.getClass()))) {\n    return false;\n  }\n  return Objects.equals(color,other.getColor());\n}"
+    },
+    "Old_Method": "@Override public boolean equals(Object obj){\n  if (this == obj) {\n    return true;\n  }\n  if (!super.equals(obj)) {\n    return false;\n  }\n  if (!(obj instanceof LeatherArmorMeta)) {\n    return false;\n  }\n  return Objects.equals(color,other.getColor());\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/inventory/meta/LeatherArmorMetaMock.java",
+    "Start": 1196,
+    "Stop": 1464,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "equals"
+}

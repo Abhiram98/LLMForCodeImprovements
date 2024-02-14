@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use logging instead of System.out.println",
+                "Change_Diff": "- System.out.println(...)\n+ logger.info(...)",
+                "Description": "For better maintainability and configurability of your application, it is advisable to use a logging framework instead of System.out.println statements. This allows you to control which log statements are output with arbitrary granularity, it allows you to output log statements to various output targets, and it can keep a history of log statements.",
+                "Start": 3,
+                "End": 20
+            },
+            {
+                "Improvement": "Add null check for ByteBuffer",
+                "Change_Diff": "+ if (bodyData != null) {\n  byte[] dest=new byte[bodyData.limit()];\n  bodyData.get(dest);\n+ } else {\n+   logger.info(\"bodyData is null\");\n+ }",
+                "Description": "A null check for the ByteBuffer 'bodyData' is needed before trying to get data from it. This will prevent NullPointerExceptions from being thrown if 'bodyData' is null.",
+                "Start": 7,
+                "End": 10
+            },
+            {
+                "Improvement": "Handle SteamException properly",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.error(\"SteamException occurred\", e);\n+ throw new RuntimeException(e);",
+                "Description": "Instead of just printing the stack trace when a SteamException is caught, it would be better to handle it properly. This might involve logging the error and rethrowing the exception or wrapping it in a new exception and throwing that.",
+                "Start": 17,
+                "End": 19
+            }
+        ],
+        "Final code": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  logger.info(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      if (bodyData != null) {\n        byte[] dest=new byte[bodyData.limit()];\n        bodyData.get(dest);\n        String result=new String(dest,Charset.defaultCharset());\n        logger.info(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n      } else {\n        logger.info(\"bodyData is null\");\n      }\n    } else {\n      logger.info(\"- failed reading request data!\");\n    }\n  } catch (SteamException e) {\n    logger.error(\"SteamException occurred\", e);\n    throw new RuntimeException(e);\n  }\n  logger.info(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}"
+    },
+    "Old_Method": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamHTTPTest.java",
+    "Start": 1411,
+    "Stop": 2260,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onHTTPRequestDataReceived"
+}

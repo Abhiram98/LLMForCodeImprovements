@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant builder variable",
+                "Change_Diff": "- HttpGraphQlClient.Builder<?> builder2=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n+ builder=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n- HttpGraphQlClient.Builder<?> builder3=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));\n+ builder=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));",
+                "Description": "There is no need to declare a new builder variable each time when we can reuse the original one. This will make the code cleaner and easier to read.",
+                "Start": 5,
+                "End": 16
+            },
+            {
+                "Improvement": "Remove redundant client variable",
+                "Change_Diff": "- HttpGraphQlClient client=builder2.build();\n+ client=builder.build();\n- HttpGraphQlClient client=builder3.build();\n+ client=builder.build();",
+                "Description": "There is no need to declare a new client variable each time when we can reuse the original one. This will make the code cleaner and easier to read.",
+                "Start": 6,
+                "End": 16
+            }
+        ],
+        "Final code": "@Test void mutateWebTestClientViaConsumer(){\n  HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n  HttpGraphQlClient.Builder<?> builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n  HttpGraphQlClient client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n  builder=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n  client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\",\"two\");\n  builder=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));\n  client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n}"
+    },
+    "Old_Method": "@Test void mutateWebTestClientViaConsumer(){\n  HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n  HttpGraphQlClient.Builder<?> builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n  HttpGraphQlClient client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n  HttpGraphQlClient.Builder<?> builder2=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n  client=builder2.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\",\"two\");\n  HttpGraphQlClient.Builder<?> builder3=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));\n  client=builder3.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/test/java/org/springframework/graphql/client/WebGraphQlClientBuilderTests.java",
+    "Start": 5152,
+    "Stop": 6358,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "mutateWebTestClientViaConsumer"
+}

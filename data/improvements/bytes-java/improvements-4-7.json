@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method visibility modifier",
+                "Change_Diff": "- Alphabet(char[] chars){\n+ protected Alphabet(char[] chars){",
+                "Description": "Java methods should always be declared with explicit visibility. If the method should be available to all classes in the same package and subclasses, then it should be declared as protected.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add comments for complex calculations",
+                "Change_Diff": "- this.bitsPerChar=log2(chars.length);\n+ this.bitsPerChar=log2(chars.length); // Calculate the number of bits needed to represent a character in the alphabet\n- int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n+ int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar)); // Calculate the greatest common divisor of 8 and the bits per character\n- this.charsPerChunk=8 / gcd;\n+ this.charsPerChunk=8 / gcd; // Calculate the number of characters per chunk",
+                "Description": "Adding comments to explain what each part of the code does is good practice and improves code readability.",
+                "Start": 4,
+                "End": 6
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- byte[] decodabet=new byte[ASCII_MAX + 1];\n+ byte[] decodingTable=new byte[ASCII_MAX + 1];\n- decodabet[c]=(byte)i;\n+ decodingTable[c]=(byte)i;\n- this.decodabet=decodabet;\n+ this.decodabet=decodingTable;",
+                "Description": "Meaningful variable names make the code easier to read and understand. The variable 'decodabet' could be renamed to 'decodingTable' to better convey its purpose.",
+                "Start": 8,
+                "End": 14
+            }
+        ],
+        "Final code": "protected Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length); // Calculate the number of bits needed to represent a character in the alphabet\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar)); // Calculate the greatest common divisor of 8 and the bits per character\n  this.charsPerChunk=8 / gcd; // Calculate the number of characters per chunk\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodingTable=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodingTable,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodingTable[c]=(byte)i;\n  }\n  this.decodabet=decodingTable;\n}"
+    },
+    "Old_Method": "Alphabet(char[] chars){\n  this.chars=Objects.requireNonNull(chars);\n  this.bitsPerChar=log2(chars.length);\n  int gcd=Math.min(8,Integer.lowestOneBit(bitsPerChar));\n  this.charsPerChunk=8 / gcd;\n  this.bytesPerChunk=bitsPerChar / gcd;\n  this.mask=chars.length - 1;\n  byte[] decodabet=new byte[ASCII_MAX + 1];\n  Arrays.fill(decodabet,(byte)-1);\n  for (int i=0; i < chars.length; i++) {\n    char c=chars[i];\n    decodabet[c]=(byte)i;\n  }\n  this.decodabet=decodabet;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/BaseEncoding.java",
+    "Start": 6069,
+    "Stop": 6946,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "Alphabet"
+}

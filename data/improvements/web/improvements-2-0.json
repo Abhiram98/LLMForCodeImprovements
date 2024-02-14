@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(\"mysql url:\" + dbUrl);\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}\n",
+    "File_Path": "web/dao/src/main/java/com/aitongyi/web/dao/conf/DatabaseConfig.java",
+    "Start": 1211,
+    "Stop": 1703,
+    "Project_Name": "data/projects/web",
+    "Method_Name": "dataSource"
+}

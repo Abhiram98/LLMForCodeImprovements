@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract creation and deletion of resources into separate methods",
+                "Change_Diff": "- this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n- this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n- this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n+ createResources(context, vpcStackName, stackName, bucketName);\n- this.deleteBucket(context,bucketName);\n- this.deleteStack(context,stackName);\n- this.deleteStack(context,vpcStackName);\n+ deleteResources(context, vpcStackName, stackName, bucketName);",
+                "Description": "The test method has too many responsibilities. Extract creation and deletion of resources into separate methods to improve readability and maintainability.",
+                "Start": 2,
+                "End": 42
+            },
+            {
+                "Improvement": "Replace System.out.println with a logger",
+                "Change_Diff": "- System.out.println(\"Remaining objects:\");\n- for (final String object : objects) {\n-    System.out.println(object);\n- }\n+ logger.log(Level.INFO, \"Remaining objects:\");\n+ for (final String object : objects) {\n+    logger.log(Level.INFO, object);\n+ }",
+                "Description": "System.out.println is not generally used in production code and logs should be written using a logger to provide more control over output and levels of logging.",
+                "Start": 26,
+                "End": 29
+            }
+        ],
+        "Final code": "@Test\npublic void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    createResources(context, vpcStackName, stackName, bucketName);\n    cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n    this.retry(context,() -> {\n      final long count=this.countBucket(bucketName);\n      if (count != 0) {\n        throw new RuntimeException(\"there are \" + count + \" infected files left\");\n      }\n      return false;\n    }\n);\n  } catch (final RuntimeException e) {\n    final List<String> objects=this.listBucket(bucketName,100);\n    logger.log(Level.INFO, \"Remaining objects:\");\n    for (final String object : objects) {\n        logger.log(Level.INFO, object);\n    }\n    throw e;\n  } finally {\n    deleteResources(context, vpcStackName, stackName, bucketName);\n  }\n}\n\nprivate void createResources(Context context, String vpcStackName, String stackName, String bucketName) {\n  this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n  this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n  this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n}\n\nprivate void deleteResources(Context context, String vpcStackName, String stackName, String bucketName) {\n  this.deleteBucket(context,bucketName);\n  this.deleteStack(context,stackName);\n  this.deleteStack(context,vpcStackName);\n}"
+    },
+    "Old_Method": "@Test public void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n        this.retry(context,() -> {\n          final long count=this.countBucket(bucketName);\n          if (count != 0) {\n            throw new RuntimeException(\"there are \" + count + \" infected files left\");\n          }\n          return false;\n        }\n);\n      }\n catch (      final RuntimeException e) {\n        final List<String> objects=this.listBucket(bucketName,100);\n        System.out.println(\"Remaining objects:\");\n        for (        final String object : objects) {\n          System.out.println(object);\n        }\n        throw e;\n      }\n finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestRealworldFiles.java",
+    "Start": 247,
+    "Stop": 2293,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "test"
+}

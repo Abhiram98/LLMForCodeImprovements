@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactoring to a separate method",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n-    cookie.setValue(\"\");\n-    cookie.setPath(\"/\");\n-    cookie.setMaxAge(0);\n-    response.addCookie(cookie);\n+    if (cookie.getName().equals(name)) {\n+        Cookie newCookie = createEmptyCookie(name);\n+        response.addCookie(newCookie);\n+    }\n...\n+private static Cookie createEmptyCookie(String name) {\n+    Cookie cookie = new Cookie(name, \"\");\n+    cookie.setPath(\"/\");\n+    cookie.setMaxAge(0);\n+    return cookie;\n+}",
+                "Description": "Refactor the code that creates a new cookie into a separate method for better readability and maintainability.",
+                "Start": 4,
+                "End": 8
+            },
+            {
+                "Improvement": "Adding null check for 'name'",
+                "Change_Diff": "+ if (name == null) {\n+     return;\n+ }\n...",
+                "Description": "Add null check for 'name'. If 'name' is null, the method should return immediately to avoid NullPointerException.",
+                "Start": 1,
+                "End": 13
+            }
+        ],
+        "Final code": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  if (name == null) {\n    return;\n  }\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        Cookie newCookie = createEmptyCookie(name);\n        response.addCookie(newCookie);\n      }\n    }\n  }\n}\n\nprivate static Cookie createEmptyCookie(String name) {\n  Cookie cookie = new Cookie(name, \"\");\n  cookie.setPath(\"/\");\n  cookie.setMaxAge(0);\n  return cookie;\n}"
+    },
+    "Old_Method": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (    Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        cookie.setValue(\"\");\n        cookie.setPath(\"/\");\n        cookie.setMaxAge(0);\n        response.addCookie(cookie);\n      }\n    }\n  }\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/util/CookieUtils.java",
+    "Start": 1016,
+    "Stop": 1537,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "deleteCookie"
+}

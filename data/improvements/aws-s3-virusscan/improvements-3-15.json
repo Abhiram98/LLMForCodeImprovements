@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract duplicate code into a method",
+                "Change_Diff": "- this.deleteStack(context,stackName);\n- this.deleteStack(context,vpcStackName);\n+ deleteStacks(context, stackName, vpcStackName);",
+                "Description": "The deleteStack method is called three times in the catch and finally blocks. You should extract this code into a separate method to increase readability and maintainability. This method can take the context and stackName as parameters, and be called in the catch and finally blocks.",
+                "Start": 22,
+                "End": 40
+            },
+            {
+                "Improvement": "Use try-with-resources to manage resources",
+                "Change_Diff": "- final Context context=new Context();\n- try { ... } finally { this.deleteStack(context, vpcStackName); }\n+ try (final Context context = new Context()) { ... }",
+                "Description": "The Context object can implement the AutoCloseable interface and its close method can take care of the stack deletion. This way, you can use a try-with-resources block to guarantee that the resources are properly released, even if an exception is thrown.",
+                "Start": 2,
+                "End": 40
+            }
+        ],
+        "Final code": "public void test() {\n    try (final Context context = new Context()) {\n        final String vpcStackName = \"vpc-2azs-\" + this.random8String();\n        final String stackName = \"s3-virusscan-\" + this.random8String();\n        final String bucketName = \"s3-virusscan-\" + this.random8String();\n        final InfectedFileCache cache = new InfectedFileCache();\n        this.createWiddixStack(context, vpcStackName, \"vpc/vpc-2azs.yaml\");\n        try {\n            this.createStack(context, stackName, \"template.yaml\", new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n            try {\n                this.createBucketWithSQSNotification(bucketName, this.getStackOutputValue(stackName, \"ScanQueueArn\"));\n                cache.getFiles().forEach(file -> this.createObject(bucketName, file.getkey(), file.getContent(), file.getContentType(), file.getContentLength()));\n                this.retry(context, () -> {\n                    final long count = this.countBucket(bucketName);\n                    if (count != 0) {\n                        throw new RuntimeException(\"there are \" + count + \" infected files left\");\n                    }\n                    return false;\n                });\n            } catch (final RuntimeException e) {\n                final List<String> objects = this.listBucket(bucketName, 100);\n                System.out.println(\"Remaining objects:\");\n                for (final String object : objects) {\n                    System.out.println(object);\n                }\n                throw e;\n            } finally {\n                this.deleteBucket(context, bucketName);\n            }\n        } finally {\n            deleteStacks(context, stackName);\n        }\n    }\n}\n\nprivate void deleteStacks(Context context, String... stackNames) {\n    for (String stackName : stackNames) {\n        this.deleteStack(context, stackName);\n    }\n}"
+    },
+    "Old_Method": "@Test public void test(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final InfectedFileCache cache=new InfectedFileCache();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        cache.getFiles().forEach(file -> this.createObject(bucketName,file.getkey(),file.getContent(),file.getContentType(),file.getContentLength()));\n        this.retry(context,() -> {\n          final long count=this.countBucket(bucketName);\n          if (count != 0) {\n            throw new RuntimeException(\"there are \" + count + \" infected files left\");\n          }\n          return false;\n        }\n);\n      }\n catch (      final RuntimeException e) {\n        final List<String> objects=this.listBucket(bucketName,100);\n        System.out.println(\"Remaining objects:\");\n        for (        final String object : objects) {\n          System.out.println(object);\n        }\n        throw e;\n      }\n finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestRealworldFiles.java",
+    "Start": 247,
+    "Stop": 2293,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "test"
+}

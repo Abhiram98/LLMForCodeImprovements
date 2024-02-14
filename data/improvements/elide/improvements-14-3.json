@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Simplify the baseRoute assignment",
+                "Change_Diff": "- String baseRoute=baseUrl == null ? \"\" : baseUrl;\n+ String baseRoute=Optional.ofNullable(baseUrl).orElse(\"\");",
+                "Description": "The baseRoute can be simplified by using Optional.ofNullable() method which returns an empty string if baseUrl is null.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Refactor apiVersion extraction",
+                "Change_Diff": "- /* All the code related to apiVersion extraction */\n+ String[] apiVersionData = extractApiVersion(path);\n+ apiVersion = apiVersionData[0];\n+ apiVersionString = apiVersionData[1];\n+ pathStart = Integer.parseInt(apiVersionData[2]);\n+ pathEnd = Integer.parseInt(apiVersionData[3]);",
+                "Description": "The extraction of the apiVersion can be refactored into a separate method for better readability and maintainability.",
+                "Start": 9,
+                "End": 43
+            },
+            {
+                "Improvement": "Refactor route extraction",
+                "Change_Diff": "- /* All the code related to route extraction */\n+ route = extractRoute(path, pathStart, pathEnd);",
+                "Description": "The extraction of the route can be refactored into a separate method for better readability and maintainability.",
+                "Start": 44,
+                "End": 50
+            },
+            {
+                "Improvement": "Refactor baseRoute construction",
+                "Change_Diff": "- /* All the code related to baseRoute construction */\n+ baseRoute = constructBaseRoute(baseRoute, apiVersionString);",
+                "Description": "The construction of the baseRoute can be refactored into a separate method for better readability and maintainability.",
+                "Start": 51,
+                "End": 56
+            }
+        ],
+        "Final code": "public Route resolve(String mediaType, String baseUrl, String path, Map<String, List<String>> headers, Map<String, List<String>> parameters) {\n    String baseRoute = Optional.ofNullable(baseUrl).orElse(\"\");\n    String route = path;\n    String apiVersion = NO_VERSION;\n    String apiVersionString = \"\";\n    int pathStart = -1;\n    int pathEnd = -1;\n    String[] apiVersionData = extractApiVersion(path);\n    apiVersion = apiVersionData[0];\n    apiVersionString = apiVersionData[1];\n    pathStart = Integer.parseInt(apiVersionData[2]);\n    pathEnd = Integer.parseInt(apiVersionData[3]);\n    route = extractRoute(path, pathStart, pathEnd);\n    baseRoute = constructBaseRoute(baseRoute, apiVersionString);\n    return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}"
+    },
+    "Old_Method": "@Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n  String baseRoute=baseUrl == null ? \"\" : baseUrl;\n  String route=path;\n  String apiVersion=NO_VERSION;\n  String apiVersionString=\"\";\n  int versionStart=-1;\n  int versionEnd=-1;\n  int pathStart=-1;\n  int pathEnd=-1;\n  int find=path.indexOf('/',0);\n  if (find != -1) {\n    if (find == 0) {\n      versionStart=1;\n      int findEnd=path.indexOf('/',1);\n      if (findEnd != -1) {\n        versionEnd=findEnd;\n        pathStart=findEnd;\n        pathEnd=path.length();\n      }\n else {\n        versionEnd=path.length();\n      }\n    }\n else {\n      versionStart=0;\n      versionEnd=find;\n      pathStart=find;\n      pathEnd=path.length();\n    }\n  }\n else {\n    versionStart=0;\n    versionEnd=path.length();\n  }\n  if (versionStart != -1 && versionEnd != -1) {\n    apiVersion=path.substring(versionStart,versionEnd);\n    apiVersionString=apiVersion;\n  }\n  if (!apiVersion.isEmpty() && !this.versionPrefix.isEmpty()) {\n    if (apiVersion.startsWith(this.versionPrefix)) {\n      apiVersion=apiVersion.substring(this.versionPrefix.length());\n    }\n  }\n  if (!apiVersion.isEmpty()) {\n    if (!apiVersionValidator.isValidApiVersion(apiVersion)) {\n      apiVersion=NO_VERSION;\n      pathStart=0;\n      pathEnd=path.length();\n      apiVersionString=\"\";\n    }\n  }\n  if (pathStart != -1 && pathEnd != -1) {\n    route=path.substring(pathStart,pathEnd);\n  }\n else {\n    route=\"\";\n  }\n  if (route.length() > 0 && route.charAt(0) == '/') {\n    route=route.substring(1);\n  }\n  if (baseRoute.length() > 0 && baseRoute.charAt(baseRoute.length() - 1) == '/') {\n    baseRoute=baseRoute + apiVersionString;\n  }\n else {\n    baseRoute=baseRoute + \"/\" + apiVersionString;\n  }\n  return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/core/request/route/PathRouteResolver.java",
+    "Start": 730,
+    "Stop": 3402,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "resolve"
+}

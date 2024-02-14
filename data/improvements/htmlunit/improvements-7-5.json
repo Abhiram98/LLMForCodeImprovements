@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Optimize the value assignment",
+                "Change_Diff": "- value=value + \" \";\n- value=value + token;\n+ StringBuilder sb = new StringBuilder(value);\n+ if (value.length() != 0 && !isWhitespace(value.charAt(value.length() - 1))) {\n+   sb.append(\" \");\n+ }\n+ sb.append(token);\n+ value = sb.toString();",
+                "Description": "Instead of assigning the value multiple times, you should make use of StringBuilder for concatenation. This will be more efficient as String objects are immutable in Java, so each concatenation will result in a new String object being created which can be inefficient, especially in loops.",
+                "Start": 11,
+                "End": 22
+            },
+            {
+                "Improvement": "Improve error messages",
+                "Change_Diff": "- throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n- throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n+ throw JavaScriptEngine.reportRuntimeError(\"Empty string is not allowed as input\");\n+ throw JavaScriptEngine.reportRuntimeError(\"Input containing whitespace is not allowed\");",
+                "Description": "The error message for both the empty string check and the whitespace check is the same. It would be more helpful to throw different messages for different errors to make the problem more clear to the user.",
+                "Start": 5,
+                "End": 8
+            }
+        ],
+        "Final code": "/** \n * Adds the specified token to the underlying string.\n * @param token the token to add\n */\n@JsxFunction public void add(final String token){\n  if (StringUtils.isEmpty(token)) {\n    throw JavaScriptEngine.reportRuntimeError(\"Empty string is not allowed as input\");\n  }\n  if (StringUtils.containsAny(token,whitespaceChars())) {\n    throw JavaScriptEngine.reportRuntimeError(\"Input containing whitespace is not allowed\");\n  }\n  boolean changed=false;\n  String value=getAttribValue();\n  if (StringUtils.isEmpty(value)) {\n    value=token;\n    changed=true;\n  }\n else {\n    value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n    if (position(value,token) < 0) {\n      StringBuilder sb = new StringBuilder(value);\n      if (value.length() != 0 && !isWhitespace(value.charAt(value.length() - 1))) {\n        sb.append(\" \");\n      }\n      sb.append(token);\n      value = sb.toString();\n      changed=true;\n    }\n else     if (getBrowserVersion().hasFeature(JS_DOMTOKENLIST_REMOVE_WHITESPACE_CHARS_ON_ADD)) {\n      value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n      changed=true;\n    }\n  }\n  if (changed) {\n    updateAttribute(value);\n  }\n}"
+    },
+    "Old_Method": "/** \n * Adds the specified token to the underlying string.\n * @param token the token to add\n */\n@JsxFunction public void add(final String token){\n  if (StringUtils.isEmpty(token)) {\n    throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n  }\n  if (StringUtils.containsAny(token,whitespaceChars())) {\n    throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n  }\n  boolean changed=false;\n  String value=getAttribValue();\n  if (StringUtils.isEmpty(value)) {\n    value=token;\n    changed=true;\n  }\n else {\n    value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n    if (position(value,token) < 0) {\n      if (value.length() != 0 && !isWhitespace(value.charAt(value.length() - 1))) {\n        value=value + \" \";\n      }\n      value=value + token;\n      changed=true;\n    }\n else     if (getBrowserVersion().hasFeature(JS_DOMTOKENLIST_REMOVE_WHITESPACE_CHARS_ON_ADD)) {\n      value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n      changed=true;\n    }\n  }\n  if (changed) {\n    updateAttribute(value);\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/dom/DOMTokenList.java",
+    "Start": 4586,
+    "Stop": 5928,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "add"
+}

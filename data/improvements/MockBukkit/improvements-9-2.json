@@ -1,0 +1,9 @@
+{
+    "Method_Improvements": {"response_failed": true},
+    "Old_Method": "@SuppressWarnings(\"unchecked\") @Override @Deprecated(since=\"1.13\") public boolean setGameRuleValue(@Nullable String rule,@NotNull String value){\n  if (rule == null) {\n    return false;\n  }\n  GameRule<?> gameRule=GameRule.getByName(rule);\n  if (gameRule == null) {\n    return false;\n  }\n  if (gameRule.getType().equals(Boolean.class) && (value.equalsIgnoreCase(\"true\") || value.equalsIgnoreCase(\"false\"))) {\n    WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n    if (!event.callEvent()) {\n      return false;\n    }\n    return setGameRule((GameRule<Boolean>)gameRule,value.equalsIgnoreCase(\"true\"));\n  }\n else   if (gameRule.getType().equals(Integer.class)) {\n    try {\n      int intValue=Integer.parseInt(value);\n      WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n      if (!event.callEvent()) {\n        return false;\n      }\n      return setGameRule((GameRule<Integer>)gameRule,intValue);\n    }\n catch (    NumberFormatException e) {\n      return false;\n    }\n  }\n else {\n    return false;\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/WorldMock.java",
+    "Start": 60111,
+    "Stop": 61224,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "setGameRuleValue"
+}

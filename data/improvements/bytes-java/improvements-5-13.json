@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid code duplication",
+                "Change_Diff": "- for (int i=0; i < 8; i++) {\n-    assertFalse(Bytes.allocate(1).bitAt(i));\n-  }\n-  for (int i=0; i < 8; i++) {\n-    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n-  }\n-  assertFalse(Bytes.from((byte)8).bitAt(0));\n-  assertFalse(Bytes.from((byte)8).bitAt(1));\n-  assertFalse(Bytes.from((byte)8).bitAt(2));\n-  assertTrue(Bytes.from((byte)8).bitAt(3));\n-  assertFalse(Bytes.from((byte)8).bitAt(4));\n\n+ checkBits(Bytes.allocate(1), 8, false);\n+ checkBits(Bytes.from((byte)0xFF), 8, true);\n+ checkBits(Bytes.from((byte)8), new boolean[]{false, false, false, true, false});",
+                "Description": "There is a repeated pattern of checking the bit at certain positions after creating a Bytes object from a byte. This can be extracted into its own method to avoid duplicating the same piece of code multiple times.",
+                "Start": 3,
+                "End": 14
+            },
+            {
+                "Improvement": "Abstract exception test",
+                "Change_Diff": "- try {\n-    Bytes.allocate(1).bitAt(8);\n-    fail();\n-  }\n- catch (  IndexOutOfBoundsException ignored) {\n-  }\n-  try {\n-    Bytes.allocate(16).bitAt(-1);\n-    fail();\n-  }\n- catch (  IndexOutOfBoundsException ignored) {\n-  }\n\n+ expectIndexOutOfBoundsException(() -> Bytes.allocate(1).bitAt(8));\n+ expectIndexOutOfBoundsException(() -> Bytes.allocate(16).bitAt(-1));",
+                "Description": "The pattern of trying a method and expecting an exception is repeated twice. This can be extracted to its own method to avoid duplicating the same piece of code multiple times.",
+                "Start": 15,
+                "End": 22
+            }
+        ],
+        "Final code": "@Test public void bitAt(){\n  checkBits(Bytes.allocate(1), 8, false);\n  checkBits(Bytes.from((byte)0xFF), 8, true);\n  checkBits(Bytes.from((byte)8), new boolean[]{false, false, false, true, false});\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  expectIndexOutOfBoundsException(() -> Bytes.allocate(1).bitAt(8));\n  expectIndexOutOfBoundsException(() -> Bytes.allocate(16).bitAt(-1));\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n\nprivate void checkBits(Bytes bytes, int numBits, boolean expected) {\n    for (int i = 0; i < numBits; i++) {\n        assertEquals(expected, bytes.bitAt(i));\n    }\n}\n\nprivate void checkBits(Bytes bytes, boolean[] bits) {\n    for (int i = 0; i < bits.length; i++) {\n        assertEquals(bits[i], bytes.bitAt(i));\n    }\n}\n\nprivate void expectIndexOutOfBoundsException(Runnable runnable) {\n    try {\n        runnable.run();\n        fail();\n    } catch (IndexOutOfBoundsException ignored) {\n    }\n}"
+    },
+    "Old_Method": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  assertFalse(Bytes.from((byte)8).bitAt(0));\n  assertFalse(Bytes.from((byte)8).bitAt(1));\n  assertFalse(Bytes.from((byte)8).bitAt(2));\n  assertTrue(Bytes.from((byte)8).bitAt(3));\n  assertFalse(Bytes.from((byte)8).bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BytesMiscTest.java",
+    "Start": 12738,
+    "Stop": 14127,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "bitAt"
+}

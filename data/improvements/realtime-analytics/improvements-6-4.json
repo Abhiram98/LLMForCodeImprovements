@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop for iterating over collections",
+                "Change_Diff": "- while ((event=localQueue.poll()) != null) {\n+ for (JetstreamEvent event : localQueue) {",
+                "Description": "Instead of using a traditional while loop to iterate over `pendingSessionizers`, use an enhanced for loop. This ensures better readability and simpler code.",
+                "Start": 5,
+                "End": 7
+            },
+            {
+                "Improvement": "Avoid SuppressWarnings",
+                "Change_Diff": "- @SuppressWarnings(\"unchecked\") LinkedList<SessionizationInfo> pendingSessionizers=(LinkedList<SessionizationInfo>)event.get(SESSIONIZER_LIST);\n+ LinkedList<SessionizationInfo> pendingSessionizers = new LinkedList<>();\n+ pendingSessionizers.addAll((Collection<? extends SessionizationInfo>) event.get(SESSIONIZER_LIST));",
+                "Description": "Avoid using @SuppressWarnings annotation. It's better to handle the warning instead of suppressing it. In this case, create a `LinkedList<SessionizationInfo>` object and then add the objects from `event.get(SESSIONIZER_LIST)`.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Use finally block in try-catch",
+                "Change_Diff": "- try {\n+ try {\n // code here\n} finally {\n // code to be executed finally\n}",
+                "Description": "Use a finally block to ensure the code is executed regardless of whether an exception is thrown or not. This will help to avoid code duplication.",
+                "Start": 11,
+                "End": 59
+            }
+        ],
+        "Final code": "@Override public void run(){\n  while (running) {\n    JetstreamEvent event;\n    for (JetstreamEvent event : localQueue) {\n      LinkedList<SessionizationInfo> pendingSessionizers = new LinkedList<>();\n      pendingSessionizers.addAll((Collection<? extends SessionizationInfo>) event.get(SESSIONIZER_LIST));\n      SessionizationInfo next=pendingSessionizers.removeFirst();\n      if (pendingSessionizers.isEmpty()) {\n        event.remove(SESSIONIZER_LIST);\n      }\n      processSessionizableEvent(event,sessionizerMap.get(next.getName()),next);\n    }\n    try {\n      event=responseQueue.poll();\n      if (event == null) {\n        event=requestQueue.take();\n      }\n    } catch (InterruptedException e) {\n      continue;\n    } finally {\n      // code to be executed finally\n    }\n    // rest of the code remains same\n  }\n}"
+    },
+    "Old_Method": "@Override public void run(){\n  while (running) {\n    JetstreamEvent event;\n    while ((event=localQueue.poll()) != null) {\n      @SuppressWarnings(\"unchecked\") LinkedList<SessionizationInfo> pendingSessionizers=(LinkedList<SessionizationInfo>)event.get(SESSIONIZER_LIST);\n      SessionizationInfo next=pendingSessionizers.removeFirst();\n      if (pendingSessionizers.isEmpty()) {\n        event.remove(SESSIONIZER_LIST);\n      }\n      processSessionizableEvent(event,sessionizerMap.get(next.getName()),next);\n    }\n    try {\n      event=responseQueue.poll();\n      if (event == null) {\n        event=requestQueue.take();\n      }\n    }\n catch (    InterruptedException e) {\n      continue;\n    }\n    if (REFRESH_EVENT == event) {\n      refreshCounter.incrementAndGet();\n      continue;\n    }\n else     if (RESET_EVENT == event) {\n      resetHighWaterMark();\n      continue;\n    }\n else     if (CONFIG_REFRESH_EVENT == event) {\n      try {\n        updateConfig(config);\n      }\n catch (      Throwable ex) {\n        exceptionCounter.incrementAndGet();\n        errorManager.registerError(ex,ErrorType.Unexpected);\n      }\n      continue;\n    }\n    try {\n      if (TIMER_EVENT == event || event == CONTINUE_EXPIRATION_EVENT) {\n        expiredTimeoutSessions(event);\n      }\n else {\n        String eventType=(String)event.get(JS_EVENT_TYPE);\n        if (!interEventTypes.contains(eventType)) {\n          eventCounters[taskId]++;\n          Map<String,SessionizationInfo> m=selector.process(event);\n          if (m == null || m.isEmpty()) {\n            bypassEventCounter++;\n            sendRawEvent(event);\n          }\n else           if (m.size() == 1) {\n            Entry<String,SessionizationInfo> entry=m.entrySet().iterator().next();\n            event.put(CURRENT_SESSIOIZERINFO,entry.getValue());\n            processSessionizableEvent(event,sessionizerMap.get(entry.getKey()),entry.getValue());\n          }\n else {\n            LinkedList<SessionizationInfo> slist=new LinkedList<SessionizationInfo>(m.values());\n            event.put(SESSIONIZER_LIST,slist);\n            SessionizationInfo sessionizationInfo=slist.removeFirst();\n            event.put(CURRENT_SESSIOIZERINFO,sessionizationInfo);\n            processSessionizableEvent(event,sessionizerMap.get(sessionizationInfo.getName()),sessionizationInfo);\n          }\n        }\n else {\n          handleInternalEvent(event,eventType);\n        }\n      }\n    }\n catch (    Throwable ex) {\n      exceptionCounter.incrementAndGet();\n      errorManager.registerError(ex,event,ErrorType.Unexpected);\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 32821,
+    "Stop": 36449,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "run"
+}

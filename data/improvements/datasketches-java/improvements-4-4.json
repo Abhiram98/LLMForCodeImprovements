@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources to automatically close resources",
+                "Change_Diff": "- WritableHandle wh;\n...\ntry {\n  wh.close();\n}\ncatch (  Exception e) {\n}\n+ try (WritableHandle wh = putOffHeap(Memory.wrap(sv3csk.toByteArray()))) {\n...\n}",
+                "Description": "The try-with-resources statement is a try statement that declares one or more resources. The resource is as an object that must be closed after finishing with it. The try-with-resources statement ensures that each resource is closed at the end of the statement execution. This can be applied to the `WritableHandle wh` object creation and usage.",
+                "Start": 8,
+                "End": 12
+            },
+            {
+                "Improvement": "Avoid empty catch blocks",
+                "Change_Diff": "- catch (  Exception e) {\n}\n+ catch (Exception e) {\n  e.printStackTrace();\n}",
+                "Description": "Empty catch blocks swallow exceptions and can make it difficult to identify and debug issues. At the very least, the caught exceptions should be logged.",
+                "Start": 12,
+                "End": 14
+            }
+        ],
+        "Final code": "@Test public void checkWrapCompactSketchGivenDefaultSeed(){\n  final int k=64;\n  final long seed=ThetaUtil.DEFAULT_UPDATE_SEED;\n  final short seedHash=Util.computeSeedHash(seed);\n  UpdateSketch sv3usk=UpdateSketch.builder().setNominalEntries(k).setSeed(seed).build();\n  for (int i=0; i < k; i++) {\n    sv3usk.update(i);\n  }\n  CompactSketch sv3cskResult;\n  CompactSketch sv3csk=sv3usk.compact();\n  try (WritableHandle wh = putOffHeap(Memory.wrap(sv3csk.toByteArray()))) {\n    sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n    assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n    assertEquals(sv3cskResult.getSeedHash(),seedHash);\n    assertTrue(sv3cskResult.isDirect());\n  } catch (Exception e) {\n    e.printStackTrace();\n  }\n  try (WritableHandle wh = putOffHeap(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed))) {\n    sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n    assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n    assertEquals(sv3cskResult.getSeedHash(),seedHash);\n    assertFalse(sv3cskResult.isDirect());\n  } catch (Exception e) {\n    e.printStackTrace();\n  }\n  try (WritableHandle wh = putOffHeap(BackwardConversions.convertSerVer3toSerVer1(sv3csk))) {\n    sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n    assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n    assertEquals(sv3cskResult.getSeedHash(),seedHash);\n    assertFalse(sv3cskResult.isDirect());\n  } catch (Exception e) {\n    e.printStackTrace();\n  }\n}"
+    },
+    "Old_Method": "@Test public void checkWrapCompactSketchGivenDefaultSeed(){\n  final int k=64;\n  final long seed=ThetaUtil.DEFAULT_UPDATE_SEED;\n  final short seedHash=Util.computeSeedHash(seed);\n  UpdateSketch sv3usk=UpdateSketch.builder().setNominalEntries(k).setSeed(seed).build();\n  for (int i=0; i < k; i++) {\n    sv3usk.update(i);\n  }\n  CompactSketch sv3cskResult;\n  WritableHandle wh;\n  CompactSketch sv3csk=sv3usk.compact();\n  wh=putOffHeap(Memory.wrap(sv3csk.toByteArray()));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertTrue(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n  wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer2(sv3csk,seed));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertFalse(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n  wh=putOffHeap(BackwardConversions.convertSerVer3toSerVer1(sv3csk));\n  sv3cskResult=Sketches.wrapCompactSketch(wh.getWritable(),seed);\n  assertEquals(sv3cskResult.getEstimate(),sv3usk.getEstimate());\n  assertEquals(sv3cskResult.getSeedHash(),seedHash);\n  assertFalse(sv3cskResult.isDirect());\n  try {\n    wh.close();\n  }\n catch (  Exception e) {\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/HeapifyWrapSerVer1and2Test.java",
+    "Start": 14530,
+    "Stop": 16090,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkWrapCompactSketchGivenDefaultSeed"
+}

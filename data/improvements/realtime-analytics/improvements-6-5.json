@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract complex logic into separate methods",
+                "Change_Diff": "Extract the logic inside the while loop into a new method called processEvent(JetstreamEvent event). Extract the logic inside the if-else-if-else block into a new method called handleEvent(JetstreamEvent event).",
+                "Description": "The method run() is too complex with many nested conditionals. Extracting parts of this logic into separate methods would enhance readability and maintainability.",
+                "Start": 0,
+                "End": 100
+            },
+            {
+                "Improvement": "Use try-with-resources to handle exceptions",
+                "Change_Diff": "Replace traditional try-catch block with try-with-resources.",
+                "Description": "Instead of using traditional try-catch blocks, you can use try-with-resources, which also ensures that each resource is closed at the end of the statement.",
+                "Start": 11,
+                "End": 47
+            },
+            {
+                "Improvement": "Use Java 8 Stream API",
+                "Change_Diff": "Replace the while loop for polling events from the queue with Stream API's forEach method.",
+                "Description": "For operations on collections, using Java 8 Stream API can make the code more readable and support parallel execution.",
+                "Start": 4,
+                "End": 10
+            },
+            {
+                "Improvement": "Use Optional to avoid null checks",
+                "Change_Diff": "Replace null check on event with Optional.ofNullable and use orElse to provide a default action.",
+                "Description": "Instead of checking if an object is null before using it, you can use Java 8's Optional class to avoid potential NullPointerExceptions.",
+                "Start": 14,
+                "End": 16
+            }
+        ],
+        "Final code": "Not possible to provide without knowing the rest of the code and dependencies."
+    },
+    "Old_Method": "@Override public void run(){\n  while (running) {\n    JetstreamEvent event;\n    while ((event=localQueue.poll()) != null) {\n      @SuppressWarnings(\"unchecked\") LinkedList<SessionizationInfo> pendingSessionizers=(LinkedList<SessionizationInfo>)event.get(SESSIONIZER_LIST);\n      SessionizationInfo next=pendingSessionizers.removeFirst();\n      if (pendingSessionizers.isEmpty()) {\n        event.remove(SESSIONIZER_LIST);\n      }\n      processSessionizableEvent(event,sessionizerMap.get(next.getName()),next);\n    }\n    try {\n      event=responseQueue.poll();\n      if (event == null) {\n        event=requestQueue.take();\n      }\n    }\n catch (    InterruptedException e) {\n      continue;\n    }\n    if (REFRESH_EVENT == event) {\n      refreshCounter.incrementAndGet();\n      continue;\n    }\n else     if (RESET_EVENT == event) {\n      resetHighWaterMark();\n      continue;\n    }\n else     if (CONFIG_REFRESH_EVENT == event) {\n      try {\n        updateConfig(config);\n      }\n catch (      Throwable ex) {\n        exceptionCounter.incrementAndGet();\n        errorManager.registerError(ex,ErrorType.Unexpected);\n      }\n      continue;\n    }\n    try {\n      if (TIMER_EVENT == event || event == CONTINUE_EXPIRATION_EVENT) {\n        expiredTimeoutSessions(event);\n      }\n else {\n        String eventType=(String)event.get(JS_EVENT_TYPE);\n        if (!interEventTypes.contains(eventType)) {\n          eventCounters[taskId]++;\n          Map<String,SessionizationInfo> m=selector.process(event);\n          if (m == null || m.isEmpty()) {\n            bypassEventCounter++;\n            sendRawEvent(event);\n          }\n else           if (m.size() == 1) {\n            Entry<String,SessionizationInfo> entry=m.entrySet().iterator().next();\n            event.put(CURRENT_SESSIOIZERINFO,entry.getValue());\n            processSessionizableEvent(event,sessionizerMap.get(entry.getKey()),entry.getValue());\n          }\n else {\n            LinkedList<SessionizationInfo> slist=new LinkedList<SessionizationInfo>(m.values());\n            event.put(SESSIONIZER_LIST,slist);\n            SessionizationInfo sessionizationInfo=slist.removeFirst();\n            event.put(CURRENT_SESSIOIZERINFO,sessionizationInfo);\n            processSessionizableEvent(event,sessionizerMap.get(sessionizationInfo.getName()),sessionizationInfo);\n          }\n        }\n else {\n          handleInternalEvent(event,eventType);\n        }\n      }\n    }\n catch (    Throwable ex) {\n      exceptionCounter.incrementAndGet();\n      errorManager.registerError(ex,event,ErrorType.Unexpected);\n    }\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/impl/SessionizerProcessor.java",
+    "Start": 32821,
+    "Stop": 36449,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "run"
+}

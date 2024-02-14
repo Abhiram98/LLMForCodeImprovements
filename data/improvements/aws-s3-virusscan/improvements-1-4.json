@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use logging instead of System.out.println for error handling",
+                "Change_Diff": "- System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n- e.printStackTrace(System.out);\n- System.out.println();\n+ Logger logger = Logger.getLogger(getClass().getName());\n+ logger.log(Level.WARNING, \"retry[\" + t.incrementAndGet() + \"] exception: \", e);",
+                "Description": "Instead of using `System.out.println` to print exception messages, use a logging framework such as `java.util.logging` or SLF4J. This provides more flexibility (like different logging levels and multiple output targets) and is generally considered a best practice.",
+                "Start": 7,
+                "End": 10
+            },
+            {
+                "Improvement": "Parameterize the retry configuration",
+                "Change_Diff": "- final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n+ final RetryConfig config=createRetryConfig(maxTries, delay, unit);",
+                "Description": "The retry configuration (maximum number of tries, delay between tries, etc.) is hardcoded in the method. It would be a good idea to parameterize these values so they can be configured according to the situation. This allows for more flexibility and reusability of the method.",
+                "Start": 14,
+                "End": 15
+            }
+        ],
+        "Final code": "protected final <T>T retry(final Context context,final Callable<T> callable, int maxTries, long delay, ChronoUnit unit){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (    final Exception e) {\n      Logger logger = Logger.getLogger(getClass().getName());\n      logger.log(Level.WARNING, \"retry[\" + t.incrementAndGet() + \"] exception: \", e);\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=createRetryConfig(maxTries, delay, unit);\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}\n\nprivate RetryConfig createRetryConfig(int maxTries, long delay, ChronoUnit unit) {\n  return new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(maxTries).withDelayBetweenTries(delay, unit).withFixedBackoff().build();\n}"
+    },
+    "Old_Method": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (    final Exception e) {\n      System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n      e.printStackTrace(System.out);\n      System.out.println();\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ATest.java",
+    "Start": 555,
+    "Stop": 1605,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "retry"
+}

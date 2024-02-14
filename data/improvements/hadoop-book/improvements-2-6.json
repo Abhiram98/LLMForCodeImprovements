@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract constants",
+                "Change_Diff": "- final Path inDir=new Path(TMP_DIR,'in');\n- final Path outDir=new Path(TMP_DIR,'out');\n+ final Path inDir=new Path(TMP_DIR,IN_DIRECTORY);\n+ final Path outDir=new Path(TMP_DIR,OUT_DIRECTORY);",
+                "Description": "Magic numbers and strings in a code can be confusing and error-prone. It's better to extract them as constants with descriptive names",
+                "Start": 10,
+                "End": 23
+            },
+            {
+                "Improvement": "Improve error messages",
+                "Change_Diff": "- throw new IOException('Cannot create input directory ' + inDir);\n+ throw new IOException('Failed to create input directory at path: ' + inDir);",
+                "Description": "Detailed and specific error messages helps in debugging. Instead of saying 'Cannot create input directory', it would be better to include the path of the directory in the error message.",
+                "Start": 21,
+                "End": 21
+            },
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- final SequenceFile.Writer writer=...\n- try {\n-   writer.append(offset,size);\n- } finally {\n-   writer.close();\n- }\n+ try (final SequenceFile.Writer writer = ...) {\n+   writer.append(offset, size);\n+ }",
+                "Description": "Java 7 introduced the try-with-resources construct, which automatically closes resources when the try block exits. This can simplify code and make error handling more robust.",
+                "Start": 28,
+                "End": 34
+            },
+            {
+                "Improvement": "Avoid System.out.println()",
+                "Change_Diff": "- System.out.println('Starting Job');\n+ LOG.info('Starting Job');",
+                "Description": "System.out.println() is not advisable for logging as it cannot be disabled and does not support levels or categories. Use a proper logging framework like SLF4J or Log4J.",
+                "Start": 37,
+                "End": 37
+            }
+        ],
+        "Final code": "public static BigDecimal estimate(int numMaps,long numPoints,JobConf jobConf) throws IOException {\n  // ... previous code ...\n  final Path inDir=new Path(TMP_DIR,IN_DIRECTORY);\n  final Path outDir=new Path(TMP_DIR,OUT_DIRECTORY);\n  // ... previous code ...\n  if (!fs.mkdirs(inDir)) {\n    throw new IOException('Failed to create input directory at path: ' + inDir);\n  }\n  // ... previous code ...\n  try (final SequenceFile.Writer writer=SequenceFile.createWriter(fs,jobConf,file,LongWritable.class,LongWritable.class,CompressionType.NONE)) {\n    writer.append(offset,size);\n  }\n  // ... previous code ...\n  LOG.info('Starting Job');\n  // ... rest of the code ...\n}"
+    },
+    "Old_Method": "/** \n * Run a map/reduce job for estimating Pi.\n * @return the estimated value of Pi\n */\npublic static BigDecimal estimate(int numMaps,long numPoints,JobConf jobConf) throws IOException {\n  jobConf.setJobName(PiEstimator.class.getSimpleName());\n  jobConf.setInputFormat(SequenceFileInputFormat.class);\n  jobConf.setOutputKeyClass(BooleanWritable.class);\n  jobConf.setOutputValueClass(LongWritable.class);\n  jobConf.setOutputFormat(SequenceFileOutputFormat.class);\n  jobConf.setMapperClass(PiMapper.class);\n  jobConf.setNumMapTasks(numMaps);\n  jobConf.setReducerClass(PiReducer.class);\n  jobConf.setNumReduceTasks(1);\n  jobConf.setSpeculativeExecution(false);\n  final Path inDir=new Path(TMP_DIR,\"in\");\n  final Path outDir=new Path(TMP_DIR,\"out\");\n  FileInputFormat.setInputPaths(jobConf,inDir);\n  FileOutputFormat.setOutputPath(jobConf,outDir);\n  final FileSystem fs=FileSystem.get(jobConf);\n  if (fs.exists(TMP_DIR)) {\n    throw new IOException(\"Tmp directory \" + fs.makeQualified(TMP_DIR) + \" already exists.  Please remove it first.\");\n  }\n  if (!fs.mkdirs(inDir)) {\n    throw new IOException(\"Cannot create input directory \" + inDir);\n  }\n  try {\n    for (int i=0; i < numMaps; ++i) {\n      final Path file=new Path(inDir,\"part\" + i);\n      final LongWritable offset=new LongWritable(i * numPoints);\n      final LongWritable size=new LongWritable(numPoints);\n      final SequenceFile.Writer writer=SequenceFile.createWriter(fs,jobConf,file,LongWritable.class,LongWritable.class,CompressionType.NONE);\n      try {\n        writer.append(offset,size);\n      }\n  finally {\n        writer.close();\n      }\n      System.out.println(\"Wrote input for Map #\" + i);\n    }\n    System.out.println(\"Starting Job\");\n    final long startTime=System.currentTimeMillis();\n    JobClient.runJob(jobConf);\n    final double duration=(System.currentTimeMillis() - startTime) / 1000.0;\n    System.out.println(\"Job Finished in \" + duration + \" seconds\");\n    Path inFile=new Path(outDir,\"reduce-out\");\n    LongWritable numInside=new LongWritable();\n    LongWritable numOutside=new LongWritable();\n    SequenceFile.Reader reader=new SequenceFile.Reader(fs,inFile,jobConf);\n    try {\n      reader.next(numInside,numOutside);\n    }\n  finally {\n      reader.close();\n    }\n    return BigDecimal.valueOf(4).setScale(20).multiply(BigDecimal.valueOf(numInside.get())).divide(BigDecimal.valueOf(numMaps)).divide(BigDecimal.valueOf(numPoints));\n  }\n  finally {\n    fs.delete(TMP_DIR,true);\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/PiEstimator.java",
+    "Start": 8217,
+    "Stop": 11568,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "estimate"
+}

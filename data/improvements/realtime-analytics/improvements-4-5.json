@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Throw exception instead of returning null",
+                "Change_Diff": "- catch (  Exception ex) {\n-   return null;\n+ catch (  Exception ex) {\n+   throw ex;",
+                "Description": "Instead of returning null when an exception was caught, it's better to throw the exception. This way, the caller method can handle the exception and take the necessary steps.",
+                "Start": 22,
+                "End": 24
+            },
+            {
+                "Improvement": "Make use of Optional",
+                "Change_Diff": "- private GeoInfo _getGeoInfo(String ipAddress){\n+ private Optional<GeoInfo> _getGeoInfo(String ipAddress){\n...\n-   return geoInfo;\n+   return Optional.of(geoInfo);\n...\n-   return null;\n+   throw ex;",
+                "Description": "Java 8 introduced the Optional class to help developers deal with null values. By using Optional, you can avoid null pointer exceptions and provide a clear and explicit contract for your API. It's advisable to return Optional from methods that can potentially return null.",
+                "Start": 2,
+                "End": 24
+            }
+        ],
+        "Final code": "private Optional<GeoInfo> _getGeoInfo(String ipAddress) throws Exception {\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return Optional.of(geoInfo);\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return Optional.of(geoInfo);\n  }\n  catch (  Exception ex) {\n    throw ex;\n  }\n}"
+    },
+    "Old_Method": "private GeoInfo _getGeoInfo(String ipAddress){\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return geoInfo;\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return geoInfo;\n  }\n catch (  Exception ex) {\n    return null;\n  }\n}\n",
+    "File_Path": "realtime-analytics/collector/src/main/java/com/ebay/pulsar/collector/udf/GeoEnrichmentUtil.java",
+    "Start": 1289,
+    "Stop": 2470,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "_getGeoInfo"
+}

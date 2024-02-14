@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce the depth of conditional nesting",
+                "Change_Diff": "- if (Config.has(Config.Key.TEMPLATE_DIR)) {...} else {...}\n+ if (!Config.has(Config.Key.TEMPLATE_DIR)) {...; return;}\n... if (Config.has(Config.Key.BUCKET_NAME)) {...} else {...}",
+                "Description": "The method has a high degree of nesting, which can make the code difficult to read and maintain. The use of 'guard clauses' can reduce the depth of conditional nesting and make the code more readable.",
+                "Start": 4,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract repeated code into a separate method",
+                "Change_Diff": "- req=req.withTemplateURL('https://'+bucketName+'.s3.'+bucketRegion+'.amazonaws.com/'+stackName);\n- req=req.withTemplateURL('https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/'+template);\n+ String s3Url = buildS3Url(bucketName, bucketRegion, stackName);\n+ req=req.withTemplateURL(s3Url);",
+                "Description": "The code to build the S3 URL is repeated twice. This code can be extracted into a separate method to reduce duplication and improve maintainability.",
+                "Start": 11,
+                "End": 12
+            }
+        ],
+        "Final code": "protected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  if (!Config.has(Config.Key.TEMPLATE_DIR)) {\n    String s3Url = buildS3Url('widdix-aws-s3-virusscan', 'eu-west-1', template);\n    req=req.withTemplateURL(s3Url);\n    return;\n  }\n  final String dir=Config.get(Config.Key.TEMPLATE_DIR);\n  if (!Config.has(Config.Key.BUCKET_NAME)) {\n    final String body=readFile(dir + template,StandardCharsets.UTF_8);\n    req=req.withTemplateBody(body);\n    return;\n  }\n  final String bucketName=Config.get(Config.Key.BUCKET_NAME);\n  final String bucketRegion=Config.get(Config.Key.BUCKET_REGION);\n  final AmazonS3 s3local=AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build();\n  s3local.putObject(bucketName,stackName,new File(dir + template));\n  String s3Url = buildS3Url(bucketName, bucketRegion, stackName);\n  req=req.withTemplateURL(s3Url);\n  if (Config.get(Config.Key.FAILURE_POLICY).equals('retain')) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}\n\nprivate String buildS3Url(String bucketName, String bucketRegion, String stackName) {\n  return 'https://' + bucketName + '.s3.'+ bucketRegion+ '.amazonaws.com/'+ stackName;\n}"
+    },
+    "Old_Method": "protected final void createStack(final Context context,final String stackName,final String template,final Parameter... parameters){\n  context.addStack(stackName);\n  CreateStackRequest req=new CreateStackRequest().withStackName(stackName).withParameters(parameters).withCapabilities(Capability.CAPABILITY_IAM);\n  if (Config.has(Config.Key.TEMPLATE_DIR)) {\n    final String dir=Config.get(Config.Key.TEMPLATE_DIR);\n    if (Config.has(Config.Key.BUCKET_NAME)) {\n      final String bucketName=Config.get(Config.Key.BUCKET_NAME);\n      final String bucketRegion=Config.get(Config.Key.BUCKET_REGION);\n      final AmazonS3 s3local=AmazonS3ClientBuilder.standard().withCredentials(this.credentialsProvider).withRegion(bucketRegion).build();\n      s3local.putObject(bucketName,stackName,new File(dir + template));\n      req=req.withTemplateURL(\"https://\" + bucketName + \".s3.\"+ bucketRegion+ \".amazonaws.com/\"+ stackName);\n    }\n else {\n      final String body=readFile(dir + template,StandardCharsets.UTF_8);\n      req=req.withTemplateBody(body);\n    }\n  }\n else {\n    req=req.withTemplateURL(\"https://widdix-aws-s3-virusscan.s3.eu-west-1.amazonaws.com/\" + template);\n  }\n  if (Config.get(Config.Key.FAILURE_POLICY).equals(\"retain\")) {\n    req=req.withOnFailure(OnFailure.DO_NOTHING);\n  }\n  this.cf.createStack(req);\n  this.waitForStack(context,stackName,FinalStatus.CREATE_COMPLETE);\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+    "Start": 1185,
+    "Stop": 2820,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "createStack"
+}

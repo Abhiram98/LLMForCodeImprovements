@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Simplify if-else constructs",
+                "Change_Diff": "- if (env == null) {\n-   if (key.defaultValue == null) {\n-     throw new RuntimeException(\"config not found: \" + key.name);\n-   }\n- else {\n-     return key.defaultValue;\n-   }\n- }\n- else {\n-   return env;\n- }",
+                "Description": "The nested if-else constructs can be simplified to a more concise and readable form by utilizing ternary operator.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Add null check for key",
+                "Change_Diff": "+ if (key == null) {\n+   throw new IllegalArgumentException(\"Key cannot be null\");\n+ }",
+                "Description": "There is no null check for the `key` parameter. If a null value is passed, it will lead to a NullPointerException. Adding a null check can prevent such exceptions.",
+                "Start": 2,
+                "End": 2
+            }
+        ],
+        "Final code": "public static String get(final Key key){\n  if (key == null) {\n    throw new IllegalArgumentException(\"Key cannot be null\");\n  }\n  final String env=System.getenv(key.name);\n  return (env == null) ? (key.defaultValue == null ? throw new RuntimeException(\"config not found: \" + key.name) : key.defaultValue) : env;\n}"
+    },
+    "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+    "Start": 813,
+    "Stop": 1187,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "get"
+}

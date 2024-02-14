@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch to handle exceptions",
+                "Change_Diff": "- throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n+ try {\n+    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n+ } catch (IllegalStateException e) {\n+    e.printStackTrace();\n+ }",
+                "Description": "Instead of throwing an IllegalStateException directly, we can use a try-catch block to handle any exceptions that may occur. This not only provides a way to handle errors gracefully but also gives an opportunity to log the error or perform other actions if necessary.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Use Java 8 Stream API",
+                "Change_Diff": "- for (  T node : nodes) {\n-    String cursor=this.adapter.cursorAt(container,index++);\n-    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n- }\n+ edges = nodes.stream()\n+    .map(node -> new DefaultEdge<>(node, new DefaultConnectionCursor(this.adapter.cursorAt(container, index++))))\n+    .collect(Collectors.toList());",
+                "Description": "Instead of using a for-each loop to iterate over the nodes and populate the edges list, you can use Java 8's Stream API. This would make the code more readable, concise and easier to understand.",
+                "Start": 16,
+                "End": 20
+            }
+        ],
+        "Final code": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    try {\n        throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n    } catch (IllegalStateException e) {\n        e.printStackTrace();\n    }\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  edges = nodes.stream()\n    .map(node -> new DefaultEdge<>(node, new DefaultConnectionCursor(this.adapter.cursorAt(container, index++))))\n    .collect(Collectors.toList());\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}"
+    },
+    "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+    "Start": 7935,
+    "Stop": 9024,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "adaptDataContainer"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add error logging instead of printStackTrace",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.error(\"An error occurred while registering the object.\", e);",
+                "Description": "The method uses e.printStackTrace() to log errors. This is not a good practice because it sends the error to standard output and it is hard to manage and filter the output. Instead, use a logging framework, such as SLF4J or Log4J, which can handle the error messages in a more flexible way, including sending the error messages to different output targets, applying different policies to different messages, etc.",
+                "Start": 28,
+                "End": 32
+            },
+            {
+                "Improvement": "Extract configuration loading into a separate method",
+                "Change_Diff": "- this.name=BATCHER_PREFIX + name;\n- this.target=target;\n- queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n- setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n- setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n- blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n+ loadConfigurations();",
+                "Description": "The constructor is doing too many things including loading configurations. Extracting the configuration loading into a separate method will make the code cleaner and easier to maintain.",
+                "Start": 4,
+                "End": 8
+            }
+        ],
+        "Final code": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  loadConfigurations();\n  batch=new ArrayList<Object>(maxMessages);\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n  catch (Throwable e) {\n    if (CONFIGURATION.shouldPrintLoggingErrors()) {\n      logger.error(\"An error occurred while registering the object.\", e);\n    }\n  }\n}\n\nprivate void loadConfigurations() {\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n}"
+    },
+    "Old_Method": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n catch (  Throwable e) {\n    if (CONFIGURATION.shouldPrintLoggingErrors()) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 4433,
+    "Stop": 5937,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "MessageBatcher"
+}

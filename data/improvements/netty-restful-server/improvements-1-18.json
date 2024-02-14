@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Improved exception handling",
+                "Change_Diff": "- logger.error(\"sql error\",e);\n+ throw new RuntimeException(\"sql error\", e);",
+                "Description": "Rather than just logging the error, it might be better to throw a RuntimeException to let the caller know something goes wrong. This can avoid returning null or unexpected results.",
+                "Start": 16,
+                "End": 19
+            },
+            {
+                "Improvement": "Close resources in individual try-catch blocks",
+                "Change_Diff": "- JdbcPool.release(conn,statement,rs);\n+ try { if (rs != null) rs.close(); } catch (Exception e) { logger.error(\"Error while closing ResultSet\", e); }\n+ try { if (statement != null) statement.close(); } catch (Exception e) { logger.error(\"Error while closing PreparedStatement\", e); }\n+ try { if (conn != null) conn.close(); } catch (Exception e) { logger.error(\"Error while closing Connection\", e); }",
+                "Description": "It's recommended to wrap each resource closure in individual try-catch blocks in the finally block. As currently written, if an exception is thrown during the closure of one resource, the remaining resources may not be closed properly.",
+                "Start": 21,
+                "End": 21
+            }
+        ],
+        "Final code": "public static String getValue(String sql,Object... params){\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet rs=null;\n  String res=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    rs=statement.executeQuery();\n    if (rs.next()) {\n      res=rs.getString(1);\n    }\n  }\n catch (SQLException e) {\n    throw new RuntimeException(\"sql error\", e);\n  }\n finally {\n    try { if (rs != null) rs.close(); } catch (Exception e) { logger.error(\"Error while closing ResultSet\", e); }\n    try { if (statement != null) statement.close(); } catch (Exception e) { logger.error(\"Error while closing PreparedStatement\", e); }\n    try { if (conn != null) conn.close(); } catch (Exception e) { logger.error(\"Error while closing Connection\", e); }\n  }\n  return res;\n}"
+    },
+    "Old_Method": "public static String getValue(String sql,Object... params){\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet rs=null;\n  String res=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    rs=statement.executeQuery();\n    if (rs.next()) {\n      res=rs.getString(1);\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,rs);\n  }\n  return res;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/Mysql.java",
+    "Start": 4994,
+    "Stop": 5866,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "getValue"
+}

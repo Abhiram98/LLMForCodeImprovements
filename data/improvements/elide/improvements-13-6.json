@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for 'queriedTable'",
+                "Change_Diff": "+ if (queriedTable == null) {\n+     throw new IllegalArgumentException(\"queriedTable cannot be null\");\n+ }\n- SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);",
+                "Description": "Before creating an instance of 'SplitFilterExpressionVisitor' using 'queriedTable', check if 'queriedTable' is null to avoid NullPointerException.",
+                "Start": 12,
+                "End": 12
+            },
+            {
+                "Improvement": "Use Optional for 'filterExpression'",
+                "Change_Diff": "- FilterExpression filterExpression=entityProjection.getFilterExpression();\n+ Optional<FilterExpression> filterExpression = Optional.ofNullable(entityProjection.getFilterExpression());\n- if (filterExpression == null) {\n+ if (!filterExpression.isPresent()) {",
+                "Description": "Instead of checking if 'filterExpression' is null, use Java 8's Optional to avoid null checks and make the code more readable.",
+                "Start": 4,
+                "End": 8
+            }
+        ],
+        "Final code": "private void splitFilters(){\n  Optional<FilterExpression> filterExpression = Optional.ofNullable(entityProjection.getFilterExpression());\n  if (!filterExpression.isPresent()) {\n    whereFilter=null;\n    havingFilter=null;\n    return;\n  }\n  if (queriedTable == null) {\n      throw new IllegalArgumentException(\"queriedTable cannot be null\");\n  }\n  SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints constraints=filterExpression.get().accept(visitor);\n  whereFilter=constraints.getWhereExpression();\n  havingFilter=constraints.getHavingExpression();\n}"
+    },
+    "Old_Method": "/** \n * Gets whereFilter and havingFilter based on provided filter expression from  {@link EntityProjection}.\n */\nprivate void splitFilters(){\n  FilterExpression filterExpression=entityProjection.getFilterExpression();\n  if (filterExpression == null) {\n    whereFilter=null;\n    havingFilter=null;\n    return;\n  }\n  SplitFilterExpressionVisitor visitor=new SplitFilterExpressionVisitor(queriedTable);\n  FilterConstraints constraints=filterExpression.accept(visitor);\n  whereFilter=constraints.getWhereExpression();\n  havingFilter=constraints.getHavingExpression();\n}\n",
+    "File_Path": "elide/elide-datastore/elide-datastore-aggregation/src/main/java/com/yahoo/elide/datastores/aggregation/EntityProjectionTranslator.java",
+    "Start": 3706,
+    "Stop": 4367,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "splitFilters"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use logging instead of System.out.println",
+                "Change_Diff": "- System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n+ logger.warn(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n\n- System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n+ logger.warn(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n\n- System.out.println(\"Message envelope configured but message types defined for handler\");\n+ logger.warn(\"Message envelope configured but message types defined for handler\");",
+                "Description": "System.out.println is usually not recommended in production code. Instead, use a logging framework like log4j or slf4j. These provide more flexibility (different log levels, different output targets) and can be dynamically configured.",
+                "Start": 6,
+                "End": 14
+            },
+            {
+                "Improvement": "Avoid multiple calls to getAnnotation",
+                "Change_Diff": "- if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n+ Handler handlerAnnotation = ReflectionUtils.getAnnotation(handler,Handler.class);\n+ if (handler == null || handlerAnnotation == null) {\n\n- Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n+ Enveloped envelope = handlerAnnotation;",
+                "Description": "Multiple calls to ReflectionUtils.getAnnotation are made for the same annotation, which is unnecessary. Instead, it would be better to store the result in a variable and reuse it.",
+                "Start": 2,
+                "End": 10
+            }
+        ],
+        "Final code": "private boolean isValidMessageHandler(Method handler) {\n  Logger logger = Logger.getLogger(getClass().getName());\n  Handler handlerAnnotation = ReflectionUtils.getAnnotation(handler,Handler.class);\n  if (handler == null || handlerAnnotation == null) {\n    return false;\n  }\n  if (handler.getParameterTypes().length != 1) {\n    logger.warn(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n    return false;\n  }\n  Enveloped envelope = handlerAnnotation;\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n    logger.warn(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    logger.warn(\"Message envelope configured but message types defined for handler\");\n    return false;\n  }\n  return true;\n}"
+    },
+    "Old_Method": "private boolean isValidMessageHandler(Method handler){\n  if (handler == null || ReflectionUtils.getAnnotation(handler,Handler.class) == null) {\n    return false;\n  }\n  if (handler.getParameterTypes().length != 1) {\n    System.out.println(\"Found no or more than one parameter in messageHandler [\" + handler.getName() + \"]. A messageHandler must define exactly one parameter\");\n    return false;\n  }\n  Enveloped envelope=ReflectionUtils.getAnnotation(handler,Enveloped.class);\n  if (envelope != null && !MessageEnvelope.class.isAssignableFrom(handler.getParameterTypes()[0])) {\n    System.out.println(\"Message envelope configured but no subclass of MessageEnvelope found as parameter\");\n    return false;\n  }\n  if (envelope != null && envelope.messages().length == 0) {\n    System.out.println(\"Message envelope configured but message types defined for handler\");\n    return false;\n  }\n  return true;\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/listener/MetadataReader.java",
+    "Start": 5330,
+    "Stop": 6449,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "isValidMessageHandler"
+}

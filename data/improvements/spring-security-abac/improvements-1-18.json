@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extracting base64 key generation to a separate method",
+                "Change_Diff": "- String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n+ String key = generateBase64Key(policyName, jsonKeyValuePairs, templateData);",
+                "Description": "The key generation with Base64 encoding is a distinct operation and can be extracted into its own method for better readability and potential reusability.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Use Optional instead of null check",
+                "Change_Diff": "- String cachedRequest=this.requestBuilderCache.get(key);\n- if (cachedRequest != null) {\n-    return cachedRequest;\n+ Optional<String> cachedRequest = Optional.ofNullable(this.requestBuilderCache.get(key));\n+ if (cachedRequest.isPresent()) {\n+    return cachedRequest.get();",
+                "Description": "Java 8 introduced Optional to help design more comprehensible APIs so that by just reading the signature of a method, you can tell whether you can expect an optional value. This forces you to actively unwrap an Optional to deal with the absence of a value.",
+                "Start": 6,
+                "End": 8
+            },
+            {
+                "Improvement": "Use try-with-resources to ensure resources are closed",
+                "Change_Diff": "- StringWriter out=new StringWriter()\n+ try (StringWriter out = new StringWriter())",
+                "Description": "The StringWriter doesn't really need to be closed, but if you update this code to use a different kind of writer in the future, you might need to close it. It's a good practice to always use try-with-resources with AutoCloseable resources.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Use Objects.requireNonNullElse function",
+                "Change_Diff": "- if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n-    throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n+ xacmlRequest = Objects.requireNonNullElse(xacmlRequest, throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName));",
+                "Description": "Java 11 provides a handy utility function Objects.requireNonNullElse which returns the first argument if it is non-null and otherwise returns the non-null second argument. It can be used to simplify the null check for xacmlRequest.",
+                "Start": 23,
+                "End": 25
+            }
+        ],
+        "Final code": "@Override public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n  Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n  String key = generateBase64Key(policyName, jsonKeyValuePairs, templateData);\n  Optional<String> cachedRequest = Optional.ofNullable(this.requestBuilderCache.get(key));\n  if (cachedRequest.isPresent()) {\n    return cachedRequest.get();\n  }\n  String xacmlRequest;\n  try (StringWriter out = new StringWriter()){\n    Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData,out);\n    xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n    out.flush();\n  }\n catch (  IOException|TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n  }\n  xacmlRequest = Objects.requireNonNullElse(xacmlRequest, throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName));\n  return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}\n\nprivate String generateBase64Key(String policyName, String jsonKeyValuePairs, Map<String, Object> templateData) {\n  return Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n}"
+    },
+    "Old_Method": "@Override public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n  Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n  String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n  String cachedRequest=this.requestBuilderCache.get(key);\n  if (cachedRequest != null) {\n    return cachedRequest;\n  }\n  String xacmlRequest;\n  try (StringWriter out=new StringWriter()){\n    Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData,out);\n    xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n    out.flush();\n  }\n catch (  IOException|TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n  }\n  if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n    throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n  }\n  return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 1262,
+    "Stop": 2829,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "createAuthRequest"
+}

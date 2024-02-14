@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code redundancy",
+                "Change_Diff": "- byte[] barr=refSk.toByteArray();\n- Memory srcMem=Memory.wrap(barr);\n- CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n- checkByRange(refSk,testSk,u,ordered);\n- byte[] byteArray=refSk.toByteArray();\n- Memory heapROMem=Memory.wrap(byteArray);\n- testSk=(CompactSketch)Sketch.heapify(heapROMem);\n+ CompactSketch testSk = heapifySketch(refSk, u, ordered)",
+                "Description": "The lines that convert the sketch to byte array, wrap it in Memory, and then heapify it into a CompactSketch are duplicated. This process could be extracted into a separate method, reducing redundancy and improving readability.",
+                "Start": 6,
+                "End": 13
+            },
+            {
+                "Improvement": "Remove redundant code",
+                "Change_Diff": "- testSk=(CompactSketch)Sketch.wrap(directMem);\n- checkByRange(refSk,testSk,u,ordered);",
+                "Description": "The conversion of directMem to a CompactSketch and the subsequent checkByRange are duplicated. The duplication could be removed without changing the functionality.",
+                "Start": 19,
+                "End": 22
+            },
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n+ try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)) {",
+                "Description": "The WritableHandle is not being closed in a finally block which could potentially lead to a resource leak. It is better to use try-with-resources which automatically closes the resource.",
+                "Start": 16,
+                "End": 24
+            }
+        ],
+        "Final code": "public void checkHeapifyWrap(int k,int u,boolean ordered) {\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  CompactSketch testSk = heapifySketch(refSk, u, ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)) {\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n  catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n\nprivate CompactSketch heapifySketch(CompactSketch refSk, int u, boolean ordered) {\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  return testSk;\n}"
+    },
+    "Old_Method": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/CompactSketchTest.java",
+    "Start": 1975,
+    "Stop": 3351,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkHeapifyWrap"
+}

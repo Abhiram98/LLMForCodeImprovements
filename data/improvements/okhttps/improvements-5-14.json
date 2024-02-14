@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract constant for file size",
+                "Change_Diff": "- long size=3 * 1024 * 1024;\n+ final long FILE_CHUNK_SIZE=3 * 1024 * 1024;\n+ long size=FILE_CHUNK_SIZE;",
+                "Description": "Instead of using magic numbers in your code (like 3 * 1024 * 1024), it's better to define them as constants with meaningful names. This makes the code easier to read and maintain.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Extract file path to a constant",
+                "Change_Diff": "- get().getBody().toFile(\"D:/download/test.zip\")\n+ final String FILE_PATH = \"D:/download/test.zip\";\n+ get().getBody().toFile(FILE_PATH)",
+                "Description": "Hardcoding the file path makes the code less flexible. It's better to extract it as a constant, which can be easily modified.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Extract URL to a constant",
+                "Change_Diff": "- HttpUtils.sync(\"/download/test.zip\")\n+ final String URL = \"/download/test.zip\";\n+ HttpUtils.sync(URL)",
+                "Description": "Hardcoding the URL makes the code less flexible. It's better to extract it as a constant, which can be easily modified.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Extract success message to a constant",
+                "Change_Diff": "- println(\"下载完成\");\n+ final String SUCCESS_MESSAGE = \"下载完成\";\n+ println(SUCCESS_MESSAGE);",
+                "Description": "Extracting the success message to a constant makes the code easier to internationalize and maintain.",
+                "Start": 11,
+                "End": 11
+            }
+        ],
+        "Final code": "static void download(long totalSize,int index){\n  final long FILE_CHUNK_SIZE=3 * 1024 * 1024;\n  long size=FILE_CHUNK_SIZE;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  final String URL = \"/download/test.zip\";\n  final String FILE_PATH = \"D:/download/test.zip\";\n  HttpUtils.sync(URL).setRange(start,end).get().getBody().toFile(FILE_PATH).setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      final String SUCCESS_MESSAGE = \"下载完成\";\n      println(SUCCESS_MESSAGE);\n    }\n  }\n).start();\n}"
+    },
+    "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+    "Start": 680,
+    "Stop": 1474,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "download"
+}

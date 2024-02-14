@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract constants for string literals",
+                "Change_Diff": "- println(\"全局 onResponse: \" + result.getStatus());\n+ println(GLOBAL_ON_RESPONSE + result.getStatus());\n...\n- println(\"全局 onException: \" + error.getMessage());\n+ println(GLOBAL_ON_EXCEPTION + error.getMessage());\n...\n- println(\"单例 onResponse: \" + result.getStatus());\n+ println(LOCAL_ON_RESPONSE + result.getStatus());\n...\n- println(\"单例 onException: \" + error.getMessage());\n+ println(LOCAL_ON_EXCEPTION + error.getMessage());",
+                "Description": "String literals used multiple times such as '全局 onResponse: ', '全局 onComplete: ', '全局 onException: ', '单例 onResponse: ', '单例 onComplete: ', and '单例 onException: ' should be defined as constants at the class level to avoid potential typos and improve readability.",
+                "Start": 2,
+                "End": 21
+            },
+            {
+                "Improvement": "Extract URL as constant",
+                "Change_Diff": "- http.async(\"http://www.baidu.com\").setOnResponse((  HttpResult result) -> {\n+ http.async(BAIDU_URL).setOnResponse((  HttpResult result) -> {",
+                "Description": "The URL 'http://www.baidu.com' is hardcoded inline. This should be extracted to a constant at the class level to improve readability and maintainability.",
+                "Start": 15,
+                "End": 15
+            },
+            {
+                "Improvement": "Extract sleep duration as constant",
+                "Change_Diff": "- sleep(2000);\n+ sleep(SLEEP_DURATION);",
+                "Description": "The sleep duration '2000' is hardcoded inline. This should be extracted to a constant at the class level to improve readability and maintainability.",
+                "Start": 23,
+                "End": 23
+            }
+        ],
+        "Final code": "private static final String GLOBAL_ON_RESPONSE = \"全局 onResponse: \";\nprivate static final String GLOBAL_ON_COMPLETE = \"全局 onComplete: \";\nprivate static final String GLOBAL_ON_EXCEPTION = \"全局 onException: \";\nprivate static final String LOCAL_ON_RESPONSE = \"单例 onResponse: \";\nprivate static final String LOCAL_ON_COMPLETE = \"单例 onComplete: \";\nprivate static final String LOCAL_ON_EXCEPTION = \"单例 onException: \";\nprivate static final String BAIDU_URL = \"http://www.baidu.com\";\nprivate static final int SLEEP_DURATION = 2000;\n\n@Test public void testGlobalCallback(){\n  HTTP http=HTTP.builder().responseListener((  HttpTask<?> task,  HttpResult result) -> {\n    println(GLOBAL_ON_RESPONSE + result.getStatus());\n    return true;\n  }\n).completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n    println(GLOBAL_ON_COMPLETE + state);\n    return true;\n  }\n).exceptionListener((  HttpTask<?> task,  IOException error) -> {\n    println(GLOBAL_ON_EXCEPTION + error.getMessage());\n    return false;\n  }\n).build();\n  http.async(BAIDU_URL).setOnResponse((  HttpResult result) -> {\n    println(LOCAL_ON_RESPONSE + result.getStatus());\n  }\n).setOnComplete((  HttpResult.State state) -> {\n    println(LOCAL_ON_COMPLETE + state);\n  }\n).setOnException((  IOException error) -> {\n    println(LOCAL_ON_EXCEPTION + error.getMessage());\n  }\n).get();\n  sleep(SLEEP_DURATION);\n}"
+    },
+    "Old_Method": "@Test public void testGlobalCallback(){\n  HTTP http=HTTP.builder().responseListener((  HttpTask<?> task,  HttpResult result) -> {\n    println(\"全局 onResponse: \" + result.getStatus());\n    return true;\n  }\n).completeListener((  HttpTask<?> task,  HttpResult.State state) -> {\n    println(\"全局 onComplete: \" + state);\n    return true;\n  }\n).exceptionListener((  HttpTask<?> task,  IOException error) -> {\n    println(\"全局 onException: \" + error.getMessage());\n    return false;\n  }\n).build();\n  http.async(\"http://www.baidu.com\").setOnResponse((  HttpResult result) -> {\n    println(\"单例 onResponse: \" + result.getStatus());\n  }\n).setOnComplete((  HttpResult.State state) -> {\n    println(\"单例 onComplete: \" + state);\n  }\n).setOnException((  IOException error) -> {\n    println(\"单例 onException: \" + error.getMessage());\n  }\n).get();\n  sleep(2000);\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/ListenerTests.java",
+    "Start": 151,
+    "Stop": 1367,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "testGlobalCallback"
+}

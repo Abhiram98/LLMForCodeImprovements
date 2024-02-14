@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use a logging framework instead of System.out.println",
+                "Change_Diff": "- System.out.println(\"Register user ...\");\n+ logger.info(\"Register user ...\");",
+                "Description": "It is not recommended to use System.out.println() for logging in a production environment. Using a proper logging framework gives you more flexibility and is more powerful.",
+                "Start": 2,
+                "End": 22
+            },
+            {
+                "Improvement": "Extract repetitive code into a method",
+                "Change_Diff": "- user=new SteamUser(userCallback);\n- System.out.println(\"Register user stats callback ...\");\n+ registerInterface(\"user\", new SteamUser(userCallback));",
+                "Description": "The code to register each interface type is nearly identical. This can be extracted into a method to remove duplication and enhance readability.",
+                "Start": 3,
+                "End": 16
+            }
+        ],
+        "Final code": "@Override protected void registerInterfaces(){\n  logger.info(\"Register user ...\");\n  registerInterface(\"user\", new SteamUser(userCallback));\n  logger.info(\"Register user stats callback ...\");\n  registerInterface(\"userStats\", new SteamUserStats(userStatsCallback));\n  logger.info(\"Register remote storage ...\");\n  registerInterface(\"remoteStorage\", new SteamRemoteStorage(remoteStorageCallback));\n  logger.info(\"Register UGC ...\");\n  registerInterface(\"ugc\", new SteamUGC(ugcCallback));\n  logger.info(\"Register Utils ...\");\n  registerInterface(\"utils\", new SteamUtils(utilsCallback));\n  logger.info(\"Register Apps ...\");\n  registerInterface(\"apps\", new SteamApps());\n  logger.info(\"Register Friends ...\");\n  registerInterface(\"friends\", new SteamFriends(friendsCallback));\n  logger.info(\"Local user account ID: \" + user.getSteamID().getAccountID());\n  logger.info(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n  logger.info(\"Local user friends name: \" + friends.getPersonaName());\n  logger.info(\"App ID: \" + utils.getAppID());\n  logger.info(\"App build ID: \" + apps.getAppBuildId());\n  logger.info(\"App owner: \" + apps.getAppOwner().getAccountID());\n  logger.info(\"Current game language: \" + apps.getCurrentGameLanguage());\n  logger.info(\"Available game languages: \" + apps.getAvailableGameLanguages());\n}\n\nprivate void registerInterface(String name, Object interfaceInstance) {\n  logger.info(\"Register \" + name + \" ...\");\n  this.name = interfaceInstance;\n}"
+    },
+    "Old_Method": "@Override protected void registerInterfaces(){\n  System.out.println(\"Register user ...\");\n  user=new SteamUser(userCallback);\n  System.out.println(\"Register user stats callback ...\");\n  userStats=new SteamUserStats(userStatsCallback);\n  System.out.println(\"Register remote storage ...\");\n  remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n  System.out.println(\"Register UGC ...\");\n  ugc=new SteamUGC(ugcCallback);\n  System.out.println(\"Register Utils ...\");\n  utils=new SteamUtils(utilsCallback);\n  System.out.println(\"Register Apps ...\");\n  apps=new SteamApps();\n  System.out.println(\"Register Friends ...\");\n  friends=new SteamFriends(friendsCallback);\n  System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n  System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n  System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n  System.out.println(\"App ID: \" + utils.getAppID());\n  System.out.println(\"App build ID: \" + apps.getAppBuildId());\n  System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n  System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n  System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+    "Start": 13419,
+    "Stop": 14725,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "registerInterfaces"
+}

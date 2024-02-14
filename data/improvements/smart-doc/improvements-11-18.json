@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use streams instead of for loops",
+                "Change_Diff": "- for (ApiParam apiParam : apiParamList) {\n- apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n- if (apiParam.getPid() == 0) {\n-  params.add(apiParam);\n-   }\n- }\n- for (ApiParam apiParam : params) {\n-   apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n- } \n+ apiParamList.stream().forEach(apiParam -> apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\")));\n+ List<ApiParam> params = apiParamList.stream().filter(apiParam -> apiParam.getPid()==0).collect(Collectors.toList());\n+ params.stream().forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0)));",
+                "Description": "Instead of using two separate for loops to filter and set children for apiParams, we can use Java 8 Stream API for better readability and performance.",
+                "Start": 5,
+                "End": 14
+            },
+            {
+                "Improvement": "Use Collections.emptyList() instead of new ArrayList<>(0)",
+                "Change_Diff": "- return new ArrayList<>(0);\n+ return Collections.emptyList();",
+                "Description": "Instead of creating a new ArrayList with initial capacity of 0, use Collections.emptyList(). It returns a singleton instance of an empty list which is immutable. It's more memory efficient.",
+                "Start": 3,
+                "End": 3
+            }
+        ],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return Collections.emptyList();\n  }\n  apiParamList.stream().forEach(apiParam -> apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\")));\n  List<ApiParam> params = apiParamList.stream().filter(apiParam -> apiParam.getPid()==0).collect(Collectors.toList());\n  params.stream().forEach(apiParam -> apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0)));\n  return params;\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

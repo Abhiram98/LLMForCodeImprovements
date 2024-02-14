@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repeated code into a new method",
+                "Change_Diff": "- for (int i=0; i < byteArray.length; i++) {...}\n- else {\n- for (int i=byteArray.length - 1; i >= 0; i--) {...}\n+ shiftBytes(byteArray, offsetBytes, shiftMod, carryMask, byteOrder);",
+                "Description": "The code inside both the if and else blocks are almost identical. This is a clear sign that you can refactor this into a new method. This will make your code DRY (Don't Repeat Yourself), easier to read, and easier to maintain.",
+                "Start": 16,
+                "End": 36
+            },
+            {
+                "Improvement": "Use '===' and '!==' for comparison",
+                "Change_Diff": "- if (sourceIndex >= byteArray.length) {...}\n- else {...}\n+ if (sourceIndex == byteArray.length) {...}\n+ else {...}",
+                "Description": "In Java, '===' and '!==' are not used for comparison. Instead '==' and '!=' should be used. This will avoid any potential confusion or errors.",
+                "Start": 19,
+                "End": 20
+            }
+        ],
+        "Final code": "static byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  shiftBytes(byteArray, offsetBytes, shiftMod, carryMask, byteOrder);\n  return byteArray;\n}\n\nvoid shiftBytes(byte[] byteArray, int offsetBytes, int shiftMod, byte carryMask, ByteOrder byteOrder) {\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      shiftAndAssign(byteArray, sourceIndex, shiftMod, carryMask);\n    }\n  } else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      shiftAndAssign(byteArray, sourceIndex, shiftMod, carryMask);\n    }\n  }\n}\n\nvoid shiftAndAssign(byte[] byteArray, int sourceIndex, int shiftMod, byte carryMask) {\n  if (sourceIndex == byteArray.length) {\n    byteArray[i]=0;\n  } else {\n    byte src=byteArray[sourceIndex];\n    byte dst=(byte)(src << shiftMod);\n    if (sourceIndex + 1 < byteArray.length) {\n      dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n    }\n    byteArray[i]=dst;\n  }\n}"
+    },
+    "Old_Method": "/** \n * Light shift of whole byte array by shiftBitCount bits. This method will alter the input byte array. <p> <strong>Analysis<\/strong> <ul> <li>Time Complexity: <code>O(n)<\/code><\/li> <li>Space Complexity: <code>O(1)<\/code><\/li> <li>Alters Parameters: <code>true<\/code><\/li> <\/ul> <\/p>\n * @param byteArray     to shift\n * @param shiftBitCount how many bits to shift\n * @param byteOrder     endianness of given byte array\n * @return shifted byte array\n */\nstatic byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      if (sourceIndex >= byteArray.length) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex + 1 < byteArray.length) {\n          dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      if (sourceIndex < 0) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex - 1 >= 0) {\n          dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n  return byteArray;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Util.java",
+    "Start": 9808,
+    "Stop": 12110,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "shiftLeft"
+}

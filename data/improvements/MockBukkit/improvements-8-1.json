@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract the task into a separate method",
+                "Change_Diff": "- Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,1);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n); \n+ Thread thread = new Thread(this::runTaskLater);",
+                "Description": "The task to run later is quite complex and makes the method difficult to read. By extracting it into a separate method, the readability of the code will be improved.",
+                "Start": 3,
+                "End": 11
+            },
+            {
+                "Improvement": "Use the join method instead of the busy wait",
+                "Change_Diff": "- while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n+ thread.join();",
+                "Description": "Instead of using a busy wait (while loop) to wait for the thread to finish, it is more efficient to use the join method provided by the Thread class.",
+                "Start": 13,
+                "End": 17
+            },
+            {
+                "Improvement": "Remove redundant check for execution completion",
+                "Change_Diff": "- while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertTrue(executed.get());\n-",
+                "Description": "The while loop checking for execution completion is redundant because the join method will block until the thread completes. Additionally, the assertion for executed.get() is also redundant since it will always be true at this point in the code.",
+                "Start": 18,
+                "End": 23
+            }
+        ],
+        "Final code": "private void runTaskLater() {\n  try {\n    scheduler.runTaskLater(null, bukkitTask -> {\n      if (mainThread != Thread.currentThread()) {\n        notPrimaryThread.set(true);\n      }\n      executed.set(true);\n    }, 1);\n  } finally {\n    completed.set(true);\n  }\n}\n\n@Test\nvoid registerOneTasksAsynchronously() {\n  final Thread mainThread = Thread.currentThread();\n  AtomicBoolean executed = new AtomicBoolean();\n  AtomicBoolean completed = new AtomicBoolean();\n  AtomicBoolean notPrimaryThread = new AtomicBoolean();\n  Thread thread = new Thread(this::runTaskLater);\n  thread.start();\n  long startTime = System.currentTimeMillis();\n  thread.join();\n  assertFalse(notPrimaryThread.get());\n}"
+    },
+    "Old_Method": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,1);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertTrue(executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n",
+    "File_Path": "MockBukkit/src/test/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMockTest.java",
+    "Start": 14506,
+    "Stop": 15448,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "registerOneTasksAsynchronously"
+}

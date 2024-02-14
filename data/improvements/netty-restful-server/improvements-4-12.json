@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i = 0; i < selectFields.length; i++) {\n+ for (String selectField : selectFields) {",
+                "Description": "Instead of using a traditional for loop to iterate over `selectFields`, use an enhanced for loop. This makes the code cleaner and easier to read.",
+                "Start": 11,
+                "End": 11
+            },
+            {
+                "Improvement": "Avoid using magic numbers",
+                "Change_Diff": "- int j = i + 1;\n+ final int RESULT_SET_INDEX = i + 1;",
+                "Description": "Replace the magic number `j = i + 1` with a named constant to improve readability of the code and reduce potential errors.",
+                "Start": 13,
+                "End": 13
+            },
+            {
+                "Improvement": "Move field accessibility change to initialization",
+                "Change_Diff": "- field.setAccessible(true);\n+ /* No line here. This operation has been moved to fieldMap initialization. */",
+                "Description": "The accessibility of the field is changed each time in the for loop. It can be moved to where the field is initialized, reducing the number of times this operation is executed.",
+                "Start": 17,
+                "End": 17
+            },
+            {
+                "Improvement": "Use try-with-resources for ResultSet",
+                "Change_Diff": "- public A resultSet(String[] selectFields, ResultSet resultSet){\n+ public A resultSet(String[] selectFields, ResultSet resultSet){\n+ try (resultSet) {",
+                "Description": "ResultSet should be closed properly after using it to prevent resource leaks. Java 7 introduced the try-with-resources statement that ensures the resource is closed at the end of the statement.",
+                "Start": 10,
+                "End": 43
+            }
+        ],
+        "Final code": "public A resultSet(String[] selectFields, ResultSet resultSet){\n  A bean=null;\n  try {\n    bean=(A)Class.forName(clazz.getName()).newInstance();\n    try (resultSet) {\n      for (String selectField : selectFields) {\n        final int RESULT_SET_INDEX = selectFields.indexOf(selectField) + 1;\n        if (!fieldMap.containsKey(selectField)) {\n          continue;\n        }\n        Field field = fieldMap.get(selectField);\n        Class fieldClass = field.getType();\n        if (fieldClass == String.class) {\n          field.set(bean, resultSet.getString(RESULT_SET_INDEX));\n        } else if (fieldClass == int.class || fieldClass == Integer.class) {\n          field.set(bean, resultSet.getInt(RESULT_SET_INDEX));\n        } else if (fieldClass == float.class || fieldClass == Float.class) {\n          field.set(bean, resultSet.getFloat(RESULT_SET_INDEX));\n        } else if (fieldClass == double.class || fieldClass == Double.class) {\n          field.set(bean, resultSet.getDouble(RESULT_SET_INDEX));\n        } else if (fieldClass == long.class || fieldClass == Long.class) {\n          field.set(bean, resultSet.getLong(RESULT_SET_INDEX));\n        } else if (fieldClass == Date.class) {\n          field.set(bean, resultSet.getDate(RESULT_SET_INDEX));\n        }\n      }\n    }\n  } catch (SQLException e) {\n    logger.error(\"resultSet parse error\", e);\n  } catch (IllegalAccessException|ClassNotFoundException|InstantiationException e) {\n    e.printStackTrace();\n  }\n  return bean;\n}"
+    },
+    "Old_Method": "/** \n * 根据 fieldMap 里字段名和 bean 属性名的对应关系,根据查询字段取出对应的属性名 然后通过反射设置值\n * @param selectFields\n * @param resultSet\n * @return\n */\n@SuppressWarnings(\"unchecked\") public A resultSet(String[] selectFields,ResultSet resultSet){\n  A bean=null;\n  try {\n    bean=(A)Class.forName(clazz.getName()).newInstance();\n    for (int i=0; i < selectFields.length; i++) {\n      int j=i + 1;\n      if (!fieldMap.containsKey(selectFields[i])) {\n        continue;\n      }\n      Field field=fieldMap.get(selectFields[i]);\n      field.setAccessible(true);\n      Class fieldClass=field.getType();\n      if (fieldClass == String.class) {\n        field.set(bean,resultSet.getString(j));\n      }\n else       if (fieldClass == int.class || fieldClass == Integer.class) {\n        field.set(bean,resultSet.getInt(j));\n      }\n else       if (fieldClass == float.class || fieldClass == Float.class) {\n        field.set(bean,resultSet.getFloat(j));\n      }\n else       if (fieldClass == double.class || fieldClass == Double.class) {\n        field.set(bean,resultSet.getDouble(j));\n      }\n else       if (fieldClass == long.class || fieldClass == Long.class) {\n        field.set(bean,resultSet.getLong(j));\n      }\n else       if (fieldClass == Date.class) {\n        field.set(bean,resultSet.getDate(j));\n      }\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"resultSet parse error\",e);\n  }\ncatch (  IllegalAccessException|ClassNotFoundException|InstantiationException e) {\n    e.printStackTrace();\n  }\n  return bean;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 1900,
+    "Stop": 3717,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "resultSet"
+}

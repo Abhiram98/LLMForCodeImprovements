@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use logging instead of System.out.println for debugging",
+                "Change_Diff": "- System.out.println(...);\n- System.err.println(...);\n+ logger.debug(...);\n+ logger.error(...);",
+                "Description": "System.out.println statements are generally not suitable for debugging in a production environment. A logging framework provides more flexibility and is generally more efficient. Logging allows you to control the level of detail output and can be configured to output to different locations.",
+                "Start": 18,
+                "End": 32
+            },
+            {
+                "Improvement": "Refactor error handling with exceptions",
+                "Change_Diff": "- System.err.println(...);\n+ throw new Exception(...);",
+                "Description": "When an error is encountered, instead of using System.err.println and continuing the execution, it's better to throw an exception. This makes it clear that an error has occurred, and allows the caller to decide how to handle the issue.",
+                "Start": 7,
+                "End": 11
+            },
+            {
+                "Improvement": "Remove magic numbers",
+                "Change_Diff": "- if (packetReadSize == 0) {\n+ if (packetReadSize == NO_BYTES_READ) {",
+                "Description": "There are several magic numbers in the code, such as the '0' in packetReadSize == 0. It's better to replace these with named constants to improve readability and maintainability.",
+                "Start": 12,
+                "End": 15
+            }
+        ],
+        "Final code": "@Override protected void processUpdate() throws SteamException {\n  int[] packetSize=new int[1];\n  if (networking.isP2PPacketAvailable(defaultChannel,packetSize)) {\n    SteamID steamIDSender=new SteamID();\n    if (packetSize[0] > packetReadBuffer.capacity()) {\n      throw new SteamException(\"incoming packet larger than read buffer can handle\");\n    }\n    packetReadBuffer.clear();\n    packetReadBuffer.limit(packetSize[0]);\n    int packetReadSize=networking.readP2PPacket(steamIDSender,packetReadBuffer,defaultChannel);\n    if (packetReadSize == NO_BYTES_READ) {\n      throw new Exception(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but got none\");\n    }\n else if (packetReadSize < packetSize[0]) {\n      throw new Exception(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but only got \"+ packetReadSize);\n    }\n    packetReadBuffer.limit(packetReadSize);\n    if (packetReadSize > 0) {\n      registerRemoteSteamID(steamIDSender);\n      int bytesReceived=packetReadBuffer.limit();\n      logger.debug(\"Rcv packet: userID=\" + steamIDSender.getAccountID() + \", \"+ bytesReceived+ \" bytes\");\n      byte[] bytes=new byte[bytesReceived];\n      packetReadBuffer.get(bytes);\n      int magicBytes=checkMagicBytes(packetReadBuffer,AUTH);\n      if (magicBytes > 0) {\n        remoteAuthTicketData.clear();\n        remoteAuthTicketData.put(bytes,magicBytes,bytesReceived - magicBytes);\n        remoteAuthTicketData.flip();\n        logger.debug(\"Auth ticket received: \" + remoteAuthTicketData.toString() + \" [hash: \"+ remoteAuthTicketData.hashCode()+ \"]\");\n        beginAuthSession(steamIDSender);\n      }\n else {\n        String message=new String(bytes,messageCharset);\n        logger.debug(\"Rcv message: \\\"\" + message + \"\\\"\");\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void processUpdate() throws SteamException {\n  int[] packetSize=new int[1];\n  if (networking.isP2PPacketAvailable(defaultChannel,packetSize)) {\n    SteamID steamIDSender=new SteamID();\n    if (packetSize[0] > packetReadBuffer.capacity()) {\n      throw new SteamException(\"incoming packet larger than read buffer can handle\");\n    }\n    packetReadBuffer.clear();\n    packetReadBuffer.limit(packetSize[0]);\n    int packetReadSize=networking.readP2PPacket(steamIDSender,packetReadBuffer,defaultChannel);\n    if (packetReadSize == 0) {\n      System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but got none\");\n    }\n else     if (packetReadSize < packetSize[0]) {\n      System.err.println(\"Rcv packet: expected \" + packetSize[0] + \" bytes, but only got \"+ packetReadSize);\n    }\n    packetReadBuffer.limit(packetReadSize);\n    if (packetReadSize > 0) {\n      registerRemoteSteamID(steamIDSender);\n      int bytesReceived=packetReadBuffer.limit();\n      System.out.println(\"Rcv packet: userID=\" + steamIDSender.getAccountID() + \", \"+ bytesReceived+ \" bytes\");\n      byte[] bytes=new byte[bytesReceived];\n      packetReadBuffer.get(bytes);\n      int magicBytes=checkMagicBytes(packetReadBuffer,AUTH);\n      if (magicBytes > 0) {\n        remoteAuthTicketData.clear();\n        remoteAuthTicketData.put(bytes,magicBytes,bytesReceived - magicBytes);\n        remoteAuthTicketData.flip();\n        System.out.println(\"Auth ticket received: \" + remoteAuthTicketData.toString() + \" [hash: \"+ remoteAuthTicketData.hashCode()+ \"]\");\n        beginAuthSession(steamIDSender);\n      }\n else {\n        String message=new String(bytes,messageCharset);\n        System.out.println(\"Rcv message: \\\"\" + message + \"\\\"\");\n      }\n    }\n  }\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+    "Start": 3102,
+    "Stop": 5085,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processUpdate"
+}

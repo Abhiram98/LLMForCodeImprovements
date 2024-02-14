@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 streams instead of for loop",
+                "Change_Diff": "- for (String loaderBeanName : loadersNames) {\n-     BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n-     try {\n-          registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n-     }\n-     catch (Exception e) {\n-          throw new RuntimeException(e);\n-     }\n- }\n+ Arrays.stream(loadersNames)\n+    .map(loaderBeanName -> beanFactory.getBeanDefinition(loaderBeanName))\n+    .forEach(loaderBeanDefinition -> {\n+        try {\n+            registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()), loaderBeanName);\n+        } catch (Exception e) {\n+            throw new RuntimeException(e);\n+        }\n+    });",
+                "Description": "Instead of using a traditional for loop, you can use Java 8 streams to iterate over `loadersNames`. This makes the code more declarative and easier to read.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Add error message to the RuntimeException",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new RuntimeException(\"Failed to register Saga Loader: \" + loaderBeanName, e);",
+                "Description": "When throwing a RuntimeException, it would be helpful to include a message that describes what went wrong. This will make troubleshooting easier if the exception is ever thrown.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  Arrays.stream(loadersNames)\n    .map(loaderBeanName -> beanFactory.getBeanDefinition(loaderBeanName))\n    .forEach(loaderBeanDefinition -> {\n        try {\n            registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()), loaderBeanName);\n        } catch (Exception e) {\n            throw new RuntimeException(\"Failed to register Saga Loader: \" + loaderBeanName, e);\n        }\n    });\n}"
+    },
+    "Old_Method": "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n catch (    Exception e) {\n      throw new RuntimeException(e);\n    }\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/main/java/pl/com/bottega/ecommerce/system/saga/impl/SpringSagaRegistry.java",
+    "Start": 2646,
+    "Stop": 3169,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "registerSagaLoaderBeans"
+}

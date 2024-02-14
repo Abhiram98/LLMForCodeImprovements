@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Reduce code complexity using ternary operator",
+            "Change_Diff": "- if (env == null) {\n-    if (key.defaultValue == null) {\n-      throw new RuntimeException(\"config not found: \" + key.name);\n-    }\n- else {\n-      return key.defaultValue;\n-    }\n-  }\n- else {\n-    return env;\n-  }\n+ return env != null ? env : (key.defaultValue != null ? key.defaultValue : throw new RuntimeException(\"config not found: \" + key.name));",
+            "Description": "Instead of using nested if else statements, we can simplify the code by using a ternary operator. This will make the code more readable and easier to follow.",
+            "Start": 3,
+            "End": 10
+        }],
+        "Final code": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  return env != null ? env : (key.defaultValue != null ? key.defaultValue : throw new RuntimeException(\"config not found: \" + key.name));\n}"
+    },
+    "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+    "Start": 813,
+    "Stop": 1187,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "get"
+}

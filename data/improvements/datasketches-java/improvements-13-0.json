@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code duplication",
+                "Change_Diff": "- checkByRange(refSk,testSk,u,ordered);\n- testSk=(CompactSketch)Sketch.wrap(directMem);\n- checkByRange(refSk,testSk,u,ordered);\n+ boolean isRangeChecked = checkByRange(refSk,testSk,u,ordered);\n+ if (!isRangeChecked) {\n+    testSk=(CompactSketch)Sketch.wrap(directMem);\n+    isRangeChecked = checkByRange(refSk,testSk,u,ordered);\n+ }",
+                "Description": "The checkByRange method is called twice with the same parameters. This creates unnecessary code duplication. To improve this, you can call the method once and store the result in a variable if it is needed again.",
+                "Start": 14,
+                "End": 15
+            },
+            {
+                "Improvement": "Use try-with-resources for efficient memory management",
+                "Change_Diff": "- try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n+ try (WritableHandle wdh=WritableMemory.allocateDirect(bytes); WritableMemory directMem=wdh.getWritable()) {",
+                "Description": "The WritableHandle object should be closed after usage to free up system resources. To ensure this happens even when exceptions are thrown, use a try-with-resources statement.",
+                "Start": 16,
+                "End": 23
+            },
+            {
+                "Improvement": "Avoid throwing generic exceptions",
+                "Change_Diff": "- catch (  final Exception e) {\n-    throw new RuntimeException(e);\n+ } catch (final IOException e) {\n+   throw new RuntimeException(\"Failed to allocate direct memory\", e);",
+                "Description": "Catching and throwing a generic Exception is a bad practice, it doesn't provide any specific information about the problem that occurred. It is better to catch specific exceptions so that the problem can be identified more easily.",
+                "Start": 23,
+                "End": 23
+            }
+        ],
+        "Final code": "public void checkHeapifyWrap(int k,int u,boolean ordered) {\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  boolean isRangeChecked = checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  if (!isRangeChecked) {\n    testSk=(CompactSketch)Sketch.heapify(heapROMem);\n    isRangeChecked = checkByRange(refSk,testSk,u,ordered);\n  }\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes); WritableMemory directMem=wdh.getWritable()) {\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    if (!isRangeChecked) {\n      testSk=(CompactSketch)Sketch.wrap(directMem);\n      isRangeChecked = checkByRange(refSk,testSk,u,ordered);\n    }\n  } catch (final IOException e) {\n    throw new RuntimeException(\"Failed to allocate direct memory\", e);\n  }\n}"
+    },
+    "Old_Method": "public void checkHeapifyWrap(int k,int u,boolean ordered){\n  UpdateSketch usk=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk.update(i);\n  }\n  CompactSketch refSk=usk.compact(ordered,null);\n  byte[] barr=refSk.toByteArray();\n  Memory srcMem=Memory.wrap(barr);\n  CompactSketch testSk=(CompactSketch)Sketch.heapify(srcMem);\n  checkByRange(refSk,testSk,u,ordered);\n  byte[] byteArray=refSk.toByteArray();\n  Memory heapROMem=Memory.wrap(byteArray);\n  testSk=(CompactSketch)Sketch.heapify(heapROMem);\n  checkByRange(refSk,testSk,u,ordered);\n  int bytes=usk.getCompactBytes();\n  try (WritableHandle wdh=WritableMemory.allocateDirect(bytes)){\n    WritableMemory directMem=wdh.getWritable();\n    refSk=usk.compact(ordered,directMem);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n    testSk=(CompactSketch)Sketch.wrap(directMem);\n    checkByRange(refSk,testSk,u,ordered);\n  }\n catch (  final Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/CompactSketchTest.java",
+    "Start": 1975,
+    "Stop": 3351,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkHeapifyWrap"
+}

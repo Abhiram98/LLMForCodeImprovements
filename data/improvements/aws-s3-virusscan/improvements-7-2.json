@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated string to a constant",
+                "Change_Diff": "- this.createObject(bucketName,\"virus.txt\"...\n+ this.createObject(bucketName,VIRUS_FILE...\n- if (this.doesObjectExist(bucketName,\"virus.txt\") == true) {\n+ if (this.doesObjectExist(bucketName,VIRUS_FILE) == true) {\n- this.createObject(bucketName,\"no-virus.txt\"...\n+ this.createObject(bucketName,NO_VIRUS_FILE...\n- if (this.doesObjectExist(bucketName,\"no-virus.txt\") == false) {\n+ if (this.doesObjectExist(bucketName,NO_VIRUS_FILE) == false) {\n- this.deleteObject(context,bucketName,\"no-virus.txt\");\n+ this.deleteObject(context,bucketName,NO_VIRUS_FILE);",
+                "Description": "The method uses a hardcoded string 'virus.txt' and 'no-virus.txt' in multiple places. It's a good practice to extract such literals into constants to avoid potential errors due to typos and improve maintainability.",
+                "Start": 12,
+                "End": 35
+            },
+            {
+                "Improvement": "Use try-with-resources to automatically close resources",
+                "Change_Diff": "- try {\n+ try (Resource resource = this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\")) {",
+                "Description": "Currently, resources are being closed in the finally block which is error-prone. By using try-with-resources, Java automatically closes the resources at the end of the statement, reducing the risk of resource leak.",
+                "Start": 8,
+                "End": 39
+            }
+        ],
+        "Final code": "@Test public void testWithFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  final String VIRUS_FILE = \"virus.txt\";\n  final String NO_VIRUS_FILE = \"no-virus.txt\";\n  try (Resource resource = this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\")) {\n    this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n    try {\n      this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n      this.createObject(bucketName,NO_VIRUS_FILE,\"not a virus\");\n      this.createObject(bucketName,VIRUS_FILE,\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n      this.retry(context,() -> {\n        if (this.doesObjectExist(bucketName,VIRUS_FILE) == true) {\n          throw new RuntimeException(VIRUS_FILE + \" must be deleted\");\n        }\n        return false;\n      }\n);\n      this.retry(context,() -> {\n        if (this.doesObjectExist(bucketName,NO_VIRUS_FILE) == false) {\n          throw new RuntimeException(NO_VIRUS_FILE + \" must be existing\");\n        }\n        return true;\n      }\n);\n      this.deleteObject(context,bucketName,NO_VIRUS_FILE);\n    }\nfinally {\n      this.deleteBucket(context,bucketName);\n    }\n  }\nfinally {\n    this.deleteStack(context,stackName);\n  }\n}\nfinally {\n  this.deleteStack(context,vpcStackName);\n}\n}"
+    },
+    "Old_Method": "@Test public void testWithFileDeletion(){\n  final Context context=new Context();\n  final String vpcStackName=\"vpc-2azs-\" + this.random8String();\n  final String stackName=\"s3-virusscan-\" + this.random8String();\n  final String bucketName=\"s3-virusscan-\" + this.random8String();\n  try {\n    this.createWiddixStack(context,vpcStackName,\"vpc/vpc-2azs.yaml\");\n    try {\n      this.createStack(context,stackName,\"template.yaml\",new Parameter().withParameterKey(\"ParentVPCStack\").withParameterValue(vpcStackName));\n      try {\n        this.createBucketWithSQSNotification(bucketName,this.getStackOutputValue(stackName,\"ScanQueueArn\"));\n        this.createObject(bucketName,\"no-virus.txt\",\"not a virus\");\n        this.createObject(bucketName,\"virus.txt\",\"X5O!P%@AP[4\\\\PZX54(P^)7CC)7}$EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*\");\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"virus.txt\") == true) {\n            throw new RuntimeException(\"virus.txt must be deleted\");\n          }\n          return false;\n        }\n);\n        this.retry(context,() -> {\n          if (this.doesObjectExist(bucketName,\"no-virus.txt\") == false) {\n            throw new RuntimeException(\"no-virus.txt must be existing\");\n          }\n          return true;\n        }\n);\n        this.deleteObject(context,bucketName,\"no-virus.txt\");\n      }\n  finally {\n        this.deleteBucket(context,bucketName);\n      }\n    }\n  finally {\n      this.deleteStack(context,stackName);\n    }\n  }\n  finally {\n    this.deleteStack(context,vpcStackName);\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/TestEicarFile.java",
+    "Start": 3987,
+    "Stop": 6025,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "testWithFileDeletion"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated code to a method",
+                "Change_Diff": "- synchronized (lock) {\n-     if (status != Status.CANCELED) {\n-       status=Status.ERROR;\n-     }\n-   }\n-   if (status == Status.ERROR) {\n-     fireOnFailure(e);\n-   }\n+ setStatus(Status.ERROR);\n+ if (status == Status.ERROR) {\n+   fireOnFailure(e);\n+ }",
+                "Description": "The code for changing the status and checking if it is not already canceled is repeated multiple times. This can be extracted into a separate method to reduce duplication.",
+                "Start": 15,
+                "End": 17
+            },
+            {
+                "Improvement": "Move fireOnSuccess() call inside finally block",
+                "Change_Diff": "- if (status == Status.DONE) {\n-   fireOnSuccess();\n- }\n+ finally {\n+   ...\n+   if (status == Status.DONE) {\n+     fireOnSuccess();\n+   }\n+ }",
+                "Description": "The success event should be fired before the method finishes execution. This will ensure that the event is fired even if an exception is thrown.",
+                "Start": 38,
+                "End": 39
+            }
+        ],
+        "Final code": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\n          setStatus(Status.DONE);\n        }\n      }\n    }\n  } catch (IOException e) {\n    setStatus(Status.ERROR);\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  } finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n    if (status == Status.DONE) {\n      fireOnSuccess();\n    }\n  }\n}\n\nprivate void setStatus(Status newStatus) {\n  synchronized (lock) {\n    if (status != Status.CANCELED) {\n      status = newStatus;\n    }\n  }\n}"
+    },
+    "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+    "Start": 6005,
+    "Stop": 7715,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "doDownload"
+}

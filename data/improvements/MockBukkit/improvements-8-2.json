@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce duplicate code",
+                "Change_Diff": "- while (!completed.get()) {\n-    checkTimeout(startTime,thread);\n-    scheduler.performOneTick();\n-    Thread.yield();\n-  }\n-  while (!executed.get()) {\n-    checkTimeout(startTime);\n-    scheduler.performOneTick();\n-  }\n+ performTaskUntil(executed, startTime, thread);\n+ performTaskUntil(completed, startTime);",
+                "Description": "The logic for checking the timeout and performing a tick on the scheduler is repeated twice. This logic can be abstracted into a separate method which can be called twice. This makes the code easier to maintain and reduces the chances of inconsistent changes.",
+                "Start": 25,
+                "End": 36
+            },
+            {
+                "Improvement": "Add null check",
+                "Change_Diff": "- Thread thread=new Thread(() -> {\n+ if (scheduler == null) throw new IllegalArgumentException(\"Scheduler should not be null\");\n+ Thread thread=new Thread(() -> {",
+                "Description": "There is no null check for the scheduler object, it is being directly used for calling the `runTaskLater` and `performOneTick` methods. If it is null, a NullPointerException will be thrown. To prevent this, add a null check at the beginning of the method.",
+                "Start": 10,
+                "End": 10
+            }
+        ],
+        "Final code": "    @Test void registerOneTasksAsynchronously(){\n      final Thread mainThread=Thread.currentThread();\n      AtomicBoolean executed=new AtomicBoolean();\n      AtomicBoolean completed=new AtomicBoolean();\n      AtomicBoolean notPrimaryThread=new AtomicBoolean();\n      if (scheduler == null) throw new IllegalArgumentException(\"Scheduler should not be null\");\n      Thread thread=new Thread(() -> {\n        try {\n          scheduler.runTaskLater(null,bukkitTask -> {\n            if (mainThread != Thread.currentThread()) {\n              notPrimaryThread.set(true);\n            }\n            executed.set(true);\n          }\n,1);\n        }\n      finally {\n          completed.set(true);\n        }\n      }\n);\n      thread.start();\n      long startTime=System.currentTimeMillis();\n      performTaskUntil(completed, startTime, thread);\n      performTaskUntil(executed, startTime);\n      assertTrue(executed.get());\n      assertFalse(notPrimaryThread.get());\n    }\n\n    private void performTaskUntil(AtomicBoolean condition, long startTime, Thread... threads) {\n        while (!condition.get()) {\n            Arrays.stream(threads).forEach(t -> checkTimeout(startTime, t));\n            scheduler.performOneTick();\n            Thread.yield();\n        }\n    }"
+    },
+    "Old_Method": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,1);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertTrue(executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n",
+    "File_Path": "MockBukkit/src/test/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMockTest.java",
+    "Start": 14506,
+    "Stop": 15448,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "registerOneTasksAsynchronously"
+}

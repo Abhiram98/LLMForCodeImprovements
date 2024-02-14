@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful names for variables",
+                "Change_Diff": "- final HashSet<Object> permanentElements=new HashSet<Object>();\n- final Collection testSetWeak=createSet();\n- final Random rand=new Random();\n- Object candidate=new Object();\n+ final HashSet<Object> permanentObjects=new HashSet<Object>();\n+ final Collection randomTestSet=createSet();\n+ final Random randomGenerator=new Random();\n+ Object randomObject=new Object();",
+                "Description": "Variable names should be descriptive to make the code easier to read and understand. For example, 'candidate' could be changed to 'randomObject', 'testSetWeak' to 'randomTestSet', etc.",
+                "Start": 5,
+                "End": 12
+            },
+            {
+                "Improvement": "Remove unused code",
+                "Change_Diff": "- System.currentTimeMillis();",
+                "Description": "The line 'System.currentTimeMillis();' doesn't affect the program and should be removed.",
+                "Start": 15,
+                "End": 15
+            },
+            {
+                "Improvement": "Use AssertJ assertions for better readability and more detailed error messages",
+                "Change_Diff": "- assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n- for (  Object test : testSetWeak) {\n- assertTrue(permanentElements.contains(test));\n+ assertThat(randomTestSet).hasSizeGreaterThan(permanentObjects.size()).hasSizeLessThan(numberOfElements);\n+ for (Object testObject : randomTestSet) {\n+ assertThat(permanentObjects).contains(testObject);",
+                "Description": "AssertJ provides a richer set of assertions than JUnit and can provide more detailed error messages.",
+                "Start": 19,
+                "End": 22
+            }
+        ],
+        "Final code": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentObjects=new HashSet<Object>();\n  final Collection randomTestSet=createSet();\n  final Random randomGenerator=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object randomObject=new Object();\n    if (randomGenerator.nextInt() % 3 == 0) {\n      permanentObjects.add(randomObject);\n    }\n    randomTestSet.add(randomObject);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (Object testObject : randomTestSet) {}\n    }\n  }\n,numberOfThreads);\n  assertThat(randomTestSet).hasSizeGreaterThan(permanentObjects.size()).hasSizeLessThan(numberOfElements);\n  for (Object testObject : randomTestSet) {\n    assertThat(permanentObjects).contains(testObject);\n  }\n}"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

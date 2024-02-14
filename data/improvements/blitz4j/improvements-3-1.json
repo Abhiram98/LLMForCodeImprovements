@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid null checks on appenders in while loop condition",
+                "Change_Diff": "- while (appenders.getAllAppenders() == null || (appenders != null && !appenders.getAllAppenders().hasMoreElements())) {\n+ while (appenders.getAllAppenders() == null || !appenders.getAllAppenders().hasMoreElements()) {",
+                "Description": "The null check on 'appenders' is not required if it is ensured that 'appenders' is always initialized before this method is called. It will improve readability and performance of the code as unnecessary null checks will be avoided.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Combine two if conditions into one",
+                "Change_Diff": "- if (batcher.isSpaceAvailable()) {\n... \n- if (batcher.process(event)) {\n... \n+ if (batcher.isSpaceAvailable() && batcher.process(event)) {",
+                "Description": "The two if conditions inside the for loop can be combined into one using the '&&' operator. This will make the code more concise and easier to read.",
+                "Start": 24,
+                "End": 31
+            }
+        ],
+        "Final code": "private void processLoggingEvents(List<LoggingEvent> loggingEvents){\n  while (appenders.getAllAppenders() == null || !appenders.getAllAppenders().hasMoreElements()) {\n    if ((batcher == null) || (batcher.isPaused())) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n      catch (InterruptedException ignore) {\n      }\n      continue;\n    }\n    org.apache.log4j.Logger asyncLogger=LoggerCache.getInstance().getOrCreateLogger(LOGGER_ASYNC_APPENDER);\n    Appender originalAppender=asyncLogger.getAppender(originalAppenderName);\n    if (originalAppender == null) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n      catch (InterruptedException ignore) {\n      }\n      continue;\n    }\n    appenders.addAppender(originalAppender);\n  }\n  for (Iterator<Entry<String,LogSummary>> iter=logSummaryMap.entrySet().iterator(); iter.hasNext(); ) {\n    Entry<String,LogSummary> mapEntry=(Entry<String,LogSummary>)iter.next();\n    if (batcher.isSpaceAvailable() && batcher.process(mapEntry.getValue().createEvent())) {\n      iter.remove();\n    }\n    else {\n      break;\n    }\n  }\n  for (LoggingEvent event : loggingEvents) {\n    appenders.appendLoopOnAppenders(event);\n  }\n}"
+    },
+    "Old_Method": "/** \n * Process the logging events. This is called by the batcher.\n * @param loggingEvents - The logging events to be written to the underlying appender\n */\nprivate void processLoggingEvents(List<LoggingEvent> loggingEvents){\n  while (appenders.getAllAppenders() == null || (appenders != null && !appenders.getAllAppenders().hasMoreElements())) {\n    if ((batcher == null) || (batcher.isPaused())) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    org.apache.log4j.Logger asyncLogger=LoggerCache.getInstance().getOrCreateLogger(LOGGER_ASYNC_APPENDER);\n    Appender originalAppender=asyncLogger.getAppender(originalAppenderName);\n    if (originalAppender == null) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    appenders.addAppender(originalAppender);\n  }\n  for (Iterator<Entry<String,LogSummary>> iter=logSummaryMap.entrySet().iterator(); iter.hasNext(); ) {\n    Entry<String,LogSummary> mapEntry=(Entry<String,LogSummary>)iter.next();\n    if (batcher.isSpaceAvailable()) {\n      LogSummary logSummary=mapEntry.getValue();\n      LoggingEvent event=logSummary.createEvent();\n      if (batcher.process(event)) {\n        iter.remove();\n      }\n else {\n        break;\n      }\n    }\n else {\n      break;\n    }\n  }\n  for (  LoggingEvent event : loggingEvents) {\n    appenders.appendLoopOnAppenders(event);\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/blitz4j/AsyncAppender.java",
+    "Start": 5676,
+    "Stop": 8133,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "processLoggingEvents"
+}

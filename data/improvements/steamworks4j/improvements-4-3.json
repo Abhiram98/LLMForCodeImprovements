@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use a constructor to initialize SteamUGCDetails",
+            "Change_Diff": "- SteamUGCDetails details=new SteamUGCDetails();\n- details.publishedFileID=publishedFileID;\n- details.result=result;\n- details.title=title;\n- details.description=description;\n- details.fileHandle=fileHandle;\n- details.previewFileHandle=previewFileHandle;\n- details.fileName=fileName;\n- details.votesUp=votesUp;\n- details.votesDown=votesDown;\n- details.ownerID=ownerID;\n- details.timeCreated=timeCreated;\n- details.timeUpdated=timeUpdated;\n+ SteamUGCDetails details = new SteamUGCDetails(publishedFileID, result, title, description, fileHandle, previewFileHandle, fileName, votesUp, votesDown, ownerID, timeCreated, timeUpdated);",
+            "Description": "Rather than setting each property of SteamUGCDetails individually after creating a new instance, use a constructor to initialize all properties at once. This makes the code cleaner and reduces the chance of missing any property.",
+            "Start": 2,
+            "End": 14
+        }],
+        "Final code": "void onRequestUGCDetails(long publishedFileID,int result,String title,String description,long fileHandle,long previewFileHandle,String fileName,boolean cachedData,int votesUp,int votesDown,long ownerID,int timeCreated,int timeUpdated){\n  SteamUGCDetails details = new SteamUGCDetails(publishedFileID, result, title, description, fileHandle, previewFileHandle, fileName, votesUp, votesDown, ownerID, timeCreated, timeUpdated);\n  callback.onRequestUGCDetails(details,SteamResult.byValue(result));\n}"
+    },
+    "Old_Method": "void onRequestUGCDetails(long publishedFileID,int result,String title,String description,long fileHandle,long previewFileHandle,String fileName,boolean cachedData,int votesUp,int votesDown,long ownerID,int timeCreated,int timeUpdated){\n  SteamUGCDetails details=new SteamUGCDetails();\n  details.publishedFileID=publishedFileID;\n  details.result=result;\n  details.title=title;\n  details.description=description;\n  details.fileHandle=fileHandle;\n  details.previewFileHandle=previewFileHandle;\n  details.fileName=fileName;\n  details.votesUp=votesUp;\n  details.votesDown=votesDown;\n  details.ownerID=ownerID;\n  details.timeCreated=timeCreated;\n  details.timeUpdated=timeUpdated;\n  callback.onRequestUGCDetails(details,SteamResult.byValue(result));\n}\n",
+    "File_Path": "steamworks4j/java-wrapper/src/main/java/com/codedisaster/steamworks/SteamUGCCallbackAdapter.java",
+    "Start": 840,
+    "Stop": 1654,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onRequestUGCDetails"
+}

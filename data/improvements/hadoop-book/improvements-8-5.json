@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace System.out.println with a Logger",
+                "Change_Diff": "- System.out.println(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);\n+ logger.info(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);",
+                "Description": "Printing to the console is not usually a good idea in production code, as it can lead to performance issues. Instead, use a logger to log messages. This also allows for more control over when to log based on log levels.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Check for division by zero",
+                "Change_Diff": "- long rowsPerSplit=totalRows / numSplits;\n+ if (numSplits == 0) throw new IllegalArgumentException(\"numSplits must be > 0\");\n+ long rowsPerSplit=totalRows / numSplits;",
+                "Description": "We are dividing totalRows by numSplits without checking if numSplits is zero. This could lead to an ArithmeticException. We should add a check and throw an IllegalArgumentException if numSplits is zero.",
+                "Start": 4,
+                "End": 4
+            }
+        ],
+        "Final code": "public InputSplit[] getSplits(JobConf job,int numSplits){\n  long totalRows=getNumberOfRows(job);\n  if (numSplits == 0) throw new IllegalArgumentException(\"numSplits must be > 0\");\n  long rowsPerSplit=totalRows / numSplits;\n  logger.info(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);\n  InputSplit[] splits=new InputSplit[numSplits];\n  long currentRow=0;\n  for (int split=0; split < numSplits - 1; ++split) {\n    splits[split]=new RangeInputSplit(currentRow,rowsPerSplit);\n    currentRow+=rowsPerSplit;\n  }\n  splits[numSplits - 1]=new RangeInputSplit(currentRow,totalRows - currentRow);\n  return splits;\n}"
+    },
+    "Old_Method": "/** \n * Create the desired number of splits, dividing the number of rows between the mappers.\n */\npublic InputSplit[] getSplits(JobConf job,int numSplits){\n  long totalRows=getNumberOfRows(job);\n  long rowsPerSplit=totalRows / numSplits;\n  System.out.println(\"Generating \" + totalRows + \" using \"+ numSplits+ \" maps with step of \"+ rowsPerSplit);\n  InputSplit[] splits=new InputSplit[numSplits];\n  long currentRow=0;\n  for (int split=0; split < numSplits - 1; ++split) {\n    splits[split]=new RangeInputSplit(currentRow,rowsPerSplit);\n    currentRow+=rowsPerSplit;\n  }\n  splits[numSplits - 1]=new RangeInputSplit(currentRow,totalRows - currentRow);\n  return splits;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/terasort/TeraGen.java",
+    "Start": 4921,
+    "Stop": 5780,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "getSplits"
+}

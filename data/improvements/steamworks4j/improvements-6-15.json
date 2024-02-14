@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace multiple else if condition with switch case for readability",
+                "Change_Diff": "- else if (input.equals(\"p2p list\")) {\n- else if (input.startsWith(\"auth ticket \")) {\n+ switch (input) {\ncase \"p2p list\":\ncase \"auth ticket \":",
+                "Description": "Instead of using multiple else if to check the input, use a switch case which makes it more readable and easier to debug.",
+                "Start": 2,
+                "End": 50
+            },
+            {
+                "Improvement": "Extract Magic Strings as Constants",
+                "Change_Diff": "- if (input.startsWith(\"p2p send \")) {\n+ if (input.startsWith(P2P_SEND)) {",
+                "Description": "Strings like \"p2p send \", \"p2p close \" etc. are hard-coded and used multiple times in the method. Extracting them into constants would make the code more maintainable.",
+                "Start": 2,
+                "End": 50
+            },
+            {
+                "Improvement": "Replace System.out.println with Logger",
+                "Change_Diff": "- System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n+ LOGGER.error(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");",
+                "Description": "Using System.out.println for logging is not a good practice, it's better to replace it with a logger for better log management.",
+                "Start": 17,
+                "End": 19
+            },
+            {
+                "Improvement": "Extract code blocks into separate methods",
+                "Change_Diff": "- if (input.startsWith(\"p2p send \")) {\n+ handleP2PSend(input);",
+                "Description": "The method is too long and doing multiple things. Extracting code blocks into separate methods would make it more readable and maintainable.",
+                "Start": 2,
+                "End": 50
+            }
+        ],
+        "Final code": "private static final String P2P_SEND = \"p2p send \";\nprivate static final String P2P_CLOSE = \"p2p close \";\nprivate static final Logger LOGGER = LoggerFactory.getLogger(ClassName.class);\n\n@Override protected void processInput(String input) throws SteamException {\n\n  switch (input) {\n    case P2P_SEND:\n      handleP2PSend(input);\n      break;\n    case P2P_CLOSE:\n      handleP2PClose(input);\n      break;\n    case \"p2p list\":\n      handleP2PList(input);\n      break;\n    case \"auth ticket\":\n      handleAuthTicket(input);\n      break;\n    default:\n      friends.processInput(input);\n      break;\n  }\n}\n\nprivate void handleP2PSend(String input) {\n  // Extracted code\n}\n\nprivate void handleP2PClose(String input) {\n  // Extracted code\n}\n\nprivate void handleP2PList(String input) {\n  // Extracted code\n}\n\nprivate void handleAuthTicket(String input) {\n  // Extracted code\n}"
+    },
+    "Old_Method": "@Override protected void processInput(String input) throws SteamException {\n  if (input.startsWith(\"p2p send \")) {\n    String[] params=input.substring(\"p2p send \".length()).split(\" \");\n    int receiverID=Integer.parseInt(params[0]);\n    SteamID steamIDReceiver=null;\n    if (remoteUserIDs.containsKey(receiverID)) {\n      steamIDReceiver=remoteUserIDs.get(receiverID);\n    }\n else     if (friends.isFriendAccountID(receiverID)) {\n      steamIDReceiver=friends.getFriendSteamID(receiverID);\n    }\n else {\n      System.out.println(\"Error: unknown userID \" + receiverID + \" (no friend, not connected)\");\n    }\n    if (steamIDReceiver != null) {\n      packetSendBuffer.clear();\n      for (int i=1; i < params.length; i++) {\n        byte[] bytes=params[i].getBytes(messageCharset);\n        if (i > 1) {\n          packetSendBuffer.put((byte)0x20);\n        }\n        packetSendBuffer.put(bytes);\n      }\n      packetSendBuffer.flip();\n      networking.sendP2PPacket(steamIDReceiver,packetSendBuffer,SteamNetworking.P2PSend.Unreliable,defaultChannel);\n    }\n  }\n else   if (input.startsWith(\"p2p close \")) {\n    int remoteID=Integer.parseInt(input.substring(\"p2p close \".length()));\n    SteamID steamIDRemote=null;\n    if (remoteUserIDs.containsKey(remoteID)) {\n      steamIDRemote=remoteUserIDs.get(remoteID);\n    }\n else {\n      System.out.println(\"Error: unknown remote ID \" + remoteID + \" (not connected)\");\n    }\n    if (steamIDRemote != null) {\n      networking.closeP2PSessionWithUser(steamIDRemote);\n      unregisterRemoteSteamID(steamIDRemote);\n    }\n  }\n else   if (input.equals(\"p2p list\")) {\n    System.out.println(\"P2P connected users:\");\n    if (remoteUserIDs.size() == 0) {\n      System.out.println(\"  none\");\n    }\n    for (    SteamID steamIDUser : remoteUserIDs.values()) {\n      System.out.println(\"  \" + steamIDUser.getAccountID());\n    }\n  }\n else   if (input.startsWith(\"auth ticket \")) {\n    String authCmd=input.substring(\"auth ticket \".length());\n    if (authCmd.equals(\"get\")) {\n      getAuthTicket();\n    }\n else     if (authCmd.equals(\"cancel\")) {\n      cancelAuthTicket();\n    }\n else     if (authCmd.equals(\"send\")) {\n      broadcastAuthTicket();\n    }\n else     if (authCmd.equals(\"end\")) {\n      endAuthSession();\n    }\n  }\n  friends.processInput(input);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamNetworkingTest.java",
+    "Start": 5088,
+    "Stop": 7338,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processInput"
+}

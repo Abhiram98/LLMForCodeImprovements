@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "+ /**\n+  * Updates the current HllSketchImpl with the given coupon.\n+  * @param coupon The coupon to be updated.\n+  * @return The updated HllSketchImpl.\n+  */",
+                "Description": "The method is currently missing documentation. Adding JavaDoc comments can help other developers understand the purpose of the method, its parameters, and its return value.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Refactor nested conditions",
+                "Change_Diff": "- final int index=find(mem,getLgCouponArrInts(),coupon);\n- if (index >= 0) {\n-   return this;\n- }\n- insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n- insertHashSetCount(wmem,getCouponCount() + 1);\n- final boolean promote=checkGrowOrPromote();\n- if (!promote) {\n-   return this;\n- }\n- return promoteListOrSetToHll(this);\n+ if (isCouponInSet(coupon)) {\n+   return this;\n+ }\n+ incrementCouponCount(coupon);\n+ if (shouldPromote()) {\n+   return promoteListOrSetToHll(this);\n+ }\n+ return this;",
+                "Description": "The nested conditionals can be refactored to improve readability and maintainability of the code. The logic to increment the coupon count and check for promotion can be extracted into separate methods.",
+                "Start": 6,
+                "End": 15
+            }
+        ],
+        "Final code": "  /**\n   * Updates the current HllSketchImpl with the given coupon.\n   * @param coupon The coupon to be updated.\n   * @return The updated HllSketchImpl.\n   */\n@Override HllSketchImpl couponUpdate(final int coupon){\n  if (wmem == null) {\n    noWriteAccess();\n  }\n  if (isCouponInSet(coupon)) {\n    return this;\n  }\n  incrementCouponCount(coupon);\n  if (shouldPromote()) {\n    return promoteListOrSetToHll(this);\n  }\n  return this;\n}\n\nprivate boolean isCouponInSet(final int coupon) {\n  final int index=find(mem,getLgCouponArrInts(),coupon);\n  return index >= 0;\n}\n\nprivate void incrementCouponCount(final int coupon) {\n  insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n  insertHashSetCount(wmem,getCouponCount() + 1);\n}\n\nprivate boolean shouldPromote() {\n  final boolean promote=checkGrowOrPromote();\n  return promote;\n}"
+    },
+    "Old_Method": "@Override HllSketchImpl couponUpdate(final int coupon){\n  if (wmem == null) {\n    noWriteAccess();\n  }\n  final int index=find(mem,getLgCouponArrInts(),coupon);\n  if (index >= 0) {\n    return this;\n  }\n  insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n  insertHashSetCount(wmem,getCouponCount() + 1);\n  final boolean promote=checkGrowOrPromote();\n  if (!promote) {\n    return this;\n  }\n  return promoteListOrSetToHll(this);\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/hll/DirectCouponHashSet.java",
+    "Start": 2926,
+    "Stop": 3436,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "couponUpdate"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for automatic resource management",
+                "Change_Diff": "- Connection conn=null;\n- PreparedStatement statement=null;\n- ResultSet rs=null;\n...\n- finally {\n-    JdbcPool.release(conn,statement,rs);\n- };\n+ try (Connection conn = JdbcPool.getReadConnection();\n+ PreparedStatement statement = conn.prepareStatement(sql);) {",
+                "Description": "The try-with-resources statement is a try statement that declares one or more resources. A resource is an object that must be closed after the program is finished with it. The try-with-resources statement ensures that each resource is closed at the end of the statement. This would remove the need for explicit resource release in the finally block.",
+                "Start": 8,
+                "End": 24
+            },
+            {
+                "Improvement": "Handle SQLException",
+                "Change_Diff": "- logger.error(\"sql error\",e);\n+ throw new RuntimeException(\"SQL error\", e);",
+                "Description": "SQLException is caught but not handled properly. It's a good practice to either rethrow the exception (possibly after wrapping it in a custom exception class) or handle it in a meaningful way, instead of just logging it.",
+                "Start": 20,
+                "End": 22
+            }
+        ],
+        "Final code": "public static String getValue(String sql,Object... params) throws RuntimeException {\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  String res=null;\n  try (Connection conn = JdbcPool.getReadConnection(); PreparedStatement statement = conn.prepareStatement(sql)) {\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    try (ResultSet rs = statement.executeQuery()) {\n      if (rs.next()) {\n        res=rs.getString(1);\n      }\n    }\n  }\n catch (SQLException e) {\n    throw new RuntimeException(\"SQL error\", e);\n  }\n  return res;\n}"
+    },
+    "Old_Method": "public static String getValue(String sql,Object... params){\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet rs=null;\n  String res=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    rs=statement.executeQuery();\n    if (rs.next()) {\n      res=rs.getString(1);\n    }\n  }\n catch (  SQLException e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,rs);\n  }\n  return res;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/Mysql.java",
+    "Start": 4994,
+    "Stop": 5866,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "getValue"
+}

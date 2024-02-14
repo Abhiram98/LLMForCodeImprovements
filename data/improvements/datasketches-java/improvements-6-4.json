@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use more meaningful variable names",
+                "Change_Diff": "- final int lgK=5;\n- final int k=1 << lgK;\n- final int u=4 * k;\n- final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n- final CompactSketch csk1=usk1.compact(true,null);\n- final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n+ final int logEntries=5;\n+ final int entries=1 << logEntries;\n+ final int updateCount=4 * entries;\n+ final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(entries).build();\n+ final CompactSketch compactSketch=updateSketch.compact(true,null);\n+ final Intersection intersection=SetOperation.builder().buildIntersection(iMem);",
+                "Description": "Variable names such as 'lgK', 'k', 'u', 'usk1', 'csk1', 'inter' are not very descriptive and do not help in understanding the code. It is better to use more meaningful names.",
+                "Start": 2,
+                "End": 13
+            },
+            {
+                "Improvement": "Use a more descriptive test method name",
+                "Change_Diff": "- @Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n+ @Test(expectedExceptions=SketchesArgumentException.class) public void shouldThrowExceptionWhenMemorySizeTooSmall(){",
+                "Description": "The test method name 'checkSizedTooSmall' is not very descriptive. It is better to use a more descriptive name that explains what the test is doing.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add comments to explain the logic",
+                "Change_Diff": "+ // Setting logEntries to 5\n+ // Creating entries by left shifting logEntries\n+ // Setting updateCount to 4 times the entries\n+ // Building an UpdateSketch with nominal entries set to entries\n+ // Updating the UpdateSketch 'updateCount' times\n+ // Compacting the UpdateSketch\n+ // Building an Intersection with a writable memory\n+ // Intersecting the Intersection with the compact sketch",
+                "Description": "The test method lacks comments explaining the logic behind the test. This can make the test hard to understand for other developers. It is good practice to add comments to improve code readability.",
+                "Start": 2,
+                "End": 13
+            }
+        ],
+        "Final code": "@Test(expectedExceptions=SketchesArgumentException.class) public void shouldThrowExceptionWhenMemorySizeTooSmall(){\n  // Setting logEntries to 5\n  final int logEntries=5;\n  // Creating entries by left shifting logEntries\n  final int entries=1 << logEntries;\n  // Setting updateCount to 4 times the entries\n  final int updateCount=4 * entries;\n  final int memBytes=getMaxIntersectionBytes(entries / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  // Building an UpdateSketch with nominal entries set to entries\n  final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(entries).build();\n  // Updating the UpdateSketch 'updateCount' times\n  for (int i=0; i < updateCount; i++) {\n    updateSketch.update(i);\n  }\n  // Compacting the UpdateSketch\n  final CompactSketch compactSketch=updateSketch.compact(true,null);\n  // Building an Intersection with a writable memory\n  final Intersection intersection=SetOperation.builder().buildIntersection(iMem);\n  // Intersecting the Intersection with the compact sketch\n  intersection.intersect(compactSketch);\n}"
+    },
+    "Old_Method": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int lgK=5;\n  final int k=1 << lgK;\n  final int u=4 * k;\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/DirectIntersectionTest.java",
+    "Start": 17194,
+    "Stop": 17845,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSizedTooSmall"
+}

@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary `@Deprecated` annotations",
+                "Change_Diff": "- @Deprecated @Test public void testMdBuilderControllersApi1(){\n- @Deprecated ApiConfig config=new ApiConfig();\n+ @Test public void testMdBuilderControllersApi1(){\n+ ApiConfig config=new ApiConfig();",
+                "Description": "It appears as if the `@Deprecated` annotation is being misused in this case. This annotation is generally used to indicate that a particular method, class, or field is deprecated and should not be used. If this method isn't deprecated, remove the annotation.",
+                "Start": 5,
+                "End": 6
+            },
+            {
+                "Improvement": "Use Java constant for server URL",
+                "Change_Diff": "- config.setServerUrl(\"http://127.0.0.1:8899\");\n- config.setOpenUrl(\"http://localhost:7700/api\");\n+ config.setServerUrl(Constants.SERVER_URL);\n+ config.setOpenUrl(Constants.OPEN_URL);",
+                "Description": "It would be wise to replace the hardcoded server URLs with Java constants. This would make it easier to manage and modify the URLs, and it would also prevent accidental changes to the URLs.",
+                "Start": 7,
+                "End": 8
+            },
+            {
+                "Improvement": "Externalize sensitive data",
+                "Change_Diff": "- config.setAppToken(\"be4211613a734b45888c075741680e49\");\n+ config.setAppToken(System.getenv(\"APP_TOKEN\"));",
+                "Description": "The hardcoded app token should be externalized to a configuration file or environment variable. This would provide better security and flexibility.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Use try-with-resources for timing code execution",
+                "Change_Diff": "- long start=System.currentTimeMillis();\n- ApiDocBuilder.buildApiDoc(config);\n- long end=System.currentTimeMillis();\n- DateTimeUtil.printRunTime(end,start);\n+ try (Timer timer = new Timer()) {\n+     ApiDocBuilder.buildApiDoc(config);\n+ }",
+                "Description": "Instead of manually capturing the start and end times, use a try-with-resources statement with a custom AutoCloseable Timer class. This will ensure that the end time is always captured, even if an exception is thrown during execution.",
+                "Start": 24,
+                "End": 27
+            }
+        ],
+        "Final code": "@Test public void testMdBuilderControllersApi1(){\n  ApiConfig config=new ApiConfig();\n  config.setServerUrl(Constants.SERVER_URL);\n  config.setOpenUrl(Constants.OPEN_URL);\n  config.setAppToken(System.getenv(\"APP_TOKEN\"));\n  config.setDebugEnvName(\"测试环境\");\n  config.setInlineEnum(true);\n  config.setStyle(\"randomLight\");\n  config.setCreateDebugPage(false);\n  config.setAllInOne(true);\n  config.setCoverOld(false);\n  config.setOutPath(\"D:\\smart-doc\\docs\\jmx1\");\n  config.setFramework(FrameworkEnum.SPRING.getFramework());\n  config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\smart-doc\\test-project\"));\n  config.setPackageFilters(\"com.power.doc.controller.*\");\n  config.setBaseDir(\"D:\\smart-doc\\test-project\\smart-doc-example-cn-master\");\n  config.setCodePath(\"/src/main/java\");\n  try (Timer timer = new Timer()) {\n      ApiDocBuilder.buildApiDoc(config);\n  }\n}"
+    },
+    "Old_Method": "/** \n * test markdown\n */\n@Deprecated @Test public void testMdBuilderControllersApi1(){\n  @Deprecated ApiConfig config=new ApiConfig();\n  config.setServerUrl(\"http://127.0.0.1:8899\");\n  config.setOpenUrl(\"http://localhost:7700/api\");\n  config.setAppToken(\"be4211613a734b45888c075741680e49\");\n  config.setDebugEnvName(\"测试环境\");\n  config.setInlineEnum(true);\n  config.setStyle(\"randomLight\");\n  config.setCreateDebugPage(false);\n  config.setAllInOne(true);\n  config.setCoverOld(false);\n  config.setOutPath(\"D:\\\\smart-doc\\\\docs\\\\jmx1\");\n  config.setFramework(FrameworkEnum.SPRING.getFramework());\n  config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\\\smart-doc\\\\test-project\"));\n  config.setPackageFilters(\"com.power.doc.controller.*\");\n  config.setBaseDir(\"D:\\\\smart-doc\\\\test-project\\\\smart-doc-example-cn-master\");\n  config.setCodePath(\"/src/main/java\");\n  long start=System.currentTimeMillis();\n  ApiDocBuilder.buildApiDoc(config);\n  long end=System.currentTimeMillis();\n  DateTimeUtil.printRunTime(end,start);\n}\n",
+    "File_Path": "smart-doc/src/test/java/com/ly/doc/ApiDocTest.java",
+    "Start": 3797,
+    "Stop": 5156,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "testMdBuilderControllersApi1"
+}

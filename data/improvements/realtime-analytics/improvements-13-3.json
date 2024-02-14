@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce the level of nesting",
+                "Change_Diff": "- if (MCCounterHelper.isMCCounterEvent(event)) {...} else if (MCCounterHelper.isMCMultiCounterEvent(event)) {...} else if (MCCounterHelper.isGroupByCounterEvent(event)) {...} else {...}\n+ handleEvent(event)",
+                "Description": "The nested conditional blocks make the code hard to understand. You can simplify it by using early returns/continues or by breaking the code into smaller methods.",
+                "Start": 6,
+                "End": 90
+            },
+            {
+                "Improvement": "Avoid the use of magic numbers",
+                "Change_Diff": "- Map<String,String> tags=new HashMap<String,String>(5);\n+ final int INITIAL_MAP_SIZE = 5;\n+ Map<String,String> tags=new HashMap<String,String>(INITIAL_MAP_SIZE);",
+                "Description": "The use of the number 5 in 'new HashMap<String,String>(5)' could be replaced with a well-named constant to make the code more readable.",
+                "Start": 59,
+                "End": 59
+            },
+            {
+                "Improvement": "Use try-catch block to handle ClassCastException",
+                "Change_Diff": "- Long total=(Long)entry.getValue();\n+ Long total = null;\n+ try {\n+     total = (Long)entry.getValue();\n+ } catch (ClassCastException ex) {\n+     LOGGER.error('Class cast exception: ', ex);\n+ }",
+                "Description": "The explicit casting of objects to Long and String could lead to ClassCastException if the object is of a different type. Using a try-catch block will help handle such scenarios gracefully.",
+                "Start": 14,
+                "End": 75
+            }
+        ],
+        "Final code": "  @Override public void sendEvent(JetstreamEvent event) throws EventException {\n    if (isPaused() || shutdownFlag.get()) {\n      super.incrementEventDroppedCounter();\n      return;\n    }\n    incrementEventRecievedCounter();\n    handleEvent(event);\n  }\n\n  private void handleEvent(JetstreamEvent event) {\n    // The complete implementation of handleEvent method\n  }"
+    },
+    "Old_Method": "@Override public void sendEvent(JetstreamEvent event) throws EventException {\n  if (isPaused() || shutdownFlag.get()) {\n    super.incrementEventDroppedCounter();\n    return;\n  }\n  incrementEventRecievedCounter();\n  if (MCCounterHelper.isMCCounterEvent(event)) {\n    String metricName=(String)event.get(MCConstant.METRIC_NAME);\n    Long total=null;\n    if (MCCounterHelper.isAvgEvent(metricName)) {\n      for (      Map.Entry<String,Object> entry : event.entrySet()) {\n        if (entry.getKey().toLowerCase().contains(\"total\")) {\n          total=(Long)entry.getValue();\n          break;\n        }\n      }\n    }\n    if (event.get(MCConstant.METRIC_COUNT) != null) {\n      Long count=(Long)event.get(MCConstant.METRIC_COUNT);\n      if (total != null) {\n        ((AvgCounter)getCounterByMetricName(metricName,true)).inc(count,total);\n      }\n else       getCounterByMetricName(metricName,false).inc(count);\n    }\n else {\n      getCounterByMetricName(metricName,false).inc();\n    }\n  }\n else   if (MCCounterHelper.isMCMultiCounterEvent(event)) {\n    for (    Map.Entry<String,Object> entry : event.entrySet()) {\n      if (entry.getKey().toLowerCase().contains(\"count\")) {\n        String metricName=entry.getKey();\n        Long count=(Long)entry.getValue();\n        if (count != null) {\n          getCounterByMetricName(metricName,false).inc(count);\n        }\n else {\n          LOGGER.warn(\"Null Count returned by EPL, CountName:\" + metricName);\n        }\n      }\n    }\n  }\n else   if (MCCounterHelper.isGroupByCounterEvent(event)) {\n    if (getConfiguration().isEnableGroupByCounter()) {\n      String metricName=(String)event.get(MCConstant.METRIC_NAME);\n      String groupId=(String)event.get(MCConstant.GROUP_ID);\n      if (groupId != null && groupId.trim().length() != 0) {\n        long registerdFreq=getFrequencyByMetricName(metricName);\n        if (event.get(MCConstant.FREQUENCY_IN_MIN) == null && registerdFreq <= 0) {\n          setMetricFrequency(metricName,MetricFrequency.ONE_MINUTE.getValue());\n        }\n else         if (event.get(MCConstant.FREQUENCY_IN_MIN) != null) {\n          Integer frequencyInMin=(Integer)event.get(MCConstant.FREQUENCY_IN_MIN);\n          long frequency=frequencyInMin * MetricFrequency.ONE_MINUTE.getValue();\n          if (frequency > 0 && frequency != registerdFreq) {\n            setMetricFrequency(metricName,frequency);\n          }\n        }\n        metricTables.put(metricName,event.getEventType());\n        Map<String,String> tags=new HashMap<String,String>(5);\n        MCCounterHelper.isGroupByCounterEventWithTag(event,tags);\n        Long total=null;\n        if (MCCounterHelper.isAvgEvent(metricName)) {\n          for (          Map.Entry<String,Object> entry : event.entrySet()) {\n            if (entry.getKey().toLowerCase().contains(\"total\")) {\n              total=(Long)entry.getValue();\n              break;\n            }\n          }\n        }\n        if (event.get(MCConstant.METRIC_COUNT) != null) {\n          Long count=(Long)event.get(MCConstant.METRIC_COUNT);\n          if (total != null) {\n            getCounterByMetricDemensionAndInc(metricName,groupId,tags,true,count,total);\n          }\n else {\n            getCounterByMetricDemensionAndInc(metricName,groupId,tags,false,count,null);\n          }\n        }\n else {\n          getCounterByMetricDemensionAndInc(metricName,groupId,tags,false,null,null);\n        }\n      }\n else {\n        LOGGER.warn(\"Null or empty groupId returned by EPL, metricName:\" + metricName);\n      }\n    }\n  }\n else {\n    evaluateRawEvent(event);\n  }\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 18706,
+    "Stop": 23760,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "sendEvent"
+}

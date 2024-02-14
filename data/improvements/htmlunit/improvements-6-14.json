@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor to reduce method complexity",
+                "Change_Diff": "- public CssStyleSheet getSheet(){...+ private CssStyleSheet loadFromCache() {...}\n+ private CssStyleSheet loadFromSource() {...}\n+ public CssStyleSheet getSheet() {...}",
+                "Description": "Method getSheet() is complex, with nested conditionals and exception handling. Refactor to simplify, improve readability, and minimize complexity.",
+                "Start": 2,
+                "End": 27
+            },
+            {
+                "Improvement": "Extract URL creation to a separate method",
+                "Change_Diff": "- final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm(); + final String uri = getUri();",
+                "Description": "The creation of the 'uri' variable is somewhat complex and could be extracted into a separate method for clarity and potential reuse.",
+                "Start": 7,
+                "End": 7
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  sheet_ = loadFromCache();\n  if (sheet_ == null) {\n    sheet_ = loadFromSource();\n  }\n  return sheet_;\n}\n\nprivate CssStyleSheet loadFromCache() {\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  if (cached != null) {\n    final String uri = getUri();\n    return new CssStyleSheet(this,cached,uri);\n  }\n  return null;\n}\n\nprivate CssStyleSheet loadFromSource() {\n  final String css=getTextContent();\n  final String uri = getUri();\n  try (InputSource source=new InputSource(new StringReader(css))){\n    CssStyleSheet sheet = new CssStyleSheet(this,source,uri);\n    getPage().getWebClient().getCache().cache(css,sheet.getWrappedSheet());\n    return sheet;\n  } catch (final IOException e) {\n    LOG.error(e.getMessage(),e);\n    return null;\n  }\n}\n\nprivate String getUri() {\n  return getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

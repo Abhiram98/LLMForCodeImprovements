@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid code duplication",
+                "Change_Diff": "- try {\n ... \n} catch (final FailingHttpStatusCodeException e) { ... }\n\nto\n\nprivate void loadPageAndHandleException(URL url, boolean urlWithCredentials, String failMessage) throws Exception {\n    try {\n        loadPageWithAlerts(url);\n        if (!urlWithCredentials) {\n            fail(failMessage);\n        }\n    } catch (final FailingHttpStatusCodeException e) {\n        if (urlWithCredentials) {\n            throw e;\n        }\n    }\n}",
+                "Description": "The code blocks within the try-catch statements are similar, which leads to unnecessary code duplication. This can be avoided by extracting these blocks into a separate method, which would make the code cleaner and more maintainable.",
+                "Start": 8,
+                "End": 33
+            },
+            {
+                "Improvement": "Extract constant",
+                "Change_Diff": "- \"Should not be authorized\"\n\nto\n\nprivate static final String AUTHORIZATION_FAIL_MESSAGE = \"Should not be authorized\";",
+                "Description": "The authorization error message 'Should not be authorized' is repeated multiple times in the code. It can be extracted as a constant to avoid repetition, improve readability, and ease future modifications.",
+                "Start": 13,
+                "End": 30
+            }
+        ],
+        "Final code": "/** \n * @throws Exception if an error occurs\n */\n@Test @Alerts(\"SecRet\") public void basicAuthenticationUserFromUrlOverwrite() throws Exception {\n    final String html=\"<html><body onload='alert(\\\"SecRet\\\")'><\/body><\/html>\";\n    getMockWebConnection().setDefaultResponse(html);\n    getWebClient().getCredentialsProvider().clear();\n    final boolean urlWithCredentials=!getBrowserVersion().isIE();\n    final URL url1=new URL(\"http://jetty:jetty@localhost:\" + PORT + \"/\");\n    final URL url2=new URL(\"http://jetty:wrong@localhost:\" + PORT + \"/\");\n\n    loadPageAndHandleException(url1, urlWithCredentials, AUTHORIZATION_FAIL_MESSAGE);\n    loadPageAndHandleException(url2, urlWithCredentials, AUTHORIZATION_FAIL_MESSAGE);\n}\n\nprivate static final String AUTHORIZATION_FAIL_MESSAGE = \"Should not be authorized\";\n\nprivate void loadPageAndHandleException(URL url, boolean urlWithCredentials, String failMessage) throws Exception {\n    try {\n        loadPageWithAlerts(url);\n        if (!urlWithCredentials) {\n            fail(failMessage);\n        }\n    } catch (final FailingHttpStatusCodeException e) {\n        if (urlWithCredentials) {\n            throw e;\n        }\n    }\n}"
+    },
+    "Old_Method": "/** \n * @throws Exception if an error occurs\n */\n@Test @Alerts(\"SecRet\") public void basicAuthenticationUserFromUrlOverwrite() throws Exception {\n  final String html=\"<html><body onload='alert(\\\"SecRet\\\")'><\/body><\/html>\";\n  getMockWebConnection().setDefaultResponse(html);\n  getWebClient().getCredentialsProvider().clear();\n  try {\n    loadPage(html,URL_FIRST);\n    fail(\"Should not be authorized\");\n  }\n catch (  final FailingHttpStatusCodeException e) {\n  }\n  final boolean urlWithCredentials=!getBrowserVersion().isIE();\n  try {\n    final URL url=new URL(\"http://jetty:jetty@localhost:\" + PORT + \"/\");\n    loadPageWithAlerts(url);\n    if (!urlWithCredentials) {\n      fail(\"Should not be authorized\");\n    }\n  }\n catch (  final FailingHttpStatusCodeException e) {\n    if (urlWithCredentials) {\n      throw e;\n    }\n  }\n  try {\n    loadPageWithAlerts(URL_FIRST);\n    if (!urlWithCredentials) {\n      fail(\"Should not be authorized\");\n    }\n  }\n catch (  final FailingHttpStatusCodeException e) {\n    if (urlWithCredentials) {\n      throw e;\n    }\n  }\n  try {\n    final URL url=new URL(\"http://jetty:wrong@localhost:\" + PORT + \"/\");\n    loadPage(html,url);\n    fail(\"Should not be authorized\");\n  }\n catch (  final FailingHttpStatusCodeException e) {\n  }\n}\n",
+    "File_Path": "htmlunit/src/test/java/org/htmlunit/DefaultCredentialsProvider2Test.java",
+    "Start": 8048,
+    "Stop": 9826,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "basicAuthenticationUserFromUrlOverwrite"
+}

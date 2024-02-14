@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use ExecutorService instead of raw thread",
+                "Change_Diff": "- Thread thread=new Thread(() -> {\n-    try {\n-      scheduler.runTaskLater(null,bukkitTask -> {\n-        if (mainThread != Thread.currentThread()) {\n-          notPrimaryThread.set(true);\n-        }\n-        executed.set(true);\n-      }\n-,1);\n-    }\n-  finally {\n-      completed.set(true);\n-    }\n-  }\n-);\n-  thread.start();\n+ ExecutorService executorService = Executors.newSingleThreadExecutor();\n+ executorService.submit(() -> {\n+   scheduler.runTaskLater(null, bukkitTask -> {\n+     if (mainThread != Thread.currentThread()) {\n+       notPrimaryThread.set(true);\n+     }\n+     executed.set(true);\n+   }, 1);\n+   completed.set(true);\n+ });\n+ executorService.shutdown();",
+                "Description": "Instead of using raw Thread for asynchronous execution, use ExecutorService. It efficiently manages a pool of threads and provides a way to decouple task submission from the mechanics of how each task will be run, including details of thread use, scheduling, etc.",
+                "Start": 5,
+                "End": 20
+            },
+            {
+                "Improvement": "Remove redundant check for execution and thread",
+                "Change_Diff": "- assertTrue(executed.get());\n- assertFalse(notPrimaryThread.get());",
+                "Description": "The check for the execution and the primary thread is already performed in the task. There is no need to check it again after the task completion.",
+                "Start": 28,
+                "End": 29
+            }
+        ],
+        "Final code": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  ExecutorService executorService = Executors.newSingleThreadExecutor();\n  executorService.submit(() -> {\n    scheduler.runTaskLater(null, bukkitTask -> {\n      if (mainThread != Thread.currentThread()) {\n        notPrimaryThread.set(true);\n      }\n      executed.set(true);\n    }, 1);\n    completed.set(true);\n  });\n  executorService.shutdown();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n}"
+    },
+    "Old_Method": "@Test void registerOneTasksAsynchronously(){\n  final Thread mainThread=Thread.currentThread();\n  AtomicBoolean executed=new AtomicBoolean();\n  AtomicBoolean completed=new AtomicBoolean();\n  AtomicBoolean notPrimaryThread=new AtomicBoolean();\n  Thread thread=new Thread(() -> {\n    try {\n      scheduler.runTaskLater(null,bukkitTask -> {\n        if (mainThread != Thread.currentThread()) {\n          notPrimaryThread.set(true);\n        }\n        executed.set(true);\n      }\n,1);\n    }\n  finally {\n      completed.set(true);\n    }\n  }\n);\n  thread.start();\n  long startTime=System.currentTimeMillis();\n  while (!completed.get()) {\n    checkTimeout(startTime,thread);\n    scheduler.performOneTick();\n    Thread.yield();\n  }\n  while (!executed.get()) {\n    checkTimeout(startTime);\n    scheduler.performOneTick();\n  }\n  assertTrue(executed.get());\n  assertFalse(notPrimaryThread.get());\n}\n",
+    "File_Path": "MockBukkit/src/test/java/be/seeseemelk/mockbukkit/scheduler/BukkitSchedulerMockTest.java",
+    "Start": 14506,
+    "Stop": 15448,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "registerOneTasksAsynchronously"
+}

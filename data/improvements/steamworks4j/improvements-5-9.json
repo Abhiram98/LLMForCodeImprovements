@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Handle exception properly",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.error(\"An error occurred while processing the HTTP request\", e);",
+                "Description": "Instead of just printing the stack trace, the exception should be handled properly. This could include logging the error for future debugging, or rethrowing it, possibly wrapped in a custom exception.",
+                "Start": 11,
+                "End": 13
+            },
+            {
+                "Improvement": "Extract magic number",
+                "Change_Diff": "- ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n+ final int BYTES_RECEIVED = bytesReceived;\n+ ByteBuffer bodyData=ByteBuffer.allocateDirect(BYTES_RECEIVED);",
+                "Description": "The 'bytesReceived' argument in the 'ByteBuffer.allocateDirect' method is a magic number. It's recommended to replace magic numbers with named constants to improve code readability.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- try { ... } catch (SteamException e) { ... } \n+ try (SteamHTTPRequestHandle requestHandle = request) { ... } catch (SteamException e) { ... }",
+                "Description": "Use try-with-resources to automatically close the resources after being used. It makes the code cleaner and takes care of the closing of resources in all scenarios, thereby preventing resource leaks.",
+                "Start": 4,
+                "End": 16
+            }
+        ],
+        "Final code": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  final int BYTES_RECEIVED = bytesReceived;\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(BYTES_RECEIVED);\n  try (SteamHTTPRequestHandle requestHandle = request) {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    } else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  } catch (SteamException e) {\n    logger.error(\"An error occurred while processing the HTTP request\", e);\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}"
+    },
+    "Old_Method": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamHTTPTest.java",
+    "Start": 1411,
+    "Stop": 2260,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onHTTPRequestDataReceived"
+}

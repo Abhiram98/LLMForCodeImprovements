@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid multiple return statements",
+                "Change_Diff": "- if (response.getStatusCode() != HttpStatus.OK) {\n     return false;\n  }\n...\n- if (responseDataArr.isEmpty()) {\n     return false;\n  }\n...\n- if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n     return false;\n  }\n...\n+ boolean isAuthorized = true;\n...\n+ if (response.getStatusCode() != HttpStatus.OK || responseDataArr.isEmpty() || !currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n     isAuthorized = false;\n  }\n...\n+ return isAuthorized;",
+                "Description": "Having multiple return statements in a single method can make the code harder to read and understand. It is better to have a single return statement at the end of the method.",
+                "Start": 9,
+                "End": 27
+            },
+            {
+                "Improvement": "Remove unnecessary check for HttpStatus.OK",
+                "Change_Diff": "- if (response.getStatusCode() == HttpStatus.OK) {\n     this.authCache.putIfAbsent(authRequest,cachedResponse);\n  }",
+                "Description": "The check if (response.getStatusCode() == HttpStatus.OK) is unnecessary because of the previous check if (response.getStatusCode() != HttpStatus.OK). If the code reaches this point, it means that the HTTP status is already OK.",
+                "Start": 12,
+                "End": 13
+            }
+        ],
+        "Final code": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  boolean isAuthorized = true;\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      isAuthorized = false;\n    }\n    cachedResponse=response.getBody().toString();\n    this.authCache.putIfAbsent(authRequest,cachedResponse);\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    isAuthorized = false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      isAuthorized = false;\n    }\n  }\n  return isAuthorized;\n}"
+    },
+    "Old_Method": "@Override public boolean authorize(String authRequest){\n  String cachedResponse=this.authCache.get(authRequest);\n  if (cachedResponse == null) {\n    RestTemplateBuilder restTemplateBuilder=new RestTemplateBuilder().requestFactory(() -> new HttpComponentsClientHttpRequestFactory(this.httpClient));\n    RestTemplate rt=restTemplateBuilder.build();\n    HttpEntity<String> entity=new HttpEntity<>(authRequest,this.restHeaders);\n    ResponseEntity response=rt.postForEntity(XACML_PDP_ENTITLEMENT_SERVICE_URL + \"/pdp\",entity,String.class);\n    if (response.getStatusCode() != HttpStatus.OK) {\n      return false;\n    }\n    cachedResponse=response.getBody().toString();\n    if (response.getStatusCode() == HttpStatus.OK) {\n      this.authCache.putIfAbsent(authRequest,cachedResponse);\n    }\n  }\n  JSONObject responseObj=new JSONObject(cachedResponse);\n  JSONArray responseDataArr=responseObj.getJSONArray(\"Response\");\n  if (responseDataArr.isEmpty()) {\n    return false;\n  }\n  for (  Object Response : responseDataArr) {\n    JSONObject currentResponse=(JSONObject)Response;\n    if (!currentResponse.getString(\"Decision\").equals(\"Permit\")) {\n      return false;\n    }\n  }\n  return true;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 4347,
+    "Stop": 5782,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "authorize"
+}

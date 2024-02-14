@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < bbCount; i++) {\n+ for (double bufValue : combBuf) {",
+                "Description": "Instead of using a traditional for loop to iterate over `combBuf`, use an enhanced for loop. This will make the code cleaner and easier to read.",
+                "Start": 8,
+                "End": 10
+            },
+            {
+                "Improvement": "Avoid using magic numbers",
+                "Change_Diff": "- if (n >= (2 * k)) {\n+ if (n >= (TWO_TIMES_K)) {",
+                "Description": "The code contains magic numbers (2, 10, 1f). These should be replaced with named constants to make the code easier to understand and maintain.",
+                "Start": 13,
+                "End": 25
+            },
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- sb.append(String.format(\"%10.1f\",combBuf[i]));\n+ sb.append(formatBuffer(combBuf[i]));",
+                "Description": "The 'String.format' code snippet is repeated multiple times in the method. This could be extracted into a separate method to make the code more DRY (Don't Repeat Yourself).",
+                "Start": 8,
+                "End": 25
+            }
+        ],
+        "Final code": "private static final int TWO_TIMES_K = 2;\nprivate static String getDataDetail(final DoublesSketch sketchIn) {\n    final DoublesSketch sketch = sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n    final StringBuilder sb = new StringBuilder();\n    final String skName = sketch.getClass().getSimpleName();\n    sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n    final int k = sketch.getK();\n    final long n = sketch.getN();\n    final int bbCount = sketch.getBaseBufferCount();\n    final long bitPattern = sketch.getBitPattern();\n    final double[] combBuf = sketch.getCombinedBuffer();\n    sb.append(\"   BaseBuffer   : \");\n    for (double bufValue : combBuf) {\n        sb.append(formatBuffer(bufValue));\n    }\n    sb.append(LS);\n    final int combBufSize = combBuf.length;\n    if (n >= (TWO_TIMES_K * k)) {\n        sb.append(\"   Valid | Level\");\n        for (int j = TWO_TIMES_K * k; j < combBufSize; j++) {\n            if ((j % k) == 0) {\n                final int levelNum = (j / k) - 2;\n                final String validLvl = ((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n                final String lvl = String.format(\"%5d\", levelNum);\n                sb.append(LS).append(\"   \").append(validLvl).append(\" \").append(lvl).append(\": \");\n            }\n            sb.append(formatBuffer(combBuf[j]));\n        }\n        sb.append(LS);\n    }\n    sb.append(\"### END DATA DETAIL\").append(LS);\n    return sb.toString();\n}\n\nprivate static String formatBuffer(double bufferValue) {\n    return String.format(\"%10.1f\", bufferValue);\n}"
+    },
+    "Old_Method": "private static String getDataDetail(final DoublesSketch sketchIn){\n  final DoublesSketch sketch=sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n  final StringBuilder sb=new StringBuilder();\n  final String skName=sketch.getClass().getSimpleName();\n  sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n  final int k=sketch.getK();\n  final long n=sketch.getN();\n  final int bbCount=sketch.getBaseBufferCount();\n  final long bitPattern=sketch.getBitPattern();\n  final double[] combBuf=sketch.getCombinedBuffer();\n  sb.append(\"   BaseBuffer   : \");\n  for (int i=0; i < bbCount; i++) {\n    sb.append(String.format(\"%10.1f\",combBuf[i]));\n  }\n  sb.append(LS);\n  final int combBufSize=combBuf.length;\n  if (n >= (2 * k)) {\n    sb.append(\"   Valid | Level\");\n    for (int j=2 * k; j < combBufSize; j++) {\n      if ((j % k) == 0) {\n        final int levelNum=(j / k) - 2;\n        final String validLvl=((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n        final String lvl=String.format(\"%5d\",levelNum);\n        sb.append(LS).append(\"   \").append(validLvl).append(\" \").append(lvl).append(\": \");\n      }\n      sb.append(String.format(\"%10.1f\",combBuf[j]));\n    }\n    sb.append(LS);\n  }\n  sb.append(\"### END DATA DETAIL\").append(LS);\n  return sb.toString();\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/quantiles/DoublesUtil.java",
+    "Start": 7871,
+    "Stop": 9398,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "getDataDetail"
+}

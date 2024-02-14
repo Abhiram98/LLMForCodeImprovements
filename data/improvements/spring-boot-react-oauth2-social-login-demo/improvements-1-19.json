@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null checks for parameters",
+                "Change_Diff": "+ if (oAuth2UserRequest == null) {\n+     throw new IllegalArgumentException(\"oAuth2UserRequest cannot be null\");\n+ }\n+ if (oAuth2User == null) {\n+     throw new IllegalArgumentException(\"oAuth2User cannot be null\");\n+ }",
+                "Description": "The method does not currently check if the parameters passed to it are null. This can lead to a NullPointerException if a null value is passed. It is a good practice to check for null values at the beginning of the method and throw an appropriate exception if a null value is found.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use Optional's orElseThrow instead of isPresent and get",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-     user=userOptional.get();\n+ user=userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"User not found\"));",
+                "Description": "The use of Optional's isPresent method followed by get can be replaced by the orElseThrow method. This would make the code more readable and concise by removing the need for an if statement.",
+                "Start": 8,
+                "End": 13
+            }
+        ],
+        "Final code": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n    if (oAuth2UserRequest == null) {\n        throw new IllegalArgumentException(\"oAuth2UserRequest cannot be null\");\n    }\n    if (oAuth2User == null) {\n        throw new IllegalArgumentException(\"oAuth2User cannot be null\");\n    }\n    OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n    if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n        throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n    }\n    Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n    User user;\n    user=userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"User not found\"));\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n        throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n    else {\n        user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n    }\n    return UserPrincipal.create(user,oAuth2User.getAttributes());\n}"
+    },
+    "Old_Method": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/oauth2/CustomOAuth2UserService.java",
+    "Start": 1883,
+    "Stop": 3147,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "processOAuth2User"
+}

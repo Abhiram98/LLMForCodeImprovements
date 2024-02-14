@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract loading properties to a separate method",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n...\n- KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n+ loadProperties();",
+                "Description": "The constructor is doing too many things and is overloaded with logic. We can improve readability by extracting the code for loading properties into a separate method.",
+                "Start": 2,
+                "End": 8
+            },
+            {
+                "Improvement": "Extract setting up cache to a separate method",
+                "Change_Diff": "- CacheManager cacheManager=EhCacheManager.getInstance();\n...\n- this.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\n+ setupCache();",
+                "Description": "Setting up the cache is a separate concern and can be moved to a separate method to improve modularity and readability.",
+                "Start": 18,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract setting up HTTP client to a separate method",
+                "Change_Diff": "- this.httpClient=HttpClients.custom().setSSLContext...\n...\n- SpringApplication.run(XacmlAttributeHandler.class).close();\n+ setupHttpClient();",
+                "Description": "Setting up the HTTP client involves complex logic and can be moved to a separate method to improve readability and maintainability.",
+                "Start": 22,
+                "End": 24
+            },
+            {
+                "Improvement": "Extract setting up headers to a separate method",
+                "Change_Diff": "- this.restHeaders=new HttpHeaders();\n...\n- this.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\n+ setupHeaders();",
+                "Description": "Setting up the headers can be extracted to a separate method to make the constructor cleaner and improve modularity.",
+                "Start": 26,
+                "End": 29
+            }
+        ],
+        "Final code": "public XacmlAttributeHandler(){\n  try {\n    loadProperties();\n  } catch (IOException e) {\n    logger.error(\"Failed to read properties from application.properties\", e);\n    stopApplication();\n  }\n  if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n    logger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\n    stopApplication();\n  }\n  setupCache();\n  try {\n    setupHttpClient();\n  } catch (Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\", e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  setupHeaders();\n  logger.info(\"XacmlAttributeHandler successfully initiated\");\n}\n\nprivate void loadProperties() {...}\n\nprivate void setupCache() {...}\n\nprivate void setupHttpClient() {...}\n\nprivate void setupHeaders() {...}"
+    },
+    "Old_Method": "public XacmlAttributeHandler(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    XACML_PDP_ENTITLEMENT_SERVICE_URL=properties.getProperty(\"xacml.pdp.url.entitlement.service\");\n    TRUST_STORE=properties.getProperty(\"xacml.pdp.trustStore\");\n    TRUST_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.trustStore.password\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n  }\n catch (  IOException e) {\n    logger.error(\"Failed to read properties from application.properties\",e);\n    stopApplication();\n  }\n  if (XACML_PDP_ENTITLEMENT_SERVICE_URL == null) {\n    logger.error(\"xacml.pdp.url.entitlement.service property is null in application.properties\");\n    stopApplication();\n  }\n  CacheManager cacheManager=EhCacheManager.getInstance();\n  this.authCache=cacheManager.getCache(\"authCache\",String.class,String.class,60,100);\n  this.entitlementAttributesCache=cacheManager.getCache(\"entitlementCache\",String.class,JSONObject.class,60,100);\n  this.apiResourceListCache=cacheManager.getCache(\"apiResourceList\",String.class,JSONObject.class,60,100);\n  try {\n    this.httpClient=HttpClients.custom().setSSLContext(SSLContextBuilder.create().loadKeyMaterial(loadPfx(\"classpath:\".concat(KEY_STORE),KEY_STORE_PASSWORD.toCharArray()),KEY_STORE_PASSWORD.toCharArray()).loadTrustMaterial(ResourceUtils.getFile(\"classpath:\".concat(TRUST_STORE)),TRUST_STORE_PASSWORD.toCharArray()).build()).build();\n  }\n catch (  Exception e) {\n    logger.error(\"Failed to read trustStore/keyStore\",e);\n    SpringApplication.run(XacmlAttributeHandler.class).close();\n  }\n  this.restHeaders=new HttpHeaders();\n  this.restHeaders.setContentType(MediaType.APPLICATION_JSON);\n  this.restHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));\n  this.restHeaders.set(\"WSO2-Identity-User\",\"admin\");\n  logger.info(\"XacmlAttributeHandler successfully initiated\");\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/XacmlAttributeHandler.java",
+    "Start": 1818,
+    "Stop": 4341,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "XacmlAttributeHandler"
+}

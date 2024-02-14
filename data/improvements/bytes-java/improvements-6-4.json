@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use separate methods for BIG_ENDIAN and LITTLE_ENDIAN",
+                "Change_Diff": "- if (byteOrder == ByteOrder.BIG_ENDIAN) {...} else {...}\n+ shiftLeftBigEndian(byteArray, shiftBitCount, byteOrder);\n+ shiftLeftLittleEndian(byteArray, shiftBitCount, byteOrder);",
+                "Description": "Instead of checking the byteOrder inside a single method, we can separate the functionality into two different methods. This will improve readability and maintainability. It also follows the Single Responsibility Principle.",
+                "Start": 11,
+                "End": 36
+            },
+            {
+                "Improvement": "Check for null input",
+                "Change_Diff": "+ if (byteArray == null) throw new IllegalArgumentException(\"byteArray can't be null.\");",
+                "Description": "It's good practice to check for null input to avoid NullPointerException. We should return a null or throw an IllegalArgumentException if the input byteArray is null.",
+                "Start": 5,
+                "End": 5
+            }
+        ],
+        "Final code": "static byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  if (byteArray == null) throw new IllegalArgumentException(\"byteArray can't be null.\");\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    shiftLeftBigEndian(byteArray, shiftMod, carryMask, offsetBytes);\n  } else {\n    shiftLeftLittleEndian(byteArray, shiftMod, carryMask, offsetBytes);\n  }\n  return byteArray;\n}\n\nvoid shiftLeftBigEndian(byte[] byteArray, int shiftMod, byte carryMask, int offsetBytes) {\n  int sourceIndex;\n  for (int i=0; i < byteArray.length; i++) {\n    sourceIndex=i + offsetBytes;\n    if (sourceIndex >= byteArray.length) {\n      byteArray[i]=0;\n    } else {\n      shiftBits(byteArray, sourceIndex, shiftMod, carryMask);\n    }\n  }\n}\n\nvoid shiftLeftLittleEndian(byteArray, shiftMod, carryMask, offsetBytes) {\n  int sourceIndex;\n  for (int i=byteArray.length - 1; i >= 0; i--) {\n    sourceIndex=i - offsetBytes;\n    if (sourceIndex < 0) {\n      byteArray[i]=0;\n    } else {\n      shiftBits(byteArray, sourceIndex, shiftMod, carryMask);\n    }\n  }\n}\n\nvoid shiftBits(byte[] byteArray, int sourceIndex, int shiftMod, byte carryMask) {\n  byte src=byteArray[sourceIndex];\n  byte dst=(byte)(src << shiftMod);\n  if (sourceIndex - 1 >= 0) {\n    dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n  }\n  byteArray[i]=dst;\n}"
+    },
+    "Old_Method": "/** \n * Light shift of whole byte array by shiftBitCount bits. This method will alter the input byte array. <p> <strong>Analysis<\/strong> <ul> <li>Time Complexity: <code>O(n)<\/code><\/li> <li>Space Complexity: <code>O(1)<\/code><\/li> <li>Alters Parameters: <code>true<\/code><\/li> <\/ul> <\/p>\n * @param byteArray     to shift\n * @param shiftBitCount how many bits to shift\n * @param byteOrder     endianness of given byte array\n * @return shifted byte array\n */\nstatic byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      if (sourceIndex >= byteArray.length) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex + 1 < byteArray.length) {\n          dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      if (sourceIndex < 0) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex - 1 >= 0) {\n          dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n  return byteArray;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Util.java",
+    "Start": 9808,
+    "Stop": 12110,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "shiftLeft"
+}

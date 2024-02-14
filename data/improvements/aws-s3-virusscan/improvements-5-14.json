@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Simplify the if-else condition",
+                "Change_Diff": "- if (env == null) {\n\tif (key.defaultValue == null) {\n\t\tthrow new RuntimeException(\"config not found: \" + key.name);\n\t}\nelse {return key.defaultValue;}\n}\nelse {\n\treturn env;\n}\n+ if (env != null) {\n\treturn env;\n}\n\nif (key.defaultValue == null) {\n\tthrow new RuntimeException(\"config not found: \" + key.name);\n}\n\nreturn key.defaultValue;",
+                "Description": "You can simplify the if-else condition by removing the else statement. If 'env' is not null, the function will return 'env' and exit. If 'env' is null, the function will continue to the next condition.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Add NullPointerException check",
+                "Change_Diff": "+ if (key == null) {\n\tthrow new IllegalArgumentException(\"Key cannot be null.\");\n}",
+                "Description": "The method does not currently handle the case where the input Key is null. This could lead to NullPointerException. We can add a check at the beginning of the method to throw an IllegalArgumentException when the input Key is null.",
+                "Start": 2,
+                "End": 2
+            }
+        ],
+        "Final code": "public static String get(final Key key) {\nif (key == null) {\n\tthrow new IllegalArgumentException(\"Key cannot be null.\");\n}\n\nfinal String env = System.getenv(key.name);\n\nif (env != null) {\n\treturn env;\n}\n\nif (key.defaultValue == null) {\n\tthrow new RuntimeException(\"config not found: \" + key.name);\n}\n\nreturn key.defaultValue;\n}"
+    },
+    "Old_Method": "public static String get(final Key key){\n  final String env=System.getenv(key.name);\n  if (env == null) {\n    if (key.defaultValue == null) {\n      throw new RuntimeException(\"config not found: \" + key.name);\n    }\n else {\n      return key.defaultValue;\n    }\n  }\n else {\n    return env;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/Config.java",
+    "Start": 813,
+    "Stop": 1187,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "get"
+}

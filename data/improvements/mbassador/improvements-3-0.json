@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary double subscription of listener",
+                "Change_Diff": "- bus.subscribe(listener);\n- bus.subscribe(listener);",
+                "Description": "The same instance of SyncAsyncListener is being subscribed to the bus twice consecutively. This is unnecessary and may lead to duplicate event handling. Remove the duplicate subscription to improve the code.",
+                "Start": 3,
+                "End": 4
+            },
+            {
+                "Improvement": "Avoid subscribing non-listeners to bus",
+                "Change_Diff": "- bus.subscribe(new Object());\n- bus.subscribe(new String());",
+                "Description": "The bus is being subscribed to instances of Object and String classes. These are not event listeners and will not handle any events. Remove these unnecessary subscriptions to improve the code.",
+                "Start": 5,
+                "End": 6
+            },
+            {
+                "Improvement": "Remove redundant method calls for event publishing",
+                "Change_Diff": "- bus.publishAsync(new File(\"/tmp/random.csv\"));\n- bus.post(new File(\"/tmp/random.csv\")).asynchronously();",
+                "Description": "The same event is being published twice consecutively using different methods (publishAsync and post.asynchronously). This is unnecessary and may lead to duplicate event handling. Remove the redundant method call to improve the code.",
+                "Start": 7,
+                "End": 8
+            },
+            {
+                "Improvement": "Remove redundant method calls for event posting",
+                "Change_Diff": "- bus.publish(\"some message\");\n- bus.post(\"some message\").now();",
+                "Description": "The same event is being posted twice consecutively using different methods (publish and post.now). This is unnecessary and may lead to duplicate event handling. Remove the redundant method call to improve the code.",
+                "Start": 9,
+                "End": 10
+            }
+        ],
+        "Final code": "public static void main(String[] args){\n  bus.subscribe(new ListenerDefinition.SyncAsyncListener());\n  Object listener=new ListenerDefinition.SyncAsyncListener();\n  bus.subscribe(listener);\n  bus.post(new File(\"/tmp/random.csv\")).asynchronously();\n  bus.post(\"some message\").now();\n}"
+    },
+    "Old_Method": "public static void main(String[] args){\n  bus.subscribe(new ListenerDefinition.SyncAsyncListener());\n  Object listener=new ListenerDefinition.SyncAsyncListener();\n  bus.subscribe(listener);\n  bus.subscribe(listener);\n  bus.subscribe(new Object());\n  bus.subscribe(new String());\n  bus.publishAsync(new File(\"/tmp/random.csv\"));\n  bus.post(new File(\"/tmp/random.csv\")).asynchronously();\n  bus.publish(\"some message\");\n  bus.post(\"some message\").now();\n}\n",
+    "File_Path": "mbassador/examples/SubscriptionAndPublication.java",
+    "Start": 850,
+    "Stop": 1791,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "main"
+}

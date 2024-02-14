@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for jsonKeyValuePairs parameter",
+                "Change_Diff": "+ if(jsonKeyValuePairs == null) {\n+   throw new IllegalArgumentException(\"jsonKeyValuePairs cannot be null\");\n+ }",
+                "Description": "Before using the jsonKeyValuePairs parameter, add a null check to prevent Null Pointer Exception.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Move RequestAttributes cast to a separate line",
+                "Change_Diff": "- ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n+ RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();\n+ ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;",
+                "Description": "Assigning and casting in one line can be confusing. It's better to move the casting of RequestContextHolder.currentRequestAttributes() to ServletRequestAttributes to a separate line.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use optional for null safety in case of accessing cookies",
+                "Change_Diff": "- value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\n+ value=Optional.ofNullable(httpServletRequest.getCookies()).map(GeneralUtils::extractValuesFromCookies).map(c -> c.get(value)).orElse(null);",
+                "Description": "There is a potential null pointer exception if the httpServletRequest.getCookies() returns null. Use Optional to avoid potential null pointer exceptions.",
+                "Start": 14,
+                "End": 15
+            }
+        ],
+        "Final code": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  if(jsonKeyValuePairs == null) {\n    throw new IllegalArgumentException(\"jsonKeyValuePairs cannot be null\");\n  }\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  RequestAttributes requestAttributes = RequestContextHolder.currentRequestAttributes();\n  ServletRequestAttributes servletRequestAttributes = (ServletRequestAttributes) requestAttributes;\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\n    switch (propertyType) {\n    case HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\n    case COOKIE:\n      value=Optional.ofNullable(httpServletRequest.getCookies()).map(GeneralUtils::extractValuesFromCookies).map(c -> c.get(value)).orElse(null);\n    break;\n    case QUERY_PARAM:\n      value=httpServletRequest.getParameter(value);\n    break;\n    case FORM_DATA:\n      value=httpServletRequest.getParameter(value);\n    break;\n    case PATH_PARAM:\n      value=extractPathParam(httpServletRequest,value);\n    break;\n    }\n    templateData.put(key,value);\n  }\n  return templateData;\n}"
+    },
+    "Old_Method": "private Map<String,Object> generateFreemakerTemplateData(String jsonKeyValuePairs){\n  JSONObject jsonObject=new JSONObject(jsonKeyValuePairs.trim());\n  Iterator<String> keys=jsonObject.keys();\n  ServletRequestAttributes servletRequestAttributes=(ServletRequestAttributes)RequestContextHolder.currentRequestAttributes();\n  HttpServletRequest httpServletRequest=servletRequestAttributes.getRequest();\n  Map<String,Object> templateData=new HashMap<>();\n  while (keys.hasNext()) {\n    String key=keys.next();\n    String value=jsonObject.get(key).toString();\n    String[] proTypeArr=value.split(\"\\\\.\",2);\n    PropertyType propertyType=PropertyType.getEnum(proTypeArr[0]);\n    if (!proTypeArr[0].isEmpty()) {\n      value=proTypeArr[1];\n    }\nswitch (propertyType) {\ncase HEADER:\n      value=httpServletRequest.getHeader(value);\n    break;\ncase COOKIE:\n  value=GeneralUtils.extractValuesFromCookies(httpServletRequest.getCookies()).get(value);\nbreak;\ncase QUERY_PARAM:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase FORM_DATA:\nvalue=httpServletRequest.getParameter(value);\nbreak;\ncase PATH_PARAM:\nvalue=extractPathParam(httpServletRequest,value);\nbreak;\n}\ntemplateData.put(key,value);\n}\nreturn templateData;\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 2835,
+    "Stop": 4525,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "generateFreemakerTemplateData"
+}

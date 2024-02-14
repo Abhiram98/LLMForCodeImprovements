@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use early return instead of multiple if-else",
+                "Change_Diff": "- if (typeName.contains('<')) {...} else {...}\n- if (gicType.contains('[')) {...}\n+ String gicType = typeName;\n+ if (typeName.contains('<')) {...}\n+ if (gicType.contains('[')) {...}",
+                "Description": "Instead of using multiple if-else statements, you can use early return to reduce the indentation level and improve readability.",
+                "Start": 3,
+                "End": 11
+            },
+            {
+                "Improvement": "Remove unnecessary variable declaration",
+                "Change_Diff": "- String gicType;\n+ // Removed line",
+                "Description": "There's no need to declare the 'gicType' variable at the start of the method. It can be declared when it is first initialized.",
+                "Start": 2,
+                "End": 2
+            }
+        ],
+        "Final code": "private static String getType(String typeName) {\n    String gicType = typeName;\n    if (typeName.contains('<')) {\n        gicType = typeName.substring(typeName.indexOf('<') + 1,typeName.lastIndexOf('>'));\n    }\n    if (gicType.contains('[')) {\n        gicType = gicType.substring(0, gicType.indexOf('['));\n    }\n    return gicType.substring(gicType.lastIndexOf('.') + 1).toLowerCase();\n}"
+    },
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

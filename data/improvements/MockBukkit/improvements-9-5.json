@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code duplication",
+                "Change_Diff": "- WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n- if (!event.callEvent()) {\n-   return false;\n- }",
+                "Description": "The code for creating and calling the WorldGameRuleChangeEvent is duplicated. It can be moved to a separate method to reduce duplication.",
+                "Start": 10,
+                "End": 15
+            },
+            {
+                "Improvement": "Use switch case instead of if-else",
+                "Change_Diff": "- if (gameRule.getType().equals(Boolean.class) && (value.equalsIgnoreCase(\"true\") || value.equalsIgnoreCase(\"false\"))) {\n... \n} else if (gameRule.getType().equals(Integer.class)) {\n ... \n} else {\n ... \n}\n + switch (gameRule.getType().getSimpleName()) {\n case \"Boolean\": \n ... \n case \"Integer\": \n ... \n default: \n ... \n }",
+                "Description": "The comparison of gameRule.getType() should use a switch case instead of if-else for cleaner code and better readability",
+                "Start": 9,
+                "End": 29
+            }
+        ],
+        "Final code": "@SuppressWarnings(\"unchecked\") @Override @Deprecated(since=\"1.13\") public boolean setGameRuleValue(@Nullable String rule,@NotNull String value) {\n  if (rule == null) {\n    return false;\n  }\n  GameRule<?> gameRule=GameRule.getByName(rule);\n  if (gameRule == null) {\n    return false;\n  }\n\n  switch (gameRule.getType().getSimpleName()) {\n    case \"Boolean\":\n      if (value.equalsIgnoreCase(\"true\") || value.equalsIgnoreCase(\"false\")) {\n        return processEvent(gameRule, value) && setGameRule((GameRule<Boolean>)gameRule,value.equalsIgnoreCase(\"true\"));\n      }\n      break;\n    case \"Integer\":\n      try {\n        int intValue = Integer.parseInt(value);\n        return processEvent(gameRule, value) && setGameRule((GameRule<Integer>)gameRule,intValue);\n      } catch (NumberFormatException e) {\n        return false;\n      }\n    default:\n      return false;\n  }\n}\n\nprivate boolean processEvent(GameRule<?> gameRule, String value) {\n  WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n  return event.callEvent();\n}"
+    },
+    "Old_Method": "@SuppressWarnings(\"unchecked\") @Override @Deprecated(since=\"1.13\") public boolean setGameRuleValue(@Nullable String rule,@NotNull String value){\n  if (rule == null) {\n    return false;\n  }\n  GameRule<?> gameRule=GameRule.getByName(rule);\n  if (gameRule == null) {\n    return false;\n  }\n  if (gameRule.getType().equals(Boolean.class) && (value.equalsIgnoreCase(\"true\") || value.equalsIgnoreCase(\"false\"))) {\n    WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n    if (!event.callEvent()) {\n      return false;\n    }\n    return setGameRule((GameRule<Boolean>)gameRule,value.equalsIgnoreCase(\"true\"));\n  }\n else   if (gameRule.getType().equals(Integer.class)) {\n    try {\n      int intValue=Integer.parseInt(value);\n      WorldGameRuleChangeEvent event=new WorldGameRuleChangeEvent(this,null,gameRule,value);\n      if (!event.callEvent()) {\n        return false;\n      }\n      return setGameRule((GameRule<Integer>)gameRule,intValue);\n    }\n catch (    NumberFormatException e) {\n      return false;\n    }\n  }\n else {\n    return false;\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/WorldMock.java",
+    "Start": 60111,
+    "Stop": 61224,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "setGameRuleValue"
+}

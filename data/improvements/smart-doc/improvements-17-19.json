@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- Apis methodApi;\n+ Apis apiMethod;",
+                "Description": "Instead of using `methodApi`, use a more meaningful name for the variable such as `apiMethod`.",
+                "Start": 6,
+                "End": 30
+            },
+            {
+                "Improvement": "Consolidate condition checks",
+                "Change_Diff": "- if (CollectionUtil.isNotEmpty(apiMethodDoc.getPathParams())) {...}\n- if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams()) {...}\n- if (CollectionUtil.isNotEmpty(apiMethodDoc.getRequestParams())) {...}\n+ if (CollectionUtil.isNotEmpty(apiMethodDoc.getPathParams())) {...} else if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {...} else if (CollectionUtil.isNotEmpty(apiMethodDoc.getRequestParams())) {...}",
+                "Description": "The checks for `CollectionUtil.isNotEmpty(apiMethodDoc.getPathParams())`, `CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())`, and `CollectionUtil.isNotEmpty(apiMethodDoc.getRequestParams())` are done separately. They can be consolidated into a single if-else block.",
+                "Start": 22,
+                "End": 30
+            },
+            {
+                "Improvement": "Remove redundant else statement",
+                "Change_Diff": "- else if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {...}\n+ if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {...}",
+                "Description": "The else statement in `else if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {...}` is redundant and can be removed.",
+                "Start": 26,
+                "End": 28
+            }
+        ],
+        "Final code": "public static List<Apis> buildApis(List<ApiMethodDoc> apiMethodDocs,boolean hasDebugEnv){\n  List<Apis> apis=new ArrayList<>();\n  Apis apiMethod;\n  for (  ApiMethodDoc apiMethodDoc : apiMethodDocs) {\n    apiMethod=new Apis();\n    apiMethod.setIsFolder(TornaConstants.NO);\n    apiMethod.setName(apiMethodDoc.getDesc());\n    apiMethod.setUrl(hasDebugEnv ? subFirstUrlOrPath(apiMethodDoc.getPath()) : subFirstUrlOrPath(apiMethodDoc.getUrl()));\n    apiMethod.setHttpMethod(apiMethodDoc.getType());\n    apiMethod.setContentType(apiMethodDoc.getContentType());\n    apiMethod.setDescription(apiMethodDoc.getDetail());\n    apiMethod.setIsShow(TornaConstants.YES);\n    apiMethod.setAuthor(apiMethodDoc.getAuthor());\n    apiMethod.setOrderIndex(apiMethodDoc.getOrder());\n    apiMethod.setVersion(apiMethodDoc.getVersion());\n    apiMethod.setHeaderParams(buildHerder(apiMethodDoc.getRequestHeaders()));\n    apiMethod.setResponseParams(buildParams(apiMethodDoc.getResponseParams()));\n    apiMethod.setIsRequestArray(apiMethodDoc.getIsRequestArray());\n    apiMethod.setIsResponseArray(apiMethodDoc.getIsResponseArray());\n    apiMethod.setRequestArrayType(apiMethodDoc.getRequestArrayType());\n    apiMethod.setResponseArrayType(apiMethodDoc.getResponseArrayType());\n    apiMethod.setDeprecated(apiMethodDoc.isDeprecated() ? \"Deprecated\" : null);\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getPathParams())) {\n      apiMethod.setPathParams(buildParams(apiMethodDoc.getPathParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams()) && DocGlobalConstants.FILE_CONTENT_TYPE.equals(apiMethodDoc.getContentType())) {\n      apiMethod.setRequestParams(buildParams(apiMethodDoc.getQueryParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {\n      apiMethod.setQueryParams(buildParams(apiMethodDoc.getQueryParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getRequestParams())) {\n      apiMethod.setRequestParams(buildParams(apiMethodDoc.getRequestParams()));\n    }\n    apis.add(apiMethod);\n  }\n  return apis;\n}"
+    },
+    "Old_Method": "/** \n * build apis\n * @param apiMethodDocs apiMethodDocs\n * @param hasDebugEnv   has debug environment\n * @return List of Api\n */\npublic static List<Apis> buildApis(List<ApiMethodDoc> apiMethodDocs,boolean hasDebugEnv){\n  List<Apis> apis=new ArrayList<>();\n  Apis methodApi;\n  for (  ApiMethodDoc apiMethodDoc : apiMethodDocs) {\n    methodApi=new Apis();\n    methodApi.setIsFolder(TornaConstants.NO);\n    methodApi.setName(apiMethodDoc.getDesc());\n    methodApi.setUrl(hasDebugEnv ? subFirstUrlOrPath(apiMethodDoc.getPath()) : subFirstUrlOrPath(apiMethodDoc.getUrl()));\n    methodApi.setHttpMethod(apiMethodDoc.getType());\n    methodApi.setContentType(apiMethodDoc.getContentType());\n    methodApi.setDescription(apiMethodDoc.getDetail());\n    methodApi.setIsShow(TornaConstants.YES);\n    methodApi.setAuthor(apiMethodDoc.getAuthor());\n    methodApi.setOrderIndex(apiMethodDoc.getOrder());\n    methodApi.setVersion(apiMethodDoc.getVersion());\n    methodApi.setHeaderParams(buildHerder(apiMethodDoc.getRequestHeaders()));\n    methodApi.setResponseParams(buildParams(apiMethodDoc.getResponseParams()));\n    methodApi.setIsRequestArray(apiMethodDoc.getIsRequestArray());\n    methodApi.setIsResponseArray(apiMethodDoc.getIsResponseArray());\n    methodApi.setRequestArrayType(apiMethodDoc.getRequestArrayType());\n    methodApi.setResponseArrayType(apiMethodDoc.getResponseArrayType());\n    methodApi.setDeprecated(apiMethodDoc.isDeprecated() ? \"Deprecated\" : null);\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getPathParams())) {\n      methodApi.setPathParams(buildParams(apiMethodDoc.getPathParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams()) && DocGlobalConstants.FILE_CONTENT_TYPE.equals(apiMethodDoc.getContentType())) {\n      methodApi.setRequestParams(buildParams(apiMethodDoc.getQueryParams()));\n    }\n else     if (CollectionUtil.isNotEmpty(apiMethodDoc.getQueryParams())) {\n      methodApi.setQueryParams(buildParams(apiMethodDoc.getQueryParams()));\n    }\n    if (CollectionUtil.isNotEmpty(apiMethodDoc.getRequestParams())) {\n      methodApi.setRequestParams(buildParams(apiMethodDoc.getRequestParams()));\n    }\n    apis.add(methodApi);\n  }\n  return apis;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 5753,
+    "Stop": 8424,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "buildApis"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for 'name' parameter",
+                "Change_Diff": "+ if (name == null) {\n+ throw new IllegalArgumentException(\"Bucket name cannot be null\");\n+ }",
+                "Description": "Adding a null check for the 'name' parameter will prevent a NullPointerException from being thrown when the 'listObjects' method is called.",
+                "Start": 1,
+                "End": 2
+            },
+            {
+                "Improvement": "Add handling for AmazonServiceException",
+                "Change_Diff": "+ try {\n    objectListing = s3.listObjects(name);\n} catch (AmazonServiceException e) {\n    System.out.println(\"Error getting objects from bucket: \" + e.getMessage());\n    return 0;\n}",
+                "Description": "The methods 'listObjects' and 'listNextBatchOfObjects' can throw an AmazonServiceException if any errors occur while trying to access the S3 bucket. It's good practice to handle this exception.",
+                "Start": 3,
+                "End": 11
+            }
+        ],
+        "Final code": "protected long countBucket(final String name) {\n    if (name == null) {\n        throw new IllegalArgumentException(\"Bucket name cannot be null\");\n    }\n    long count = 0;\n    ObjectListing objectListing;\n    try {\n        objectListing = s3.listObjects(name);\n    } catch (AmazonServiceException e) {\n        System.out.println(\"Error getting objects from bucket: \" + e.getMessage());\n        return 0;\n    }\n    while (true) {\n        count += objectListing.getObjectSummaries().size();\n        if (objectListing.isTruncated()) {\n            objectListing = s3.listNextBatchOfObjects(objectListing);\n        } else {\n            break;\n        }\n    }\n    return count;\n}"
+    },
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

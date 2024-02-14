@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce Cyclomatic Complexity",
+                "Change_Diff": "- if (container == null) {\n+ if (container == null) return EMPTY_CONNECTION;\n- if (container instanceof Connection<?>) {\n+ else if (container instanceof Connection<?>) return container;\n- if (!this.adapter.supports(container.getClass())) {\n+ else if (!this.adapter.supports(container.getClass())) {\n- if (container.getClass().getName().endsWith(\"Connection\")) {\n+ if (container.getClass().getName().endsWith(\"Connection\")) return container;\n- throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());",
+                "Description": "The method has too many nested if conditions which increases cyclomatic complexity. This can be reduced by returning a result as soon as the condition is met, thus eliminating the need for else statements.",
+                "Start": 2,
+                "End": 12
+            },
+            {
+                "Improvement": "Use enhanced for loop with index",
+                "Change_Diff": "- for (T node : nodes) {\n- String cursor=this.adapter.cursorAt(container,index++);\n- edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n+ IntStream.range(0, nodes.size()).forEach(index -> {\n+ T node = nodes.get(index);\n+ String cursor = this.adapter.cursorAt(container, index);\n+ edges.add(new DefaultEdge<>(node, new DefaultConnectionCursor(cursor)));\n+ });",
+                "Description": "Instead of manually incrementing index, use IntStream with forEach to iterate over the nodes collection. This would make the code cleaner and easier to understand.",
+                "Start": 18,
+                "End": 22
+            }
+        ],
+        "Final code": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) return EMPTY_CONNECTION;\n  else if (container instanceof Connection<?>) return container;\n  else if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) return container;\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) return EMPTY_CONNECTION;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  IntStream.range(0, nodes.size()).forEach(index -> {\n    T node = nodes.get(index);\n    String cursor=this.adapter.cursorAt(container, index);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  });\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}"
+    },
+    "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+    "Start": 7935,
+    "Stop": 9024,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "adaptDataContainer"
+}

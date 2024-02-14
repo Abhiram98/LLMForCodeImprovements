@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Simplify conditionals and exception handling",
+                "Change_Diff": "- if (!(event instanceof ServerExceptionEvent)) {\n-      String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n-      callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n-    }\n-    if (ex instanceof RuntimeException) {\n-      throw r;\n-    }\n- else {\n-      throw new EventHandlerException(ex);\n-    }\n+    String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n+    callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n+    throw ex instanceof RuntimeException ? (RuntimeException) ex : new EventHandlerException(ex);",
+                "Description": "The current exception handling can be simplified and made clearer by removing the extra if condition and throwing the exception directly. This will not only make the code cleaner, but also easier to read and maintain.",
+                "Start": 12,
+                "End": 20
+            },
+            {
+                "Improvement": "Use Objects.requireNonNull instead of Preconditions.checkNotNull",
+                "Change_Diff": "- Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n- Preconditions.checkNotNull(event,\"Event cannot be null\");\n+ Objects.requireNonNull(registration, \"Listener cannot be null\");\n+ Objects.requireNonNull(event, \"Event cannot be null\");",
+                "Description": "The Java standard library provides a method Objects.requireNonNull which can be used to assert that an object is not null. It's better to use standard library functions when possible as they are well-tested and often more efficient.",
+                "Start": 2,
+                "End": 3
+            }
+        ],
+        "Final code": "private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event){\n   Objects.requireNonNull(registration, \"Listener cannot be null\");\n   Objects.requireNonNull(event, \"Event cannot be null\");\n   if (!registration.getPlugin().isEnabled()) {\n     return;\n   }\n   try {\n     registration.callEvent(event);\n   }\n   catch (EventException eventException) {\n     Throwable ex = eventException.getCause();\n     String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n     callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n     throw ex instanceof RuntimeException ? (RuntimeException) ex : new EventHandlerException(ex);\n   }\n}"
+    },
+    "Old_Method": "private void callRegisteredListener(@NotNull RegisteredListener registration,@NotNull Event event){\n  Preconditions.checkNotNull(registration,\"Listener cannot be null\");\n  Preconditions.checkNotNull(event,\"Event cannot be null\");\n  if (!registration.getPlugin().isEnabled()) {\n    return;\n  }\n  try {\n    registration.callEvent(event);\n  }\n catch (  EventException eventException) {\n    Throwable ex=eventException.getCause();\n    if (!(event instanceof ServerExceptionEvent)) {\n      String msg=\"Could not pass event \" + event.getEventName() + \" to \"+ registration.getPlugin().getDescription().getFullName();\n      callEvent(new ServerExceptionEvent(new ServerEventException(msg,ex,registration.getPlugin(),registration.getListener(),event)));\n    }\n    if (ex instanceof RuntimeException) {\n      throw r;\n    }\n else {\n      throw new EventHandlerException(ex);\n    }\n  }\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/plugin/PluginManagerMock.java",
+    "Start": 18429,
+    "Stop": 19391,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "callRegisteredListener"
+}

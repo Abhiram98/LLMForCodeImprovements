@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8's Optional to handle potential null values",
+                "Change_Diff": "- Object nextMessage=null;\n+ Optional<Object> nextMessage=Optional.empty();\n- if (nextMessage == null) {\n+ if (!nextMessage.isPresent()) {",
+                "Description": "Instead of checking if 'nextMessage' is null, use Java 8's Optional to handle potential null values. This will make the code more modern and robust, and prevent potential NullPointerExceptions.",
+                "Start": 22,
+                "End": 32
+            },
+            {
+                "Improvement": "Avoid catching generic 'Throwable' exception",
+                "Change_Diff": "- catch (Throwable e) {\n+ catch (Exception e) {",
+                "Description": "Instead of catching 'Throwable', catch more specific exceptions. Catching 'Throwable' can also catch 'Error' which are serious system problems that should not be caught. Catching 'Throwable' can also mask other serious exceptions you didn't anticipate and want to know about.",
+                "Start": 49,
+                "End": 55
+            },
+            {
+                "Improvement": "Add logging instead of printStackTrace",
+                "Change_Diff": "- e.printStackTrace();\n+ logger.error(\"Exception occurred\", e);",
+                "Description": "Instead of using 'printStackTrace', use a logger to log exceptions. This will give you more control over the logging level, output location, and formatting, and can integrate with logging utilities.",
+                "Start": 52,
+                "End": 54
+            }
+        ],
+        "Final code": "public void run(){\n  int batchSize=0;\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (InterruptedException ignore) {\n      }\n      continue;\n    }\n    try {\n      if (batch.size() < stream.maxMessages) {\n        long now=System.nanoTime();\n        final long firstTime=now;\n        do {\n          if (stream.queue.drainTo(batch,stream.maxMessages - batch.size()) <= 0) {\n            long maxWait=firstTime + stream.maxDelay - now;\n            if (maxWait <= 0) {\n              break;\n            }\n            Optional<Object> nextMessage=Optional.empty();\n            try {\n              nextMessage=Optional.ofNullable(stream.queue.poll(maxWait,TimeUnit.NANOSECONDS));\n            }\n catch (InterruptedException ignore) {\n            }\n            if (!nextMessage.isPresent()) {\n              break;\n            }\n            batch.add(nextMessage.get());\n            now=System.nanoTime();\n          }\n        }\n while (batch.size() < stream.maxMessages);\n      }\n      batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        }\n catch (Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        Stopwatch s=processTimeTracer.start();\n        boolean retryExecution=false;\n        do {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          }\n catch (RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        }\n while (retryExecution);\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    }\n catch (Exception e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        logger.error(\"Exception occurred\", e);\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "/** \n * Process messages from the queue, after grouping them into batches. \n */\npublic void run(){\n  int batchSize=0;\n  while (!shouldCollectorShutdown) {\n    if (isCollectorPaused) {\n      try {\n        Thread.sleep(SLEEP_TIME_MS);\n      }\n catch (      InterruptedException ignore) {\n      }\n      continue;\n    }\n    try {\n      if (batch.size() < stream.maxMessages) {\n        long now=System.nanoTime();\n        final long firstTime=now;\n        do {\n          if (stream.queue.drainTo(batch,stream.maxMessages - batch.size()) <= 0) {\n            long maxWait=firstTime + stream.maxDelay - now;\n            if (maxWait <= 0) {\n              break;\n            }\n            Object nextMessage=null;\n            try {\n              nextMessage=stream.queue.poll(maxWait,TimeUnit.NANOSECONDS);\n            }\n catch (            InterruptedException ignore) {\n            }\n            if (nextMessage == null) {\n              break;\n            }\n            batch.add(nextMessage);\n            now=System.nanoTime();\n          }\n        }\n while (batch.size() < stream.maxMessages);\n      }\n      batchSize=batch.size();\n      if (batchSize > 0) {\n        try {\n          queueSizeTracer.record(stream.queue.size());\n        }\n catch (        Exception ignored) {\n        }\n        avgBatchSizeTracer.record(batchSize);\n        Stopwatch s=processTimeTracer.start();\n        boolean retryExecution=false;\n        do {\n          try {\n            stream.processor.execute(new ProcessMessages(stream,batch));\n            retryExecution=false;\n          }\n catch (          RejectedExecutionException re) {\n            rejectedCounter.increment();\n            retryExecution=true;\n            Thread.sleep(RETRY_EXECUTION_TIMEOUT_MS);\n          }\n        }\n while (retryExecution);\n        processCount.increment(batchSize);\n        s.stop();\n        batch=new ArrayList(stream.maxMessages);\n      }\n    }\n catch (    Throwable e) {\n      if (CONFIGURATION.shouldPrintLoggingErrors()) {\n        e.printStackTrace();\n      }\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 14783,
+    "Stop": 18103,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "run"
+}

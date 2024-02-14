@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional to avoid null check",
+                "Change_Diff": "- if (error.getMessage() != null) {\n-    jsonApiError.detail(error.getMessage());\n+ Optional.ofNullable(error.getMessage()).ifPresent(jsonApiError::detail);",
+                "Description": "Instead of checking if error.getMessage() is null, we can use Optional.ofNullable. This makes the code cleaner and more readable.",
+                "Start": 3,
+                "End": 5
+            },
+            {
+                "Improvement": "Simplify boolean return in attribute function",
+                "Change_Diff": "- return true;\n+ // removed return true;",
+                "Description": "The attribute functions always return true, which is unnecessary. Simplify the function by removing the return statement.",
+                "Start": 13,
+                "End": 41
+            },
+            {
+                "Improvement": "Use Optional to simplify logic",
+                "Change_Diff": "- if (value instanceof Source) {\n-     jsonApiError.source(source);\n- } else if (value instanceof Map) {\n-     jsonApiError.source(toSource(map));\n- }\n- return true;\n+ Optional.ofNullable(value).ifPresent(v -> {\n+     if (v instanceof Source) {\n+         jsonApiError.source((Source) v);\n+     } else if (v instanceof Map) {\n+         jsonApiError.source(toSource((Map) v));\n+     }\n+ });",
+                "Description": "Use Optional.ofNullable to simplify the logic when checking if value is an instance of Source or Links. This can make the code cleaner and more readable.",
+                "Start": 29,
+                "End": 41
+            }
+        ],
+        "Final code": "@Override public JsonApiError toJsonApiError(ElideError error){\n  JsonApiErrorBuilder jsonApiError=JsonApiError.builder();\n  Optional.ofNullable(error.getMessage()).ifPresent(jsonApiError::detail);\n  if (error.getAttributes() != null && !error.getAttributes().isEmpty()) {\n    Map<String,Object> meta=new LinkedHashMap<>(error.getAttributes());\n    attribute(\"id\",meta,value -> {\n      jsonApiError.id(value.toString());\n    });\n    attribute(\"status\",meta,value -> {\n      jsonApiError.status(value.toString());\n    });\n    attribute(\"code\",meta,value -> {\n      jsonApiError.code(value.toString());\n    });\n    attribute(\"title\",meta,value -> {\n      jsonApiError.title(value.toString());\n    });\n    attribute(\"source\",meta,value -> {\n      Optional.ofNullable(value).ifPresent(v -> {\n        if (v instanceof Source) {\n          jsonApiError.source((Source) v);\n        } else if (v instanceof Map) {\n          jsonApiError.source(toSource((Map) v));\n        }\n      });\n    });\n    attribute(\"links\",meta,value -> {\n      Optional.ofNullable(value).ifPresent(v -> {\n        if (v instanceof Links) {\n          jsonApiError.links((Links) v);\n        } else if (v instanceof Map) {\n          jsonApiError.links(toLinks((Map) v));\n        }\n      });\n    });\n    if (!meta.isEmpty()) {\n      jsonApiError.meta(meta);\n    }\n  }\n  return jsonApiError.build();\n}"
+    },
+    "Old_Method": "@Override public JsonApiError toJsonApiError(ElideError error){\n  JsonApiErrorBuilder jsonApiError=JsonApiError.builder();\n  if (error.getMessage() != null) {\n    jsonApiError.detail(error.getMessage());\n  }\n  if (error.getAttributes() != null && !error.getAttributes().isEmpty()) {\n    Map<String,Object> meta=new LinkedHashMap<>(error.getAttributes());\n    attribute(\"id\",meta,value -> {\n      jsonApiError.id(value.toString());\n      return true;\n    }\n);\n    attribute(\"status\",meta,value -> {\n      jsonApiError.status(value.toString());\n      return true;\n    }\n);\n    attribute(\"code\",meta,value -> {\n      jsonApiError.code(value.toString());\n      return true;\n    }\n);\n    attribute(\"title\",meta,value -> {\n      jsonApiError.title(value.toString());\n      return true;\n    }\n);\n    attribute(\"source\",meta,value -> {\n      if (value instanceof Source) {\n        jsonApiError.source(source);\n      }\n else       if (value instanceof Map) {\n        jsonApiError.source(toSource(map));\n      }\n      return true;\n    }\n);\n    attribute(\"links\",meta,value -> {\n      if (value instanceof Links) {\n        jsonApiError.links(links);\n      }\n else       if (value instanceof Map) {\n        jsonApiError.links(toLinks(map));\n      }\n      return true;\n    }\n);\n    if (!meta.isEmpty()) {\n      jsonApiError.meta(meta);\n    }\n  }\n  return jsonApiError.build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/jsonapi/DefaultJsonApiErrorMapper.java",
+    "Start": 852,
+    "Stop": 2692,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "toJsonApiError"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant null check",
+                "Change_Diff": "- if (sheet_ != null) {\n-    return sheet_;\n-  }",
+                "Description": "The null check for 'sheet_' at the start of the method is not required. If 'sheet_' is not null, it will be returned immediately. Otherwise, it will be assigned a new value later in the method. Removing this check will make the code cleaner and more readable.",
+                "Start": 3,
+                "End": 5
+            },
+            {
+                "Improvement": "Use try-catch block for entire method",
+                "Change_Diff": "- try (InputSource source=new InputSource(new StringReader(css))){\n+ try {",
+                "Description": "Instead of using a try-catch block for only a part of the method, it can be used for the entire method. This will make the code cleaner and easier to read, and also ensure that any exceptions that occur in other parts of the method are also caught and handled.",
+                "Start": 8,
+                "End": 19
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try {\n      InputSource source=new InputSource(new StringReader(css));\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    } catch (final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

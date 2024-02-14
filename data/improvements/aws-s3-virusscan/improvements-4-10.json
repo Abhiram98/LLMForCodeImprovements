@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for 'name' parameter",
+                "Change_Diff": "+ if (name == null) {\n+     throw new IllegalArgumentException(\"Bucket name cannot be null.\");\n+ }",
+                "Description": "Check if the passed 'name' parameter is null before processing. This helps avoid NullPointerExceptions when 'name' is null.",
+                "Start": 1,
+                "End": 2
+            },
+            {
+                "Improvement": "Extract objectListing.getObjectSummaries().size() to a separate variable",
+                "Change_Diff": "- count += objectListing.getObjectSummaries().size();\n+ int objectSize = objectListing.getObjectSummaries().size();\n+ count += objectSize;",
+                "Description": "Extracting objectListing.getObjectSummaries().size() to a separate variable would make the code cleaner and avoid multiple calls to getObjectSummaries() and size() methods.",
+                "Start": 4,
+                "End": 4
+            }
+        ],
+        "Final code": "protected long countBucket(final String name){\n  if (name == null) {\n    throw new IllegalArgumentException(\"Bucket name cannot be null.\");\n  }\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    int objectSize = objectListing.getObjectSummaries().size();\n    count+=objectSize;\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    } else {\n      break;\n    }\n  }\n  return count;\n}"
+    },
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

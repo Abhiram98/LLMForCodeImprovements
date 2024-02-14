@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor to smaller methods",
+                "Change_Diff": "No specific line by line changes. Whole method needs to be refactored.",
+                "Description": "The current method is too long and does too many things. This makes it hard to understand and maintain. It should be refactored into smaller methods, each doing one thing, to improve readability and maintainability.",
+                "Start": 1,
+                "End": 32
+            },
+            {
+                "Improvement": "Error handling",
+                "Change_Diff": "- e.printStackTrace();\n+ throw new RuntimeException(\"Failed to register monitor\", e);",
+                "Description": "The current error handling just prints the stack trace and then continues. This is a bad practice because it hides the error. It's better to either handle the error or let it propagate up to a place where it can be handled.",
+                "Start": 28,
+                "End": 32
+            },
+            {
+                "Improvement": "Magic string",
+                "Change_Diff": "No specific line by line changes. Replace all the magic strings with constants.",
+                "Description": "There are magic strings in the code like 'queue_size', 'waitTimeforBuffer', etc. These should be replaced with constants to avoid errors due to typos and to make it easier to change the value later.",
+                "Start": 14,
+                "End": 23
+            }
+        ],
+        "Final code": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  initializeQueue();\n  setBatchValues();\n  initializeCollector();\n  initializeTracers();\n  initializeCounters();\n  setBlockingProperty();\n  startCollector();\n  registerMonitor();\n}\n\nprivate void initializeQueue() {\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n}\n\nprivate void setBatchValues() {\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n}\n\nprivate void initializeCollector() {\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n}\n\nprivate void initializeTracers() {\n  queueSizeTracer=Monitors.newTimer(QUEUE_SIZE); // QUEUE_SIZE is a constant\n  batchSyncPutTracer=Monitors.newTimer(WAIT_TIME_FOR_BUFFER); // WAIT_TIME_FOR_BUFFER is a constant\n  avgBatchSizeTracer=Monitors.newTimer(BATCH_SIZE); // BATCH_SIZE is a constant\n  threadSubmitTracer=Monitors.newTimer(THREAD_INVOCATION_TIME); // THREAD_INVOCATION_TIME is a constant\n  processTimeTracer=Monitors.newTimer(MESSAGE_PROCESS_TIME); // MESSAGE_PROCESS_TIME is a constant\n}\n\nprivate void initializeCounters() {\n  processCount=Monitors.newCounter(MESSAGES_PROCESSED); // MESSAGES_PROCESSED is a constant\n  queueOverflowCounter=Monitors.newCounter(QUEUE_OVERFLOW); // QUEUE_OVERFLOW is a constant\n}\n\nprivate void setBlockingProperty() {\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n}\n\nprivate void startCollector() {\n  collector.setDaemon(true);\n  collector.start();\n}\n\nprivate void registerMonitor() {\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n  catch (Throwable e) {\n    throw new RuntimeException(\"Failed to register monitor\", e);\n  }\n}"
+    },
+    "Old_Method": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n catch (  Throwable e) {\n    if (CONFIGURATION.shouldPrintLoggingErrors()) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 4433,
+    "Stop": 5937,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "MessageBatcher"
+}

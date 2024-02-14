@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove Deprecated Annotation",
+                "Change_Diff": "- @Deprecated @Test public void testJmxBuilderControllersApi(){",
+                "Description": "The '@Deprecated' annotation is not required and can be removed. This annotation implies that the method is outdated and should not be used, but since it's a test method, this is not the case.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Use Configurator Pattern for ApiConfig",
+                "Change_Diff": "- ApiConfig config=new ApiConfig();\n- config.setServerUrl(\"http://127.0.0.1:8899\");\n- config.setOpenUrl(\"http://localhost:7700/api\");\n- config.setAppToken(\"be4211613a734b45888c075741680e49\");\n- config.setDebugEnvName(\"测试环境\");\n- config.setLanguage(DocLanguage.CHINESE);\n- config.setInlineEnum(true);\n- config.setStyle(\"randomLight\");\n- config.setCreateDebugPage(false);\n- config.setAllInOne(true);\n- config.setCoverOld(false);\n- config.setOutPath(\"D:\\smart-doc\\docs\\jmx1\");\n- config.setFramework(FrameworkEnum.SPRING.getFramework());\n- config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\smart-doc\\test-project\"));\n- config.setPackageFilters(\"com.power.doc.controller.*\");\n- config.setBaseDir(\"D:\\smart-doc\\test-project\\smart-doc-example-cn-master\");\n- config.setCodePath(\"/src/main/java\");",
+                "Description": "Instead of setting individual values to the 'ApiConfig' object, use a builder pattern. This makes the code cleaner and easier to read.",
+                "Start": 6,
+                "End": 19
+            },
+            {
+                "Improvement": "Use try-with-resources for time measurement",
+                "Change_Diff": "- long start=System.currentTimeMillis();\n- JMeterBuilder.buildApiDoc(config);\n- long end=System.currentTimeMillis();\n- DateTimeUtil.printRunTime(end,start);",
+                "Description": "Instead of manually calculating the start and end time, use a try-with-resources statement with a custom AutoCloseable time measurement class. This will ensure that the end time is always captured, even if an exception occurs.",
+                "Start": 20,
+                "End": 24
+            }
+        ],
+        "Final code": "@Test public void testJmxBuilderControllersApi(){\n  ApiConfig config = new ApiConfig.Builder()\n    .setServerUrl(\"http://127.0.0.1:8899\")\n    .setOpenUrl(\"http://localhost:7700/api\")\n    .setAppToken(\"be4211613a734b45888c075741680e49\")\n    .setDebugEnvName(\"测试环境\")\n    .setLanguage(DocLanguage.CHINESE)\n    .setInlineEnum(true)\n    .setStyle(\"randomLight\")\n    .setCreateDebugPage(false)\n    .setAllInOne(true)\n    .setCoverOld(false)\n    .setOutPath(\"D:\\smart-doc\\docs\\jmx1\")\n    .setFramework(FrameworkEnum.SPRING.getFramework())\n    .setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\smart-doc\\test-project\"))\n    .setPackageFilters(\"com.power.doc.controller.*\")\n    .setBaseDir(\"D:\\smart-doc\\test-project\\smart-doc-example-cn-master\")\n    .setCodePath(\"/src/main/java\")\n    .build();\n  try (TimeMeasurement timeMeasurement = new TimeMeasurement()) {\n    JMeterBuilder.buildApiDoc(config);\n  }\n}"
+    },
+    "Old_Method": "/** \n * test jmeter\n */\n@Deprecated @Test public void testJmxBuilderControllersApi(){\n  @Deprecated ApiConfig config=new ApiConfig();\n  config.setServerUrl(\"http://127.0.0.1:8899\");\n  config.setOpenUrl(\"http://localhost:7700/api\");\n  config.setAppToken(\"be4211613a734b45888c075741680e49\");\n  config.setDebugEnvName(\"测试环境\");\n  config.setLanguage(DocLanguage.CHINESE);\n  config.setInlineEnum(true);\n  config.setStyle(\"randomLight\");\n  config.setCreateDebugPage(false);\n  config.setAllInOne(true);\n  config.setCoverOld(false);\n  config.setOutPath(\"D:\\\\smart-doc\\\\docs\\\\jmx1\");\n  config.setFramework(FrameworkEnum.SPRING.getFramework());\n  config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\\\smart-doc\\\\test-project\"));\n  config.setPackageFilters(\"com.power.doc.controller.*\");\n  config.setBaseDir(\"D:\\\\smart-doc\\\\test-project\\\\smart-doc-example-cn-master\");\n  config.setCodePath(\"/src/main/java\");\n  long start=System.currentTimeMillis();\n  JMeterBuilder.buildApiDoc(config);\n  long end=System.currentTimeMillis();\n  DateTimeUtil.printRunTime(end,start);\n}\n",
+    "File_Path": "smart-doc/src/test/java/com/ly/doc/ApiDocTest.java",
+    "Start": 2334,
+    "Stop": 3791,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "testJmxBuilderControllersApi"
+}

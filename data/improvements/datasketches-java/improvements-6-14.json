@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use meaningful variable names",
+            "Change_Diff": "- final int lgK=5;\n- final int k=1 << lgK;\n- final int u=4 * k;\n- final int memBytes=getMaxIntersectionBytes(k / 2);\n- final byte[] memArr=new byte[memBytes];\n- final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n- final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n- for (int i=0; i < u; i++) {\n- usk1.update(i);\n- }\n- final CompactSketch csk1=usk1.compact(true,null);\n- final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n+ final int logKeySize=5;\n+ final int keySize=1 << logKeySize;\n+ final int totalEntries=4 * keySize;\n+ final int memoryBytes=getMaxIntersectionBytes(keySize / 2);\n+ final byte[] memoryArray=new byte[memoryBytes];\n+ final WritableMemory writableMemory=WritableMemory.writableWrap(memoryArray);\n+ final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(keySize).build();\n+ for (int i=0; i < totalEntries; i++) {\n+ updateSketch.update(i);\n+ }\n+ final CompactSketch compactSketch=updateSketch.compact(true,null);\n+ final Intersection intersection=SetOperation.builder().buildIntersection(writableMemory);",
+            "Description": "Instead of using short and non-descriptive variable names, use meaningful ones that explain what the variable is for. This not only improves readability but also makes it easier to understand the purpose of the variable in the context of the function.",
+            "Start": 2,
+            "End": 11
+        }],
+        "Final code": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int logKeySize=5;\n  final int keySize=1 << logKeySize;\n  final int totalEntries=4 * keySize;\n  final int memoryBytes=getMaxIntersectionBytes(keySize / 2);\n  final byte[] memoryArray=new byte[memoryBytes];\n  final WritableMemory writableMemory=WritableMemory.writableWrap(memoryArray);\n  final UpdateSketch updateSketch=UpdateSketch.builder().setNominalEntries(keySize).build();\n  for (int i=0; i < totalEntries; i++) {\n    updateSketch.update(i);\n  }\n  final CompactSketch compactSketch=updateSketch.compact(true,null);\n  final Intersection intersection=SetOperation.builder().buildIntersection(writableMemory);\n  intersection.intersect(compactSketch);\n}"
+    },
+    "Old_Method": "@Test(expectedExceptions=SketchesArgumentException.class) public void checkSizedTooSmall(){\n  final int lgK=5;\n  final int k=1 << lgK;\n  final int u=4 * k;\n  final int memBytes=getMaxIntersectionBytes(k / 2);\n  final byte[] memArr=new byte[memBytes];\n  final WritableMemory iMem=WritableMemory.writableWrap(memArr);\n  final UpdateSketch usk1=UpdateSketch.builder().setNominalEntries(k).build();\n  for (int i=0; i < u; i++) {\n    usk1.update(i);\n  }\n  final CompactSketch csk1=usk1.compact(true,null);\n  final Intersection inter=SetOperation.builder().buildIntersection(iMem);\n  inter.intersect(csk1);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/DirectIntersectionTest.java",
+    "Start": 17194,
+    "Stop": 17845,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkSizedTooSmall"
+}

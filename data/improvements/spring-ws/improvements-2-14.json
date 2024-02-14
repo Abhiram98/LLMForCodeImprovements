@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add missing semicolon",
+                "Change_Diff": "- }\n;\n+ };\n",
+                "Description": "There's a missing semicolon in the code which may lead to a compile-time error. A semicolon should be added at the end of the instantiation of the 'endpoint' object.",
+                "Start": 17,
+                "End": 17
+            },
+            {
+                "Improvement": "Add missing import statements",
+                "Change_Diff": "+ import org.junit.Test;\n+ import javax.activation.MimeType;\n+ import javax.mail.internet.MimeMessage;\n+ import javax.xml.transform.Source;\n+ import javax.xml.transform.Result;\n+ import org.springframework.oxm.StringSource;\n+ import org.springframework.oxm.StringResult;\n+ import org.springframework.oxm.mime.MimeContainer;\n+ import org.springframework.oxm.mime.MimeMarshaller;\n+ import org.springframework.oxm.mime.MimeUnmarshaller;\n+ import org.springframework.ws.context.DefaultMessageContext;\n+ import org.springframework.ws.context.MessageContext;\n+ import org.springframework.ws.endpoint.AbstractMarshallingPayloadEndpoint;",
+                "Description": "The code snippet is missing import statements for the classes and interfaces being used. This might lead to compilation errors. Add necessary import statements at the beginning of the code.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "import org.junit.Test;\nimport javax.activation.MimeType;\nimport javax.mail.internet.MimeMessage;\nimport javax.xml.transform.Source;\nimport javax.xml.transform.Result;\nimport org.springframework.oxm.StringSource;\nimport org.springframework.oxm.StringResult;\nimport org.springframework.oxm.mime.MimeContainer;\nimport org.springframework.oxm.mime.MimeMarshaller;\nimport org.springframework.oxm.mime.MimeUnmarshaller;\nimport org.springframework.ws.context.DefaultMessageContext;\nimport org.springframework.ws.context.MessageContext;\nimport org.springframework.ws.endpoint.AbstractMarshallingPayloadEndpoint;\n\n@Test public void testInvokeMimeMarshaller() throws Exception {\n  MimeUnmarshaller unmarshaller=createMock(MimeUnmarshaller.class);\n  MimeMarshaller marshaller=createMock(MimeMarshaller.class);\n  MimeMessage request=createMock(\"request\",MimeMessage.class);\n  MimeMessage response=createMock(\"response\",MimeMessage.class);\n  Source requestSource=new StringSource(\"<request/>\");\n  expect(request.getPayloadSource()).andReturn(requestSource);\n  expect(factoryMock.createWebServiceMessage()).andReturn(response);\n  expect(unmarshaller.unmarshal(eq(requestSource),isA(MimeContainer.class))).andReturn(42L);\n  Result responseResult=new StringResult();\n  expect(response.getPayloadResult()).andReturn(responseResult);\n  marshaller.marshal(eq(\"result\"),eq(responseResult),isA(MimeContainer.class));\n  replay(factoryMock,unmarshaller,marshaller,request,response);\n  AbstractMarshallingPayloadEndpoint endpoint=new AbstractMarshallingPayloadEndpoint(){\n    @Override protected Object invokeInternal(    Object requestObject) throws Exception {\n      assertThat(requestObject).isEqualTo(42L);\n      return \"result\";\n    }\n  };\n  endpoint.setMarshaller(marshaller);\n  endpoint.setUnmarshaller(unmarshaller);\n  endpoint.afterPropertiesSet();\n  context=new DefaultMessageContext(request,factoryMock);\n  endpoint.invoke(context);\n  assertThat(response).isNotNull();\n  verify(factoryMock,unmarshaller,marshaller,request,response);\n}"
+    },
+    "Old_Method": "@Test public void testInvokeMimeMarshaller() throws Exception {\n  MimeUnmarshaller unmarshaller=createMock(MimeUnmarshaller.class);\n  MimeMarshaller marshaller=createMock(MimeMarshaller.class);\n  MimeMessage request=createMock(\"request\",MimeMessage.class);\n  MimeMessage response=createMock(\"response\",MimeMessage.class);\n  Source requestSource=new StringSource(\"<request/>\");\n  expect(request.getPayloadSource()).andReturn(requestSource);\n  expect(factoryMock.createWebServiceMessage()).andReturn(response);\n  expect(unmarshaller.unmarshal(eq(requestSource),isA(MimeContainer.class))).andReturn(42L);\n  Result responseResult=new StringResult();\n  expect(response.getPayloadResult()).andReturn(responseResult);\n  marshaller.marshal(eq(\"result\"),eq(responseResult),isA(MimeContainer.class));\n  replay(factoryMock,unmarshaller,marshaller,request,response);\n  AbstractMarshallingPayloadEndpoint endpoint=new AbstractMarshallingPayloadEndpoint(){\n    @Override protected Object invokeInternal(    Object requestObject) throws Exception {\n      assertThat(requestObject).isEqualTo(42L);\n      return \"result\";\n    }\n  }\n;\n  endpoint.setMarshaller(marshaller);\n  endpoint.setUnmarshaller(unmarshaller);\n  endpoint.afterPropertiesSet();\n  context=new DefaultMessageContext(request,factoryMock);\n  endpoint.invoke(context);\n  assertThat(response).isNotNull();\n  verify(factoryMock,unmarshaller,marshaller,request,response);\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/test/java/org/springframework/ws/server/endpoint/MarshallingPayloadEndpointTest.java",
+    "Start": 6056,
+    "Stop": 7507,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "testInvokeMimeMarshaller"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try with resources for automatic resource management",
+                "Change_Diff": "- Connection conn=null;\n- PreparedStatement statement=null;\n- ResultSet resultSet=null;\n+ try (Connection conn=JdbcPool.getReadConnection();\n+ PreparedStatement statement=conn.prepareStatement(sql);)\n- finally {\n-    JdbcPool.release(conn,statement,resultSet);\n-  }",
+                "Description": "Change the way resources are managed. Instead of manually releasing resources in a finally block, use try-with-resources. It makes the code cleaner and avoids resource leaks.",
+                "Start": 8,
+                "End": 25
+            },
+            {
+                "Improvement": "Move the selectFields calculation to outside the while loop",
+                "Change_Diff": "- String[] selectFields=parseSelectFields(sql);\n- while (resultSet.next()) {\n+ String[] selectFields=parseSelectFields(sql);\n+ while (resultSet.next())",
+                "Description": "The selectFields array is calculated for every iteration of the while loop, which is unnecessary as it does not change. Moving it outside the loop will improve performance.",
+                "Start": 18,
+                "End": 19
+            }
+        ],
+        "Final code": "public List<A> list(String sql, Object... params) {\n  List<A> beanList = new ArrayList<>();\n  grammarCheck(sql, DMLTypes.SELECT);\n  int paramSize = getParameterNum(sql, params);\n  if (paramSize > 0) {\n    try (Connection conn = JdbcPool.getReadConnection();\n         PreparedStatement statement = bindParameters(conn.prepareStatement(sql), params);\n         ResultSet resultSet = statement.executeQuery()) {\n      String[] selectFields = parseSelectFields(sql);\n      while (resultSet.next()) {\n        beanList.add(resultSet(selectFields, resultSet));\n      }\n    } catch (Exception e) {\n      logger.error(\"sql error\", e);\n    }\n  }\n  return beanList;\n}"
+    },
+    "Old_Method": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,resultSet);\n  }\n  return beanList;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 4628,
+    "Stop": 5587,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "list"
+}

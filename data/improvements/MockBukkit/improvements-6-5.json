@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Objects.hashCode() for null safe hash calculations",
+                "Change_Diff": "- result=prime * result + ((displayName == null) ? 0 : displayName.hashCode());\n+ result=prime * result + Objects.hashCode(displayName);",
+                "Description": "Instead of manually checking for null and calculating hash, use Objects.hashCode() which handles null values gracefully.",
+                "Start": 5,
+                "End": 12
+            },
+            {
+                "Improvement": "Factor out the repeated multiplication by prime",
+                "Change_Diff": "- result=prime * result + ...\n+ result=result + ...\n  ...\n- return result;\n+ return prime * result;",
+                "Description": "Instead of multiplying by prime at each step, just multiply the final result by prime. This reduces redundancy and makes the code cleaner.",
+                "Start": 5,
+                "End": 16
+            }
+        ],
+        "Final code": "@Override public int hashCode(){\n  final int prime=31;\n  int result=1;\n  result= result + Objects.hashCode(displayName);\n  result= result + Objects.hashCode(lore);\n  result= result + Objects.hashCode(customModelData);\n  result= result + (enchants.isEmpty() ? 0 : enchants.hashCode());\n  result= result + (hasRepairCost() ? this.repairCost : 0);\n  result= result + (!persistentDataContainer.isEmpty() ? persistentDataContainer.hashCode() : 0);\n  result= result + (hideFlags.isEmpty() ? 0 : hideFlags.hashCode());\n  result= result + Boolean.hashCode(unbreakable);\n  result= result + (hasDamage() ? this.damage : 0);\n  result= result + (hasDestroyableKeys() ? this.destroyableKeys.hashCode() : 0);\n  result= result + (hasPlaceableKeys() ? this.placeableKeys.hashCode() : 0);\n  return prime * result;\n}"
+    },
+    "Old_Method": "@Override public int hashCode(){\n  final int prime=31;\n  int result=1;\n  result=prime * result + ((displayName == null) ? 0 : displayName.hashCode());\n  result=prime * result + ((lore == null) ? 0 : lore.hashCode());\n  result=prime * result + ((customModelData == null) ? 0 : customModelData.hashCode());\n  result=prime * result + (enchants.isEmpty() ? 0 : enchants.hashCode());\n  result=prime * result + (hasRepairCost() ? this.repairCost : 0);\n  result=prime * result + (!persistentDataContainer.isEmpty() ? persistentDataContainer.hashCode() : 0);\n  result=prime * result + (hideFlags.isEmpty() ? 0 : hideFlags.hashCode());\n  result=prime * result + Boolean.hashCode(unbreakable);\n  result=prime * result + (hasDamage() ? this.damage : 0);\n  result=prime * result + (hasDestroyableKeys() ? this.destroyableKeys.hashCode() : 0);\n  result=prime * result + (hasPlaceableKeys() ? this.placeableKeys.hashCode() : 0);\n  return result;\n}\n",
+    "File_Path": "MockBukkit/src/main/java/be/seeseemelk/mockbukkit/inventory/meta/ItemMetaMock.java",
+    "Start": 7167,
+    "Stop": 8130,
+    "Project_Name": "data/projects/MockBukkit",
+    "Method_Name": "hashCode"
+}

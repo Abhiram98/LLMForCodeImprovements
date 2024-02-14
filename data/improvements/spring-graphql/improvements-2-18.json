@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "+ /**\n+  * This method gets the GraphQLObjectType for a given class from a given schema.\n+  * @param clazz the class to get the GraphQLObjectType for.\n+  * @param schema the schema to get the GraphQLObjectType from.\n+  * @return the GraphQLObjectType for the given class from the given schema. Returns null if the class starts with 'java.' or if no matching GraphQLObjectType is found.\n+  * @throws IllegalStateException if the mapping for the class is invalid.\n+  */",
+                "Description": "Adding method documentation makes your code more readable and easier to maintain. It helps other developers understand the purpose of the method, its parameters, and the return type.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n+ private GraphQLObjectType getTypeForClass(Class<?> targetClass,GraphQLSchema targetSchema){",
+                "Description": "Using meaningful names for variables makes your code more readable and maintainable. It helps other developers understand what the variable is used for.",
+                "Start": 1,
+                "End": 24
+            }
+        ],
+        "Final code": "/**\n * This method gets the GraphQLObjectType for a given class from a given schema.\n * @param targetClass the class to get the GraphQLObjectType for.\n * @param targetSchema the schema to get the GraphQLObjectType from.\n * @return the GraphQLObjectType for the given class from the given schema. Returns null if the class starts with 'java.' or if no matching GraphQLObjectType is found.\n * @throws IllegalStateException if the mapping for the class is invalid.\n */\n@Nullable private GraphQLObjectType getTypeForClass(Class<?> targetClass,GraphQLSchema targetSchema){\n  if (targetClass.getName().startsWith(\"java.\")) {\n    return null;\n  }\n  String name=getMapping(targetClass);\n  if (name != null) {\n    GraphQLObjectType objectType=targetSchema.getObjectType(name);\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + targetClass.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(targetClass);\n  if (targetSchema.containsType(name)) {\n    return targetSchema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : targetClass.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,targetSchema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=targetClass.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,targetSchema);\n  }\n  return null;\n}"
+    },
+    "Old_Method": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  if (clazz.getName().startsWith(\"java.\")) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  if (name != null) {\n    GraphQLObjectType objectType=schema.getObjectType(name);\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(clazz);\n  if (schema.containsType(name)) {\n    return schema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : clazz.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,schema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=clazz.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,schema);\n  }\n  return null;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/execution/ClassNameTypeResolver.java",
+    "Start": 2869,
+    "Stop": 3854,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getTypeForClass"
+}

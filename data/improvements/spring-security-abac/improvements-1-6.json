@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract the JSON processing to a separate method",
+                "Change_Diff": "- xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n+ xacmlRequest = processJSON(out, policyName);",
+                "Description": "The JSON processing within the try block can be extracted to a separate method. This improves readability and maintainability of the code by making the createAuthRequest method less cluttered.",
+                "Start": 11,
+                "End": 13
+            },
+            {
+                "Improvement": "Use Optional to avoid null checks",
+                "Change_Diff": "- if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n+ if (!Optional.ofNullable(xacmlRequest).isPresent()) {",
+                "Description": "The null or empty check for xacmlRequest can be done using Optional. This provides a cleaner way to prevent NullPointerExceptions.",
+                "Start": 18,
+                "End": 20
+            }
+        ],
+        "Final code": "public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n    Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n    String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n    String cachedRequest=this.requestBuilderCache.get(key);\n    if (cachedRequest != null) {\n      return cachedRequest;\n    }\n    String xacmlRequest;\n    try (StringWriter out=new StringWriter()){\n      Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n      cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n      cfg.setDefaultEncoding(\"UTF-8\");\n      Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n      template.process(templateData,out);\n      xacmlRequest = processJSON(out, policyName);\n      out.flush();\n    }\n    catch (IOException|TemplateException e) {\n      throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n    }\n    if (!Optional.ofNullable(xacmlRequest).isPresent()) {\n      throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n    }\n    return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}\n\nprivate String processJSON(StringWriter out, String policyName) {\n    return new JSONObject(out.toString()).get(policyName).toString();\n}"
+    },
+    "Old_Method": "@Override public String createAuthRequest(String policyName,String jsonKeyValuePairs){\n  Map<String,Object> templateData=generateFreemakerTemplateData(jsonKeyValuePairs);\n  String key=Base64.getEncoder().encodeToString(policyName.concat(jsonKeyValuePairs).concat(getTemplateDataAsAString(templateData)).trim().getBytes());\n  String cachedRequest=this.requestBuilderCache.get(key);\n  if (cachedRequest != null) {\n    return cachedRequest;\n  }\n  String xacmlRequest;\n  try (StringWriter out=new StringWriter()){\n    Configuration cfg=new Configuration(new Version(\"2.3.23\"));\n    cfg.setClassForTemplateLoading(this.getClass(),\"/\");\n    cfg.setDefaultEncoding(\"UTF-8\");\n    Template template=cfg.getTemplate(ATTRIBUTE_CONFIG_FILE_NAME);\n    template.process(templateData,out);\n    xacmlRequest=new JSONObject(out.toString()).get(policyName).toString();\n    out.flush();\n  }\n catch (  IOException|TemplateException e) {\n    throw new AttributeEvaluatorException(\"Failed to build the XACML Json request for policy with name : \" + policyName,e);\n  }\n  if (xacmlRequest == null || xacmlRequest.isEmpty()) {\n    throw new AttributeEvaluatorException(\"Generated XACML request is empty or NULL for policy with name : \" + policyName);\n  }\n  return this.requestBuilderCache.putIfAbsent(key,xacmlRequest);\n}\n",
+    "File_Path": "spring-security-abac/sdk/src/main/java/org/wso2/spring/security/abac/util/XacmlAuthRequestBuilder.java",
+    "Start": 1262,
+    "Stop": 2829,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "createAuthRequest"
+}

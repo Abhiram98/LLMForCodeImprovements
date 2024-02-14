@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove redundant whitespace handling",
+                "Change_Diff": "- if (value.length() != 0 && !isWhitespace(value.charAt(value.length() - 1))) {\n-     value=value + \" \";\n- }\n- value=value + token;\n+ value += \" \" + token;",
+                "Description": "The code handling whitespace before adding the token is unnecessary as `String.join()` already handles this. The condition `if (value.length() != 0 && !isWhitespace(value.charAt(value.length() - 1)))` is not required.",
+                "Start": 13,
+                "End": 16
+            },
+            {
+                "Improvement": "Improve error message consistency",
+                "Change_Diff": "- throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n+ throw JavaScriptEngine.reportRuntimeError(\"Token containing whitespace not allowed\");",
+                "Description": "The error message for the condition where the token contains whitespace is misleading. It should be updated to accurately reflect the error.",
+                "Start": 7,
+                "End": 7
+            }
+        ],
+        "Final code": "/** \n * Adds the specified token to the underlying string.\n * @param token the token to add\n */\n@JsxFunction public void add(final String token){\n  if (StringUtils.isEmpty(token)) {\n    throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n  }\n  if (StringUtils.containsAny(token,whitespaceChars())) {\n    throw JavaScriptEngine.reportRuntimeError(\"Token containing whitespace not allowed\");\n  }\n  boolean changed=false;\n  String value=getAttribValue();\n  if (StringUtils.isEmpty(value)) {\n    value=token;\n    changed=true;\n  }\n else {\n    value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n    if (position(value,token) < 0) {\n        value += \" \" + token;\n        changed=true;\n    }\n else     if (getBrowserVersion().hasFeature(JS_DOMTOKENLIST_REMOVE_WHITESPACE_CHARS_ON_ADD)) {\n      value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n      changed=true;\n    }\n  }\n  if (changed) {\n    updateAttribute(value);\n  }\n}"
+    },
+    "Old_Method": "/** \n * Adds the specified token to the underlying string.\n * @param token the token to add\n */\n@JsxFunction public void add(final String token){\n  if (StringUtils.isEmpty(token)) {\n    throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n  }\n  if (StringUtils.containsAny(token,whitespaceChars())) {\n    throw JavaScriptEngine.reportRuntimeError(\"Empty input not allowed\");\n  }\n  boolean changed=false;\n  String value=getAttribValue();\n  if (StringUtils.isEmpty(value)) {\n    value=token;\n    changed=true;\n  }\n else {\n    value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n    if (position(value,token) < 0) {\n      if (value.length() != 0 && !isWhitespace(value.charAt(value.length() - 1))) {\n        value=value + \" \";\n      }\n      value=value + token;\n      changed=true;\n    }\n else     if (getBrowserVersion().hasFeature(JS_DOMTOKENLIST_REMOVE_WHITESPACE_CHARS_ON_ADD)) {\n      value=String.join(\" \",StringUtils.split(value,whitespaceChars()));\n      changed=true;\n    }\n  }\n  if (changed) {\n    updateAttribute(value);\n  }\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/javascript/host/dom/DOMTokenList.java",
+    "Start": 4586,
+    "Stop": 5928,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "add"
+}

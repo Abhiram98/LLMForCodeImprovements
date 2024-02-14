@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract method for subscription creation",
+                "Change_Diff": "- MessageHandler messageHandler;\n- for (int i=0; i < length; i++) {\n-     messageHandler=messageHandlers[i];\n-     subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n- }\n- subscribe(listener,subscriptionsByListener);\n+ subscriptionsByListener = createSubscriptions(listener, messageHandlers, length);",
+                "Description": "The process of creating subscriptions is a distinct task that can be encapsulated in its own method. This will make the code easier to read and maintain. The new method will take the listener, messageHandlers, and length as parameters and return the Subscription array. ",
+                "Start": 11,
+                "End": 18
+            },
+            {
+                "Improvement": "Add specific exception handling",
+                "Change_Diff": "- catch (Exception e) {\n-    throw new RuntimeException(e);\n+ catch (ClassNotFoundException | NoSuchMethodException e) {\n+    throw new RuntimeException(\"Error during subscription\", e);\n }",
+                "Description": "Catching Exception in general is a bad practice. It is better to catch specific exceptions that you expect might be thrown, and handle each one accordingly. Therefore, specify the types of exceptions that should be caught and provide a meaningful message with each one.",
+                "Start": 22,
+                "End": 24
+            }
+        ],
+        "Final code": "public void subscribe(Object listener) {\n    try {\n        Class<?> listenerClass = listener.getClass();\n        if (nonListeners.contains(listenerClass)) {\n            return;\n        }\n        Subscription[] subscriptionsByListener = getSubscriptionsByListener(listener);\n        if (subscriptionsByListener == null) {\n            MessageHandler[] messageHandlers = metadataReader.getMessageListener(listenerClass).getHandlers();\n            int length = messageHandlers.length;\n            if (length == 0) {\n                nonListeners.add(listenerClass);\n                return;\n            }\n            subscriptionsByListener = createSubscriptions(listener, messageHandlers, length);\n        } else {\n            for (Subscription sub : subscriptionsByListener) {\n                sub.subscribe(listener);\n            }\n        }\n    } catch (ClassNotFoundException | NoSuchMethodException e) {\n        throw new RuntimeException(\"Error during subscription\", e);\n    }\n}\n\nprivate Subscription[] createSubscriptions(Object listener, MessageHandler[] messageHandlers, int length) {\n    Subscription[] subscriptions = new Subscription[length];\n    for (int i = 0; i < length; i++) {\n        MessageHandler messageHandler = messageHandlers[i];\n        subscriptions[i] = subscriptionFactory.createSubscription(runtime, messageHandler);\n    }\n    subscribe(listener, subscriptions);\n    return subscriptions;\n}"
+    },
+    "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+    "Start": 3620,
+    "Stop": 5539,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "subscribe"
+}

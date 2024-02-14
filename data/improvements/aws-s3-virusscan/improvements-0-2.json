@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Logger instead of System.out.println",
+                "Change_Diff": "- System.out.println(...)\n+ LOGGER.info(...)",
+                "Description": "System.out.println() is not recommended for server-side applications as it consumes more resources. Instead, use Logger which can give you more flexibility to turn on/off certain logs, change log levels etc.",
+                "Start": 4,
+                "End": 35
+            },
+            {
+                "Improvement": "Handle InterruptedException properly",
+                "Change_Diff": "- catch (final InterruptedException e) {}\n+ catch (final InterruptedException e) { Thread.currentThread().interrupt(); }",
+                "Description": "The InterruptedException should be properly handled by either propagating it or interrupting the current thread again. Simply swallowing it can be dangerous as it might leave the system in an inconsistent state.",
+                "Start": 9,
+                "End": 11
+            },
+            {
+                "Improvement": "Use Set for eventsDisplayed",
+                "Change_Diff": "- final List<StackEvent> eventsDisplayed=new ArrayList<>();\n+ final Set<StackEvent> eventsDisplayed = new HashSet<>();",
+                "Description": "Since we are checking if an event is already displayed, a Set would be more appropriate because the contains operation is faster in a Set than in a List.",
+                "Start": 5,
+                "End": 16
+            },
+            {
+                "Improvement": "Avoid using raw RuntimeException",
+                "Change_Diff": "- throw new RuntimeException(...);\n+ throw new InvalidStackStatusException(...);",
+                "Description": "Directly throwing RuntimeException is not recommended as it does not provide specific details about the error. Use more specific exceptions or create your own exception class.",
+                "Start": 35,
+                "End": 35
+            }
+        ],
+        "Final code": "protected void waitForStack(final Context context,final String stackName,final FinalStatus finalStackStatus){\n  LOGGER.info('waitForStack[{}]: to reach status {}', stackName, finalStackStatus.finalStatus);\n  final Set<StackEvent> eventsDisplayed=new HashSet<>();\n  while (true) {\n    try {\n      Thread.sleep(20000);\n    } catch (final InterruptedException e) {\n      Thread.currentThread().interrupt();\n    }\n    final List<StackEvent> events=getStackEvents(stackName);\n    for (final StackEvent event : events) {\n      if (!eventsDisplayed.contains(event)) {\n        LOGGER.info('waitForStack[{}]: {} {} {} {}', stackName, event.getTimestamp(), event.getLogicalResourceId(), event.getResourceStatus(), event.getResourceStatusReason());\n        eventsDisplayed.add(event);\n      }\n    }\n    try {\n      final DescribeStacksResult res=this.cf.describeStacks(new DescribeStacksRequest().withStackName(stackName));\n      final StackStatus currentStatus=StackStatus.fromValue(res.getStacks().get(0).getStackStatus());\n      if (finalStackStatus.finalStatus == currentStatus) {\n        LOGGER.info('waitForStack[{}]: final status reached.', stackName);\n        return;\n      } else {\n        if (finalStackStatus.intermediateStatus.contains(currentStatus)) {\n          LOGGER.info('waitForStack[{}]: continue to wait (still in intermediate status {})', stackName, currentStatus);\n        } else {\n          context.reportStackFailure(stackName);\n          throw new InvalidStackStatusException('waitForStack[' + stackName + ']: reached invalid intermediate status '+ currentStatus+ '.');\n        }\n      }\n    } catch (final AmazonServiceException e) {\n      if (e.getErrorMessage().equals('Stack with id ' + stackName + ' does not exist')) {\n        if (finalStackStatus.notFoundIsFinalStatus) {\n          LOGGER.info('waitForStack[{}]: final  reached (not found).', stackName);\n          return;\n        } else {\n          if (finalStackStatus.notFoundIsIntermediateStatus) {\n            LOGGER.info('waitForStack[{}]: continue to wait (stack not found)', stackName);\n          } else {\n            context.reportStackFailure(stackName);\n            throw new StackNotFoundException('waitForStack[' + stackName + ']: stack not found.');\n          }\n        }\n      } else {\n        throw e;\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "protected void waitForStack(final Context context,final String stackName,final FinalStatus finalStackStatus){\n  System.out.println(\"waitForStack[\" + stackName + \"]: to reach status \"+ finalStackStatus.finalStatus);\n  final List<StackEvent> eventsDisplayed=new ArrayList<>();\n  while (true) {\n    try {\n      Thread.sleep(20000);\n    }\n catch (    final InterruptedException e) {\n    }\n    final List<StackEvent> events=getStackEvents(stackName);\n    for (    final StackEvent event : events) {\n      boolean displayed=false;\n      for (      final StackEvent eventDisplayed : eventsDisplayed) {\n        if (event.getEventId().equals(eventDisplayed.getEventId())) {\n          displayed=true;\n        }\n      }\n      if (!displayed) {\n        System.out.println(\"waitForStack[\" + stackName + \"]: \"+ event.getTimestamp().toString()+ \" \"+ event.getLogicalResourceId()+ \" \"+ event.getResourceStatus()+ \" \"+ event.getResourceStatusReason());\n        eventsDisplayed.add(event);\n      }\n    }\n    try {\n      final DescribeStacksResult res=this.cf.describeStacks(new DescribeStacksRequest().withStackName(stackName));\n      final StackStatus currentStatus=StackStatus.fromValue(res.getStacks().get(0).getStackStatus());\n      if (finalStackStatus.finalStatus == currentStatus) {\n        System.out.println(\"waitForStack[\" + stackName + \"]: final status reached.\");\n        return;\n      }\n else {\n        if (finalStackStatus.intermediateStatus.contains(currentStatus)) {\n          System.out.println(\"waitForStack[\" + stackName + \"]: continue to wait (still in intermediate status \"+ currentStatus+ \") ...\");\n        }\n else {\n          context.reportStackFailure(stackName);\n          throw new RuntimeException(\"waitForStack[\" + stackName + \"]: reached invalid intermediate status \"+ currentStatus+ \".\");\n        }\n      }\n    }\n catch (    final AmazonServiceException e) {\n      if (e.getErrorMessage().equals(\"Stack with id \" + stackName + \" does not exist\")) {\n        if (finalStackStatus.notFoundIsFinalStatus) {\n          System.out.println(\"waitForStack[\" + stackName + \"]: final  reached (not found).\");\n          return;\n        }\n else {\n          if (finalStackStatus.notFoundIsIntermediateStatus) {\n            System.out.println(\"waitForStack[\" + stackName + \"]: continue to wait (stack not found) ...\");\n          }\n else {\n            context.reportStackFailure(stackName);\n            throw new RuntimeException(\"waitForStack[\" + stackName + \"]: stack not found.\");\n          }\n        }\n      }\n else {\n        throw e;\n      }\n    }\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ACloudFormationTest.java",
+    "Start": 6172,
+    "Stop": 9325,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "waitForStack"
+}

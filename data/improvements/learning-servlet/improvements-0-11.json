@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for automatic resource management",
+                "Change_Diff": "- Connection c=DbUtils.getConnection();\n- PreparedStatement ps=c.prepareStatement(sql);\n- ResultSet rs=ps.executeQuery();\n+ try (Connection c = DbUtils.getConnection();\n+      PreparedStatement ps = c.prepareStatement(sql);\n+      ResultSet rs = ps.executeQuery()) {",
+                "Description": "Instead of manually closing the Connection, PreparedStatement, and ResultSet objects, use a try-with-resources block. This automatically closes the resources when they're no longer in use, even if an exception occurs. This ensures your resources are always properly closed and makes your code cleaner and easier to read.",
+                "Start": 2,
+                "End": 14
+            },
+            {
+                "Improvement": "Remove manual calls to close()",
+                "Change_Diff": "- rs.close();\n- ps.close();\n- c.close();\n+ // Removed manual calls to close()",
+                "Description": "With the introduction of the try-with-resources block, you don't need to manually call the close() method on your resources. They'll be closed automatically when they're no longer in use.",
+                "Start": 11,
+                "End": 14
+            }
+        ],
+        "Final code": "@Test public void dbTest() throws SQLException {\n    String sql = \"select uUsername from user where uId = ?\";\n    try (Connection c = DbUtils.getConnection();\n         PreparedStatement ps = c.prepareStatement(sql);\n         ResultSet rs = ps.executeQuery()) {\n        ps.setInt(1,1);\n        while (rs.next()) {\n            System.out.println(rs.getString(1));\n        }\n    } // Resources are automatically closed here\n}"
+    },
+    "Old_Method": "@Test public void dbTest() throws SQLException {\n  Connection c=DbUtils.getConnection();\n  String sql=\"select uUsername from user where uId = ?\";\n  PreparedStatement ps=c.prepareStatement(sql);\n  ps.setInt(1,1);\n  ResultSet rs=ps.executeQuery();\n  while (rs.next()) {\n    System.out.println(rs.getString(1));\n  }\n  rs.close();\n  ps.close();\n  c.close();\n}\n",
+    "File_Path": "learning-servlet/myservlet06/src/test/DbTest.java",
+    "Start": 199,
+    "Stop": 563,
+    "Project_Name": "data/projects/learning-servlet",
+    "Method_Name": "dbTest"
+}

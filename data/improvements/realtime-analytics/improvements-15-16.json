@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary inputStream marking",
+                "Change_Diff": "- ServletInputStream inputStream=request.getInputStream();\n- if (inputStream != null) {\n-   inputStream.mark(Integer.MAX_VALUE);\n- }",
+                "Description": "The ServletInputStream is marked but never reset, which is unnecessary. Removing this unnecessary code can improve readability and performance.",
+                "Start": 3,
+                "End": 5
+            },
+            {
+                "Improvement": "Replace startsWith checks with a switch case",
+                "Change_Diff": "- if (pathInfo.startsWith(PATH_PING)) {\n-   ping(request,pathInfo,response);\n- }\n- else if (pathInfo.startsWith(PATH_COUNTER)) {\n-   stats.incQueryRequestCount();\n-   getCounters(request,pathInfo,response);\n- }\n- else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n-   stats.incQueryRequestCount();\n-   getMetrics(request,pathInfo,response);\n- }\n- else {\n-   stats.incInvalidRequestCount();\n-   response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n- }",
+                "Description": "Switching on the pathInfo, after removing the leading '/', can be more efficient and readable when there are multiple checks to be made.",
+                "Start": 7,
+                "End": 17
+            }
+        ],
+        "Final code": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  try {\n    String pathInfo=request.getPathInfo();\n    switch (pathInfo.substring(1)) {\n      case PATH_PING:\n        ping(request,pathInfo,response);\n        break;\n      case PATH_COUNTER:\n        stats.incQueryRequestCount();\n        getCounters(request,pathInfo,response);\n        break;\n      case PATH_METRICGROUP:\n        stats.incQueryRequestCount();\n        getMetrics(request,pathInfo,response);\n        break;\n      default:\n        stats.incInvalidRequestCount();\n        response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n  catch (Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n  finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

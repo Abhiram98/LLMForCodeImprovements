@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder instead of StringBuffer",
+                "Change_Diff": "- StringBuffer result=new StringBuffer();\n+ StringBuilder result=new StringBuilder();",
+                "Description": "In this case, the StringBuffer isn't necessary because there is no need for synchronization. StringBuilder is faster and more efficient for this use case.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Avoid using magic numbers",
+                "Change_Diff": "- result.append(\" \");\n- result.append(\"\\n\");\n+ result.append(SPACE);\n+ result.append(NEW_LINE);",
+                "Description": "In the code, you are appending ' ' and '\\n'. It's better to use a constant to represent what they stand for to increase code readability.",
+                "Start": 27,
+                "End": 28
+            }
+        ],
+        "Final code": "static String stringifySolution(int size,List<List<ColumnName>> solution){\n  final String SPACE = \" \";\n  final String NEW_LINE = \"\\n\";\n  int[][] picture=new int[size][size];\n  StringBuilder result=new StringBuilder();\n  for (  List<ColumnName> row : solution) {\n    int x=-1;\n    int y=-1;\n    int num=-1;\n    for (    ColumnName item : row) {\n      if (item instanceof ColumnConstraint) {\n        x=((ColumnConstraint)item).column;\n        num=((ColumnConstraint)item).num;\n      }\n else if (item instanceof RowConstraint) {\n        y=((RowConstraint)item).row;\n      }\n    }\n    picture[y][x]=num;\n  }\n  for (int y=0; y < size; ++y) {\n    for (int x=0; x < size; ++x) {\n      result.append(picture[y][x]);\n      result.append(SPACE);\n    }\n    result.append(NEW_LINE);\n  }\n  return result.toString();\n}"
+    },
+    "Old_Method": "/** \n * A string containing a representation of the solution.\n * @param size the size of the board\n * @param solution a list of list of column names\n * @return a string of the solution matrix\n */\nstatic String stringifySolution(int size,List<List<ColumnName>> solution){\n  int[][] picture=new int[size][size];\n  StringBuffer result=new StringBuffer();\n  for (  List<ColumnName> row : solution) {\n    int x=-1;\n    int y=-1;\n    int num=-1;\n    for (    ColumnName item : row) {\n      if (item instanceof ColumnConstraint) {\n        x=((ColumnConstraint)item).column;\n        num=((ColumnConstraint)item).num;\n      }\n else       if (item instanceof RowConstraint) {\n        y=((RowConstraint)item).row;\n      }\n    }\n    picture[y][x]=num;\n  }\n  for (int y=0; y < size; ++y) {\n    for (int x=0; x < size; ++x) {\n      result.append(picture[y][x]);\n      result.append(\" \");\n    }\n    result.append(\"\\n\");\n  }\n  return result.toString();\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Sudoku.java",
+    "Start": 1860,
+    "Stop": 3175,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "stringifySolution"
+}

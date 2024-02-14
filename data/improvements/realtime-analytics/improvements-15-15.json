@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use switch statement for cleaner code",
+                "Change_Diff": "- if (pathInfo.startsWith(PATH_PING)) {\n-      ping(request,pathInfo,response);\n-    } else if (pathInfo.startsWith(PATH_COUNTER)) {\n-      stats.incQueryRequestCount();\n-      getCounters(request,pathInfo,response);\n-    } else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n-      stats.incQueryRequestCount();\n-      getMetrics(request,pathInfo,response);\n-    } else {\n-      stats.incInvalidRequestCount();\n-      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n-    }\n+    switch (pathInfo) {\n+      case PATH_PING:\n+        ping(request,pathInfo,response);\n+        break;\n+      case PATH_COUNTER:\n+        stats.incQueryRequestCount();\n+        getCounters(request,pathInfo,response);\n+        break;\n+      case PATH_METRICGROUP:\n+        stats.incQueryRequestCount();\n+        getMetrics(request,pathInfo,response);\n+        break;\n+      default:\n+        stats.incInvalidRequestCount();\n+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n+    }",
+                "Description": "Instead of using several if-else conditionals to check which path the request starts with, use a switch statement. This makes the code easier to read and maintain.",
+                "Start": 8,
+                "End": 17
+            },
+            {
+                "Improvement": "Use try-with-resources for automatic resource management",
+                "Change_Diff": "- ServletInputStream inputStream=request.getInputStream();\n- if (inputStream != null) {\n-    inputStream.mark(Integer.MAX_VALUE);\n-  }\n+ try (ServletInputStream inputStream = request.getInputStream()) {\n+    inputStream.mark(Integer.MAX_VALUE);\n+ }",
+                "Description": "ServletInputStream could potentially not be closed and lead to a resource leak. Using a try-with-resources statement ensures that each resource is closed at the end of the statement.",
+                "Start": 3,
+                "End": 6
+            }
+        ],
+        "Final code": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  try (ServletInputStream inputStream = request.getInputStream()) {\n    inputStream.mark(Integer.MAX_VALUE);\n    String pathInfo=request.getPathInfo();\n    switch (pathInfo) {\n      case PATH_PING:\n        ping(request,pathInfo,response);\n        break;\n      case PATH_COUNTER:\n        stats.incQueryRequestCount();\n        getCounters(request,pathInfo,response);\n        break;\n      case PATH_METRICGROUP:\n        stats.incQueryRequestCount();\n        getMetrics(request,pathInfo,response);\n        break;\n      default:\n        stats.incInvalidRequestCount();\n        response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

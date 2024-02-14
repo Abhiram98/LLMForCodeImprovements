@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Junit's @Before annotation to initialize common objects",
+                "Change_Diff": "- author=new Author();\n- author.setId(1L);\n- Book book=new Book();\n- book.setId(1L);\n- book.setLanguage(\"en\");\n- Book book2=new Book();\n- book2.setId(2L);\n- book2.setLanguage(\"de\");\n- author.getBooks().add(book2);\n- PathElement bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n- Path paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n+ @Before\n+ public void setUp() {\n+     author=new Author();\n+     author.setId(1L);\n+     book=new Book();\n+     book.setId(1L);\n+     book.setLanguage(\"en\");\n+     book2=new Book();\n+     book2.setId(2L);\n+     book2.setLanguage(\"de\");\n+     author.getBooks().add(book2);\n+     bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n+     paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n+ }",
+                "Description": "Objects like 'author', 'book', 'book2', 'bookLanguageElement', 'paths' are being reinitialized before each test. These common initializations can be moved into a setup method annotated with @Before. This reduces code redundancy and makes the test method cleaner.",
+                "Start": 2,
+                "End": 9
+            },
+            {
+                "Improvement": "Encapsulate repetitive code into private methods",
+                "Change_Diff": "Encapsulate repeated code into private methods. Example: private boolean testPredicate(Predicate predicate, Object value) { return predicate.test(value); }",
+                "Description": "The creation of 'HasMemberPredicate' and 'HasNoMemberPredicate' and the execution of 'fn.test(author)' are repeated multiple times. This can be encapsulated into private methods to make the code cleaner and more maintainable.",
+                "Start": 10,
+                "End": 29
+            }
+        ],
+        "Final code": "@Test\npublic void hasMemberPredicateToManyNullTest() throws Exception {\n    setUp();\n    assertFalse(testPredicate(new HasMemberPredicate(paths,null), author));\n    assertTrue(testPredicate(new HasNoMemberPredicate(paths,null), author));\n    assertFalse(testPredicate(new HasMemberPredicate(paths,\"null\"), author));\n    assertTrue(testPredicate(new HasNoMemberPredicate(paths,\"null\"), author));\n    book2.setLanguage(null);\n    assertTrue(testPredicate(new HasMemberPredicate(paths,null), author));\n    assertFalse(testPredicate(new HasNoMemberPredicate(paths,null), author));\n    assertTrue(testPredicate(new HasMemberPredicate(paths,\"null\"), author));\n    assertFalse(testPredicate(new HasNoMemberPredicate(paths,\"null\"), author));\n}\n\n@Before\npublic void setUp() {\n    author=new Author();\n    author.setId(1L);\n    book=new Book();\n    book.setId(1L);\n    book.setLanguage(\"en\");\n    book2=new Book();\n    book2.setId(2L);\n    book2.setLanguage(\"de\");\n    author.getBooks().add(book2);\n    bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n    paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n}\n\nprivate boolean testPredicate(Predicate predicate, Object value) {\n    return predicate.test(value);\n}"
+    },
+    "Old_Method": "@Test public void hasMemberPredicateToManyNullTest() throws Exception {\n  author=new Author();\n  author.setId(1L);\n  Book book=new Book();\n  book.setId(1L);\n  book.setLanguage(\"en\");\n  Book book2=new Book();\n  book2.setId(2L);\n  book2.setLanguage(\"de\");\n  author.getBooks().add(book2);\n  PathElement bookLanguageElement=new PathElement(Book.class,String.class,\"language\");\n  Path paths=new Path(List.of(authorBooksElement,bookLanguageElement));\n  expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  book2.setLanguage(null);\n  expression=new HasMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,null);\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n  expression=new HasMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertTrue(fn.test(author));\n  expression=new HasNoMemberPredicate(paths,\"null\");\n  fn=expression.accept(visitor);\n  assertFalse(fn.test(author));\n}\n",
+    "File_Path": "elide/elide-core/src/test/java/com/yahoo/elide/core/filter/expression/InMemoryFilterExecutorTest.java",
+    "Start": 10344,
+    "Stop": 12059,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "hasMemberPredicateToManyNullTest"
+}

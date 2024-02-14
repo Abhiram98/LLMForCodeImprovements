@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional to handle null values",
+                "Change_Diff": "- String baseRoute=baseUrl == null ? \"\" : baseUrl;\n+ String baseRoute=Optional.ofNullable(baseUrl).orElse(\"\");",
+                "Description": "In Java 8 and later, we can use java.util.Optional to avoid explicit null checks. It provides a clearer and safer way to handle nulls.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Use StringUtils from Apache Commons Lang for string manipulation",
+                "Change_Diff": "- if (route.length() > 0 && route.charAt(0) == '/') {\n-    route=route.substring(1);\n+ route=StringUtils.removeStart(route,\"/\");\n\n- if (baseRoute.length() > 0 && baseRoute.charAt(baseRoute.length() - 1) == '/') {\n-    baseRoute=baseRoute + apiVersionString;\n+ baseRoute=StringUtils.appendIfMissing(baseRoute, \"/\") + apiVersionString;",
+                "Description": "Apache Commons Lang provides helper classes for operations tied to the java.lang API, including String manipulations such as handling empty strings or substrings. Using it will make the code cleaner and easier to read.",
+                "Start": 36,
+                "End": 38
+            }
+        ],
+        "Final code": "\n@Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n  String baseRoute=Optional.ofNullable(baseUrl).orElse(\"\");\n  String route=path;\n  String apiVersion=NO_VERSION;\n  String apiVersionString=\"\";\n  int versionStart=-1;\n  int versionEnd=-1;\n  int pathStart=-1;\n  int pathEnd=-1;\n  int find=path.indexOf('/',0);\n  if (find != -1) {\n    if (find == 0) {\n      versionStart=1;\n      int findEnd=path.indexOf('/',1);\n      if (findEnd != -1) {\n        versionEnd=findEnd;\n        pathStart=findEnd;\n        pathEnd=path.length();\n      }\n else {\n        versionEnd=path.length();\n      }\n    }\n else {\n      versionStart=0;\n      versionEnd=find;\n      pathStart=find;\n      pathEnd=path.length();\n    }\n  }\n else {\n    versionStart=0;\n    versionEnd=path.length();\n  }\n  if (versionStart != -1 && versionEnd != -1) {\n    apiVersion=path.substring(versionStart,versionEnd);\n    apiVersionString=apiVersion;\n  }\n  if (!apiVersion.isEmpty() && !this.versionPrefix.isEmpty()) {\n    if (apiVersion.startsWith(this.versionPrefix)) {\n      apiVersion=apiVersion.substring(this.versionPrefix.length());\n    }\n  }\n  if (!apiVersion.isEmpty()) {\n    if (!apiVersionValidator.isValidApiVersion(apiVersion)) {\n      apiVersion=NO_VERSION;\n      pathStart=0;\n      pathEnd=path.length();\n      apiVersionString=\"\";\n    }\n  }\n  if (pathStart != -1 && pathEnd != -1) {\n    route=path.substring(pathStart,pathEnd);\n  }\n else {\n    route=\"\";\n  }\n  route=StringUtils.removeStart(route,\"/\");\n  baseRoute=StringUtils.appendIfMissing(baseRoute, \"/\") + apiVersionString;\n\n  return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}"
+    },
+    "Old_Method": "@Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n  String baseRoute=baseUrl == null ? \"\" : baseUrl;\n  String route=path;\n  String apiVersion=NO_VERSION;\n  String apiVersionString=\"\";\n  int versionStart=-1;\n  int versionEnd=-1;\n  int pathStart=-1;\n  int pathEnd=-1;\n  int find=path.indexOf('/',0);\n  if (find != -1) {\n    if (find == 0) {\n      versionStart=1;\n      int findEnd=path.indexOf('/',1);\n      if (findEnd != -1) {\n        versionEnd=findEnd;\n        pathStart=findEnd;\n        pathEnd=path.length();\n      }\n else {\n        versionEnd=path.length();\n      }\n    }\n else {\n      versionStart=0;\n      versionEnd=find;\n      pathStart=find;\n      pathEnd=path.length();\n    }\n  }\n else {\n    versionStart=0;\n    versionEnd=path.length();\n  }\n  if (versionStart != -1 && versionEnd != -1) {\n    apiVersion=path.substring(versionStart,versionEnd);\n    apiVersionString=apiVersion;\n  }\n  if (!apiVersion.isEmpty() && !this.versionPrefix.isEmpty()) {\n    if (apiVersion.startsWith(this.versionPrefix)) {\n      apiVersion=apiVersion.substring(this.versionPrefix.length());\n    }\n  }\n  if (!apiVersion.isEmpty()) {\n    if (!apiVersionValidator.isValidApiVersion(apiVersion)) {\n      apiVersion=NO_VERSION;\n      pathStart=0;\n      pathEnd=path.length();\n      apiVersionString=\"\";\n    }\n  }\n  if (pathStart != -1 && pathEnd != -1) {\n    route=path.substring(pathStart,pathEnd);\n  }\n else {\n    route=\"\";\n  }\n  if (route.length() > 0 && route.charAt(0) == '/') {\n    route=route.substring(1);\n  }\n  if (baseRoute.length() > 0 && baseRoute.charAt(baseRoute.length() - 1) == '/') {\n    baseRoute=baseRoute + apiVersionString;\n  }\n else {\n    baseRoute=baseRoute + \"/\" + apiVersionString;\n  }\n  return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/core/request/route/PathRouteResolver.java",
+    "Start": 730,
+    "Stop": 3402,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "resolve"
+}

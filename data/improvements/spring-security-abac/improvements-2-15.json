@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace runtime exception with specific exception",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new UncheckedIOException(e);",
+                "Description": "It is a good practice to throw specific exceptions rather than generic exceptions such as RuntimeException. Here, you can throw an UncheckedIOException instead of a RuntimeException because it provides more information about the type of error that occurred. An UncheckedIOException is a specific type of RuntimeException that indicates that an IO operation failed.",
+                "Start": 12,
+                "End": 14
+            },
+            {
+                "Improvement": "Use constants for property keys",
+                "Change_Diff": "- properties.getProperty(\"xacml.pdp.keyStore\");\n+ properties.getProperty(KEY_STORE_PROPERTY);\n...\n- properties.getProperty(\"idp.issuerid\");\n+ properties.getProperty(ISSUER_ID_PROPERTY);",
+                "Description": "It is advisable to use constants for strings that are used multiple times in the code. This practice improves readability and maintainability of the code. In this case, the property keys used in the getProperty() method can be declared as constants.",
+                "Start": 3,
+                "End": 9
+            }
+        ],
+        "Final code": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(KEY_STORE_PROPERTY);\n    KEY_STORE_PASSWORD=properties.getProperty(KEY_STORE_PASSWORD_PROPERTY);\n    CERT_ALIAS=properties.getProperty(CERT_ALIAS_PROPERTY);\n    CERT_PASSWORD=properties.getProperty(CERT_PASSWORD_PROPERTY);\n    IDP_META_DATA_URL=properties.getProperty(IDP_META_DATA_URL_PROPERTY);\n    ISSUER_ID=properties.getProperty(ISSUER_ID_PROPERTY);\n  }\n  catch (IOException e) {\n    throw new UncheckedIOException(e);\n  }\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

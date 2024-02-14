@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for Runnable",
+                "Change_Diff": "- ConcurrentExecutor.runConcurrent(new Runnable(){\n+ try (ConcurrentExecutor.runConcurrent(new Runnable()) {",
+                "Description": "Java's try-with-resources statement ensures that each resource is closed at the end of the statement. This could be beneficial in this case, where we are running a Runnable method. This would help avoid any potential memory leaks.",
+                "Start": 14,
+                "End": 19
+            },
+            {
+                "Improvement": "Improve condition check",
+                "Change_Diff": "- assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n+ assertTrue(permanentElements.size() <= testSetWeak.size() <= numberOfElements);",
+                "Description": "The condition check for the testSetWeak size could be simplified to improve readability and maintainability of the code. Instead of using '&&' operator, we can use '<=' and '>=' operators to make the condition more readable.",
+                "Start": 20,
+                "End": 20
+            },
+            {
+                "Improvement": "Use AssertJ for better assertion",
+                "Change_Diff": "- assertTrue(permanentElements.contains(test));\n+ assertThat(permanentElements).contains(test);",
+                "Description": "AssertJ provides a rich set of assertions, truly helpful error messages, improves test code readability and is designed to be super easy to use. This could be used to improve the quality of the assertions.",
+                "Start": 22,
+                "End": 24
+            }
+        ],
+        "Final code": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  try (ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  } ,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() <= numberOfElements);\n  for (Object test : testSetWeak) {\n    assertThat(permanentElements).contains(test);\n  }\n}"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}

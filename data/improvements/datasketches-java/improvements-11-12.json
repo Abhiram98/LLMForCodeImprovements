@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-catch block for exception handling",
+                "Change_Diff": "+ try {\n... // Existing code\n} catch (Exception e) {\n    e.printStackTrace();\n}",
+                "Description": "The method does not contain any exception handling mechanism. In Java, it is good practice to use try-catch blocks to handle any potential exceptions that can occur during the execution of a program.",
+                "Start": 2,
+                "End": 71
+            },
+            {
+                "Improvement": "Break down the method into smaller methods",
+                "Change_Diff": "- private static <T>int[] generalItemsCompress(...) {\n... // Existing code\n}\n+ private static <T>int[] generalItemsCompress(...) {\n... // Call new smaller methods\n}",
+                "Description": "The method is very long and does a lot of different things. It would be best to break it down into smaller, more manageable methods. This will make the code easier to read, understand, test, and maintain.",
+                "Start": 2,
+                "End": 71
+            },
+            {
+                "Improvement": "Avoid use of magic numbers",
+                "Change_Diff": "- final int rawBeg=inLevels[curLevel];\n+ final int LEVEL_START = 0;\n... // Replace 0, 1, 2 with LEVEL_START, LEVEL_MIDDLE, LEVEL_END\n",
+                "Description": "The method uses 'magic numbers', specifically 0, 1 and 2. It is better to define these numbers as named constants at the start of the method, to improve readability and make the code easier to maintain.",
+                "Start": 8,
+                "End": 71
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- private static <T>int[] generalItemsCompress(final int k,final int m,...) {\n+ private static <T>int[] generalItemsCompress(final int sketchParameter,final int minLevelSize,...) {",
+                "Description": "The method uses variables with non-descriptive names such as 'k', 'm', 'adjBeg', 'adjPop', etc. Using more descriptive names would make the code easier to understand.",
+                "Start": 2,
+                "End": 71
+            }
+        ],
+        "Final code": "private static <T>int[] generalItemsCompress(final int sketchParameter,final int minLevelSize,final int numLevelsIn,final Object[] inBuf,final int[] inLevels,final Object[] outBuf,final int[] outLevels,final boolean isLevelZeroSorted,final Random random,final Comparator<? super T> comp){\n  try {\nassert numLevelsIn > 0;\nfinal int LEVEL_START = 0;\nfinal int LEVEL_MIDDLE = 1;\nfinal int LEVEL_END = 2;\nint numLevels=numLevelsIn;\n\n... // Rest of the code with improvements applied\n\n  } catch (Exception e) {\n    e.printStackTrace();\n  }\n}"
+    },
+    "Old_Method": "/** \n * Compression algorithm used to merge higher levels. <p>Here is what we do for each level:<\/p> <ul><li>If it does not need to be compacted, then simply copy it over.<\/li> <li>Otherwise, it does need to be compacted, so... <ul><li>Copy zero or one guy over.<\/li> <li>If the level above is empty, halve up.<\/li> <li>Else the level above is nonempty, so halve down, then merge up.<\/li> <\/ul><\/li> <li>Adjust the boundaries of the level above.<\/li> <\/ul> <p>It can be proved that generalCompress returns a sketch that satisfies the space constraints no matter how much data is passed in. We are pretty sure that it works correctly when inBuf and outBuf are the same. All levels except for level zero must be sorted before calling this, and will still be sorted afterwards. Level zero is not required to be sorted before, and may not be sorted afterwards.<\/p> <p>This trashes inBuf and inLevels and modifies outBuf and outLevels.<\/p>\n * @param k The sketch parameter k\n * @param m The minimum level size\n * @param numLevelsIn provisional number of number of levels = max(this.numLevels, other.numLevels)\n * @param inBuf work buffer of size = this.getNumRetained() + other.getNumRetainedAboveLevelZero().This contains the items array of the other sketch\n * @param inLevels work levels array size = ubOnNumLevels(this.n + other.n) + 2\n * @param outBuf the same array as inBuf\n * @param outLevels the same size as inLevels\n * @param isLevelZeroSorted true if this.level 0 is sorted\n * @param random instance of java.util.Random\n * @param comp Comparator of T\n * @return int array of: {numLevels, targetItemCount, currentItemCount)\n */\nprivate static <T>int[] generalItemsCompress(final int k,final int m,final int numLevelsIn,final Object[] inBuf,final int[] inLevels,final Object[] outBuf,final int[] outLevels,final boolean isLevelZeroSorted,final Random random,final Comparator<? super T> comp){\n  assert numLevelsIn > 0;\n  int numLevels=numLevelsIn;\n  int currentItemCount=inLevels[numLevels] - inLevels[0];\n  int targetItemCount=KllHelper.computeTotalItemCapacity(k,m,numLevels);\n  boolean doneYet=false;\n  outLevels[0]=0;\n  int curLevel=-1;\n  while (!doneYet) {\n    curLevel++;\n    if (curLevel == (numLevels - 1)) {\n      inLevels[curLevel + 2]=inLevels[curLevel + 1];\n    }\n    final int rawBeg=inLevels[curLevel];\n    final int rawLim=inLevels[curLevel + 1];\n    final int rawPop=rawLim - rawBeg;\n    if ((currentItemCount < targetItemCount) || (rawPop < KllHelper.levelCapacity(k,numLevels,curLevel,m))) {\n      assert (rawBeg >= outLevels[curLevel]);\n      System.arraycopy(inBuf,rawBeg,outBuf,outLevels[curLevel],rawPop);\n      outLevels[curLevel + 1]=outLevels[curLevel] + rawPop;\n    }\n else {\n      final int popAbove=inLevels[curLevel + 2] - rawLim;\n      final boolean oddPop=isOdd(rawPop);\n      final int adjBeg=oddPop ? 1 + rawBeg : rawBeg;\n      final int adjPop=oddPop ? rawPop - 1 : rawPop;\n      final int halfAdjPop=adjPop / 2;\n      if (oddPop) {\n        outBuf[outLevels[curLevel]]=inBuf[rawBeg];\n        outLevels[curLevel + 1]=outLevels[curLevel] + 1;\n      }\n else {\n        outLevels[curLevel + 1]=outLevels[curLevel];\n      }\n      if ((curLevel == 0) && !isLevelZeroSorted) {\n        Arrays.sort(inBuf,adjBeg,adjBeg + adjPop);\n      }\n      if (popAbove == 0) {\n        randomlyHalveUpItems(inBuf,adjBeg,adjPop,random);\n      }\n else {\n        randomlyHalveDownItems(inBuf,adjBeg,adjPop,random);\n        mergeSortedItemsArrays(inBuf,adjBeg,halfAdjPop,inBuf,rawLim,popAbove,inBuf,adjBeg + halfAdjPop,comp);\n      }\n      currentItemCount-=halfAdjPop;\n      inLevels[curLevel + 1]=inLevels[curLevel + 1] - halfAdjPop;\n      if (curLevel == (numLevels - 1)) {\n        numLevels++;\n        targetItemCount+=KllHelper.levelCapacity(k,numLevels,0,m);\n      }\n    }\n    if (curLevel == (numLevels - 1)) {\n      doneYet=true;\n    }\n  }\n  assert (outLevels[numLevels] - outLevels[0]) == currentItemCount;\n  return new int[]{numLevels,targetItemCount,currentItemCount};\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/kll/KllItemsHelper.java",
+    "Start": 13655,
+    "Stop": 19262,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "generalItemsCompress"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use logging instead of System.out.println",
+                "Change_Diff": "- System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n- e.printStackTrace(System.out);\n- System.out.println();\n+ logger.log(Level.SEVERE, \"retry[\" + t.incrementAndGet() + \"] exception: \", e);",
+                "Description": "Using System.out.println is not advisable for logging exceptions or any other information because it cannot be controlled by different log levels and it is not as flexible as a logging framework. Hence, using java.util.logging (or any other logging framework) to log the exception details would be more appropriate.",
+                "Start": 7,
+                "End": 11
+            },
+            {
+                "Improvement": "Avoid throwing raw Exceptions",
+                "Change_Diff": "- throw e;\n+ throw new CustomException(e.getMessage(), e);",
+                "Description": "Instead of throwing a raw Exception, consider throwing a more specific exception, or create a custom exception class that extends from Exception. This would make the code more readable and would make it easier to understand the type of exception that can be thrown by this method.",
+                "Start": 11,
+                "End": 11
+            },
+            {
+                "Improvement": "Avoid raw type for CallResults",
+                "Change_Diff": "- final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n+ final CallResults<T> results=new CallExecutor<>(config).execute(wrapper);",
+                "Description": "Raw types in Java ignore the type checks at compile-time, bringing a risk of ClassCastException at runtime. Therefore, you should use a parameterized type for CallResults.",
+                "Start": 19,
+                "End": 19
+            }
+        ],
+        "Final code": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (final Exception e) {\n      logger.log(Level.SEVERE, \"retry[\" + t.incrementAndGet() + \"] exception: \", e);\n      throw new CustomException(e.getMessage(), e);\n    }\n  };\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<T> results=new CallExecutor<>(config).execute(wrapper);\n    return results.getResult();\n  }\n catch (final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}"
+    },
+    "Old_Method": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (    final Exception e) {\n      System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n      e.printStackTrace(System.out);\n      System.out.println();\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ATest.java",
+    "Start": 555,
+    "Stop": 1605,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "retry"
+}

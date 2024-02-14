@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add method description",
+                "Change_Diff": "+ /**\n+  * This method normalizes a value. If the value is a list with one element, it returns the element as a String. If the list has more than one element, it returns a string of the elements separated by commas.\n+  */\n",
+                "Description": "It is good practice to include a brief description of what the method does. This helps others understand your code better and makes maintenance easier.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use Java 8's String.join() method",
+                "Change_Diff": "- StringBuilder b=new StringBuilder();\n- b.append(values.get(0));\n- for (int i=1, t=values.size(); i < t; i++) {\n-   b.append(\",\");\n-   b.append(values.get(i));\n- }\n- return b.toString();\n+ return String.join(\",\", values.stream().map(Object::toString).collect(Collectors.toList()));",
+                "Description": "Java 8 introduced the String.join() method which can replace the loop used to concatenate strings. This makes the code more readable and concise.",
+                "Start": 8,
+                "End": 12
+            }
+        ],
+        "Final code": "private static Object normailizeValue(Object value){\n    /**\n     * This method normalizes a value. If the value is a list with one element, it returns the element as a String. If the list has more than one element, it returns a string of the elements separated by commas.\n     */\n    if (value instanceof List) {\n        @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n        if (values.size() == 1) {\n            return values.get(0).toString();\n        }\n        return String.join(\",\", values.stream().map(Object::toString).collect(Collectors.toList()));\n    } else {\n        return value;\n    }\n}"
+    },
+    "Old_Method": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    StringBuilder b=new StringBuilder();\n    b.append(values.get(0));\n    for (int i=1, t=values.size(); i < t; i++) {\n      b.append(\",\");\n      b.append(values.get(i));\n    }\n    return b.toString();\n  }\n else {\n    return value;\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 4288,
+    "Stop": 4905,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "normailizeValue"
+}

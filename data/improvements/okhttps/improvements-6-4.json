@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive null check",
+                "Change_Diff": "- if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n... \nif (bodyParams == null) {\n    return emptyRequestBody();\n}\n+ if (bodyParams == null && files == null) {\n    return emptyRequestBody();\n}",
+                "Description": "The null check for `bodyParams` and `files` is repeated multiple times in the code which makes the code hard to read and maintain. We can improve it by first checking if both are null and return an empty request body in this case. Then we can eliminate the null checks in the rest of the code.",
+                "Start": 2,
+                "End": 28
+            },
+            {
+                "Improvement": "Refactor the creation of RequestBody",
+                "Change_Diff": "- byte[] content=value.toString().getBytes(charset);\nRequestBody body=RequestBody.create(null,content);\nbuilder.addPart(MultipartBody.Part.createFormData(key,null,body));\n...\nif (value == null)       return;\nbuilder.add(key,value.toString());\n...\nreturn toRequestBody(bodyParams);\n+ private RequestBody createRequestBodyFromParams(Map<String, String> params, boolean isMultipart) {\n...\n}\n...\nRequestBody body = createRequestBodyFromParams(bodyParams, true);\nbuilder.addPart(MultipartBody.Part.createFormData(key,null,body));\n...\nRequestBody body = createRequestBodyFromParams(bodyParams, false);\nbuilder.add(key,body);\n...\nreturn body;",
+                "Description": "The creation of `RequestBody` from `bodyParams` is repeated twice in the code. We can improve it by creating a separate private method for this.",
+                "Start": 6,
+                "End": 28
+            }
+        ],
+        "Final code": "private RequestBody buildRequestBody(){\n  if (bodyParams == null && files == null) {\n    return emptyRequestBody();\n  }\n  MultipartBody.Builder multipartBuilder = null;\n  if (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART) || files != null) {\n    multipartBuilder = multipartBodyBuilder();\n  }\n  if (bodyParams != null) {\n    RequestBody body = createRequestBodyFromParams(bodyParams, multipartBuilder != null);\n    bodyParams.forEach((key,value) -> {\n      if (value == null) return;\n      if (multipartBuilder != null) {\n        multipartBuilder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      } else {\n        builder.add(key,body);\n      }\n    });\n  }\n  if (multipartBuilder != null) {\n    if (files != null) {\n      files.forEach((name,file) -> {\n        MediaType type=httpClient.mediaType(file.getType());\n        multipartBuilder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n      });\n    }\n    return multipartBuilder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder=new FormBody.Builder(charset);\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}\n\nprivate RequestBody createRequestBodyFromParams(Map<String, String> params, boolean isMultipart) {\n  byte[] content=value.toString().getBytes(charset);\n  if (isMultipart) {\n    return RequestBody.create(null,content);\n  } else {\n    return RequestBody.create(MediaType.parse('application/json; charset=utf-8'), content);\n  }\n}"
+    },
+    "Old_Method": "private RequestBody buildRequestBody(){\n  if (bodyParams != null && (OkHttps.FORM_DATA.equals(bodyType) || bodyType.startsWith(MULTIPART)) || files != null) {\n    MultipartBody.Builder builder=multipartBodyBuilder();\n    if (bodyParams != null) {\n      bodyParams.forEach((key,value) -> {\n        if (value == null)         return;\n        byte[] content=value.toString().getBytes(charset);\n        RequestBody body=RequestBody.create(null,content);\n        builder.addPart(MultipartBody.Part.createFormData(key,null,body));\n      }\n);\n    }\n    if (files != null) {\n      files.forEach((name,file) -> {\n        MediaType type=httpClient.mediaType(file.getType());\n        builder.addFormDataPart(name,file.getFileName(),file.toRequestBody(type));\n      }\n);\n    }\n    return builder.build();\n  }\n  if (requestBody != null) {\n    return toRequestBody(requestBody);\n  }\n  if (bodyParams == null) {\n    return emptyRequestBody();\n  }\n  if (OkHttps.FORM.equals(bodyType) || bodyType.endsWith(FORM)) {\n    FormBody.Builder builder=new FormBody.Builder(charset);\n    bodyParams.forEach((key,value) -> {\n      if (value == null)       return;\n      builder.add(key,value.toString());\n    }\n);\n    return builder.build();\n  }\n  return toRequestBody(bodyParams);\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/HttpTask.java",
+    "Start": 19603,
+    "Stop": 21270,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "buildRequestBody"
+}

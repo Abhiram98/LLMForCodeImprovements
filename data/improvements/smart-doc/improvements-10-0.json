@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use regex for type extraction",
+                "Change_Diff": "- if (typeName.contains(\"<\")) {\n-     gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n- }\n- else {\n-     gicType=typeName;\n- }\n- if (gicType.contains(\"[\")) {\n-     gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n- }\n- return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n+ Pattern pattern = Pattern.compile(\"([^<\\[.]+)(?:<|\\[|.|$)\");\n+ Matcher matcher = pattern.matcher(typeName);\n+ if (matcher.find()) {\n+     gicType = matcher.group(1).toLowerCase();\n+ }\n+ else {\n+     gicType = \"\";\n+ }",
+                "Description": "Instead of using multiple substring operations to extract the type, use a regular expression to match and extract the type.",
+                "Start": 2,
+                "End": 10
+            },
+            {
+                "Improvement": "Add null check for input",
+                "Change_Diff": "+ if (typeName == null) {\n+     return \"\";\n+ }",
+                "Description": "The method does not handle null inputs, which may result in NullPointerException. Add an explicit null check at the start of the method.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "private static String getType(String typeName){\n  if (typeName == null) {\n      return \"\";\n  }\n  String gicType;\n  Pattern pattern = Pattern.compile(\"([^<\\[.]+)(?:<|\\[|.|$)\");\n  Matcher matcher = pattern.matcher(typeName);\n  if (matcher.find()) {\n      gicType = matcher.group(1).toLowerCase();\n  }\n  else {\n      gicType = \"\";\n  }\n  return gicType;\n}"
+    },
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid multiple returns",
+                "Change_Diff": "- return EMPTY_CONNECTION;\n- return container;\n- return container;\n- throw new IllegalStateException...;\n- return EMPTY_CONNECTION;\n- return new DefaultConnection<>(edges,pageInfo);\n+ Object result;\n+ result = EMPTY_CONNECTION;\n+ result = container;\n+ result = container;\n+ throw new IllegalStateException...;\n+ result = EMPTY_CONNECTION;\n+ result = new DefaultConnection<>(edges,pageInfo);\n+ return result;",
+                "Description": "Multiple return statements lead to a harder-to-follow control flow. Instead, declare a variable result at the beginning, assign the result to it in the control flow and return it in the end.",
+                "Start": 2,
+                "End": 21
+            },
+            {
+                "Improvement": "Replace manual array iteration with Stream API",
+                "Change_Diff": "- int index=0;\n- List<Edge<T>> edges=new ArrayList<>(nodes.size());\n- for (  T node : nodes) {\n-     String cursor=this.adapter.cursorAt(container,index++);\n-     edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n+ List<Edge<T>> edges = IntStream.range(0, nodes.size())\n+     .mapToObj(index -> new DefaultEdge<>(nodes.get(index), new DefaultConnectionCursor(this.adapter.cursorAt(container,index))))\n+     .collect(Collectors.toList());",
+                "Description": "The Java Stream API simplifies processing collections, making code easier to read and understand. Replace the for loop with the Stream API.",
+                "Start": 16,
+                "End": 19
+            }
+        ],
+        "Final code": "private <T>Object adaptDataContainer(@Nullable Object container){\n  Object result;\n  if (container == null) {\n    result = EMPTY_CONNECTION;\n  }\n  else if (container instanceof Connection<?>) {\n    result = container;\n  }\n  else if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      result = container;\n    }\n    else {\n      throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n    }\n  }\n  else {\n    Collection<T> nodes=this.adapter.getContent(container);\n    if (nodes.isEmpty()) {\n      result = EMPTY_CONNECTION;\n    }\n    else {\n      List<Edge<T>> edges = IntStream.range(0, nodes.size())\n          .mapToObj(index -> new DefaultEdge<>(nodes.get(index), new DefaultConnectionCursor(this.adapter.cursorAt(container,index))))\n          .collect(Collectors.toList());\n      DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n      result = new DefaultConnection<>(edges,pageInfo);\n    }\n  }\n  return result;\n}"
+    },
+    "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+    "Start": 7935,
+    "Stop": 9024,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "adaptDataContainer"
+}

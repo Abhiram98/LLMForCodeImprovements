@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for creating temp directory",
+                "Change_Diff": "- configRoot=Paths.get(Files.createTempDirectory(\"test\").toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n+ try (DirectoryStream<Path> stream = Files.newDirectoryStream(Files.createTempDirectory(\"test\"))) {\n+     configRoot = Paths.get(stream.iterator().next().toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n+ }",
+                "Description": "The Files.createTempDirectory() method is used to create a temporary directory. However, this directory is not automatically deleted. It is a good practice to clean up temporary files when they are no longer needed. The try-with-resources statement ensures that each resource is closed at the end of the statement. This can be used to automatically delete the temporary directory.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Refactor the anonymous classes to named inner classes",
+                "Change_Diff": "- new ElideStandaloneTestSettings(){\n-     //code\n- }\n- new ElideStandaloneAnalyticSettings(){\n-     //code\n- }\n+ new CustomElideStandaloneTestSettings()\n+ new CustomElideStandaloneAnalyticSettings()",
+                "Description": "The anonymous classes inside the init() method can be refactored into named inner classes. This will make the code more readable and maintainable. The named inner classes can be reused and tested separately.",
+                "Start": 5,
+                "End": 39
+            }
+        ],
+        "Final code": "@BeforeAll public void init() throws Exception {\n  try (DirectoryStream<Path> stream = Files.newDirectoryStream(Files.createTempDirectory(\"test\"))) {\n    configRoot = Paths.get(stream.iterator().next().toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n  }\n  Files.createDirectories(configRoot);\n  settings=new CustomElideStandaloneTestSettings();\n  elide=new ElideStandalone(settings);\n  elide.start(false);\n}\n\nprivate class CustomElideStandaloneTestSettings extends ElideStandaloneTestSettings{\n  //override methods\n}\n\nprivate class CustomElideStandaloneAnalyticSettings extends ElideStandaloneAnalyticSettings{\n  //override methods\n}"
+    },
+    "Old_Method": "@BeforeAll public void init() throws Exception {\n  configRoot=Paths.get(Files.createTempDirectory(\"test\").toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n  Files.createDirectories(configRoot);\n  settings=new ElideStandaloneTestSettings(){\n    @Override public EntityDictionary getEntityDictionary(    ServiceLocator injector,    ClassScanner scanner,    Optional<DynamicConfiguration> dynamicConfiguration,    Set<Type<?>> entitiesToExclude){\n      Map<String,Class<? extends Check>> checks=new HashMap<>();\n      if (getAnalyticProperties().enableDynamicModelConfigAPI()) {\n        checks.put(ConfigChecks.CAN_CREATE_CONFIG,ConfigChecks.CanCreate.class);\n        checks.put(ConfigChecks.CAN_READ_CONFIG,ConfigChecks.CanRead.class);\n        checks.put(ConfigChecks.CAN_DELETE_CONFIG,ConfigChecks.CanDelete.class);\n        checks.put(ConfigChecks.CAN_UPDATE_CONFIG,ConfigChecks.CanNotUpdate.class);\n      }\n      EntityDictionary dictionary=new EntityDictionary(checks,new HashMap<>(),new Injector(){\n        @Override public void inject(        Object entity){\n          injector.inject(entity);\n        }\n        @Override public <T>T instantiate(        Class<T> cls){\n          return injector.create(cls);\n        }\n      }\n,CoerceUtil::lookup,entitiesToExclude,scanner);\n      dynamicConfiguration.map(DynamicConfiguration::getRoles).orElseGet(Collections::emptySet).forEach(role -> dictionary.addRoleCheck(role,new Role.RoleMemberCheck(role)));\n      return dictionary;\n    }\n    @Override public ElideStandaloneAnalyticSettings getAnalyticProperties(){\n      return new ElideStandaloneAnalyticSettings(){\n        @Override public boolean enableDynamicModelConfig(){\n          return true;\n        }\n        @Override public boolean enableDynamicModelConfigAPI(){\n          return true;\n        }\n        @Override public String getDynamicConfigPath(){\n          return configRoot.toFile().getAbsolutePath();\n        }\n        @Override public boolean enableAggregationDataStore(){\n          return true;\n        }\n        @Override public boolean enableMetaDataStore(){\n          return true;\n        }\n      }\n;\n    }\n  }\n;\n  elide=new ElideStandalone(settings);\n  elide.start(false);\n}\n",
+    "File_Path": "elide/elide-standalone/src/test/java/example/ElideStandaloneConfigStoreTest.java",
+    "Start": 2770,
+    "Stop": 6011,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "init"
+}

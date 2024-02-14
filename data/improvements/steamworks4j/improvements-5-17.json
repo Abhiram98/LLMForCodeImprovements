@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for auto-closing resources",
+                "Change_Diff": "- ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived); \n+ try (ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived)) {",
+                "Description": "Use try-with-resources to ensure that the ByteBuffer 'bodyData' is properly closed after the operation. This will help prevent memory leaks.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Use Logger instead of System.out.println",
+                "Change_Diff": "- System.out.println(...); \n+ logger.log(Level.INFO, ...);",
+                "Description": "Using a logger provides more control over the output and can provide more information such as timestamps, class names, etc. It's also easy to disable certain levels of logging globally, for all classes in the application.",
+                "Start": 4,
+                "End": 15
+            },
+            {
+                "Improvement": "Use more descriptive variable names",
+                "Change_Diff": "- byte[] dest=new byte[bodyData.limit()]; \n+ byte[] responseBody=new byte[bodyData.limit()];",
+                "Description": "Using descriptive variable names makes the code easier to read and understand.",
+                "Start": 8,
+                "End": 8
+            }
+        ],
+        "Final code": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  logger.log(Level.INFO, \"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  try (ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived)) {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] responseBody=new byte[bodyData.limit()];\n      bodyData.get(responseBody);\n      String result=new String(responseBody,Charset.defaultCharset());\n      logger.log(Level.INFO, \"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      logger.log(Level.INFO, \"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  logger.log(Level.INFO, \"- releasing request\");\n  http.releaseHTTPRequest(request);\n}"
+    },
+    "Old_Method": "@Override public void onHTTPRequestDataReceived(SteamHTTPRequestHandle request,long contextValue,int offset,int bytesReceived){\n  System.out.println(\"HTTP request data received: offset=\" + offset + \", bytes=\"+ bytesReceived);\n  ByteBuffer bodyData=ByteBuffer.allocateDirect(bytesReceived);\n  try {\n    if (http.getHTTPStreamingResponseBodyData(request,offset,bodyData)) {\n      byte[] dest=new byte[bodyData.limit()];\n      bodyData.get(dest);\n      String result=new String(dest,Charset.defaultCharset());\n      System.out.println(\"=== begin result:\\n\" + result + \"\\n=== end result\");\n    }\n else {\n      System.out.println(\"- failed reading request data!\");\n    }\n  }\n catch (  SteamException e) {\n    e.printStackTrace();\n  }\n  System.out.println(\"- releasing request\");\n  http.releaseHTTPRequest(request);\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamHTTPTest.java",
+    "Start": 1411,
+    "Stop": 2260,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onHTTPRequestDataReceived"
+}

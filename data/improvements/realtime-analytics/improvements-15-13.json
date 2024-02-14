@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants for static parameters",
+                "Change_Diff": "- response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n- response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n+ response.addHeader(HTTP_HEADER_ALLOW_ORIGIN, \"*\");\n+ response.addHeader(HTTP_HEADER_ALLOW_METHODS, \"*\");\n+ response.addHeader(HTTP_HEADER_ALLOW_HEADERS, CONTENT_TYPE);",
+                "Description": "Replace hardcoded strings related to HTTP headers with constants.",
+                "Start": 29,
+                "End": 31
+            },
+            {
+                "Improvement": "Avoid marking the ServletInputStream",
+                "Change_Diff": "- inputStream.mark(Integer.MAX_VALUE);\n+ // inputStream.mark(Integer.MAX_VALUE);",
+                "Description": "Marking the ServletInputStream is not necessary and may consume extra memory. Unless you're doing a reset later, it's better to avoid.",
+                "Start": 3,
+                "End": 3
+            }
+        ],
+        "Final code": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  // inputStream.mark(Integer.MAX_VALUE);\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(HTTP_HEADER_ALLOW_ORIGIN, \"*\");\n    response.addHeader(HTTP_HEADER_ALLOW_METHODS, \"*\");\n    response.addHeader(HTTP_HEADER_ALLOW_HEADERS, CONTENT_TYPE);\n  }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

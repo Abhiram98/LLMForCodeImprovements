@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional instead of returning null",
+                "Change_Diff": "- @Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n+ private Optional<GraphQLObjectType> getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n- return null;\n+ return Optional.empty();\n- return objectType;\n+ return Optional.of(objectType);\n- return objectType;\n+ return Optional.of(objectType);\n- return objectType;\n+ return Optional.of(objectType);\n- return getTypeForClass(superclass,schema);\n+ return Optional.ofNullable(getTypeForClass(superclass,schema));",
+                "Description": "Directly returning null can cause NullPointerExceptions. It's a better practice to use Optional, as it's a more explicit way to indicate the possibility of an absent value and can help prevent NullPointerExceptions.",
+                "Start": 1,
+                "End": 20
+            },
+            {
+                "Improvement": "Extract repeating code into a helper method",
+                "Change_Diff": "- GraphQLObjectType objectType=schema.getObjectType(name);\n- if (objectType == null) {\n-     throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n- }\n- return objectType;\n+ return getObjectTypeFromSchema(name, schema, clazz);",
+                "Description": "The code to get the `GraphQLObjectType` for a given name from the schema and throwing an exception if it's null is repeated twice. It's better to extract this repeating logic into a helper method to adhere to the DRY (Don't Repeat Yourself) principle.",
+                "Start": 7,
+                "End": 12
+            }
+        ],
+        "Final code": "private Optional<GraphQLObjectType> getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n    if (clazz.getName().startsWith(\"java.\")) {\n        return Optional.empty();\n    }\n    String name=getMapping(clazz);\n    if (name != null) {\n        return getObjectTypeFromSchema(name, schema, clazz);\n    }\n    name=this.classNameExtractor.apply(clazz);\n    if (schema.containsType(name)) {\n        return Optional.of(schema.getObjectType(name));\n    }\n    for (Class<?> interfaceType : clazz.getInterfaces()) {\n        Optional<GraphQLObjectType> objectType=getTypeForClass(interfaceType,schema);\n        if (objectType.isPresent()) {\n            return objectType;\n        }\n    }\n    Class<?> superclass=clazz.getSuperclass();\n    if (superclass != Object.class && superclass != null) {\n        return Optional.ofNullable(getTypeForClass(superclass,schema));\n    }\n    return Optional.empty();\n}\n\nprivate Optional<GraphQLObjectType> getObjectTypeFromSchema(String name, GraphQLSchema schema, Class<?> clazz){\n    GraphQLObjectType objectType=schema.getObjectType(name);\n    if (objectType == null) {\n        throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return Optional.of(objectType);\n}"
+    },
+    "Old_Method": "@Nullable private GraphQLObjectType getTypeForClass(Class<?> clazz,GraphQLSchema schema){\n  if (clazz.getName().startsWith(\"java.\")) {\n    return null;\n  }\n  String name=getMapping(clazz);\n  if (name != null) {\n    GraphQLObjectType objectType=schema.getObjectType(name);\n    if (objectType == null) {\n      throw new IllegalStateException(\"Invalid mapping for \" + clazz.getName() + \". \"+ \"No GraphQL Object type with name '\"+ name+ \"'.\");\n    }\n    return objectType;\n  }\n  name=this.classNameExtractor.apply(clazz);\n  if (schema.containsType(name)) {\n    return schema.getObjectType(name);\n  }\n  for (  Class<?> interfaceType : clazz.getInterfaces()) {\n    GraphQLObjectType objectType=getTypeForClass(interfaceType,schema);\n    if (objectType != null) {\n      return objectType;\n    }\n  }\n  Class<?> superclass=clazz.getSuperclass();\n  if (superclass != Object.class && superclass != null) {\n    return getTypeForClass(superclass,schema);\n  }\n  return null;\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/execution/ClassNameTypeResolver.java",
+    "Start": 2869,
+    "Stop": 3854,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getTypeForClass"
+}

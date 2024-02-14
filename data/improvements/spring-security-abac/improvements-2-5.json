@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Move properties loading to a separate method",
+                "Change_Diff": "- Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n- KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n- KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n- CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n- CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n- IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n- ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n+ loadProperties();",
+                "Description": "The constructor is doing too much work. It's a good practice to keep constructors simple and delegate the work to private methods. Hence, the properties loading can be moved to a separate method.",
+                "Start": 2,
+                "End": 9
+            },
+            {
+                "Improvement": "Handle exceptions properly",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new PropertyLoadException(\"Failed to load properties from application.properties\", e);",
+                "Description": "Instead of throwing a raw RuntimeException when an IOException occurs, it would be better to wrap it in a custom exception that provides more context about the error.",
+                "Start": 11,
+                "End": 11
+            }
+        ],
+        "Final code": "public WebSecurityConfig(){\n  try {\n    loadProperties();\n  }\n catch (IOException e) {\n    throw new PropertyLoadException(\"Failed to load properties from application.properties\", e);\n  }\n}\n\nprivate void loadProperties() throws IOException {\n  Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n  KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n  KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n  CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n  CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n  IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n  ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n}"
+    },
+    "Old_Method": "public WebSecurityConfig(){\n  try {\n    Properties properties=PropertiesLoaderUtils.loadAllProperties(\"application.properties\");\n    KEY_STORE=properties.getProperty(\"xacml.pdp.keyStore\");\n    KEY_STORE_PASSWORD=properties.getProperty(\"xacml.pdp.keyStore.password\");\n    CERT_ALIAS=properties.getProperty(\"xacml.pdp.cert.alias\");\n    CERT_PASSWORD=properties.getProperty(\"xacml.pdp.cert.password\");\n    IDP_META_DATA_URL=properties.getProperty(\"xacml.idp.metadata.url\");\n    ISSUER_ID=properties.getProperty(\"idp.issuerid\");\n  }\n catch (  IOException e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "spring-security-abac/sample/src/main/java/com/rnavagamuwa/springsecurity/config/WebSecurityConfig.java",
+    "Start": 4171,
+    "Stop": 4889,
+    "Project_Name": "data/projects/spring-security-abac",
+    "Method_Name": "WebSecurityConfig"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional to avoid NullPointerException",
+                "Change_Diff": "- if (subSession.getDynamicAttributes() == null) {\n-  subSession.setDynamicAttributes(new HashMap<String,Object>());\n- }\n- if (subSession.getInitialAttributes() == null) {\n-  subSession.setInitialAttributes(new HashMap<String,Object>());\n- }",
+                "Description": "Instead of manually checking if the getDynamicAttributes and getInitialAttributes methods return null, we can use Java 8's Optional class. This will make our code more readable and safe against NullPointerException.",
+                "Start": 6,
+                "End": 10
+            },
+            {
+                "Improvement": "Avoid repetitive code",
+                "Change_Diff": "- sessionVariable.resetAttributes(subSession.getDynamicAttributes());\n- sessionVariable.resetSessionData(subSession,session);\n- metadataVariable.resetAttributes(subSession.getInitialAttributes());\n- parentMetadataVariable.resetAttributes(session.getInitialAttributes());\n- parentSessionVariable.resetAttributes(session.getDynamicAttributes());\n- parentSessionVariable.resetSessionData(session,session);",
+                "Description": "The resetAttributes and resetSessionData methods are called for each type of Variable (sessionVariable, metadataVariable, parentMetadataVariable, parentSessionVariable). To avoid repetition, these calls can be abstracted into a separate method.",
+                "Start": 11,
+                "End": 16
+            }
+        ],
+        "Final code": "public void process(SubSession subSession, Session session, JetstreamEvent event) {\n  context.setCurrentSession(subSession);\n  context.setMainSession(session);\n  context.setEvent(event);\n\n  subSession.setDynamicAttributes(Optional.ofNullable(subSession.getDynamicAttributes()).orElse(new HashMap<>()));\n  subSession.setInitialAttributes(Optional.ofNullable(subSession.getInitialAttributes()).orElse(new HashMap<>()));\n\n  resetVariable(sessionVariable, subSession.getDynamicAttributes(), subSession, session);\n  resetVariable(metadataVariable, subSession.getInitialAttributes(), subSession, session);\n  resetVariable(parentMetadataVariable, session.getInitialAttributes(), subSession, session);\n  resetVariable(parentSessionVariable, session.getDynamicAttributes(), subSession, session);\n\n  processEPL(event);\n}\n\nprivate void resetVariable(Variable variable, Map<String, Object> attributes, SubSession subSession, Session session) {\n  variable.resetAttributes(attributes);\n  if(variable instanceof SessionVariable) {\n    ((SessionVariable) variable).resetSessionData(subSession, session);\n  }\n}"
+    },
+    "Old_Method": "public void process(SubSession subSession,Session session,JetstreamEvent event){\n  context.setCurrentSession(subSession);\n  context.setMainSession(session);\n  context.setEvent(event);\n  if (subSession.getDynamicAttributes() == null) {\n    subSession.setDynamicAttributes(new HashMap<String,Object>());\n  }\n  if (subSession.getInitialAttributes() == null) {\n    subSession.setInitialAttributes(new HashMap<String,Object>());\n  }\n  sessionVariable.resetAttributes(subSession.getDynamicAttributes());\n  sessionVariable.resetSessionData(subSession,session);\n  metadataVariable.resetAttributes(subSession.getInitialAttributes());\n  parentMetadataVariable.resetAttributes(session.getInitialAttributes());\n  parentSessionVariable.resetAttributes(session.getDynamicAttributes());\n  parentSessionVariable.resetSessionData(session,session);\n  processEPL(event);\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 24361,
+    "Stop": 25325,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "process"
+}

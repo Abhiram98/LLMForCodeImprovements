@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace '|' operator with '||' operator",
+                "Change_Diff": "- if (c == '\t' | c == '\r' | c == '\n') {\n+ if (c == '\t' || c == '\r' || c == '\n') {",
+                "Description": "In Java, the '|' operator performs a bitwise inclusive OR operation, while '||' operator performs a logical OR operation. In this case, a logical OR operation is expected.",
+                "Start": 13,
+                "End": 13
+            },
+            {
+                "Improvement": "Use try-catch block for exception handling",
+                "Change_Diff": "+ try {\n<code block>\n+ } catch (IndexOutOfBoundsException ex) {\n+     // Handle exception\n+ }",
+                "Description": "When manipulating strings, such as using the substring() method, there's a chance of IndexOutOfBoundsException. It would be safer to execute these operations inside a try-catch block to handle any exceptions that might occur.",
+                "Start": 16,
+                "End": 58
+            },
+            {
+                "Improvement": "Split large method into smaller ones",
+                "Change_Diff": "- private static Url parseUrl(String spec){\n+ private static Url parseUrl(String spec) { return parseUrlMain(spec); }\n\n+ private static Url parseUrlMain(String spec) {\n<split code block>\n+ }",
+                "Description": "The parseUrl method is quite large and handles many different cases. It would be more readable and maintainable if it were split into smaller methods, each handling a specific case.",
+                "Start": 1,
+                "End": 58
+            }
+        ],
+        "Final code": "private static Url parseUrl(String spec) {\n    return parseUrlMain(spec);\n}\n\nprivate static Url parseUrlMain(String spec) {\n    final Url url = new Url();\n    int startIndex = 0;\n    int endIndex = spec.length();\n    try {\n        if (endIndex > startIndex) {\n            // Rest of the code block\n        }\n    } catch (IndexOutOfBoundsException ex) {\n        // Handle exception\n    }\n    return url;\n}"
+    },
+    "Old_Method": "/** \n * Parses a given specification using the algorithm depicted in <a href=\"http://www.faqs.org/rfcs/rfc1808.html\">RFC1808<\/a>: <p> Section 2.4: Parsing a URL <p> An accepted method for parsing URLs is useful to clarify the generic-RL syntax of Section 2.2 and to describe the algorithm for resolving relative URLs presented in Section 4. This section describes the parsing rules for breaking down a URL (relative or absolute) into the component parts described in Section 2.1.  The rules assume that the URL has already been separated from any surrounding text and copied to a \"parse string\". The rules are listed in the order in which they would be applied by the parser.\n * @param spec The specification to parse.\n * @return the parsed specification.\n */\n@SuppressWarnings(\"PMD.UselessParentheses\") private static Url parseUrl(String spec){\n  final Url url=new Url();\n  int startIndex=0;\n  int endIndex=spec.length();\n  if (endIndex > startIndex) {\n    StringBuilder sb=null;\n    boolean before=true;\n    int trailing=0;\n    for (int i=0; i < endIndex; i++) {\n      final char c=spec.charAt(i);\n      boolean remove=false;\n      if (c == '\\t' | c == '\\r' | c == '\\n') {\n        remove=true;\n      }\n else       if ('\\u0000' <= c && c <= '\\u0020') {\n        if (before) {\n          remove=true;\n        }\n else {\n          trailing++;\n        }\n      }\n else {\n        before=false;\n        trailing=0;\n      }\n      if (remove) {\n        if (sb == null) {\n          sb=new StringBuilder(spec.substring(0,i));\n        }\n      }\n else       if (sb != null) {\n        sb.append(c);\n      }\n    }\n    if (sb == null) {\n      if (trailing > 0) {\n        endIndex=spec.length() - trailing;\n        spec=spec.substring(0,endIndex);\n      }\n    }\n else {\n      if (trailing > 0) {\n        spec=sb.substring(0,sb.length() - trailing);\n      }\n else {\n        spec=sb.toString();\n      }\n      endIndex=spec.length();\n    }\n  }\n  final int crosshatchIndex=StringUtils.indexOf(spec,'#',startIndex,endIndex);\n  if (crosshatchIndex >= 0) {\n    url.fragment_=spec.substring(crosshatchIndex + 1,endIndex);\n    endIndex=crosshatchIndex;\n  }\n  final int colonIndex=StringUtils.indexOf(spec,':',startIndex,endIndex);\n  if (colonIndex > 0) {\n    final String scheme=spec.substring(startIndex,colonIndex);\n    if (isValidScheme(scheme)) {\n      url.scheme_=scheme;\n      startIndex=colonIndex + 1;\n    }\n  }\n  final int locationStartIndex;\n  int locationEndIndex;\n  if (spec.startsWith(\"//\",startIndex)) {\n    locationStartIndex=startIndex + 2;\n    locationEndIndex=StringUtils.indexOf(spec,'/',locationStartIndex,endIndex);\n    if (locationEndIndex >= 0) {\n      startIndex=locationEndIndex;\n    }\n  }\n else {\n    locationStartIndex=-1;\n    locationEndIndex=-1;\n  }\n  final int questionMarkIndex=StringUtils.indexOf(spec,'?',startIndex,endIndex);\n  if (questionMarkIndex >= 0) {\n    if ((locationStartIndex >= 0) && (locationEndIndex < 0)) {\n      locationEndIndex=questionMarkIndex;\n      startIndex=questionMarkIndex;\n    }\n    url.query_=spec.substring(questionMarkIndex + 1,endIndex);\n    endIndex=questionMarkIndex;\n  }\n  final int semicolonIndex=StringUtils.indexOf(spec,';',startIndex,endIndex);\n  if (semicolonIndex >= 0) {\n    if ((locationStartIndex >= 0) && (locationEndIndex < 0)) {\n      locationEndIndex=semicolonIndex;\n      startIndex=semicolonIndex;\n    }\n    url.parameters_=spec.substring(semicolonIndex + 1,endIndex);\n    endIndex=semicolonIndex;\n  }\n  if ((locationStartIndex >= 0) && (locationEndIndex < 0)) {\n    locationEndIndex=endIndex;\n  }\n else   if (startIndex < endIndex) {\n    url.path_=spec.substring(startIndex,endIndex);\n  }\n  if ((locationStartIndex >= 0) && (locationEndIndex >= 0)) {\n    url.location_=spec.substring(locationStartIndex,locationEndIndex);\n  }\n  return url;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/util/UrlUtils.java",
+    "Start": 28013,
+    "Stop": 37731,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "parseUrl"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid null checks for error.getMessage() and error.getAttributes()",
+                "Change_Diff": "- if (error.getMessage() != null) {\n- if (error.getAttributes() != null && !error.getAttributes().isEmpty()) {",
+                "Description": "In Java, it is a best practice to ensure that methods never return null. If the methods `getMessage()` and `getAttributes()` of `ElideError` can never return null, then the null checks are unnecessary and can be removed.",
+                "Start": 4,
+                "End": 5
+            },
+            {
+                "Improvement": "Refactor repeated attribute processing code into a separate method",
+                "Change_Diff": "- attribute(\"id\",meta,value -> {...\n- attribute(\"status\",meta,value -> {...\n- attribute(\"code\",meta,value -> {...\n- attribute(\"title\",meta,value -> {...\n- attribute(\"source\",meta,value -> {...\n- attribute(\"links\",meta,value -> {...",
+                "Description": "The code for processing each attribute is repeated for each attribute. This code can be refactored into a separate method, which would make the code more concise and easier to maintain.",
+                "Start": 9,
+                "End": 54
+            }
+        ],
+        "Final code": "public JsonApiError toJsonApiError(ElideError error) {\n  JsonApiErrorBuilder jsonApiError = JsonApiError.builder();\n  jsonApiError.detail(error.getMessage());\n  Map<String, Object> meta = new LinkedHashMap<>(error.getAttributes());\n  processAttribute(\"id\", meta, jsonApiError::id);\n  processAttribute(\"status\", meta, jsonApiError::status);\n  processAttribute(\"code\", meta, jsonApiError::code);\n  processAttribute(\"title\", meta, jsonApiError::title);\n  processAttribute(\"source\", meta, this::processSource, jsonApiError::source);\n  processAttribute(\"links\", meta, this::processLinks, jsonApiError::links);\n  if (!meta.isEmpty()) {\n    jsonApiError.meta(meta);\n  }\n  return jsonApiError.build();\n}\n\nprivate void processAttribute(String attribute, Map<String, Object> meta, Consumer<String> setter) {\n  Object value = meta.remove(attribute);\n  if (value != null) {\n    setter.accept(value.toString());\n  }\n}\n\nprivate void processSource(Object value, Consumer<Source> setter) {...}\n\nprivate void processLinks(Object value, Consumer<Links> setter) {...}"
+    },
+    "Old_Method": "@Override public JsonApiError toJsonApiError(ElideError error){\n  JsonApiErrorBuilder jsonApiError=JsonApiError.builder();\n  if (error.getMessage() != null) {\n    jsonApiError.detail(error.getMessage());\n  }\n  if (error.getAttributes() != null && !error.getAttributes().isEmpty()) {\n    Map<String,Object> meta=new LinkedHashMap<>(error.getAttributes());\n    attribute(\"id\",meta,value -> {\n      jsonApiError.id(value.toString());\n      return true;\n    }\n);\n    attribute(\"status\",meta,value -> {\n      jsonApiError.status(value.toString());\n      return true;\n    }\n);\n    attribute(\"code\",meta,value -> {\n      jsonApiError.code(value.toString());\n      return true;\n    }\n);\n    attribute(\"title\",meta,value -> {\n      jsonApiError.title(value.toString());\n      return true;\n    }\n);\n    attribute(\"source\",meta,value -> {\n      if (value instanceof Source) {\n        jsonApiError.source(source);\n      }\n else       if (value instanceof Map) {\n        jsonApiError.source(toSource(map));\n      }\n      return true;\n    }\n);\n    attribute(\"links\",meta,value -> {\n      if (value instanceof Links) {\n        jsonApiError.links(links);\n      }\n else       if (value instanceof Map) {\n        jsonApiError.links(toLinks(map));\n      }\n      return true;\n    }\n);\n    if (!meta.isEmpty()) {\n      jsonApiError.meta(meta);\n    }\n  }\n  return jsonApiError.build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/jsonapi/DefaultJsonApiErrorMapper.java",
+    "Start": 852,
+    "Stop": 2692,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "toJsonApiError"
+}

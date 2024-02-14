@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants for magic numbers",
+                "Change_Diff": "- final int shiftMod=shiftBitCount % 8;\n+ final int shiftMod=shiftBitCount % BITS_IN_BYTE;\n- dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n+ dst|=byteArray[sourceIndex + 1] >>> (BITS_IN_BYTE - shiftMod) & carryMask & BYTE_MASK;",
+                "Description": "Magic numbers like 8 and 0xFF are used in multiple places in the code. This makes the code harder to understand and maintain. Consider defining these values as constants at the beginning of your method so that they are self-described and if they need to be changed, you only need to change them in one place.",
+                "Start": 9,
+                "End": 26
+            },
+            {
+                "Improvement": "Extract common logic into a helper method",
+                "Change_Diff": "- byte src=byteArray[sourceIndex];\n  byte dst=(byte)(src << shiftMod);\n  if (sourceIndex + 1 < byteArray.length) {\n    dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n  }\n  byteArray[i]=dst;\n+ byteArray[i] = shiftedByte(byteArray, sourceIndex, shiftMod, carryMask);",
+                "Description": "There is duplicate code in the if-else branches for both ByteOrder.BIG_ENDIAN and the else case. This common logic can be extracted into a helper method, which would make the code cleaner and easier to read and maintain.",
+                "Start": 9,
+                "End": 26
+            }
+        ],
+        "Final code": "static byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int BITS_IN_BYTE = 8;\n  final int BYTE_MASK = 0xFF;\n\n  final int shiftMod=shiftBitCount % BITS_IN_BYTE;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / BITS_IN_BYTE);\n  int sourceIndex;\n\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      if (sourceIndex >= byteArray.length) {\n        byteArray[i]=0;\n      }\n      else {\n        byteArray[i] = shiftedByte(byteArray, sourceIndex, shiftMod, carryMask);\n      }\n    }\n  }\n  else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      if (sourceIndex < 0) {\n        byteArray[i]=0;\n      }\n      else {\n        byteArray[i] = shiftedByte(byteArray, sourceIndex, shiftMod, carryMask);\n      }\n    }\n  }\n  return byteArray;\n}\n\nprivate byte shiftedByte(byte[] byteArray, int sourceIndex, int shiftMod, byte carryMask) {\n  byte src=byteArray[sourceIndex];\n  byte dst=(byte)(src << shiftMod);\n  if (sourceIndex + 1 < byteArray.length) {\n    dst|=byteArray[sourceIndex + 1] >>> (BITS_IN_BYTE - shiftMod) & carryMask & BYTE_MASK;\n  }\n  return dst;\n}"
+    },
+    "Old_Method": "/** \n * Light shift of whole byte array by shiftBitCount bits. This method will alter the input byte array. <p> <strong>Analysis<\/strong> <ul> <li>Time Complexity: <code>O(n)<\/code><\/li> <li>Space Complexity: <code>O(1)<\/code><\/li> <li>Alters Parameters: <code>true<\/code><\/li> <\/ul> <\/p>\n * @param byteArray     to shift\n * @param shiftBitCount how many bits to shift\n * @param byteOrder     endianness of given byte array\n * @return shifted byte array\n */\nstatic byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      if (sourceIndex >= byteArray.length) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex + 1 < byteArray.length) {\n          dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      if (sourceIndex < 0) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex - 1 >= 0) {\n          dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n  return byteArray;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Util.java",
+    "Start": 9808,
+    "Stop": 12110,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "shiftLeft"
+}

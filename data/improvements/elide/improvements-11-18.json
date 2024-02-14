@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- checks.put(ConfigChecks.CAN_CREATE_CONFIG,ConfigChecks.CanCreate.class);\n- checks.put(ConfigChecks.CAN_READ_CONFIG,ConfigChecks.CanRead.class);\n- checks.put(ConfigChecks.CAN_DELETE_CONFIG,ConfigChecks.CanDelete.class);\n- checks.put(ConfigChecks.CAN_UPDATE_CONFIG,ConfigChecks.CanNotUpdate.class);\n+ addConfigChecks(checks);",
+                "Description": "The code for adding checks to the EntityDictionary is repeated. This can be modularized into a separate method.",
+                "Start": 11,
+                "End": 17
+            },
+            {
+                "Improvement": "Remove unnecessary initialization",
+                "Change_Diff": "- Map<String,Class<? extends Check>> checks=new HashMap<>();\n+ Map<String,Class<? extends Check>> checks;",
+                "Description": "The HashMap for the checks is created and immediately overwritten. It's better to initialize it at the point of definition.",
+                "Start": 9,
+                "End": 9
+            }
+        ],
+        "Final code": "@BeforeAll public void init() throws Exception {\n  configRoot=Paths.get(Files.createTempDirectory(\"test\").toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n  Files.createDirectories(configRoot);\n  settings=new ElideStandaloneTestSettings(){\n    @Override public EntityDictionary getEntityDictionary(    ServiceLocator injector,    ClassScanner scanner,    Optional<DynamicConfiguration> dynamicConfiguration,    Set<Type<?>> entitiesToExclude){\n      Map<String,Class<? extends Check>> checks;\n      addConfigChecks(checks);\n      EntityDictionary dictionary=new EntityDictionary(checks,new HashMap<>(),new Injector(){\n        @Override public void inject(        Object entity){\n          injector.inject(entity);\n        }\n        @Override public <T>T instantiate(        Class<T> cls){\n          return injector.create(cls);\n        }\n      }\n,CoerceUtil::lookup,entitiesToExclude,scanner);\n      dynamicConfiguration.map(DynamicConfiguration::getRoles).orElseGet(Collections::emptySet).forEach(role -> dictionary.addRoleCheck(role,new Role.RoleMemberCheck(role)));\n      return dictionary;\n    }\n    ...\n  }\n  elide=new ElideStandalone(settings);\n  elide.start(false);\n}\n\nprivate void addConfigChecks(Map<String,Class<? extends Check>> checks) {\n  checks.put(ConfigChecks.CAN_CREATE_CONFIG,ConfigChecks.CanCreate.class);\n  checks.put(ConfigChecks.CAN_READ_CONFIG,ConfigChecks.CanRead.class);\n  checks.put(ConfigChecks.CAN_DELETE_CONFIG,ConfigChecks.CanDelete.class);\n  checks.put(ConfigChecks.CAN_UPDATE_CONFIG,ConfigChecks.CanNotUpdate.class);\n}"
+    },
+    "Old_Method": "@BeforeAll public void init() throws Exception {\n  configRoot=Paths.get(Files.createTempDirectory(\"test\").toFile().getAbsolutePath(),\"1\",\"2\",\"3\",\"4\",\"5\");\n  Files.createDirectories(configRoot);\n  settings=new ElideStandaloneTestSettings(){\n    @Override public EntityDictionary getEntityDictionary(    ServiceLocator injector,    ClassScanner scanner,    Optional<DynamicConfiguration> dynamicConfiguration,    Set<Type<?>> entitiesToExclude){\n      Map<String,Class<? extends Check>> checks=new HashMap<>();\n      if (getAnalyticProperties().enableDynamicModelConfigAPI()) {\n        checks.put(ConfigChecks.CAN_CREATE_CONFIG,ConfigChecks.CanCreate.class);\n        checks.put(ConfigChecks.CAN_READ_CONFIG,ConfigChecks.CanRead.class);\n        checks.put(ConfigChecks.CAN_DELETE_CONFIG,ConfigChecks.CanDelete.class);\n        checks.put(ConfigChecks.CAN_UPDATE_CONFIG,ConfigChecks.CanNotUpdate.class);\n      }\n      EntityDictionary dictionary=new EntityDictionary(checks,new HashMap<>(),new Injector(){\n        @Override public void inject(        Object entity){\n          injector.inject(entity);\n        }\n        @Override public <T>T instantiate(        Class<T> cls){\n          return injector.create(cls);\n        }\n      }\n,CoerceUtil::lookup,entitiesToExclude,scanner);\n      dynamicConfiguration.map(DynamicConfiguration::getRoles).orElseGet(Collections::emptySet).forEach(role -> dictionary.addRoleCheck(role,new Role.RoleMemberCheck(role)));\n      return dictionary;\n    }\n    @Override public ElideStandaloneAnalyticSettings getAnalyticProperties(){\n      return new ElideStandaloneAnalyticSettings(){\n        @Override public boolean enableDynamicModelConfig(){\n          return true;\n        }\n        @Override public boolean enableDynamicModelConfigAPI(){\n          return true;\n        }\n        @Override public String getDynamicConfigPath(){\n          return configRoot.toFile().getAbsolutePath();\n        }\n        @Override public boolean enableAggregationDataStore(){\n          return true;\n        }\n        @Override public boolean enableMetaDataStore(){\n          return true;\n        }\n      }\n;\n    }\n  }\n;\n  elide=new ElideStandalone(settings);\n  elide.start(false);\n}\n",
+    "File_Path": "elide/elide-standalone/src/test/java/example/ElideStandaloneConfigStoreTest.java",
+    "Start": 2770,
+    "Stop": 6011,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "init"
+}

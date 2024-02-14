@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace println with Logger",
+                "Change_Diff": "- System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n- e.printStackTrace(System.out);\n- System.out.println();\n+ LOGGER.log(Level.SEVERE, \"retry[\" + t.incrementAndGet() + \"] exception: \", e);",
+                "Description": "System.out.println is not very flexible, it's always writing to the console, and it's not possible to change its behavior in different parts of a program. Also, it always writes to standard output, it's not possible to write to a file, a socket, etc. Replace the System.out.println with Logger for better logging management.",
+                "Start": 7,
+                "End": 9
+            },
+            {
+                "Improvement": "Use diamond operator",
+                "Change_Diff": "- final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n+ final RetryConfig config=new RetryConfigBuilder<>().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();",
+                "Description": "The diamond operator can be used to simplify the code when creating an instance of a class that takes type parameters. It allows you to omit the type arguments when they can be inferred from the context.",
+                "Start": 15,
+                "End": 15
+            },
+            {
+                "Improvement": "Remove unnecessary casting",
+                "Change_Diff": "- return (T)results.getResult();\n+ return results.getResult();",
+                "Description": "The casting to T in (T)results.getResult() is not necessary. The compiler can infer the type of the result, so the cast can be removed to simplify the code.",
+                "Start": 20,
+                "End": 20
+            }
+        ],
+        "Final code": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (final Exception e) {\n      LOGGER.log(Level.SEVERE, \"retry[\" + t.incrementAndGet() + \"] exception: \", e);\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=new RetryConfigBuilder<>().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}"
+    },
+    "Old_Method": "protected final <T>T retry(final Context context,final Callable<T> callable){\n  final AtomicInteger t=new AtomicInteger(0);\n  final Callable<T> wrapper=() -> {\n    try {\n      return callable.call();\n    }\n catch (    final Exception e) {\n      System.out.println(\"retry[\" + t.incrementAndGet() + \"] exception: \"+ e.getMessage());\n      e.printStackTrace(System.out);\n      System.out.println();\n      throw e;\n    }\n  }\n;\n  final RetryConfig config=new RetryConfigBuilder().retryOnAnyException().withMaxNumberOfTries(30).withDelayBetweenTries(10,ChronoUnit.SECONDS).withFixedBackoff().build();\n  try {\n    final CallResults<Object> results=new CallExecutor(config).execute(wrapper);\n    return (T)results.getResult();\n  }\n catch (  final RuntimeException e) {\n    context.reportFailure();\n    throw e;\n  }\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/ATest.java",
+    "Start": 555,
+    "Stop": 1605,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "retry"
+}

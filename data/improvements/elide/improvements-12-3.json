@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Separate test setup from action and assertion",
+                "Change_Diff": "-",
+                "Description": "The test method is quite long and it's difficult to understand what is being tested. It's a good practice to separate the setup of the test, the action that is being tested, and the assertions into separate parts of the method.",
+                "Start": 2,
+                "End": 17
+            },
+            {
+                "Improvement": "Extract string literals into constants",
+                "Change_Diff": "-",
+                "Description": "Extracting string literals into named constants can improve readability and maintainability of your code. It would be easier to update the values if needed.",
+                "Start": 3,
+                "End": 9
+            },
+            {
+                "Improvement": "Use assertAll for multiple assertions",
+                "Change_Diff": "-",
+                "Description": "Using assertAll allows to group multiple assertions into a single test case. This way, even if one of the assertions fail, the remaining assertions would still be executed.",
+                "Start": 18,
+                "End": 20
+            }
+        ],
+        "Final code": "@Test public void testProcessQueryGraphQl() throws URISyntaxException {\n  // Arrange\n  final String ID = \"edc4a871-dff2-4054-804e-d80075cf827d\";\n  final String QUERY = \"{\\\"query\\\":\\\"{ group { edges { node { name commonName description } } } }\\\",\\\"variables\\\":null}\";\n  final String RESPONSE_BODY = \"{\\\"data\\\":{\\\"book\\\":{\\\"edges\\\":[{\\\"node\\\":{\\\"id\\\":\\\"1\\\",\\\"title\\\":\\\"Ender's Game\\\"}},{\\\"node\\\":{\\\"id\\\":\\\"2\\\",\\\"title\\\":\\\"Song of Ice and Fire\\\"}},{\\\"node\\\":{\\\"id\\\":\\\"3\\\",\\\"title\\\":\\\"For Whom the Bell Tolls\\\"}}]}}}\";\n  AsyncQuery queryObj = new AsyncQuery();\n  ElideResponse<String> response = ElideResponse.status(200).body(RESPONSE_BODY);\n  queryObj.setId(ID);\n  queryObj.setQuery(QUERY);\n  queryObj.setQueryType(QueryType.GRAPHQL_V1_0);\n  when(runner.run(any(),any(),any(),any(),any())).thenReturn(response);\n  GraphQLAsyncQueryOperation graphQLOperation = new GraphQLAsyncQueryOperation(asyncExecutorService, queryObj, requestScope);\n\n  // Act\n  AsyncQueryResult queryResultObj = (AsyncQueryResult) graphQLOperation.call();\n\n  // Assert\n  assertAll(\n    () -> assertEquals(RESPONSE_BODY, queryResultObj.getResponseBody()),\n    () -> assertEquals(200, queryResultObj.getHttpStatus()),\n    () -> assertEquals(3, queryResultObj.getRecordCount())\n  );\n}"
+    },
+    "Old_Method": "@Test public void testProcessQueryGraphQl() throws URISyntaxException {\n  AsyncQuery queryObj=new AsyncQuery();\n  String responseBody=\"{\\\"data\\\":{\\\"book\\\":{\\\"edges\\\":[{\\\"node\\\":{\\\"id\\\":\\\"1\\\",\\\"title\\\":\\\"Ender's Game\\\"}},\" + \"{\\\"node\\\":{\\\"id\\\":\\\"2\\\",\\\"title\\\":\\\"Song of Ice and Fire\\\"}},\" + \"{\\\"node\\\":{\\\"id\\\":\\\"3\\\",\\\"title\\\":\\\"For Whom the Bell Tolls\\\"}}]}}}\";\n  ElideResponse<String> response=ElideResponse.status(200).body(responseBody);\n  String query=\"{\\\"query\\\":\\\"{ group { edges { node { name commonName description } } } }\\\",\\\"variables\\\":null}\";\n  String id=\"edc4a871-dff2-4054-804e-d80075cf827d\";\n  queryObj.setId(id);\n  queryObj.setQuery(query);\n  queryObj.setQueryType(QueryType.GRAPHQL_V1_0);\n  when(runner.run(any(),any(),any(),any(),any())).thenReturn(response);\n  GraphQLAsyncQueryOperation graphQLOperation=new GraphQLAsyncQueryOperation(asyncExecutorService,queryObj,requestScope);\n  AsyncQueryResult queryResultObj=(AsyncQueryResult)graphQLOperation.call();\n  assertEquals(responseBody,queryResultObj.getResponseBody());\n  assertEquals(200,queryResultObj.getHttpStatus());\n  assertEquals(3,queryResultObj.getRecordCount());\n}\n",
+    "File_Path": "elide/elide-async/src/test/java/com/yahoo/elide/async/operation/GraphQLAsyncQueryOperationTest.java",
+    "Start": 1839,
+    "Stop": 3132,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "testProcessQueryGraphQl"
+}

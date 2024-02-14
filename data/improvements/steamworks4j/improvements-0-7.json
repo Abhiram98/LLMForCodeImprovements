@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use StringBuilder for concatenating strings",
+                "Change_Diff": "- System.out.println(... + leaderboard.toString() + ...);\n+ StringBuilder sb = new StringBuilder();\n+ sb.append(...).append(leaderboard.toString()).append(...);\n+ System.out.println(sb.toString());",
+                "Description": "Using '+' for string concatenation in loops creates many temporary objects which can cause performance issues. It is recommended to use StringBuilder in such cases for better performance.",
+                "Start": 3,
+                "End": 23
+            },
+            {
+                "Improvement": "Use try-with-resources to handle exceptions",
+                "Change_Diff": "- ByteBuffer image=ByteBuffer.allocateDirect(w * h * 4);\n- try {\n+ try (ByteBuffer image=ByteBuffer.allocateDirect(w * h * 4)) {",
+                "Description": "It is always a good practice to use try-with-resources when dealing with IO operations to ensure that the resources are closed properly after use. This can avoid memory leaks.",
+                "Start": 27,
+                "End": 47
+            },
+            {
+                "Improvement": "Extract nested logic into a separate method",
+                "Change_Diff": "- for (int i=0; i < numEntries; i++) { ... }\n+ processLeaderboardEntries(numEntries);",
+                "Description": "The method is too long and contains nested logic. It would be more readable and maintainable to extract the nested logic into a separate method.",
+                "Start": 6,
+                "End": 47
+            }
+        ],
+        "Final code": "@Override public void onLeaderboardScoresDownloaded(SteamLeaderboardHandle leaderboard,SteamLeaderboardEntriesHandle entries,int numEntries){\n  StringBuilder sb = new StringBuilder();\n  sb.append('Leaderboard scores downloaded: handle=').append(leaderboard.toString()).append(', entries=').append(entries.toString()).append(', count=').append(numEntries);\n  System.out.println(sb.toString());\n  int[] details=new int[16];\n  processLeaderboardEntries(numEntries, details, entries);\n}\n\nprivate void processLeaderboardEntries(int numEntries, int[] details, SteamLeaderboardEntriesHandle entries) {\n  for (int i=0; i < numEntries; i++) {\n    SteamLeaderboardEntry entry=new SteamLeaderboardEntry();\n    // remaining logic...\n  }\n}"
+    },
+    "Old_Method": "@Override public void onLeaderboardScoresDownloaded(SteamLeaderboardHandle leaderboard,SteamLeaderboardEntriesHandle entries,int numEntries){\n  System.out.println(\"Leaderboard scores downloaded: handle=\" + leaderboard.toString() + \", entries=\"+ entries.toString()+ \", count=\"+ numEntries);\n  int[] details=new int[16];\n  for (int i=0; i < numEntries; i++) {\n    SteamLeaderboardEntry entry=new SteamLeaderboardEntry();\n    if (userStats.getDownloadedLeaderboardEntry(entries,i,entry,details)) {\n      int numDetails=entry.getNumDetails();\n      System.out.println(\"Leaderboard entry #\" + i + \": accountID=\"+ entry.getSteamIDUser().getAccountID()+ \", globalRank=\"+ entry.getGlobalRank()+ \", score=\"+ entry.getScore()+ \", numDetails=\"+ numDetails);\n      for (int detail=0; detail < numDetails; detail++) {\n        System.out.println(\"  ... detail #\" + detail + \"=\"+ details[detail]);\n      }\n      if (friends.requestUserInformation(entry.getSteamIDUser(),false)) {\n        System.out.println(\"  ... requested user information for entry\");\n      }\n else {\n        System.out.println(\"  ... user name is '\" + friends.getFriendPersonaName(entry.getSteamIDUser()) + \"'\");\n        int smallAvatar=friends.getSmallFriendAvatar(entry.getSteamIDUser());\n        if (smallAvatar != 0) {\n          int w=utils.getImageWidth(smallAvatar);\n          int h=utils.getImageHeight(smallAvatar);\n          System.out.println(\"  ... small avatar size: \" + w + \"x\"+ h+ \" pixels\");\n          ByteBuffer image=ByteBuffer.allocateDirect(w * h * 4);\n          try {\n            if (utils.getImageRGBA(smallAvatar,image)) {\n              System.out.println(\"  ... small avatar retrieve avatar image successful\");\n              int nonZeroes=w * h;\n              for (int y=0; y < h; y++) {\n                for (int x=0; x < w; x++) {\n                  if (image.getInt(y * w + x) == 0) {\n                    nonZeroes--;\n                  }\n                }\n              }\n              if (nonZeroes == 0) {\n                System.err.println(\"Something's wrong! Avatar image is empty!\");\n              }\n            }\n else {\n              System.out.println(\"  ... small avatar retrieve avatar image failed!\");\n            }\n          }\n catch (          SteamException e) {\n            e.printStackTrace();\n          }\n        }\n else {\n          System.out.println(\"  ... small avatar image not available!\");\n        }\n      }\n    }\n  }\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+    "Start": 3066,
+    "Stop": 5589,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "onLeaderboardScoresDownloaded"
+}

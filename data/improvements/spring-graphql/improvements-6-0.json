@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reuse Builder variable",
+                "Change_Diff": "- HttpGraphQlClient.Builder<?> builder2=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n- client=builder2.build();\n+ builder=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n+ client=builder.build();",
+                "Description": "The variables builder2 and builder3 are unnecessary. You can reuse the `builder` variable for each mutation.",
+                "Start": 6,
+                "End": 12
+            },
+            {
+                "Improvement": "Refactor repeated code into a method",
+                "Change_Diff": "- builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n- client=builder.build();\n- client.document(DOCUMENT).execute().block(TIMEOUT);\n- assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n+ createClientAndExecute(\"one\", \"one\");",
+                "Description": "The three blocks of code that build the client, execute the document, and assert the headers are almost identical. This repeated code can be refactored into a separate method to improve readability and maintainability.",
+                "Start": 4,
+                "End": 14
+            }
+        ],
+        "Final code": "    @Test void mutateWebTestClientViaConsumer(){\n        HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n        HttpGraphQlClient.Builder<?> builder;\n        HttpGraphQlClient client;\n        createClientAndExecute(\"one\", \"one\");\n        createClientAndExecute(\"two\", \"one\", \"two\");\n        createClientAndExecute(\"three\", \"three\");\n    }\n\n    private void createClientAndExecute(String headerValue, String... expectedHeaders) {\n        builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",headerValue)));\n        client=builder.build();\n        client.document(DOCUMENT).execute().block(TIMEOUT);\n        assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(expectedHeaders);\n    }"
+    },
+    "Old_Method": "@Test void mutateWebTestClientViaConsumer(){\n  HttpBuilderSetup clientSetup=new HttpBuilderSetup();\n  HttpGraphQlClient.Builder<?> builder=clientSetup.initBuilder().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"one\")));\n  HttpGraphQlClient client=builder.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\");\n  HttpGraphQlClient.Builder<?> builder2=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeaders(h -> h.add(\"h\",\"two\")));\n  client=builder2.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"one\",\"two\");\n  HttpGraphQlClient.Builder<?> builder3=client.mutate().webClient(testClientBuilder -> testClientBuilder.defaultHeader(\"h\",\"three\"));\n  client=builder3.build();\n  client.document(DOCUMENT).execute().block(TIMEOUT);\n  assertThat(clientSetup.getActualRequest().getHeaders().get(\"h\")).containsExactly(\"three\");\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/test/java/org/springframework/graphql/client/WebGraphQlClientBuilderTests.java",
+    "Start": 5152,
+    "Stop": 6358,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "mutateWebTestClientViaConsumer"
+}

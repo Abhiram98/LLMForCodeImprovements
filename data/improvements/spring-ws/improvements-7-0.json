@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add logging for UnsupportedCallbackException",
+                "Change_Diff": "- catch (UnsupportedCallbackException ex) {\n+ catch (UnsupportedCallbackException ex) {\n+     logger.warn(\"Cleanup callback not supported\", ex);\n     }",
+                "Description": "In the catch block for UnsupportedCallbackException, nothing is currently done. It's a good practice to log exceptions so that they can be debugged if necessary.",
+                "Start": 10,
+                "End": 12
+            },
+            {
+                "Improvement": "Assign new Callback array to variable",
+                "Change_Diff": "- validationCallbackHandler.handle(new Callback[]{cleanupCallback});\n+ Callback[] callbacks = new Callback[]{cleanupCallback};\n+ validationCallbackHandler.handle(callbacks);",
+                "Description": "Rather than creating a new Callback array inline in the handle method, assign it to a variable first. This can improve readability and make debugging easier as you can inspect the array before it's passed to the handle method.",
+                "Start": 6,
+                "End": 6
+            }
+        ],
+        "Final code": "@Override protected void cleanUp(){\n  if (validationCallbackHandler != null) {\n    try {\n      CleanupCallback cleanupCallback=new CleanupCallback();\n      Callback[] callbacks = new Callback[]{cleanupCallback};\n      validationCallbackHandler.handle(callbacks);\n    }\n catch (IOException ex) {\n      logger.warn(\"Cleanup callback resulted in IOException\",ex);\n    }\n catch (UnsupportedCallbackException ex) {\n      logger.warn(\"Cleanup callback not supported\", ex);\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void cleanUp(){\n  if (validationCallbackHandler != null) {\n    try {\n      CleanupCallback cleanupCallback=new CleanupCallback();\n      validationCallbackHandler.handle(new Callback[]{cleanupCallback});\n    }\n catch (    IOException ex) {\n      logger.warn(\"Cleanup callback resulted in IOException\",ex);\n    }\ncatch (    UnsupportedCallbackException ex) {\n    }\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-security/src/main/java/org/springframework/ws/soap/security/wss4j2/Wss4jSecurityInterceptor.java",
+    "Start": 31988,
+    "Stop": 32381,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "cleanUp"
+}

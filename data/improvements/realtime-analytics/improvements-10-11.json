@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code complexity",
+                "Change_Diff": "- @Override public void run(){\n+ private void processEvent() {...}\n+ private void handleGroupDimension() {...}\n+ private void handleCounterTable() {...}\n+ private void handleMetricColumnFamily() {...}\n+ private void handleBatchSize() {...}\n+ private void publishToCassandra() {...}\n\n+ @Override public void run(){\n+    try {\n+        processEvent();\n+    } catch (Exception ex) {\n+        handleException(ex);\n+    }\n+ }",
+                "Description": "The method is long and complex, and it is difficult to test and maintain. It's recommended to break down the method into smaller, more manageable methods. This will improve readability, testability, and maintainability of the code.",
+                "Start": 1,
+                "End": 100
+            },
+            {
+                "Improvement": "Use try-with-resources to manage resources",
+                "Change_Diff": "- prepareStatementsForUpdate(columnFamilyName,tags);\n+ try (PreparedStatement ps = prepareStatementsForUpdate(columnFamilyName,tags)) {...}",
+                "Description": "The method interacts with a database without using try-with-resources or closing the resources in a finally block. This can lead to resource leaks. It's recommended to use try-with-resources or ensure that resources are closed in a finally block.",
+                "Start": 1,
+                "End": 100
+            },
+            {
+                "Improvement": "Avoid hardcoding numbers",
+                "Change_Diff": "- metricTime=(metricTime / 60000) * 60000;\n+ final int TIME_DIVISOR = 60000;\n+ metricTime=(metricTime / TIME_DIVISOR) * TIME_DIVISOR;",
+                "Description": "The method contains hardcoded numbers, also known as magic numbers, which can make the code less readable and harder to maintain. It's recommended to replace these with named constants to improve readability.",
+                "Start": 35,
+                "End": 35
+            },
+            {
+                "Improvement": "Avoid nested conditionals",
+                "Change_Diff": "- if (counterTable) {...}\n+ if (!counterTable) return;\n+ ...",
+                "Description": "The method contains deeply nested conditional statements, which can make the code less readable and harder to maintain. It's recommended to avoid deep nesting where possible, for example by returning or breaking early, or by using a guard clause.",
+                "Start": 1,
+                "End": 100
+            }
+        ],
+        "Final code": "This requires a comprehensive rewrite of the existing code, breaking it down into smaller, more manageable methods. The final code will depend on the specific logic needed for each part of the method."
+    },
+    "Old_Method": "@Override public void run(){\n  try {\n    String metricName=(String)event.get(MCConstant.METRIC_NAME);\n    String columnFamilyName=event.getEventType().toLowerCase();\n    String groupId=null;\n    Map<String,String> tags=null;\n    if (event.get(MCConstant.METRIC_DEMENSION) != null) {\n      MCMetricGroupDemension groupDemension=(MCMetricGroupDemension)event.get(MCConstant.METRIC_DEMENSION);\n      groupId=groupDemension.getGroupId();\n      if (event.get(MCConstant.TAG_TIME_IGNORE) != null) {\n        tags=new HashMap<String,String>(groupDemension.getDimensions());\n        tags.put(MCConstant.TAG_TIME_IGNORE,(String)event.get(MCConstant.TAG_TIME_IGNORE));\n      }\n else {\n        tags=groupDemension.getDimensions();\n      }\n    }\n    if (groupId == null) {\n      if (event.get(MCConstant.GROUP_ID) != null) {\n        groupId=(String)event.get(MCConstant.GROUP_ID);\n      }\n else {\n        groupId=metricName;\n      }\n    }\n    long count=0;\n    if (event.get(MCConstant.AGGREGATED_COUNT) != null) {\n      count=(Long)event.get(MCConstant.AGGREGATED_COUNT);\n    }\n else {\n      count=(Long)event.get(MCConstant.METRIC_COUNT);\n    }\n    long metricTime=(Long)event.get(MCConstant.METRIC_TIME);\n    if (event.get(MCConstant.SHUTDOWN_FLUSH) == null && (event.get(MCConstant.FIRST_FLUSH) == null)) {\n      metricTime=(metricTime / 60000) * 60000;\n    }\n    boolean counterTable=columnFamilyName.contains(COUNTER_TABLE);\n    if (counterTable) {\n      if (tags == null) {\n        tags=new HashMap<String,String>();\n        tags.put(MCCounterHelper.TAG_METRICTIME,String.valueOf(event.get(MCConstant.METRIC_TIME)));\n      }\n      Calendar c=Calendar.getInstance();\n      c.setTimeInMillis(metricTime);\n    }\n    if (metricColumnFamily.get(metricName) == null || !metricColumnFamily.get(metricName).equals(columnFamilyName)) {\n      if (counterTable) {\n        if (updatestmtMap.get(columnFamilyName) == null) {\n          if (tags != null && tags.size() > 0) {\n            prepareStatementsForUpdate(columnFamilyName,tags);\n          }\n else {\n            prepareStatementsForUpdate(columnFamilyName,null);\n          }\n        }\n      }\n else {\n        if (stmtMap.get(columnFamilyName) == null) {\n          if (tags != null && tags.size() > 0) {\n            prepareStatements(columnFamilyName,tags);\n          }\n else {\n            prepareStatements(columnFamilyName,null);\n          }\n        }\n      }\n      metricColumnFamily.put(metricName,columnFamilyName);\n    }\n    if (config.getBatchSize() > 1) {\n      MetricCounter metric=new MetricCounter(metricName,groupId,tags,count,metricTime);\n      meticCounters.add(metric);\n      int counterSize=meticCounters.size();\n      if (counterSize >= config.getBatchSize()) {\n        publishToCassandraInBatch();\n      }\n else       if (event.get(LASTEVENTINBATCH) != null) {\n        ePLBatchCount.increment();\n        publishToCassandraInBatch();\n      }\n    }\n else {\n      if (event.get(LASTEVENTINBATCH) != null) {\n        ePLBatchCount.increment();\n      }\n      int parameterSize=4;\n      if (tags != null) {\n        parameterSize=4 + tags.size();\n      }\n      Object[] paramterValues=new Object[parameterSize];\n      if (counterTable) {\n        paramterValues[0]=count;\n        paramterValues[1]=metricName;\n        paramterValues[2]=groupId;\n        paramterValues[3]=new Date(metricTime);\n        int i=1;\n        if (tags != null) {\n          for (          Map.Entry<String,String> entry : tags.entrySet()) {\n            paramterValues[3 + i]=entry.getValue();\n            i++;\n          }\n        }\n      }\n else {\n        paramterValues[0]=metricName;\n        paramterValues[1]=groupId;\n        paramterValues[2]=new Date(metricTime);\n        int i=1;\n        if (tags != null) {\n          for (          Map.Entry<String,String> entry : tags.entrySet()) {\n            paramterValues[2 + i]=entry.getValue();\n            i++;\n          }\n        }\n        paramterValues[parameterSize - 1]=Long.valueOf(count).intValue();\n      }\n      publishToCassandra(paramterValues,event);\n    }\n  }\n catch (  Exception ex) {\n    LOGGER.error(\"Error publising metrics in MetricCassandraCollector:\" + ex.getMessage());\n    cassandraErrorCount.increment();\n    if (event.get(JetstreamReservedKeys.MessageAffinityKey.toString()) == null) {\n      event.put(JetstreamReservedKeys.MessageAffinityKey.toString(),(String)event.get(MCConstant.METRIC_NAME));\n    }\n    getAdviceListener().retry(event,RetryEventCode.MSG_RETRY,ex.getMessage());\n    eventSentToAdviceListener.increment();\n    registerError(ex);\n  }\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MetricCassandraCollector.java",
+    "Start": 10962,
+    "Stop": 19825,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "run"
+}

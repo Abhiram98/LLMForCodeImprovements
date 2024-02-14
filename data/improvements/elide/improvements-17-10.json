@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor repetitive calls to buildResponse",
+                "Change_Diff": "- return buildResponse(e,errorContext);\n- return buildResponse(HttpStatus.SC_OK,e,errorContext);\n- return buildResponse(e,errorContext);\n- return buildResponse(HttpStatus.SC_OK,e,errorContext);\n- return buildResponse(HttpStatus.SC_OK,errors.build());\n+ return buildResponse;",
+                "Description": "The code calls buildResponse in various conditional blocks. This can be refactored to a single call at the end of the method, reducing redundancy and improving readability.",
+                "Start": 5,
+                "End": 25
+            },
+            {
+                "Improvement": "Replace if statements with a switch",
+                "Change_Diff": "- if (exception instanceof GraphQLException) {\n- ...\n- } else if (exception instanceof InvalidEntityBodyException) {\n- ...\n- } else if (exception instanceof InvalidApiVersionException) {\n- ...\n- } else if (exception instanceof HttpStatusException) {\n- ...\n- } else if (exception instanceof ConstraintViolationException) {\n- ...\n- }\n+ switch(exception.getClass().getSimpleName()) {\n+ case \"GraphQLException\":\n+ ...\n+ break;\n+ case \"InvalidEntityBodyException\":\n+ ...\n+ break;\n+ case \"InvalidApiVersionException\":\n+ ...\n+ break;\n+ case \"HttpStatusException\":\n+ ...\n+ break;\n+ case \"ConstraintViolationException\":\n+ ...\n+ break;\n+ default:\n+ ...\n+ break;\n+ }",
+                "Description": "The code uses multiple if statements to check the type of the exception. A switch statement would be more appropriate and cleaner in this case.",
+                "Start": 4,
+                "End": 24
+            }
+        ],
+        "Final code": "@Override protected ElideResponse<?> handleRuntimeException(RuntimeException exception,GraphQLErrorContext errorContext){\n ElideResponse<?> response;\n switch (exception.getClass().getSimpleName()) {\n case \"GraphQLException\":\n String body=exception.getMessage();\n response=ElideResponse.status(HttpStatus.SC_OK).body(body);\n break;\n case \"InvalidEntityBodyException\":\n if (exception.getCause() instanceof JsonParseException) {\n response=buildResponse(exception,errorContext);\n }\n response=buildResponse(HttpStatus.SC_OK,exception,errorContext);\n break;\n case \"InvalidApiVersionException\":\n response=buildResponse(exception,errorContext);\n break;\n case \"HttpStatusException\":\n response=buildResponse(HttpStatus.SC_OK,exception,errorContext);\n break;\n case \"ConstraintViolationException\":\n final GraphQLErrors.GraphQLErrorsBuilder errors=GraphQLErrors.builder();\n if (exception.getConstraintViolations() != null) {\n for (ConstraintViolation<?> constraintViolation : exception.getConstraintViolations()) {\n errors.error(error -> {\n error.message(constraintViolation.getMessage());\n error.extension(\"code\",constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName());\n error.extension(\"type\",\"ConstraintViolation\");\n final String propertyPathString=constraintViolation.getPropertyPath().toString();\n if (!propertyPathString.isEmpty()) {\n error.extension(\"property\",propertyPathString);\n }\n });\n }\n }\n response=buildResponse(HttpStatus.SC_OK,errors.build());\n break;\n default:\n log.error(\"Error or exception uncaught by Elide\",exception);\n throw exception;\n }\n return response;\n}"
+    },
+    "Old_Method": "@Override protected ElideResponse<?> handleRuntimeException(RuntimeException exception,GraphQLErrorContext errorContext){\n  if (exception instanceof GraphQLException) {\n    String body=e.getMessage();\n    return ElideResponse.status(HttpStatus.SC_OK).body(body);\n  }\n  if (exception instanceof InvalidEntityBodyException) {\n    if (e.getCause() instanceof JsonParseException) {\n      return buildResponse(e,errorContext);\n    }\n    return buildResponse(HttpStatus.SC_OK,e,errorContext);\n  }\n  if (exception instanceof InvalidApiVersionException) {\n    return buildResponse(e,errorContext);\n  }\n  if (exception instanceof HttpStatusException) {\n    return buildResponse(HttpStatus.SC_OK,e,errorContext);\n  }\n  if (exception instanceof ConstraintViolationException) {\n    final GraphQLErrors.GraphQLErrorsBuilder errors=GraphQLErrors.builder();\n    if (e.getConstraintViolations() != null) {\n      for (      ConstraintViolation<?> constraintViolation : e.getConstraintViolations()) {\n        errors.error(error -> {\n          error.message(constraintViolation.getMessage());\n          error.extension(\"code\",constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName());\n          error.extension(\"type\",\"ConstraintViolation\");\n          final String propertyPathString=constraintViolation.getPropertyPath().toString();\n          if (!propertyPathString.isEmpty()) {\n            error.extension(\"property\",propertyPathString);\n          }\n        }\n);\n      }\n    }\n    return buildResponse(HttpStatus.SC_OK,errors.build());\n  }\n  log.error(\"Error or exception uncaught by Elide\",exception);\n  throw exception;\n}\n",
+    "File_Path": "elide/elide-graphql/src/main/java/com/yahoo/elide/graphql/DefaultGraphQLExceptionHandler.java",
+    "Start": 1763,
+    "Stop": 3792,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "handleRuntimeException"
+}

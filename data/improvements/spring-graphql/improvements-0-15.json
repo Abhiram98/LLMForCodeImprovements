@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code complexity by refactoring nested if-else blocks",
+                "Change_Diff": "- if (annotation instanceof SchemaMapping) {\n- typeName=mapping.typeName();\n- field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n- }\n- else {\n- BatchMapping mapping=(BatchMapping)annotation;\n- typeName=mapping.typeName();\n- field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n- batchMapping=true;\n- batchSize=mapping.maxBatchSize();\n- }\n+ typeName = getTypeName(annotation);\n+ field = getField(mapping);\n+ batchSize = getBatchSize(annotation);",
+                "Description": "There are multiple nested if-else blocks in the code. This increases the cyclomatic complexity of the code and makes it harder to read and maintain. Refactor these blocks by breaking them down into smaller methods, each performing a single task. This will make the code more readable and maintainable.",
+                "Start": 9,
+                "End": 35
+            },
+            {
+                "Improvement": "Avoid use of magic numbers",
+                "Change_Diff": "- int batchSize=-1;\n+ int batchSize=DEFAULT_BATCH_SIZE;",
+                "Description": "The code contains 'magic numbers', such as -1. A 'magic number' is a direct usage of a number in the code. You should avoid using 'magic numbers'. Instead, declare them as named constants and use these constants instead of the literal numbers. This makes the code more readable and maintainable.",
+                "Start": 7,
+                "End": 7
+            }
+        ],
+        "Final code": "@Nullable private MappingInfo getMappingInfo(Method method,Object handler,Class<?> handlerType){\n  Set<Annotation> annotations=AnnotatedElementUtils.findAllMergedAnnotations(method,new LinkedHashSet<>(Arrays.asList(BatchMapping.class,SchemaMapping.class)));\n  if (annotations.isEmpty()) {\n    return null;\n  }\n  if (annotations.size() != 1) {\n    throw new IllegalArgumentException(\"Expected either @BatchMapping or @SchemaMapping, not both: \" + method.toGenericString());\n  }\n  String typeName;\n  String field;\n  boolean batchMapping=false;\n  int batchSize=DEFAULT_BATCH_SIZE;\n  HandlerMethod handlerMethod=createHandlerMethod(method,handler,handlerType);\n  Annotation annotation=annotations.iterator().next();\n\n  typeName = getTypeName(annotation);\n  field = getField(mapping);\n  batchSize = getBatchSize(annotation);\n\n  Assert.hasText(typeName,\"No parentType specified, and a source/parent method argument was also not found: \" + handlerMethod.getShortLogMessage());\n  return new MappingInfo(typeName,field,batchMapping,batchSize,handlerMethod);\n}"
+    },
+    "Old_Method": "@Nullable private MappingInfo getMappingInfo(Method method,Object handler,Class<?> handlerType){\n  Set<Annotation> annotations=AnnotatedElementUtils.findAllMergedAnnotations(method,new LinkedHashSet<>(Arrays.asList(BatchMapping.class,SchemaMapping.class)));\n  if (annotations.isEmpty()) {\n    return null;\n  }\n  if (annotations.size() != 1) {\n    throw new IllegalArgumentException(\"Expected either @BatchMapping or @SchemaMapping, not both: \" + method.toGenericString());\n  }\n  String typeName;\n  String field;\n  boolean batchMapping=false;\n  int batchSize=-1;\n  HandlerMethod handlerMethod=createHandlerMethod(method,handler,handlerType);\n  Annotation annotation=annotations.iterator().next();\n  if (annotation instanceof SchemaMapping) {\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n  }\n else {\n    BatchMapping mapping=(BatchMapping)annotation;\n    typeName=mapping.typeName();\n    field=(StringUtils.hasText(mapping.field()) ? mapping.field() : method.getName());\n    batchMapping=true;\n    batchSize=mapping.maxBatchSize();\n  }\n  if (!StringUtils.hasText(typeName)) {\n    SchemaMapping mapping=AnnotatedElementUtils.findMergedAnnotation(handlerType,SchemaMapping.class);\n    if (mapping != null) {\n      typeName=mapping.typeName();\n    }\n  }\n  if (!StringUtils.hasText(typeName)) {\n    for (    MethodParameter parameter : handlerMethod.getMethodParameters()) {\n      if (!batchMapping) {\n        Assert.state(this.argumentResolvers != null,\"`argumentResolvers` is not initialized\");\n        HandlerMethodArgumentResolver resolver=this.argumentResolvers.getArgumentResolver(parameter);\n        if (resolver instanceof SourceMethodArgumentResolver) {\n          typeName=parameter.getParameterType().getSimpleName();\n          break;\n        }\n      }\n else {\n        if (Collection.class.isAssignableFrom(parameter.getParameterType())) {\n          typeName=parameter.nested().getNestedParameterType().getSimpleName();\n          break;\n        }\n      }\n    }\n  }\n  Assert.hasText(typeName,\"No parentType specified, and a source/parent method argument was also not found: \" + handlerMethod.getShortLogMessage());\n  return new MappingInfo(typeName,field,batchMapping,batchSize,handlerMethod);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/method/annotation/support/AnnotatedControllerConfigurer.java",
+    "Start": 16586,
+    "Stop": 18892,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "getMappingInfo"
+}

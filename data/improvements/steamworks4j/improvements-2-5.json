@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove magic numbers",
+                "Change_Diff": "- if (Math.abs(x) > 0.0001f && Math.abs(y) > 0.001f) {\n+ if (Math.abs(x) > MIN_X_VALUE && Math.abs(y) > MIN_Y_VALUE) {",
+                "Description": "Magic numbers are numeric literals that appear directly in the source code without any clear meaning or purpose. They are bad for readability and maintainability. We should replace them with named constants.",
+                "Start": 14,
+                "End": 14
+            },
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < numControllers; i++) {\n+ for (SteamControllerHandle handle : controllerHandles) {",
+                "Description": "Instead of using a traditional for loop to iterate over `controllerHandles`, use an enhanced for loop. This makes the code cleaner and easier to read.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Extract duplicate code into methods",
+                "Change_Diff": "- // Previous code\n+ processDigitalAction(handle);\n+ processAnalogAction(handle);",
+                "Description": "The code for processing digital and analog actions is very similar. It's best practice to extract similar code into methods to avoid repetition and improve maintainability.",
+                "Start": 9,
+                "End": 23
+            }
+        ],
+        "Final code": "private static final float MIN_X_VALUE = 0.0001f;\nprivate static final float MIN_Y_VALUE = 0.001f;\n\n@Override protected void processUpdate() throws SteamException {\n  if (setHandle == null || getNativeHandle(setHandle) == 0) {\n    return;\n  }\n  for (SteamControllerHandle handle : controllerHandles) {\n    controller.activateActionSet(handle,setHandle);\n    processDigitalAction(handle);\n    processAnalogAction(handle);\n  }\n}\n\nprivate void processDigitalAction(SteamControllerHandle handle) {\n  if (digitalActionHandle != null) {\n    controller.getDigitalActionData(handle,digitalActionHandle,digitalActionData);\n    if (digitalActionData.getActive() && digitalActionData.getState()) {\n      System.out.println(\"  digital action: \" + getNativeHandle(digitalActionHandle));\n    }\n  }\n}\n\nprivate void processAnalogAction(SteamControllerHandle handle) {\n  if (analogActionHandle != null) {\n    controller.getAnalogActionData(handle,analogActionHandle,analogActionData);\n    if (analogActionData.getActive()) {\n      float x=analogActionData.getX();\n      float y=analogActionData.getY();\n      SteamController.SourceMode mode=analogActionData.getMode();\n      if (Math.abs(x) > MIN_X_VALUE && Math.abs(y) > MIN_Y_VALUE) {\n        System.out.println(\"  analog action: \" + analogActionData.getX() + \", \"+ analogActionData.getY()+ \", \"+ mode.name());\n      }\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override protected void processUpdate() throws SteamException {\n  if (setHandle == null || getNativeHandle(setHandle) == 0) {\n    return;\n  }\n  for (int i=0; i < numControllers; i++) {\n    SteamControllerHandle handle=controllerHandles[i];\n    controller.activateActionSet(handle,setHandle);\n    if (digitalActionHandle != null) {\n      controller.getDigitalActionData(handle,digitalActionHandle,digitalActionData);\n      if (digitalActionData.getActive() && digitalActionData.getState()) {\n        System.out.println(\"  digital action: \" + getNativeHandle(digitalActionHandle));\n      }\n    }\n    if (analogActionHandle != null) {\n      controller.getAnalogActionData(handle,analogActionHandle,analogActionData);\n      if (analogActionData.getActive()) {\n        float x=analogActionData.getX();\n        float y=analogActionData.getY();\n        SteamController.SourceMode mode=analogActionData.getMode();\n        if (Math.abs(x) > 0.0001f && Math.abs(y) > 0.001f) {\n          System.out.println(\"  analog action: \" + analogActionData.getX() + \", \"+ analogActionData.getY()+ \", \"+ mode.name());\n        }\n      }\n    }\n  }\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamControllerTest.java",
+    "Start": 1216,
+    "Stop": 3060,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "processUpdate"
+}

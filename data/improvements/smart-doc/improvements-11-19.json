@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use Java Stream API for filtering and transforming data",
+            "Change_Diff": "- for (  ApiParam apiParam : apiParamList) {\n-   apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\"),replaceAll(\"&nbsp;\",\"\")); \n-   if (apiParam.getPid() == 0) {\n-     params.add(apiParam);\n-   }\n- }\n- for (  ApiParam apiParam : params) {\n-   apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n- }\n+ apiParamList.stream()\n+   .filter(apiParam -> apiParam.getPid() == 0)\n+   .peek(apiParam -> {\n+     apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n+     apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0));\n+   })\n+   .collect(Collectors.toList());",
+            "Description": "Java Stream API can be used to filter and transform data, which can improve code readability, and in some cases, performance. Instead of using two separate loops to filter and modify the apiParamList, we can use Stream API's filter and map methods to achieve the same result in a more concise way.",
+            "Start": 5,
+            "End": 16
+        }],
+        "Final code": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList) {\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  return apiParamList.stream()\n    .filter(apiParam -> apiParam.getPid() == 0)\n    .peek(apiParam -> {\n      apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n      apiParam.setChildren(getChild(apiParam.getId(), apiParamList, 0));\n    })\n    .collect(Collectors.toList());\n}"
+    },
+    "Old_Method": "public static List<ApiParam> apiParamToTree(List<ApiParam> apiParamList){\n  if (CollectionUtil.isEmpty(apiParamList)) {\n    return new ArrayList<>(0);\n  }\n  List<ApiParam> params=new ArrayList<>();\n  for (  ApiParam apiParam : apiParamList) {\n    apiParam.setField(apiParam.getField().replaceAll(DocGlobalConstants.PARAM_PREFIX,\"\").replaceAll(\"&nbsp;\",\"\"));\n    if (apiParam.getPid() == 0) {\n      params.add(apiParam);\n    }\n  }\n  for (  ApiParam apiParam : params) {\n    apiParam.setChildren(getChild(apiParam.getId(),apiParamList,0));\n  }\n  return params;\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/ApiParamTreeUtil.java",
+    "Start": 1284,
+    "Stop": 2064,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "apiParamToTree"
+}

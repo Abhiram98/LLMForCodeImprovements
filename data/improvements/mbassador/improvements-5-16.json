@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract long method into smaller methods",
+                "Change_Diff": "- public void subscribe(Object listener){\n+ public void subscribe(Object listener){\n+ createSubscriptions(listener);\n+ subscribeListeners(listener);\n}",
+                "Description": "The subscribe method is quite long and does multiple things. It can be broken down into smaller methods to improve readability and maintainability. One method could handle the creation of subscriptions, and another could handle the subscription of listeners.",
+                "Start": 1,
+                "End": 35
+            },
+            {
+                "Improvement": "Replace RuntimeException with specific exceptions",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new IllegalArgumentException(\"Invalid listener\", e);",
+                "Description": "It's generally a bad practice to throw RuntimeException. It would be better to throw more specific exceptions that can give more information about what went wrong. For example, IllegalArgumentException can be thrown if the input is not valid, etc.",
+                "Start": 33,
+                "End": 35
+            }
+        ],
+        "Final code": "public void subscribe(Object listener){\n    try {\n        createSubscriptions(listener);\n        subscribeListeners(listener);\n    }\n    catch (Exception e) {\n        throw new IllegalArgumentException(\"Invalid listener\", e);\n    }\n}\n\nprivate void createSubscriptions(Object listener) {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n        return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n        MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n        int length=messageHandlers.length;\n        if (length == 0) {\n            nonListeners.add(listenerClass);\n            return;\n        }\n        subscriptionsByListener=new Subscription[length];\n        for (int i=0; i < length; i++) {\n            subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandlers[i]);\n        }\n    }\n}\n\nprivate void subscribeListeners(Object listener) {\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    for (Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n    }\n}"
+    },
+    "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+    "Start": 3620,
+    "Stop": 5539,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "subscribe"
+}

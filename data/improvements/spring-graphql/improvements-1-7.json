@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace explicit type argument with diamond operator",
+                "Change_Diff": "- List<Edge<T>> edges=new ArrayList<>(nodes.size());\n+ List<Edge<T>> edges=new ArrayList<>(nodes.size());",
+                "Description": "Java 7 introduced the diamond operator to remove the redundancy of having to specify the type of the generic class in both the declaration and constructor. You can replace the explicit type argument in the ArrayList constructor with the diamond operator.",
+                "Start": 16,
+                "End": 16
+            },
+            {
+                "Improvement": "Avoid using hardcoded class name for comparison",
+                "Change_Diff": "- if (container.getClass().getName().endsWith(\"Connection\")) {\n+ if (container.getClass().getSimpleName().endsWith(CONNECTION_CLASS_SUFFIX)) {",
+                "Description": "It's not a good practice to hardcode class names in the code. This might lead to problems if the class name changes in the future. It's better to create a constant for the class name.",
+                "Start": 8,
+                "End": 8
+            }
+        ],
+        "Final code": "private <T>Object adaptDataContainer(@Nullable Object container) {\n    if (container == null) {\n        return EMPTY_CONNECTION;\n    }\n    if (container instanceof Connection<?>) {\n        return container;\n    }\n    if (!this.adapter.supports(container.getClass())) {\n        if (container.getClass().getSimpleName().endsWith(CONNECTION_CLASS_SUFFIX)) {\n            return container;\n        }\n        throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n    }\n    Collection<T> nodes = this.adapter.getContent(container);\n    if (nodes.isEmpty()) {\n        return EMPTY_CONNECTION;\n    }\n    int index = 0;\n    List<Edge<T>> edges = new ArrayList<>(nodes.size());\n    for (T node : nodes) {\n        String cursor = this.adapter.cursorAt(container, index++);\n        edges.add(new DefaultEdge<>(node, new DefaultConnectionCursor(cursor)));\n    }\n    DefaultPageInfo pageInfo = new DefaultPageInfo(edges.get(0).getCursor(), edges.get(edges.size() - 1).getCursor(), this.adapter.hasPrevious(container), this.adapter.hasNext(container));\n    return new DefaultConnection<>(edges, pageInfo);\n}"
+    },
+    "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+    "Start": 7935,
+    "Stop": 9024,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "adaptDataContainer"
+}

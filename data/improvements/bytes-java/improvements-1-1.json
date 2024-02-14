@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Check for valid index range",
+                "Change_Diff": "+ if (fromIndex < 0 || toIndex > bytes.length || fromIndex > toIndex) {\n+     throw new IllegalArgumentException(\"Invalid index range\");\n+ }",
+                "Description": "Before attempting any operations on the array, you should first check that the provided indices are valid. That is, `fromIndex` should not be less than 0 and `toIndex` should not be greater than the length of the array. In addition, `fromIndex` should not be greater than `toIndex`",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Avoid unnecessary branching",
+                "Change_Diff": "- if (between.isEmpty()) {\n-     for (int i=1; i < length; i++) {\n-         toHexDigits(out,bytes[fromIndex + i]);\n-     }\n- } else {\n-     for (int i=1; i < length; i++) {\n-         out.append(between);\n-         toHexDigits(out,bytes[fromIndex + i]);\n-     }\n- }\n+ for (int i=1; i < length; i++) {\n+     out.append(between);\n+     toHexDigits(out,bytes[fromIndex + i]);\n+ }",
+                "Description": "The if-else branches inside the loop for appending the `between` string and toHexDigits are unnecessary. The `between` string is already defined earlier in the code and can be appended in the loop without the need for an if-else check. This will make the code more concise and reduce branching.",
+                "Start": 9,
+                "End": 20
+            }
+        ],
+        "Final code": "private <A extends Appendable>A formatHex(A out,byte[] bytes,int fromIndex,int toIndex){\n  Objects.requireNonNull(out,\"out\");\n  Objects.requireNonNull(bytes,\"bytes\");\n  if (fromIndex < 0 || toIndex > bytes.length || fromIndex > toIndex) {\n      throw new IllegalArgumentException(\"Invalid index range\");\n  }\n  int length=toIndex - fromIndex;\n  if (length > 0) {\n    try {\n      String between=suffix + delimiter + prefix;\n      out.append(prefix);\n      toHexDigits(out,bytes[fromIndex]);\n      for (int i=1; i < length; i++) {\n          out.append(between);\n          toHexDigits(out,bytes[fromIndex + i]);\n      }\n      out.append(suffix);\n    } catch (IOException ioe) {\n      throw new RuntimeException(ioe.getMessage(),ioe);\n    }\n  }\n  return out;\n}"
+    },
+    "Old_Method": "private <A extends Appendable>A formatHex(A out,byte[] bytes,int fromIndex,int toIndex){\n  Objects.requireNonNull(out,\"out\");\n  Objects.requireNonNull(bytes,\"bytes\");\n  int length=toIndex - fromIndex;\n  if (length > 0) {\n    try {\n      String between=suffix + delimiter + prefix;\n      out.append(prefix);\n      toHexDigits(out,bytes[fromIndex]);\n      if (between.isEmpty()) {\n        for (int i=1; i < length; i++) {\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n else {\n        for (int i=1; i < length; i++) {\n          out.append(between);\n          toHexDigits(out,bytes[fromIndex + i]);\n        }\n      }\n      out.append(suffix);\n    }\n catch (    IOException ioe) {\n      throw new RuntimeException(ioe.getMessage(),ioe);\n    }\n  }\n  return out;\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/EncodingHexJmhBenchmark.java",
+    "Start": 17470,
+    "Stop": 18670,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "formatHex"
+}

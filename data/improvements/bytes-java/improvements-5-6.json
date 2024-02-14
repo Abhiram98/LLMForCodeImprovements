@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use a variable for repeated byte initializations",
+                "Change_Diff": "- assertFalse(Bytes.from((byte)8).bitAt(0));\n- assertFalse(Bytes.from((byte)8).bitAt(1));\n- assertFalse(Bytes.from((byte)8).bitAt(2));\n- assertTrue(Bytes.from((byte)8).bitAt(3));\n- assertFalse(Bytes.from((byte)8).bitAt(4));\n+ Bytes eightBitByte = Bytes.from((byte)8);\n+ assertFalse(eightBitByte.bitAt(0));\n+ assertFalse(eightBitByte.bitAt(1));\n+ assertFalse(eightBitByte.bitAt(2));\n+ assertTrue(eightBitByte.bitAt(3));\n+ assertFalse(eightBitByte.bitAt(4));",
+                "Description": "Instead of calling Bytes.from((byte)8) multiple times, store the result in a variable and use it multiple times. This will reduce redundancy and improve readability.",
+                "Start": 8,
+                "End": 13
+            },
+            {
+                "Improvement": "Use a helper method for exception assertions",
+                "Change_Diff": "- try {\n-   Bytes.allocate(1).bitAt(8);\n-   fail();\n- }\n- catch (IndexOutOfBoundsException ignored) {}\n- try {\n-   Bytes.allocate(16).bitAt(-1);\n-   fail();\n- }\n- catch (IndexOutOfBoundsException ignored) {}\n+ assertThrows(IndexOutOfBoundsException.class, () -> Bytes.allocate(1).bitAt(8));\n+ assertThrows(IndexOutOfBoundsException.class, () -> Bytes.allocate(16).bitAt(-1));",
+                "Description": "Instead of writing a try-catch block every time you want to assert that an exception is thrown, you could define a helper method that accepts a lambda expression representing the operation that should throw the exception. This reduces redundancy and improves readability.",
+                "Start": 24,
+                "End": 37
+            }
+        ],
+        "Final code": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  Bytes eightBitByte = Bytes.from((byte)8);\n  assertFalse(eightBitByte.bitAt(0));\n  assertFalse(eightBitByte.bitAt(1));\n  assertFalse(eightBitByte.bitAt(2));\n  assertTrue(eightBitByte.bitAt(3));\n  assertFalse(eightBitByte.bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  assertThrows(IndexOutOfBoundsException.class, () -> Bytes.allocate(1).bitAt(8));\n  assertThrows(IndexOutOfBoundsException.class, () -> Bytes.allocate(16).bitAt(-1));\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}"
+    },
+    "Old_Method": "@Test public void bitAt(){\n  for (int i=0; i < 8; i++) {\n    assertFalse(Bytes.allocate(1).bitAt(i));\n  }\n  for (int i=0; i < 8; i++) {\n    assertTrue(Bytes.from((byte)0xFF).bitAt(i));\n  }\n  assertFalse(Bytes.from((byte)8).bitAt(0));\n  assertFalse(Bytes.from((byte)8).bitAt(1));\n  assertFalse(Bytes.from((byte)8).bitAt(2));\n  assertTrue(Bytes.from((byte)8).bitAt(3));\n  assertFalse(Bytes.from((byte)8).bitAt(4));\n  assertFalse(Bytes.from((byte)0b11010000).bitAt(0));\n  assertFalse(Bytes.from((byte)0b10010000).bitAt(0));\n  assertTrue(Bytes.from((byte)0b10010001).bitAt(0));\n  assertFalse(Bytes.from((byte)0b0010_1000).bitAt(4));\n  assertFalse(Bytes.parseBinary(\"101111110101100100110010011111001011101110110011011000010000000\").bitAt(54));\n  try {\n    Bytes.allocate(1).bitAt(8);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  try {\n    Bytes.allocate(16).bitAt(-1);\n    fail();\n  }\n catch (  IndexOutOfBoundsException ignored) {\n  }\n  Bytes bytes=Bytes.wrap(new byte[]{1,0,2,0}).byteOrder(ByteOrder.LITTLE_ENDIAN);\n  assertTrue(bytes.bitAt(0));\n  assertTrue(bytes.bitAt(17));\n  assertFalse(bytes.bitAt(8));\n  assertFalse(bytes.bitAt(31));\n}\n",
+    "File_Path": "bytes-java/src/test/java/at/favre/lib/bytes/BytesMiscTest.java",
+    "Start": 12738,
+    "Stop": 14127,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "bitAt"
+}

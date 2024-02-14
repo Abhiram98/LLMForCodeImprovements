@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources for handling InputStream",
+                "Change_Diff": "- try (InputStream in=url.openStream()){\n+ try (InputStream in=url.openStream())",
+                "Description": "Use try-with-resources for handling InputStream. This ensures that the InputStream is closed after use, preventing potential resource leaks.",
+                "Start": 48,
+                "End": 51
+            },
+            {
+                "Improvement": "Extract large method into smaller methods",
+                "Change_Diff": "- public void configure(Properties props){...}\n+ public void configure(Properties props){\n+   resetConfigurations();\n+   setupNfHierarchy();\n+   setupLoggerFactory();\n+   handleConfigurationFile();\n+   setupBlitz4jConfig();\n+   processProperties(props);\n+   configureAsyncAppenders();\n+   refreshConfigurations();\n+ }",
+                "Description": "The configure() method is too large and does several things which makes it difficult to understand and maintain. Extract the different sections of the method into smaller, well-named methods.",
+                "Start": 5,
+                "End": 90
+            },
+            {
+                "Improvement": "Remove unnecessary instantiation of 'blitz4jConfig' object",
+                "Change_Diff": "- this.blitz4jConfig=new DefaultBlitz4jConfig(props);",
+                "Description": "'blitz4jConfig' is instantiated three times in the method which is unnecessary. Remove the first two initializations and keep the last one at the end of the method.",
+                "Start": 36,
+                "End": 36
+            }
+        ],
+        "Final code": "public void configure(Properties props){\n  resetConfigurations();\n  setupNfHierarchy();\n  setupLoggerFactory();\n  handleConfigurationFile();\n  processProperties(props);\n  configureAsyncAppenders();\n  refreshConfigurations();\n}\n\nprivate void resetConfigurations() {...}\nprivate void setupNfHierarchy() {...}\nprivate void setupLoggerFactory() {...}\nprivate void handleConfigurationFile() {...}\nprivate void processProperties(Properties props) {...}\nprivate void configureAsyncAppenders() {...}\nprivate void refreshConfigurations() {\n  clearAsyncAppenderList();\n  PropertyConfigurator.configure(this.initialProps);\n  closeNonexistingAsyncAppenders();\n  this.logger=org.slf4j.LoggerFactory.getLogger(LoggingConfiguration.class);\n  ConfigurationManager.getConfigInstance().addConfigurationListener(new ExpandedConfigurationListenerAdapter(this));\n  this.blitz4jConfig=new DefaultBlitz4jConfig(this.initialProps);\n}"
+    },
+    "Old_Method": "/** \n * Kick start the blitz4j implementation.\n * @param props - The overriding <em>log4j<\/em> properties if any.\n */\npublic void configure(Properties props){\n  this.refreshCount.set(0);\n  this.overrideProps.clear();\n  this.originalAsyncAppenderNameMap.clear();\n  String log4jConfigurationFile=System.getProperty(PROP_LOG4J_CONFIGURATION);\n  NFHierarchy nfHierarchy=null;\n  if ((!NFHierarchy.class.equals(LogManager.getLoggerRepository().getClass()))) {\n    nfHierarchy=new NFHierarchy(new NFRootLogger(org.apache.log4j.Level.INFO));\n    org.apache.log4j.LogManager.setRepositorySelector(new NFRepositorySelector(nfHierarchy),guard);\n  }\n  String log4jLoggerFactory=System.getProperty(PROP_LOG4J_LOGGER_FACTORY);\n  if (log4jLoggerFactory != null) {\n    this.initialProps.setProperty(PROP_LOG4J_LOGGER_FACTORY,log4jLoggerFactory);\n    if (nfHierarchy != null) {\n      try {\n        LoggerFactory loggerFactory=(LoggerFactory)Class.forName(log4jLoggerFactory).newInstance();\n        nfHierarchy.setLoggerFactory(loggerFactory);\n      }\n catch (      Exception e) {\n        System.err.println(\"Cannot set the logger factory. Hence reverting to default.\");\n        e.printStackTrace();\n      }\n    }\n  }\n else {\n    this.initialProps.setProperty(PROP_LOG4J_LOGGER_FACTORY,BLITZ_LOGGER_FACTORY);\n  }\n  if (log4jConfigurationFile != null) {\n    loadLog4jConfigurationFile(log4jConfigurationFile);\n    clearAsyncAppenderList();\n    PropertyConfigurator.configure(this.initialProps);\n  }\n  this.blitz4jConfig=new DefaultBlitz4jConfig(props);\n  if ((log4jConfigurationFile == null) && (blitz4jConfig.shouldLoadLog4jPropertiesFromClassPath())) {\n    try {\n      URL url=Loader.getResource(LOG4J_PROPERTIES);\n      if (url != null) {\n        try (InputStream in=url.openStream()){\n          this.initialProps.load(in);\n        }\n       }\n    }\n catch (    Exception t) {\n      System.err.println(\"Error loading properties from \" + LOG4J_PROPERTIES);\n    }\n  }\n  Enumeration enumeration=props.propertyNames();\n  while (enumeration.hasMoreElements()) {\n    String key=(String)enumeration.nextElement();\n    String propertyValue=props.getProperty(key);\n    this.initialProps.setProperty(key,propertyValue);\n  }\n  this.blitz4jConfig=new DefaultBlitz4jConfig(this.initialProps);\n  String[] asyncAppenderArray=blitz4jConfig.getAsyncAppenders();\n  if (asyncAppenderArray == null) {\n    return;\n  }\n  for (int i=0; i < asyncAppenderArray.length; i++) {\n    String oneAppenderName=asyncAppenderArray[i];\n    if ((i == 0) || (oneAppenderName == null)) {\n      continue;\n    }\n    oneAppenderName=oneAppenderName.trim();\n    String oneAsyncAppenderName=oneAppenderName + ASYNC_APPENDERNAME_SUFFIX;\n    originalAsyncAppenderNameMap.put(oneAppenderName,oneAsyncAppenderName);\n  }\n  try {\n    convertConfiguredAppendersToAsync(this.initialProps);\n  }\n catch (  Exception e) {\n    throw new RuntimeException(\"Could not configure async appenders \",e);\n  }\n  this.blitz4jConfig=new DefaultBlitz4jConfig(this.initialProps);\n  clearAsyncAppenderList();\n  PropertyConfigurator.configure(this.initialProps);\n  closeNonexistingAsyncAppenders();\n  this.logger=org.slf4j.LoggerFactory.getLogger(LoggingConfiguration.class);\n  ConfigurationManager.getConfigInstance().addConfigurationListener(new ExpandedConfigurationListenerAdapter(this));\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/blitz4j/LoggingConfiguration.java",
+    "Start": 4787,
+    "Stop": 9182,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "configure"
+}

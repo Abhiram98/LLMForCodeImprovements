@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract code to private methods",
+                "Change_Diff": "- final int index=find(mem,getLgCouponArrInts(),coupon);\n- if (index >= 0) {\n-   return this;\n- }\n- insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n- insertHashSetCount(wmem,getCouponCount() + 1);\n+ if (!isCouponIndexFound(coupon)) {\n+   insertCoupon(coupon);\n+   incrementCouponCount();\n+ }",
+                "Description": "The method `couponUpdate` is doing too many things. It would be easier to read and maintain if its logic was divided into smaller, well-named private methods.",
+                "Start": 1,
+                "End": 13
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- final boolean promote=checkGrowOrPromote();\n+ final boolean shouldPromote=checkGrowOrPromote();",
+                "Description": "Variable names should be meaningful and clear. The variable `promote` should be renamed to `shouldPromote` to better represent its purpose.",
+                "Start": 10,
+                "End": 10
+            }
+        ],
+        "Final code": "@Override\nHllSketchImpl couponUpdate(final int coupon) {\n  if (wmem == null) {\n    noWriteAccess();\n  }\n\n  if (!isCouponIndexFound(coupon)) {\n    insertCoupon(coupon);\n    incrementCouponCount();\n  }\n\n  final boolean shouldPromote=checkGrowOrPromote();\n\n  if (!shouldPromote) {\n    return this;\n  }\n\n  return promoteListOrSetToHll(this);\n}\n\nprivate boolean isCouponIndexFound(int coupon) {\n  final int index=find(mem,getLgCouponArrInts(),coupon);\n  return index >= 0;\n}\n\nprivate void insertCoupon(int coupon) {\n  insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n}\n\nprivate void incrementCouponCount() {\n  insertHashSetCount(wmem,getCouponCount() + 1);\n}"
+    },
+    "Old_Method": "@Override HllSketchImpl couponUpdate(final int coupon){\n  if (wmem == null) {\n    noWriteAccess();\n  }\n  final int index=find(mem,getLgCouponArrInts(),coupon);\n  if (index >= 0) {\n    return this;\n  }\n  insertInt(wmem,HASH_SET_INT_ARR_START + (~index << 2),coupon);\n  insertHashSetCount(wmem,getCouponCount() + 1);\n  final boolean promote=checkGrowOrPromote();\n  if (!promote) {\n    return this;\n  }\n  return promoteListOrSetToHll(this);\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/hll/DirectCouponHashSet.java",
+    "Start": 2926,
+    "Stop": 3436,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "couponUpdate"
+}

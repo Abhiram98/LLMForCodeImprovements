@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i = 0; i < annotations.size(); i++) {\n+ for (JavaAnnotation annotation : annotations) {",
+                "Description": "Instead of using a traditional for loop to iterate over annotations, use an enhanced for loop. This will make the code cleaner and easier to read.",
+                "Start": 5,
+                "End": 32
+            },
+            {
+                "Improvement": "Use Java 8 Streams API for filtering and transformation",
+                "Change_Diff": "- for (JavaParameter javaParameter : method.getParameters()) {\n- ... \n- }\n+ method.getParameters().stream()...",
+                "Description": "Instead of using a for loop to iterate over method.getParameters(), we can use Java 8 Streams API to filter and transform the data. This will make the code more compact and easier to read.",
+                "Start": 35,
+                "End": 90
+            },
+            {
+                "Improvement": "Use Optional to handle null values",
+                "Change_Diff": "- if (Objects.isNull(headersObject)) {\n+ Optional.ofNullable(headersObject).ifPresent(headersObject -> { ...",
+                "Description": "Instead of checking for null values with an if statement, we can use the Optional class in Java 8 to handle possible null values. This will make the code more robust and prevent NullPointerExceptions.",
+                "Start": 15,
+                "End": 15
+            },
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- processMappingHeaders(header,mappingHeaders);\n+ processMappingHeaders(header, mappingHeaders);",
+                "Description": "There is a block of code that is repeated multiple times that processes the headers. This code can be extracted into a separate method to avoid repetition and make the code cleaner.",
+                "Start": 26,
+                "End": 26
+            }
+        ],
+        "Final code": "default List<ApiReqParam> handle(JavaMethod method,ProjectDocConfigBuilder projectBuilder){\n  Map<String,String> constantsMap=projectBuilder.getConstantsMap();\n  List<ApiReqParam> mappingHeaders=new ArrayList<>();\n  List<JavaAnnotation> annotations=method.getAnnotations();\n  HeaderAnnotation headerAnnotation=getHeaderAnnotation();\n  for (JavaAnnotation annotation : annotations) {\n    String annotationName=annotation.getType().getValue();\n    Optional.ofNullable(annotation.getNamedParameter(\"headers\")).ifPresent(headersObject -> {\n      String mappingHeader=StringUtil.removeQuotes(headersObject.toString());\n      if (!mappingHeader.startsWith(\"[\")) {\n        processMappingHeaders(mappingHeader,mappingHeaders);\n      }\n      List<String> headers=(LinkedList)headersObject;\n      for (String str : headers) {\n        String header=StringUtil.removeQuotes(str);\n        if (!header.startsWith(\"!\")) {\n          processMappingHeaders(header,mappingHeaders);\n        }\n      }\n    });\n  }\n  List<ApiReqParam> reqHeaders=method.getParameters().stream()\n    .filter(javaParameter -> headerAnnotation.getAnnotationName().equals(annotation.getType().getValue()))\n    .map(javaParameter -> processParameter(javaParameter, method, constantsMap)) // Assuming processParameter is a new method extracted from the repeated block of code\n    .collect(Collectors.toList());\n  return Stream.of(mappingHeaders,reqHeaders).flatMap(Collection::stream).distinct().collect(Collectors.toList());\n}"
+    },
+    "Old_Method": "default List<ApiReqParam> handle(JavaMethod method,ProjectDocConfigBuilder projectBuilder){\n  Map<String,String> constantsMap=projectBuilder.getConstantsMap();\n  List<ApiReqParam> mappingHeaders=new ArrayList<>();\n  List<JavaAnnotation> annotations=method.getAnnotations();\n  HeaderAnnotation headerAnnotation=getHeaderAnnotation();\n  for (  JavaAnnotation annotation : annotations) {\n    String annotationName=annotation.getType().getValue();\n    Object headersObject=annotation.getNamedParameter(\"headers\");\n    if (!isMapping(annotationName) || Objects.isNull(headersObject)) {\n      continue;\n    }\n    String mappingHeader=StringUtil.removeQuotes(headersObject.toString());\n    if (!mappingHeader.startsWith(\"[\")) {\n      processMappingHeaders(mappingHeader,mappingHeaders);\n      continue;\n    }\n    List<String> headers=(LinkedList)headersObject;\n    for (    String str : headers) {\n      String header=StringUtil.removeQuotes(str);\n      if (header.startsWith(\"!\")) {\n        continue;\n      }\n      processMappingHeaders(header,mappingHeaders);\n    }\n  }\n  List<ApiReqParam> reqHeaders=new ArrayList<>();\n  for (  JavaParameter javaParameter : method.getParameters()) {\n    List<JavaAnnotation> javaAnnotations=javaParameter.getAnnotations();\n    String className=method.getDeclaringClass().getCanonicalName();\n    Map<String,String> paramMap=DocUtil.getCommentsByTag(method,DocTags.PARAM,className);\n    String paramName=javaParameter.getName();\n    JavaType javaType=javaParameter.getType();\n    String simpleTypeName=javaType.getValue();\n    ApiReqParam apiReqHeader;\n    for (    JavaAnnotation annotation : javaAnnotations) {\n      String annotationName=annotation.getType().getValue();\n      if (headerAnnotation.getAnnotationName().equals(annotationName)) {\n        apiReqHeader=new ApiReqParam();\n        Map<String,Object> requestHeaderMap=annotation.getNamedParameterMap();\n        if (requestHeaderMap.get(headerAnnotation.getValueProp()) != null) {\n          String attrValue=DocUtil.handleRequestHeaderValue(annotation);\n          String constValue=((String)requestHeaderMap.get(headerAnnotation.getValueProp())).replaceAll(\"\\\"\",\"\");\n          if (StringUtil.isEmpty(attrValue)) {\n            Object value=constantsMap.get(constValue);\n            if (value != null) {\n              apiReqHeader.setName(value.toString());\n            }\n else {\n              apiReqHeader.setName(constValue);\n            }\n          }\n else {\n            apiReqHeader.setName(attrValue);\n          }\n        }\n else {\n          apiReqHeader.setName(paramName);\n        }\n        StringBuilder desc=new StringBuilder();\n        String comments=paramMap.get(paramName);\n        desc.append(DocUtil.paramCommentResolve(comments));\n        String mockValue=JavaFieldUtil.createMockValue(paramMap,paramName,javaType.getGenericCanonicalName(),simpleTypeName);\n        apiReqHeader.setValue(mockValue);\n        if (requestHeaderMap.get(headerAnnotation.getDefaultValueProp()) != null) {\n          apiReqHeader.setValue(StringUtil.removeQuotes((String)requestHeaderMap.get(headerAnnotation.getDefaultValueProp())));\n          desc.append(\"(defaultValue: \").append(StringUtil.removeQuotes((String)requestHeaderMap.get(headerAnnotation.getDefaultValueProp()))).append(\")\");\n        }\n        apiReqHeader.setDesc(desc.toString());\n        if (requestHeaderMap.get(headerAnnotation.getRequiredProp()) != null) {\n          apiReqHeader.setRequired(!Boolean.FALSE.toString().equals(requestHeaderMap.get(headerAnnotation.getRequiredProp())));\n        }\n else {\n          apiReqHeader.setRequired(true);\n        }\n        String typeName=javaParameter.getType().getValue().toLowerCase();\n        apiReqHeader.setType(DocClassUtil.processTypeNameForParams(typeName));\n        reqHeaders.add(apiReqHeader);\n        break;\n      }\n    }\n  }\n  return Stream.of(mappingHeaders,reqHeaders).flatMap(Collection::stream).distinct().collect(Collectors.toList());\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/handler/IHeaderHandler.java",
+    "Start": 1705,
+    "Stop": 6751,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "handle"
+}

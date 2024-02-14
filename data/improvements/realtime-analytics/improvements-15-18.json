@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid marking the ServletInputStream",
+                "Change_Diff": "- inputStream.mark(Integer.MAX_VALUE);\n- if (inputStream != null) {\n-   inputStream.mark(Integer.MAX_VALUE);\n- }",
+                "Description": "The mark(int readlimit) method is used to mark the current position in the input stream. After calling the mark method, the stream remembers this position until the reset method is called. The readlimit argument tells the input stream to allow readlimit bytes to be read before the mark position is forgotten. However, in this method, you mark the stream but never reset it, which makes this operation redundant. Moreover, the mark and reset methods are not supported in all InputStream subclasses.",
+                "Start": 4,
+                "End": 6
+            },
+            {
+                "Improvement": "Remove wildcard imports",
+                "Change_Diff": "- import javax.servlet.*;\n- import java.io.*;\n+ import javax.servlet.ServletException;\n+ import javax.servlet.http.HttpServletRequest;\n+ import javax.servlet.http.HttpServletResponse;\n+ import java.io.IOException;",
+                "Description": "Wildcard imports can lead to naming conflicts and make the code harder to understand. It is better to import only those classes that you use.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use specific exceptions instead of Throwable",
+                "Change_Diff": "- catch (  Throwable ex) {\n+ catch (ServletException | IOException ex) {",
+                "Description": "Catching Throwable catches every possible exception, including errors you have no control over, such as OutOfMemoryError. It's better to catch the most specific exceptions you can handle.",
+                "Start": 26,
+                "End": 26
+            },
+            {
+                "Improvement": "Remove redundant request reading in catch block",
+                "Change_Diff": "- String requestTxt=readRequest(request);\n- stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n+ String requestHead = readRequestHead(request);\n+ String requestTxt = readRequest(request);\n+ stats.setLastFailedRequest(requestHead + requestTxt);",
+                "Description": "You are reading the request twice in the catch block. It's better to read it once and store it in a variable.",
+                "Start": 27,
+                "End": 28
+            }
+        ],
+        "Final code": "@Override\npublic void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n        ping(request,pathInfo,response);\n    }\n    else if (pathInfo.startsWith(PATH_COUNTER)) {\n        stats.incQueryRequestCount();\n        getCounters(request,pathInfo,response);\n    }\n    else if (pathInfo.startsWith(PATH_METRICGROUP)) {\n        stats.incQueryRequestCount();\n        getMetrics(request,pathInfo,response);\n    }\n    else {\n        stats.incInvalidRequestCount();\n        response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n    try {\n    }\n    catch (ServletException | IOException ex) {\n        String requestHead = readRequestHead(request);\n        String requestTxt = readRequest(request);\n        stats.setLastFailedRequest(requestHead + requestTxt);\n        stats.registerError(ex);\n        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n    }\n    finally {\n        response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n        response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n        response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n    }\n}"
+    },
+    "Old_Method": "@Override public void service(HttpServletRequest request,HttpServletResponse response) throws ServletException, IOException {\n  ServletInputStream inputStream=request.getInputStream();\n  if (inputStream != null) {\n    inputStream.mark(Integer.MAX_VALUE);\n  }\n  try {\n    String pathInfo=request.getPathInfo();\n    if (pathInfo.startsWith(PATH_PING)) {\n      ping(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_COUNTER)) {\n      stats.incQueryRequestCount();\n      getCounters(request,pathInfo,response);\n    }\n else     if (pathInfo.startsWith(PATH_METRICGROUP)) {\n      stats.incQueryRequestCount();\n      getMetrics(request,pathInfo,response);\n    }\n else {\n      stats.incInvalidRequestCount();\n      response.setStatus(HttpServletResponse.SC_NOT_FOUND);\n    }\n  }\n catch (  Throwable ex) {\n    String requestTxt=readRequest(request);\n    stats.setLastFailedRequest(readRequestHead(request) + requestTxt);\n    stats.registerError(ex);\n    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);\n  }\n finally {\n    response.addHeader(\"Access-Control-Allow-Origin\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Methods\",\"*\");\n    response.addHeader(\"Access-Control-Allow-Headers\",\"Content-Type\");\n  }\n}\n",
+    "File_Path": "realtime-analytics/Demo/metricservice/src/main/java/com/ebay/pulsar/metric/servlet/MetricRestServlet.java",
+    "Start": 7480,
+    "Stop": 8955,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "service"
+}

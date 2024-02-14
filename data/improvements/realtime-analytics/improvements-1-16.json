@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce Cyclomatic Complexity",
+                "Change_Diff": "- private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){...} \n+ private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n+   Map<MCMetricGroupDemension,Counter> counters = getCounters(metricName);\n+   MCMetricGroupDemension groupDemension = getGroupDemension(tags, metricName, groupId);\n+   Counter counter = getCounter(counters, groupDemension, isAvg);\n+   updateCounter(counter, tags, count, total, isAvg);\n+   return counter;\n+ }",
+                "Description": "The method has a high cyclomatic complexity due to the nested if-else statements. This makes it difficult to maintain and test the method. Extract some logic to separate methods to reduce the complexity.",
+                "Start": 1,
+                "End": 59
+            },
+            {
+                "Improvement": "Use Optional to handle null values",
+                "Change_Diff": "- if (getConfiguration().getOffheapMetricConf() != null) {\n+ Optional<OffHeapCacheConfig> conf = Optional.ofNullable(getConfiguration().getOffheapMetricConf());",
+                "Description": "Java 8 Optional can be used to avoid NullPointerExceptions and to write more readable, cleaner code.",
+                "Start": 1,
+                "End": 59
+            }
+        ],
+        "Final code": "private Counter getCounterByMetricDemensionAndInc(String metricName, String groupId, Map<String,String> tags, boolean isAvg, Long count, Long total){\n    Map<MCMetricGroupDemension,Counter> counters = getCounters(metricName);\n    MCMetricGroupDemension groupDemension = getGroupDemension(tags, metricName, groupId);\n    Counter counter = getCounter(counters, groupDemension, isAvg);\n    updateCounter(counter, tags, count, total, isAvg);\n    return counter;\n}\n\nprivate Map<MCMetricGroupDemension,Counter> getCounters(String metricName) {\n    //...implementation here\n}\n\nprivate MCMetricGroupDemension getGroupDemension(Map<String,String> tags, String metricName, String groupId) {\n    //...implementation here\n}\n\nprivate Counter getCounter(Map<MCMetricGroupDemension,Counter> counters, MCMetricGroupDemension groupDemension, boolean isAvg) {\n    //...implementation here\n}\n\nprivate void updateCounter(Counter counter, Map<String,String> tags, Long count, Long total, boolean isAvg) {\n    //...implementation here\n}"
+    },
+    "Old_Method": "private Counter getCounterByMetricDemensionAndInc(String metricName,String groupId,Map<String,String> tags,boolean isAvg,Long count,Long total){\n  Map<MCMetricGroupDemension,Counter> counters=groupbyWithTagsMetricMap.get(metricName);\n  OffHeapCacheConfig conf=null;\n  if (getConfiguration().getOffheapMetricConf() != null) {\n    conf=getConfiguration().getOffheapMetricConf().get(metricName);\n  }\n  if (counters == null) {\nsynchronized (this) {\n      if (counters == null) {\n        if (conf != null) {\n          counters=CacheManager.getCounterOffHeapCache(metricName,conf);\n        }\n else {\n          counters=CacheManager.getCounterCache();\n        }\n        groupbyWithTagsMetricMap.put(metricName,counters);\n      }\n    }\n  }\n  MCMetricGroupDemension groupDemension=null;\n  String tag_time=null;\n  if (tags == null || tags.isEmpty()) {\n    groupDemension=new MCMetricGroupDemension(metricName,groupId);\n  }\n else {\n    if (tags.containsKey(MCConstant.TAG_TIME_IGNORE)) {\n      tag_time=tags.remove(MCConstant.TAG_TIME_IGNORE);\n    }\n    groupDemension=new MCMetricGroupDemension(metricName,groupId,tags);\n  }\n  Counter counter=counters.get(groupDemension);\n  if (counter == null) {\n    if (isAvg) {\n      counter=new AvgCounter();\n    }\n else {\n      counter=new Counter();\n    }\n    if (conf == null) {\n      counters.put(groupDemension,counter);\n    }\n  }\n  if (tag_time != null) {\n    counter.setLastCounterTime(tag_time);\n  }\n  if (isAvg) {\n    ((AvgCounter)counter).inc(count,total);\n  }\n else {\n    if (count != null) {\n      counter.inc(count);\n    }\n else {\n      counter.inc();\n    }\n  }\n  if (conf != null) {\n    counters.put(groupDemension,counter);\n  }\n  return counter;\n}\n",
+    "File_Path": "realtime-analytics/metriccalculator/src/main/java/com/ebay/pulsar/metriccalculator/processor/MCSummingProcessor.java",
+    "Start": 9927,
+    "Stop": 12300,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "getCounterByMetricDemensionAndInc"
+}

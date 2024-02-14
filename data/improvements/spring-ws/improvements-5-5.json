@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract complex logic to separate methods",
+                "Change_Diff": "- private void createOperations(Definition definition,PortType portType) throws WSDLException { ... \n+ private void createOperations(Definition definition,PortType portType) throws WSDLException { createOperationMessages(definition); addOperationsToPortType(definition, portType); }",
+                "Description": "The `createOperations` method is doing too much and could be split into smaller, more manageable methods. This would improve readability and maintainability of the code.",
+                "Start": 1,
+                "End": 50
+            },
+            {
+                "Improvement": "Use Java 8 streams for iteration",
+                "Change_Diff": "- for (  Object messageValue : definition.getMessages().values()) {...\n+ definition.getMessages().values().stream().forEach(messageValue -> {...",
+                "Description": "Java 8 introduced streams, which can make iteration over collections more concise and readable. They can also offer performance benefits, especially for large collections, by allowing for parallel processing.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Use optional to handle potential null values",
+                "Change_Diff": "- String operationName=getOperationName(message);\n if (StringUtils.hasText(operationName)) {...\n+ Optional<String> operationName=Optional.ofNullable(getOperationName(message));\n operationName.ifPresent(name -> {...",
+                "Description": "When dealing with potential null values, it's a good practice to use `Optional` to avoid NullPointerExceptions.",
+                "Start": 13,
+                "End": 14
+            }
+        ],
+        "Final code": "private void createOperations(Definition definition,PortType portType) throws WSDLException { createOperationMessages(definition); addOperationsToPortType(definition, portType); }\n\nprivate void createOperationMessages(Definition definition) {...}\n\nprivate void addOperationsToPortType(Definition definition, PortType portType) {...}"
+    },
+    "Old_Method": "private void createOperations(Definition definition,PortType portType) throws WSDLException {\n  MultiValueMap<String,Message> operations=new LinkedMultiValueMap<>();\n  for (  Object messageValue : definition.getMessages().values()) {\n    Message message=(Message)messageValue;\n    String operationName=getOperationName(message);\n    if (StringUtils.hasText(operationName)) {\n      operations.add(operationName,message);\n    }\n  }\n  if (operations.isEmpty() && logger.isWarnEnabled()) {\n    logger.warn(\"No operations were created, make sure the WSDL contains messages\");\n  }\n  for (  String operationName : operations.keySet()) {\n    Operation operation=definition.createOperation();\n    operation.setName(operationName);\n    List<Message> messages=operations.get(operationName);\n    for (    Message message : messages) {\n      if (isInputMessage(message)) {\n        Input input=definition.createInput();\n        input.setMessage(message);\n        populateInput(definition,input);\n        operation.setInput(input);\n      }\n else       if (isOutputMessage(message)) {\n        Output output=definition.createOutput();\n        output.setMessage(message);\n        populateOutput(definition,output);\n        operation.setOutput(output);\n      }\n else       if (isFaultMessage(message)) {\n        Fault fault=definition.createFault();\n        fault.setMessage(message);\n        populateFault(definition,fault);\n        operation.addFault(fault);\n      }\n    }\n    operation.setStyle(getOperationType(operation));\n    operation.setUndefined(false);\n    if (logger.isDebugEnabled()) {\n      logger.debug(\"Adding operation [\" + operation.getName() + \"] to port type [\"+ portType.getQName()+ \"]\");\n    }\n    portType.addOperation(operation);\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/main/java/org/springframework/ws/wsdl/wsdl11/provider/AbstractPortTypesProvider.java",
+    "Start": 3063,
+    "Stop": 4748,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "createOperations"
+}

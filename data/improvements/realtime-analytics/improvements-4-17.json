@@ -1,0 +1,41 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional instead of returning null",
+                "Change_Diff": "- return null;\n+ return Optional.empty();",
+                "Description": "Returning null can cause NullPointerExceptions. Using Optional can help to avoid this issue. The method should return an empty Optional instead of null when an exception is caught.",
+                "Start": 28,
+                "End": 28
+            },
+            {
+                "Improvement": "Change method to return Optional<GeoInfo>",
+                "Change_Diff": "- private GeoInfo _getGeoInfo(String ipAddress) {\n+ private Optional<GeoInfo> _getGeoInfo(String ipAddress) {",
+                "Description": "Since we are returning an Optional<GeoInfo> now, the method signature has to be changed to reflect this.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Wrap GeoInfo object in Optional",
+                "Change_Diff": "- return geoInfo;\n+ return Optional.of(geoInfo);",
+                "Description": "Instead of returning the GeoInfo object directly, it should be wrapped in an Optional. This is consistent with the method signature that now returns an Optional<GeoInfo>.",
+                "Start": 24,
+                "End": 24
+            },
+            {
+                "Improvement": "Wrap GeoInfo object in Optional when ipAddress is null",
+                "Change_Diff": "- return geoInfo;\n+ return Optional.empty();",
+                "Description": "When ipAddress is null, instead of returning a new GeoInfo object, return an empty Optional.",
+                "Start": 4,
+                "End": 4
+            }
+        ],
+        "Final code": "private Optional<GeoInfo> _getGeoInfo(String ipAddress) {\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return Optional.empty();\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return Optional.of(geoInfo);\n  }\n catch (  Exception ex) {\n    return Optional.empty();\n  }\n}"
+    },
+    "Old_Method": "private GeoInfo _getGeoInfo(String ipAddress){\n  GeoInfo geoInfo=new GeoInfo();\n  if (ipAddress == null) {\n    return geoInfo;\n  }\n  try {\n    InetAddress inetAddress=InetAddress.getByName(ipAddress);\n    CityResponse response=reader.city(inetAddress);\n    Country country=response.getCountry();\n    Continent continent=response.getContinent();\n    City city=response.getCity();\n    Postal postal=response.getPostal();\n    Location location=response.getLocation();\n    Subdivision subdivision=response.getMostSpecificSubdivision();\n    geoInfo.setRegion(subdivision.getName());\n    geoInfo.setCountryIsoCode(country.getIsoCode());\n    geoInfo.setCountry(country.getName());\n    geoInfo.setContinent(continent.getCode());\n    geoInfo.setCity(city.getName());\n    geoInfo.setPostalCode(postal.getCode());\n    geoInfo.setLatitude(location.getLatitude());\n    geoInfo.setLongitude(location.getLongitude());\n    return geoInfo;\n  }\n catch (  Exception ex) {\n    return null;\n  }\n}\n",
+    "File_Path": "realtime-analytics/collector/src/main/java/com/ebay/pulsar/collector/udf/GeoEnrichmentUtil.java",
+    "Start": 1289,
+    "Stop": 2470,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "_getGeoInfo"
+}

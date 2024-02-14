@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Simplify conditional statements with Regular Expressions",
+                "Change_Diff": "- if (typeName.contains(\"<\")) {\n- gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n- } else {\n- gicType=typeName;\n- }\n- if (gicType.contains(\"[\")) {\n- gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n- }\n+ gicType = typeName.replaceAll(\"<.*>|\\[.*]|.*\\\\.\", \"\").toLowerCase();",
+                "Description": "The method currently uses a series of complicated if-else statements to remove unwanted characters from the typeName string. This can be simplified by using a Regular Expression (RegEx) to match the unwanted characters and replace them.",
+                "Start": 2,
+                "End": 11
+            },
+            {
+                "Improvement": "Remove unnecessary toLowerCase() method",
+                "Change_Diff": "- return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n+ return gicType;",
+                "Description": "The method is called at the end of the main method, but it's not necessary. It's better to keep the original case of the typeName. The toLowerCase() method can be removed.",
+                "Start": 11,
+                "End": 11
+            }
+        ],
+        "Final code": "private static String getType(String typeName){\n    String gicType;\n    gicType = typeName.replaceAll(\"<.*>|\\[.*]|.*\\\\.\", \"\");\n    return gicType;\n}"
+    },
+    "Old_Method": "private static String getType(String typeName){\n  String gicType;\n  if (typeName.contains(\"<\")) {\n    gicType=typeName.substring(typeName.indexOf(\"<\") + 1,typeName.lastIndexOf(\">\"));\n  }\n else {\n    gicType=typeName;\n  }\n  if (gicType.contains(\"[\")) {\n    gicType=gicType.substring(0,gicType.indexOf(\"[\"));\n  }\n  return gicType.substring(gicType.lastIndexOf(\".\") + 1).toLowerCase();\n}\n",
+    "File_Path": "smart-doc/src/main/java/com/ly/doc/utils/TornaUtil.java",
+    "Start": 17508,
+    "Stop": 17998,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "getType"
+}

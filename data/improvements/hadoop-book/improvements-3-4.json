@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract complex conditions into methods",
+                "Change_Diff": "- if (values[i]) {\n+ if (isValidValue(values[i])) {",
+                "Description": "The condition `values[i]` is used to decide whether to proceed with the logic in the loop. This condition can be extracted to a separate method to increase readability and maintainability.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Split complex logic into smaller methods",
+                "Change_Diff": "- /* logic inside if condition */\n+ createNode(top, bottom, prev);\n+ updateNodeLinks(node, prev, front);",
+                "Description": "The logic inside the if condition is complex and can be hard to understand. It can be divided into smaller methods with clear names that describe their purpose. This would improve the readability and maintainability of the code.",
+                "Start": 8,
+                "End": 22
+            }
+        ],
+        "Final code": "public void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (isValidValue(values[i])) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=createNode(top, bottom, prev);\n      updateNodeLinks(node, prev, front);\n      prev=node;\n    }\n  }\n}\n\nprivate boolean isValidValue(boolean value) {\n  return value;\n}\n\nprivate Node<ColumnName> createNode(ColumnHeader<ColumnName> top, Node<ColumnName> bottom, Node<ColumnName> prev) {\n  Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n  bottom.down=node;\n  top.up=node;\n  return node;\n}\n\nprivate void updateNodeLinks(Node<ColumnName> node, Node<ColumnName> prev, Node<ColumnName> front) {\n  if (prev != null) {\n    front=prev.right;\n    node.left=prev;\n    node.right=front;\n    prev.right=node;\n    front.left=node;\n  }\n  else {\n    node.left=node;\n    node.right=node;\n  }\n}"
+    },
+    "Old_Method": "/** \n * Add a row to the table.\n * @param values the columns that are satisfied by this row\n */\npublic void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n      bottom.down=node;\n      top.up=node;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        node.left=prev;\n        node.right=front;\n        prev.right=node;\n        front.left=node;\n      }\n else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/DancingLinks.java",
+    "Start": 5022,
+    "Stop": 6050,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "addRow"
+}

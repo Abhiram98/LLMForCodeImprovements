@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove Deprecated annotation",
+                "Change_Diff": "- @Deprecated @Test public void testMdBuilderControllersApi1(){\n+ @Test public void testMdBuilderControllersApi1(){",
+                "Description": "The @Deprecated annotation is used to inform the compiler that the marked element is deprecated and should no longer be used. If the method is still in use and maintained, it should not be marked as deprecated.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Extract string literals as constants",
+                "Change_Diff": "- config.setServerUrl(\"http://127.0.0.1:8899\");\n+ config.setServerUrl(SERVER_URL);\n...\n- config.setBaseDir(\"D:\\smart-doc\\test-project\\smart-doc-example-cn-master\");\n+ config.setBaseDir(BASE_DIR);",
+                "Description": "Hardcoding string values directly in your code can lead to problems because of typos and also makes it harder to manage and change these values in the future. It's better to extract these strings as constants.",
+                "Start": 6,
+                "End": 14
+            },
+            {
+                "Improvement": "Extract config object creation and setup to a separate method",
+                "Change_Diff": "- ApiConfig config=new ApiConfig();\n...\n- config.setCodePath(\"/src/main/java\");\n+ ApiConfig config = setupApiConfig();",
+                "Description": "In order to increase code readability and maintainability, the creation and setup of the ApiConfig object can be moved to a separate method.",
+                "Start": 6,
+                "End": 19
+            }
+        ],
+        "Final code": "@Test public void testMdBuilderControllersApi1(){\n    ApiConfig config = setupApiConfig();\n    long start=System.currentTimeMillis();\n    ApiDocBuilder.buildApiDoc(config);\n    long end=System.currentTimeMillis();\n    DateTimeUtil.printRunTime(end,start);\n}\n\nprivate ApiConfig setupApiConfig() {\n    ApiConfig config = new ApiConfig();\n    config.setServerUrl(SERVER_URL);\n    config.setOpenUrl(OPEN_URL);\n    config.setAppToken(APP_TOKEN);\n    config.setDebugEnvName(DEBUG_ENV_NAME);\n    config.setInlineEnum(true);\n    config.setStyle(STYLE);\n    config.setCreateDebugPage(false);\n    config.setAllInOne(true);\n    config.setCoverOld(false);\n    config.setOutPath(OUT_PATH);\n    config.setFramework(FrameworkEnum.SPRING.getFramework());\n    config.setSourceCodePaths(SourceCodePath.builder().setDesc(DESC).setPath(PATH));\n    config.setPackageFilters(PACKAGE_FILTERS);\n    config.setBaseDir(BASE_DIR);\n    config.setCodePath(CODE_PATH);\n    return config;\n}"
+    },
+    "Old_Method": "/** \n * test markdown\n */\n@Deprecated @Test public void testMdBuilderControllersApi1(){\n  @Deprecated ApiConfig config=new ApiConfig();\n  config.setServerUrl(\"http://127.0.0.1:8899\");\n  config.setOpenUrl(\"http://localhost:7700/api\");\n  config.setAppToken(\"be4211613a734b45888c075741680e49\");\n  config.setDebugEnvName(\"测试环境\");\n  config.setInlineEnum(true);\n  config.setStyle(\"randomLight\");\n  config.setCreateDebugPage(false);\n  config.setAllInOne(true);\n  config.setCoverOld(false);\n  config.setOutPath(\"D:\\\\smart-doc\\\\docs\\\\jmx1\");\n  config.setFramework(FrameworkEnum.SPRING.getFramework());\n  config.setSourceCodePaths(SourceCodePath.builder().setDesc(\"本项目代码\").setPath(\"D:\\\\smart-doc\\\\test-project\"));\n  config.setPackageFilters(\"com.power.doc.controller.*\");\n  config.setBaseDir(\"D:\\\\smart-doc\\\\test-project\\\\smart-doc-example-cn-master\");\n  config.setCodePath(\"/src/main/java\");\n  long start=System.currentTimeMillis();\n  ApiDocBuilder.buildApiDoc(config);\n  long end=System.currentTimeMillis();\n  DateTimeUtil.printRunTime(end,start);\n}\n",
+    "File_Path": "smart-doc/src/test/java/com/ly/doc/ApiDocTest.java",
+    "Start": 3797,
+    "Stop": 5156,
+    "Project_Name": "data/projects/smart-doc",
+    "Method_Name": "testMdBuilderControllersApi1"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Split into multiple methods",
+                "Change_Diff": "- @Override public Download toFile(File file){\n+ @Override public Download toFile(File file){\n+   validateTaskExecutor();\n+   ensureFileExists(file);",
+                "Description": "The method toFile() is doing too many things. It checks whether the taskExecutor is null, whether the file and its parent exist, and whether new file creation is possible. It would be better to split these into separate methods for better readability and maintainability.",
+                "Start": 1,
+                "End": 21
+            },
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- catch (  Exception e) {\n-    response.close();\n+ catch (  Exception e) {",
+                "Description": "The response object is not being closed in the case of successful execution. This could lead to resource leaks. It would be better to use try-with-resources to ensure that the response is always closed.",
+                "Start": 22,
+                "End": 23
+            }
+        ],
+        "Final code": "@Override public Download toFile(File file){\n  validateTaskExecutor();\n  ensureFileExists(file);\n  try {\n    return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n  } catch (  Exception e) {\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n}\n\nprivate void validateTaskExecutor() {\n  if (taskExecutor == null) {\n    throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n  }\n}\n\nprivate void ensureFileExists(File file) {\n  if (!file.exists()) {\n    File parent=file.getParentFile();\n    if (parent == null) {\n      throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n    }\n    if (!parent.exists() && !parent.mkdirs()) {\n      throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n    }\n    if (!file.createNewFile()) {\n      throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n    }\n  }\n}"
+    },
+    "Old_Method": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n    }\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n      }\n    }\n  }\n catch (  Exception e) {\n    response.close();\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/internal/ResultBody.java",
+    "Start": 3853,
+    "Stop": 4601,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "toFile"
+}

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Optional API to avoid null checks",
+                "Change_Diff": "- if (error.getMessage() != null) {\n+ Optional.ofNullable(error.getMessage()).ifPresent(jsonApiError::detail);\n\n- if (error.getAttributes() != null && !error.getAttributes().isEmpty()) {\n+ Optional.ofNullable(error.getAttributes()).ifPresent(attributes -> ...",
+                "Description": "Instead of manually checking if `error.getMessage()` and `error.getAttributes()` are null, use the Optional API that provides a more elegant, functional-programming approach to handle null values.",
+                "Start": 4,
+                "End": 9
+            },
+            {
+                "Improvement": "Refactor repetitive code into a method",
+                "Change_Diff": "- attribute(\"id\",meta,value -> {...});\n... \n- attribute(\"links\",meta,value -> {...});\n+ addAttribute(\"id\", meta, jsonApiError::id);\n...\n+ addAttribute(\"links\", meta, jsonApiError::links);",
+                "Description": "The code to add an attribute is repetitive. Refactor this into a separate method to improve readability and maintainability of your code.",
+                "Start": 11,
+                "End": 52
+            }
+        ],
+        "Final code": "@Override public JsonApiError toJsonApiError(ElideError error){\n  JsonApiErrorBuilder jsonApiError=JsonApiError.builder();\n  Optional.ofNullable(error.getMessage()).ifPresent(jsonApiError::detail);\n  Optional.ofNullable(error.getAttributes()).ifPresent(attributes -> {\n    if (!attributes.isEmpty()) {\n      Map<String,Object> meta=new LinkedHashMap<>(attributes);\n      addAttribute(\"id\", meta, jsonApiError::id);\n      addAttribute(\"status\", meta, jsonApiError::status);\n      addAttribute(\"code\", meta, jsonApiError::code);\n      addAttribute(\"title\", meta, jsonApiError::title);\n      addAttribute(\"source\", meta, this::addSource);\n      addAttribute(\"links\", meta, this::addLinks);\n      if (!meta.isEmpty()) {\n        jsonApiError.meta(meta);\n      }\n    }\n  });\n  return jsonApiError.build();\n}\n\nprivate void addAttribute(String key, Map<String, Object> meta, Function<String, Void> setter) {...}\nprivate void addSource(Object value, JsonApiErrorBuilder builder) {...}\nprivate void addLinks(Object value, JsonApiErrorBuilder builder) {...}"
+    },
+    "Old_Method": "@Override public JsonApiError toJsonApiError(ElideError error){\n  JsonApiErrorBuilder jsonApiError=JsonApiError.builder();\n  if (error.getMessage() != null) {\n    jsonApiError.detail(error.getMessage());\n  }\n  if (error.getAttributes() != null && !error.getAttributes().isEmpty()) {\n    Map<String,Object> meta=new LinkedHashMap<>(error.getAttributes());\n    attribute(\"id\",meta,value -> {\n      jsonApiError.id(value.toString());\n      return true;\n    }\n);\n    attribute(\"status\",meta,value -> {\n      jsonApiError.status(value.toString());\n      return true;\n    }\n);\n    attribute(\"code\",meta,value -> {\n      jsonApiError.code(value.toString());\n      return true;\n    }\n);\n    attribute(\"title\",meta,value -> {\n      jsonApiError.title(value.toString());\n      return true;\n    }\n);\n    attribute(\"source\",meta,value -> {\n      if (value instanceof Source) {\n        jsonApiError.source(source);\n      }\n else       if (value instanceof Map) {\n        jsonApiError.source(toSource(map));\n      }\n      return true;\n    }\n);\n    attribute(\"links\",meta,value -> {\n      if (value instanceof Links) {\n        jsonApiError.links(links);\n      }\n else       if (value instanceof Map) {\n        jsonApiError.links(toLinks(map));\n      }\n      return true;\n    }\n);\n    if (!meta.isEmpty()) {\n      jsonApiError.meta(meta);\n    }\n  }\n  return jsonApiError.build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/jsonapi/DefaultJsonApiErrorMapper.java",
+    "Start": 852,
+    "Stop": 2692,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "toJsonApiError"
+}

@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Use Assert.assertThrows for exception testing",
+            "Change_Diff": "- try {\n-   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n-   Assert.fail();\n- }\n- catch (OfferChangedExcpetion e) {\n- }\n+ Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));",
+            "Description": "Instead of using a try-catch block to test for an exception, use the Assert.assertThrows method from Junit. It makes the code cleaner and easier to understand.",
+            "Start": 8,
+            "End": 13
+        }],
+        "Final code": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}"
+    },
+    "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+    "Start": 2542,
+    "Stop": 3087,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "canNotPurchaseIfOfferChanged"
+}

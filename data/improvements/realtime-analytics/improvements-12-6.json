@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use Java 8 Stream API for list concatenation",
+                "Change_Diff": "- StringBuilder b=new StringBuilder();\n- b.append(values.get(0));\n- for (int i=1, t=values.size(); i < t; i++) {\n-   b.append(\",\");\n-   b.append(values.get(i));\n- }\n- return b.toString();\n+ return values.stream().map(Object::toString).collect(Collectors.joining(\",\"));",
+                "Description": "Instead of using a for loop to concatenate the List elements, use the Java 8 Stream with the Collectors joining method for cleaner and more readable code.",
+                "Start": 7,
+                "End": 11
+            },
+            {
+                "Improvement": "Remove unnecessary toString() call",
+                "Change_Diff": "- return values.get(0).toString();\n+ return values.get(0);",
+                "Description": "In case of a single-element list, the toString() call on the first element is unnecessary as the function is expecting an Object as return type. This could avoid potential null pointer exceptions.",
+                "Start": 5,
+                "End": 5
+            }
+        ],
+        "Final code": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0);\n    }\n    return values.stream().map(Object::toString).collect(Collectors.joining(\",\"));\n  }\n else {\n    return value;\n  }\n}"
+    },
+    "Old_Method": "private static Object normailizeValue(Object value){\n  if (value instanceof List) {\n    @SuppressWarnings(\"unchecked\") List<Object> values=(List<Object>)value;\n    if (values.size() == 1) {\n      return values.get(0).toString();\n    }\n    StringBuilder b=new StringBuilder();\n    b.append(values.get(0));\n    for (int i=1, t=values.size(); i < t; i++) {\n      b.append(\",\");\n      b.append(values.get(i));\n    }\n    return b.toString();\n  }\n else {\n    return value;\n  }\n}\n",
+    "File_Path": "realtime-analytics/sessionizer/src/main/java/com/ebay/pulsar/sessionizer/esper/impl/EsperSessionizer.java",
+    "Start": 4288,
+    "Stop": 4905,
+    "Project_Name": "data/projects/realtime-analytics",
+    "Method_Name": "normailizeValue"
+}

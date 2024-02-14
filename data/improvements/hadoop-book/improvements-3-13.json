@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract inner if condition to a separate private method",
+                "Change_Diff": "- if (values[i]) {\n...\n}\n+ if (values[i]) {\n  createAndLinkNode()\n}\n",
+                "Description": "The if condition inside the for loop is doing a lot of tasks. It would be more readable to extract it into a separate private method. The new method can be called `createAndLinkNode()`",
+                "Start": 5,
+                "End": 20
+            },
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < values.length; ++i) {\n+ for (boolean value : values) {",
+                "Description": "Instead of using a traditional for loop to iterate over `values`, use an enhanced for loop. The new loop can be written as `for (boolean value : values) {`",
+                "Start": 4,
+                "End": 4
+            }
+        ],
+        "Final code": "public void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  int i=0;\n  for (boolean value : values) {\n    if (value) {\n      createAndLinkNode(i, prev);\n    }\n    i++;\n  }\n}\n\nprivate void createAndLinkNode(int i, Node<ColumnName> prev) {\n  ColumnHeader<ColumnName> top=columns.get(i);\n  top.size+=1;\n  Node<ColumnName> bottom=top.up;\n  Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n  bottom.down=node;\n  top.up=node;\n  if (prev != null) {\n    Node<ColumnName> front=prev.right;\n    node.left=prev;\n    node.right=front;\n    prev.right=node;\n    front.left=node;\n  }\n  else {\n    node.left=node;\n    node.right=node;\n  }\n  prev=node;\n}"
+    },
+    "Old_Method": "/** \n * Add a row to the table.\n * @param values the columns that are satisfied by this row\n */\npublic void addRow(boolean[] values){\n  Node<ColumnName> prev=null;\n  for (int i=0; i < values.length; ++i) {\n    if (values[i]) {\n      ColumnHeader<ColumnName> top=columns.get(i);\n      top.size+=1;\n      Node<ColumnName> bottom=top.up;\n      Node<ColumnName> node=new Node<ColumnName>(null,null,bottom,top,top);\n      bottom.down=node;\n      top.up=node;\n      if (prev != null) {\n        Node<ColumnName> front=prev.right;\n        node.left=prev;\n        node.right=front;\n        prev.right=node;\n        front.left=node;\n      }\n else {\n        node.left=node;\n        node.right=node;\n      }\n      prev=node;\n    }\n  }\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/DancingLinks.java",
+    "Start": 5022,
+    "Stop": 6050,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "addRow"
+}

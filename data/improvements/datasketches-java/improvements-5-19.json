@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract Magic Numbers into Constants",
+                "Change_Diff": "-  int k=256;\n+  public static final int K = 256;\n\n-  int n=1000000;\n+  public static final int N = 1000000;\n\n-  int numPhiValues=99;\n+  public static final int NUM_PHI_VALUES = 99;\n\n-  double nominal=(1e6 * q) / 100.0;\n+  public static final double NOMINAL = 1e6;\n\n-  assertTrue(reported >= (nominal - 10000.0));\n+  public static final double ERROR_BOUND = 10000.0;\n\n-  double phi=q / 100.0;\n+  public static final double PHI = 100.0;\n\n-  assertTrue(subtotal >= (phi - 0.01));\n+  public static final double TOLERANCE = 0.01;\n\n-  assertEquals(result.getRank(500000),0.5,0.01);\n+  public static final double RANK = 500000;\n+  public static final double EXPECTED_RANK = 0.5;",
+                "Description": "The various magic numbers (256, 1000000, 99, 1e6, 10000.0, 0.01, 0.5, etc.) used in the method should be extracted into named constants at the class level to improve readability and maintainability.",
+                "Start": 2,
+                "End": 37
+            },
+            {
+                "Improvement": "Use enhanced for loop for iterating",
+                "Change_Diff": "-  for (int q=1; q <= 99; q++) {\n+  for (double phi : phiArr) {\n\n-  for (int q=1; q <= 100; q++) {\n+  for (double pmf : pmfResult) {\n\n-  for (int q=1; q <= 100; q++) {\n+  for (double cdf : cdfResult) {",
+                "Description": "For iterating over arrays or collections, it's better to use enhanced for loop for readability and less error-prone.",
+                "Start": 19,
+                "End": 36
+            }
+        ],
+        "Final code": "@Test public void checkEndToEnd(){\n  public static final int K = 256;\n  public static final int N = 1000000;\n  public static final int NUM_PHI_VALUES = 99;\n  public static final double NOMINAL = 1e6;\n  public static final double ERROR_BOUND = 10000.0;\n  public static final double PHI = 100.0;\n  public static final double TOLERANCE = 0.01;\n  public static final double RANK = 500000;\n  public static final double EXPECTED_RANK = 0.5;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(K).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(K).build();\n  for (int item=N; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    } else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),N);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  double[] phiArr=new double[NUM_PHI_VALUES];\n  for (int q=1; q <= NUM_PHI_VALUES; q++) {\n    phiArr[q - 1]=q / PHI;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  for (double phi : phiArr) {\n    double nominal=(NOMINAL * phi) / PHI;\n    double reported=splitPoints[phi - 1];\n    assertTrue(reported >= (nominal - ERROR_BOUND));\n    assertTrue(reported <= (nominal + ERROR_BOUND));\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  double subtotal=0.0;\n  for (double pmf : pmfResult) {\n    phi=pmf / PHI;\n    subtotal+=pmfResult[phi - 1];\n    assertTrue(subtotal >= (phi - TOLERANCE));\n    assertTrue(subtotal <= (phi + TOLERANCE));\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (double cdf : cdfResult) {\n    phi=cdf / PHI;\n    subtotal=cdfResult[phi - 1];\n    assertTrue(subtotal >= (phi - TOLERANCE));\n    assertTrue(subtotal <= (phi + TOLERANCE));\n  }\n  assertEquals(result.getRank(RANK),EXPECTED_RANK,TOLERANCE);\n}"
+    },
+    "Old_Method": "@Test public void checkEndToEnd(){\n  int k=256;\n  UpdateDoublesSketch qs=DoublesSketch.builder().setK(k).build();\n  UpdateDoublesSketch qs2=DoublesSketch.builder().setK(k).build();\n  int n=1000000;\n  for (int item=n; item >= 1; item--) {\n    if ((item % 4) == 0) {\n      qs.update(item);\n    }\n else {\n      qs2.update(item);\n    }\n  }\n  assertEquals(qs.getN() + qs2.getN(),n);\n  DoublesUnion union=DoublesUnion.heapify(qs);\n  union.union(qs2);\n  DoublesSketch result=union.getResult();\n  int numPhiValues=99;\n  double[] phiArr=new double[numPhiValues];\n  for (int q=1; q <= 99; q++) {\n    phiArr[q - 1]=q / 100.0;\n  }\n  double[] splitPoints=result.getQuantiles(phiArr);\n  for (int q=1; q <= 99; q++) {\n    double nominal=(1e6 * q) / 100.0;\n    double reported=splitPoints[q - 1];\n    assertTrue(reported >= (nominal - 10000.0));\n    assertTrue(reported <= (nominal + 10000.0));\n  }\n  double[] pmfResult=result.getPMF(splitPoints);\n  double subtotal=0.0;\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal+=pmfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  double[] cdfResult=result.getCDF(splitPoints);\n  for (int q=1; q <= 100; q++) {\n    double phi=q / 100.0;\n    subtotal=cdfResult[q - 1];\n    assertTrue(subtotal >= (phi - 0.01));\n    assertTrue(subtotal <= (phi + 0.01));\n  }\n  assertEquals(result.getRank(500000),0.5,0.01);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/quantiles/HeapUpdateDoublesSketchTest.java",
+    "Start": 2693,
+    "Stop": 4396,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkEndToEnd"
+}

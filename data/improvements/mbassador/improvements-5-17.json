@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Refactor the method to reduce its complexity",
+                "Change_Diff": "- public void subscribe(Object listener){\n+ public void subscribe(Object listener){\n+     Subscription[] subscriptions = createSubscriptions(listener);\n+     subscribeListener(listener, subscriptions);\n+ }\n\n+ private Subscription[] createSubscriptions(Object listener){...}\n\n+ private void subscribeListener(Object listener, Subscription[] subscriptions){...}",
+                "Description": "The subscribe method is doing too much. It's creating subscriptions, subscribing listeners, and handling exceptions. It would be better to separate these concerns into their own methods to improve readability and maintainability.",
+                "Start": 1,
+                "End": 33
+            },
+            {
+                "Improvement": "Avoid swallowing the original exception",
+                "Change_Diff": "-  throw new RuntimeException(e);\n+  throw new RuntimeException(\"Exception occurred while subscribing\", e);",
+                "Description": "When catching exceptions, it is important to preserve the original exception to have a complete stack trace for debugging. Here, a new RuntimeException is being thrown and the original exception is lost.",
+                "Start": 30,
+                "End": 32
+            }
+        ],
+        "Final code": "public void subscribe(Object listener){\n    try {\n        Subscription[] subscriptions = createSubscriptions(listener);\n        subscribeListener(listener, subscriptions);\n    } catch (Exception e) {\n        throw new RuntimeException(\"Exception occurred while subscribing\", e);\n    }\n}\n\nprivate Subscription[] createSubscriptions(Object listener){\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n        return null;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n        MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n        int length=messageHandlers.length;\n        if (length == 0) {\n            nonListeners.add(listenerClass);\n            return null;\n        }\n        subscriptionsByListener=new Subscription[length];\n        MessageHandler messageHandler;\n        for (int i=0; i < length; i++) {\n            messageHandler=messageHandlers[i];\n            subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n        }\n    }\n    return subscriptionsByListener;\n}\n\nprivate void subscribeListener(Object listener, Subscription[] subscriptions){\n    if (subscriptions == null) {\n        return;\n    }\n    for (Subscription sub : subscriptions) {\n        sub.subscribe(listener);\n    }\n}"
+    },
+    "Old_Method": "public void subscribe(Object listener){\n  try {\n    Class<?> listenerClass=listener.getClass();\n    if (nonListeners.contains(listenerClass)) {\n      return;\n    }\n    Subscription[] subscriptionsByListener=getSubscriptionsByListener(listener);\n    if (subscriptionsByListener == null) {\n      MessageHandler[] messageHandlers=metadataReader.getMessageListener(listenerClass).getHandlers();\n      int length=messageHandlers.length;\n      if (length == 0) {\n        nonListeners.add(listenerClass);\n        return;\n      }\n      subscriptionsByListener=new Subscription[length];\n      MessageHandler messageHandler;\n      for (int i=0; i < length; i++) {\n        messageHandler=messageHandlers[i];\n        subscriptionsByListener[i]=subscriptionFactory.createSubscription(runtime,messageHandler);\n      }\n      subscribe(listener,subscriptionsByListener);\n    }\n else {\n      for (      Subscription sub : subscriptionsByListener) {\n        sub.subscribe(listener);\n      }\n    }\n  }\n catch (  Exception e) {\n    throw new RuntimeException(e);\n  }\n}\n",
+    "File_Path": "mbassador/src/main/java/net/engio/mbassy/subscription/SubscriptionManager.java",
+    "Start": 3620,
+    "Stop": 5539,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "subscribe"
+}

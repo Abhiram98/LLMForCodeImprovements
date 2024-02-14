@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use try-with-resources",
+                "Change_Diff": "- private void doDownload(RandomAccessFile raFile){\n+ private void doDownload(RandomAccessFile raFile) throws IOException{\n+ try (RandomAccessFile ra = raFile) {",
+                "Description": "The try-with-resources statement is a try statement that declares one or more resources. A resource is an object that must be closed after the program is finished with it. This improvement aims to ensure that each resource is closed at the end of the statement.",
+                "Start": 2,
+                "End": 49
+            },
+            {
+                "Improvement": "Avoid Deeply Nested Control Flow Statements",
+                "Change_Diff": "- while (status != Status.CANCELED && status != Status.DONE) {\n-     if (status == Status.DOWNLOADING) {\n+ if(status == Status.CANCELED || status == Status.DONE) return;\n+ if(status != Status.DOWNLOADING) return;",
+                "Description": "Deeply nested control flow statements are hard to read and understand. It's better to break the method into several smaller methods or use guard clauses to return early.",
+                "Start": 4,
+                "End": 33
+            }
+        ],
+        "Final code": "private void doDownload(RandomAccessFile raFile) throws IOException{\n  try (RandomAccessFile ra = raFile) {\n    if (appended && seekBytes > 0) {\n      ra.seek(seekBytes);\n    }\n    if(status == Status.CANCELED || status == Status.DONE) return;\n    if(status != Status.DOWNLOADING) return;\n    byte[] buff=new byte[buffSize];\n    int len;\n    while ((len=input.read(buff)) != -1) {\n      ra.write(buff,0,len);\n      doneBytes+=len;\n      if (status == Status.CANCELED || status == Status.PAUSED) {\n        break;\n      }\n    }\n    if (len == -1) {\n      synchronized (lock) {\n        if (status != Status.CANCELED) {\n          status=Status.DONE;\n        }\n      }\n    }\n  } catch (  IOException e) {\n    synchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  } finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}"
+    },
+    "Old_Method": "private void doDownload(RandomAccessFile raFile){\n  try {\n    if (appended && seekBytes > 0) {\n      raFile.seek(seekBytes);\n    }\n    while (status != Status.CANCELED && status != Status.DONE) {\n      if (status == Status.DOWNLOADING) {\n        byte[] buff=new byte[buffSize];\n        int len;\n        while ((len=input.read(buff)) != -1) {\n          raFile.write(buff,0,len);\n          doneBytes+=len;\n          if (status == Status.CANCELED || status == Status.PAUSED) {\n            break;\n          }\n        }\n        if (len == -1) {\nsynchronized (lock) {\n            if (status != Status.CANCELED) {\n              status=Status.DONE;\n            }\n          }\n        }\n      }\n    }\n  }\n catch (  IOException e) {\nsynchronized (lock) {\n      if (status != Status.CANCELED) {\n        status=Status.ERROR;\n      }\n    }\n    if (status == Status.ERROR) {\n      fireOnFailure(e);\n    }\n  }\n finally {\n    closeQuietly(raFile);\n    closeQuietly(input);\n    if (status == Status.CANCELED && !file.delete()) {\n      Platform.logError(\"can not delete canceled file: \" + file);\n    }\n    fireOnComplete();\n  }\n  if (status == Status.DONE) {\n    fireOnSuccess();\n  }\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/Download.java",
+    "Start": 6005,
+    "Stop": 7715,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "doDownload"
+}

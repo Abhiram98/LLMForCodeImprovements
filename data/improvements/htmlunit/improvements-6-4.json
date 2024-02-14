@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce method complexity by breaking it down",
+                "Change_Diff": "- public CssStyleSheet getSheet(){\n...\n+ public CssStyleSheet getSheet(){\n   if (sheet_ != null) {\n    return sheet_;\n  }\n return getSheetFromCacheOrNew();\n}\n\nprivate CssStyleSheet getSheetFromCacheOrNew() {...}",
+                "Description": "The getSheet() method is quite complex as it does multiple things. It would be more maintainable and easier to understand if broken down into smaller methods, each responsible for a single operation.",
+                "Start": 1,
+                "End": 22
+            },
+            {
+                "Improvement": "Use Optional to handle potential null values",
+                "Change_Diff": "- if (sheet_ != null) {\n    return sheet_;\n  }\n+ return Optional.ofNullable(sheet_).orElseGet(this::getSheetFromCacheOrNew);",
+                "Description": "Instead of checking for null values, use Java 8's Optional. Optional is a container object that may or may not contain a non-null value, which can reduce the risk of NullPointerException.",
+                "Start": 2,
+                "End": 3
+            }
+        ],
+        "Final code": "public CssStyleSheet getSheet(){\n   return Optional.ofNullable(sheet_).orElseGet(this::getSheetFromCacheOrNew);\n}\n\nprivate CssStyleSheet getSheetFromCacheOrNew() {\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}"
+    },
+    "Old_Method": "/** \n * @return the referenced style sheet\n */\npublic CssStyleSheet getSheet(){\n  if (sheet_ != null) {\n    return sheet_;\n  }\n  final Cache cache=getPage().getWebClient().getCache();\n  final CSSStyleSheetImpl cached=cache.getCachedStyleSheet(getTextContent());\n  final String uri=getPage().getWebResponse().getWebRequest().getUrl().toExternalForm();\n  if (cached != null) {\n    sheet_=new CssStyleSheet(this,cached,uri);\n  }\n else {\n    final String css=getTextContent();\n    try (InputSource source=new InputSource(new StringReader(css))){\n      sheet_=new CssStyleSheet(this,source,uri);\n      cache.cache(css,sheet_.getWrappedSheet());\n    }\n catch (    final IOException e) {\n      LOG.error(e.getMessage(),e);\n    }\n  }\n  return sheet_;\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlStyle.java",
+    "Start": 3916,
+    "Stop": 4846,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "getSheet"
+}

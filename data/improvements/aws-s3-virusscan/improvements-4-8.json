@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for objectListing",
+                "Change_Diff": "+ if (objectListing == null) {\n+      return count;\n+  }",
+                "Description": "If the s3.listObjects(name) returns null, then objectListing.getObjectSummaries() will throw NullPointerException. It's a good practice to add null check before using the object.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use do-while loop instead of while loop",
+                "Change_Diff": "- while (true) {\n- ...\n- else {\n-   break;\n- }\n+ do {\n+...\n+ } while (objectListing.isTruncated());",
+                "Description": "In the current code, we are writing the code to list objects and count them twice, once before the while loop and once inside the loop. We can replace the while loop with a do-while loop to avoid code duplication.",
+                "Start": 4,
+                "End": 10
+            }
+        ],
+        "Final code": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  if (objectListing == null) {\n      return count;\n  }\n  do {\n    count+=objectListing.getObjectSummaries().size();\n    objectListing=s3.listNextBatchOfObjects(objectListing);\n  } while (objectListing.isTruncated());\n  return count;\n}"
+    },
+    "Old_Method": "protected long countBucket(final String name){\n  long count=0;\n  ObjectListing objectListing=s3.listObjects(name);\n  while (true) {\n    count+=objectListing.getObjectSummaries().size();\n    if (objectListing.isTruncated()) {\n      objectListing=s3.listNextBatchOfObjects(objectListing);\n    }\n else {\n      break;\n    }\n  }\n  return count;\n}\n",
+    "File_Path": "aws-s3-virusscan/test/src/test/java/de/widdix/awss3virusscan/AAWSTest.java",
+    "Start": 8428,
+    "Stop": 8863,
+    "Project_Name": "data/projects/aws-s3-virusscan",
+    "Method_Name": "countBucket"
+}

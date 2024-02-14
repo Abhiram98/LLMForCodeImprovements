@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce code duplication by creating a method for registration and logging",
+                "Change_Diff": "- System.out.println(\"Register user ...\");\n  user=new SteamUser(userCallback);\n  System.out.println(\"Register user stats callback ...\");\n  userStats=new SteamUserStats(userStatsCallback);\n[...]\n+ registerInterface(\"Register user\", new SteamUser(userCallback));\n+ registerInterface(\"Register user stats callback\", new SteamUserStats(userStatsCallback));\n[...]",
+                "Description": "Code duplication is a bad practice as it makes the code harder to maintain and understand. Here, the code for registering an interface and printing a message is repeated multiple times. This can be improved by creating a method that takes in the message and the callback as parameters, creates the interface, and prints the message.",
+                "Start": 2,
+                "End": 16
+            },
+            {
+                "Improvement": "Encapsulate System prints in a separate method",
+                "Change_Diff": "- System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n[...]\n+ logInfo(\"Local user account ID: \" + user.getSteamID().getAccountID());\n[...]",
+                "Description": "System prints are scattered throughout the method. It's better to encapsulate them in a separate method, which can be silenced or redirected more easily for different environments, e.g., testing or production.",
+                "Start": 17,
+                "End": 26
+            }
+        ],
+        "Final code": "@Override protected void registerInterfaces(){\n  registerInterface(\"Register user\", new SteamUser(userCallback));\n  registerInterface(\"Register user stats callback\", new SteamUserStats(userStatsCallback));\n  registerInterface(\"Register remote storage\", new SteamRemoteStorage(remoteStorageCallback));\n  registerInterface(\"Register UGC\", new SteamUGC(ugcCallback));\n  registerInterface(\"Register Utils\", new SteamUtils(utilsCallback));\n  registerInterface(\"Register Apps\", new SteamApps());\n  registerInterface(\"Register Friends\", new SteamFriends(friendsCallback));\n\n  logInfo(\"Local user account ID: \" + user.getSteamID().getAccountID());\n  logInfo(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n  logInfo(\"Local user friends name: \" + friends.getPersonaName());\n  logInfo(\"App ID: \" + utils.getAppID());\n  logInfo(\"App build ID: \" + apps.getAppBuildId());\n  logInfo(\"App owner: \" + apps.getAppOwner().getAccountID());\n  logInfo(\"Current game language: \" + apps.getCurrentGameLanguage());\n  logInfo(\"Available game languages: \" + apps.getAvailableGameLanguages());\n}\n\nprivate void registerInterface(String message, Object interface){\n  System.out.println(message);\n  interface = interface;\n}\n\nprivate void logInfo(String message){\n  System.out.println(message);\n}"
+    },
+    "Old_Method": "@Override protected void registerInterfaces(){\n  System.out.println(\"Register user ...\");\n  user=new SteamUser(userCallback);\n  System.out.println(\"Register user stats callback ...\");\n  userStats=new SteamUserStats(userStatsCallback);\n  System.out.println(\"Register remote storage ...\");\n  remoteStorage=new SteamRemoteStorage(remoteStorageCallback);\n  System.out.println(\"Register UGC ...\");\n  ugc=new SteamUGC(ugcCallback);\n  System.out.println(\"Register Utils ...\");\n  utils=new SteamUtils(utilsCallback);\n  System.out.println(\"Register Apps ...\");\n  apps=new SteamApps();\n  System.out.println(\"Register Friends ...\");\n  friends=new SteamFriends(friendsCallback);\n  System.out.println(\"Local user account ID: \" + user.getSteamID().getAccountID());\n  System.out.println(\"Local user steam ID: \" + SteamID.getNativeHandle(user.getSteamID()));\n  System.out.println(\"Local user friends name: \" + friends.getPersonaName());\n  System.out.println(\"App ID: \" + utils.getAppID());\n  System.out.println(\"App build ID: \" + apps.getAppBuildId());\n  System.out.println(\"App owner: \" + apps.getAppOwner().getAccountID());\n  System.out.println(\"Current game language: \" + apps.getCurrentGameLanguage());\n  System.out.println(\"Available game languages: \" + apps.getAvailableGameLanguages());\n}\n",
+    "File_Path": "steamworks4j/tests/src/main/java/com/codedisaster/steamworks/test/SteamClientAPITest.java",
+    "Start": 13419,
+    "Stop": 14725,
+    "Project_Name": "data/projects/steamworks4j",
+    "Method_Name": "registerInterfaces"
+}

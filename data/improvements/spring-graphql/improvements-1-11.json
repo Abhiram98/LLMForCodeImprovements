@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of early return",
+                "Change_Diff": "- if (container == null) {\n-     return EMPTY_CONNECTION;\n- }",
+                "Description": "In the beginning of the method, there is a condition that checks if `container` is `null` and returns `EMPTY_CONNECTION`. It is a good practice to use early return in order to avoid unnecessary indentation and make the code easier to read.",
+                "Start": 2,
+                "End": 4
+            },
+            {
+                "Improvement": "Refactor repeated code",
+                "Change_Diff": "- if (!this.adapter.supports(container.getClass())) {\n-     if (container.getClass().getName().endsWith(\"Connection\")) {\n-         return container;\n-     }\n-     throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n+ String containerClassName = container.getClass().getName();\n+ if (!this.adapter.supports(container.getClass())) {\n+     if (containerClassName.endsWith(\"Connection\")) {\n+         return container;\n+     }\n+     throw new IllegalStateException(\"No ConnectionAdapter for: \" + containerClassName);",
+                "Description": "The `container.getClass().getName()` is used multiple times in the method. To avoid repetition, it is better to store it in a variable and use that variable instead.",
+                "Start": 7,
+                "End": 11
+            }
+        ],
+        "Final code": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  String containerClassName = container.getClass().getName();\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (containerClassName.endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + containerClassName);\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}"
+    },
+    "Old_Method": "private <T>Object adaptDataContainer(@Nullable Object container){\n  if (container == null) {\n    return EMPTY_CONNECTION;\n  }\n  if (container instanceof Connection<?>) {\n    return container;\n  }\n  if (!this.adapter.supports(container.getClass())) {\n    if (container.getClass().getName().endsWith(\"Connection\")) {\n      return container;\n    }\n    throw new IllegalStateException(\"No ConnectionAdapter for: \" + container.getClass().getName());\n  }\n  Collection<T> nodes=this.adapter.getContent(container);\n  if (nodes.isEmpty()) {\n    return EMPTY_CONNECTION;\n  }\n  int index=0;\n  List<Edge<T>> edges=new ArrayList<>(nodes.size());\n  for (  T node : nodes) {\n    String cursor=this.adapter.cursorAt(container,index++);\n    edges.add(new DefaultEdge<>(node,new DefaultConnectionCursor(cursor)));\n  }\n  DefaultPageInfo pageInfo=new DefaultPageInfo(edges.get(0).getCursor(),edges.get(edges.size() - 1).getCursor(),this.adapter.hasPrevious(container),this.adapter.hasNext(container));\n  return new DefaultConnection<>(edges,pageInfo);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/pagination/ConnectionFieldTypeVisitor.java",
+    "Start": 7935,
+    "Stop": 9024,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "adaptDataContainer"
+}

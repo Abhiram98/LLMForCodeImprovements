@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use English for println statement",
+                "Change_Diff": "- println(\"下载完成\");\n+ println(\"Download completed\");",
+                "Description": "To make your code more accessible for developers who don't read Chinese, change the println statement to print in English.",
+                "Start": 14,
+                "End": 14
+            },
+            {
+                "Improvement": "Add method description",
+                "Change_Diff": "+ /**\n+ * This method downloads a file in chunks and appends each chunk to a local file until the entire file is downloaded.\n+ * @param totalSize The total size of the file to be downloaded.\n+ * @param index The index of the current chunk to be downloaded.\n+ */",
+                "Description": "Adding a method description improves the readability and maintainability of the code. Other developers can understand what the method does without having to read and understand the entire method.",
+                "Start": 1,
+                "End": 1
+            }
+        ],
+        "Final code": "    /**\n     * This method downloads a file in chunks and appends each chunk to a local file until the entire file is downloaded.\n     * @param totalSize The total size of the file to be downloaded.\n     * @param index The index of the current chunk to be downloaded.\n     */\n    static void download(long totalSize,int index){\n      long size=3 * 1024 * 1024;\n      long start=index * size;\n      long end=Math.min(start + size,totalSize);\n      HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n        if (end < totalSize) {\n          download(totalSize,index + 1);\n        }\n     else {\n          System.out.println(\"Download completed\");\n        }\n      }\n    ).start();\n    }"
+    },
+    "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+    "Start": 680,
+    "Stop": 1474,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "download"
+}

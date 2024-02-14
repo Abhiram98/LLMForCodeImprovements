@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Add null check for sql and params",
+                "Change_Diff": "+ if (sql == null || params == null) {\n+     throw new IllegalArgumentException(\"sql and params cannot be null\");\n+ }",
+                "Description": "Before passing sql and params to other methods, it's better to check if they are null. This can prevent NullPointerException.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use try-with-resources to close resources",
+                "Change_Diff": "- Connection conn=null;\n- PreparedStatement statement=null;\n- ResultSet resultSet=null;\n- try {\n- conn=JdbcPool.getReadConnection();\n- statement=conn.prepareStatement(sql);\n+ try (Connection conn = JdbcPool.getReadConnection();\n+ PreparedStatement statement = conn.prepareStatement(sql)) {\n-\n- finally {\n- JdbcPool.release(conn,statement,resultSet);\n- }",
+                "Description": "To ensure that the resources are always closed, you can use try-with-resources statement. This will automatically close the resources when they are no longer needed.",
+                "Start": 5,
+                "End": 24
+            }
+        ],
+        "Final code": "public List<A> list(String sql,Object... params){\n  if (sql == null || params == null) {\n     throw new IllegalArgumentException(\"sql and params cannot be null\");\n  }\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  try (Connection conn = JdbcPool.getReadConnection();\n  PreparedStatement statement = conn.prepareStatement(sql)) {\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    ResultSet resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n  return beanList;\n}"
+    },
+    "Old_Method": "public List<A> list(String sql,Object... params){\n  List<A> beanList=new ArrayList<>();\n  grammarCheck(sql,DMLTypes.SELECT);\n  int paramSize=getParameterNum(sql,params);\n  Connection conn=null;\n  PreparedStatement statement=null;\n  ResultSet resultSet=null;\n  try {\n    conn=JdbcPool.getReadConnection();\n    statement=conn.prepareStatement(sql);\n    if (paramSize > 0) {\n      statement=bindParameters(statement,params);\n    }\n    resultSet=statement.executeQuery();\n    String[] selectFields=parseSelectFields(sql);\n    while (resultSet.next()) {\n      beanList.add(resultSet(selectFields,resultSet));\n    }\n  }\n catch (  Exception e) {\n    logger.error(\"sql error\",e);\n  }\n finally {\n    JdbcPool.release(conn,statement,resultSet);\n  }\n  return beanList;\n}\n",
+    "File_Path": "netty-restful-server/src/main/java/net/mengkang/nettyrest/mysql/MySelect.java",
+    "Start": 4628,
+    "Stop": 5587,
+    "Project_Name": "data/projects/netty-restful-server",
+    "Method_Name": "list"
+}

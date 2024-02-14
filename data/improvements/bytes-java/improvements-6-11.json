@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of Java Enums instead of raw constants",
+                "Change_Diff": "- ByteOrder byteOrder\n+ Endianess endianess",
+                "Description": "The ByteOrder is a raw constant in this case. It is a better idea to use Enums as they provide a way to define a common type for a group of related values and enable you to use these values in a type-safe way within your code. In the case of ByteOrder, it can have only two values BIG_ENDIAN and LITTLE_ENDIAN.",
+                "Start": 12,
+                "End": 35
+            },
+            {
+                "Improvement": "Refactor into smaller methods",
+                "Change_Diff": "- shiftLeft method\n+ shiftLeftBigEndian method\n+ shiftLeftLittleEndian method",
+                "Description": "The method shiftLeft is too long and does too many things. It would be better to split it into smaller methods. This way, the code would be easier to read and understand.",
+                "Start": 12,
+                "End": 35
+            },
+            {
+                "Improvement": "Replacing magic numbers with named constants",
+                "Change_Diff": "- 8\n+ BITS_IN_BYTE",
+                "Description": "There are magic numbers in the code (like 8), it's better to replace them with named constants for better readability.",
+                "Start": 14,
+                "End": 35
+            }
+        ],
+        "Final code": "enum Endianess {BIG_ENDIAN, LITTLE_ENDIAN}\n\nprivate static final int BITS_IN_BYTE = 8;\n\nstatic byte[] shiftLeft(byte[] byteArray,int shiftBitCount,Endianess endianess){\n  final int shiftMod=shiftBitCount % BITS_IN_BYTE;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / BITS_IN_BYTE);\n\n  if (endianess == Endianess.BIG_ENDIAN) {\n    return shiftLeftBigEndian(byteArray, shiftMod, carryMask, offsetBytes);\n  } else {\n    return shiftLeftLittleEndian(byteArray, shiftMod, carryMask, offsetBytes);\n  }\n}\n\nstatic byte[] shiftLeftBigEndian(byte[] byteArray, int shiftMod, byte carryMask, int offsetBytes) {\n  // original code for big endian case goes here\n}\n\nstatic byte[] shiftLeftLittleEndian(byte[] byteArray, int shiftMod, byte carryMask, int offsetBytes) {\n  // original code for little endian case goes here\n}"
+    },
+    "Old_Method": "/** \n * Light shift of whole byte array by shiftBitCount bits. This method will alter the input byte array. <p> <strong>Analysis<\/strong> <ul> <li>Time Complexity: <code>O(n)<\/code><\/li> <li>Space Complexity: <code>O(1)<\/code><\/li> <li>Alters Parameters: <code>true<\/code><\/li> <\/ul> <\/p>\n * @param byteArray     to shift\n * @param shiftBitCount how many bits to shift\n * @param byteOrder     endianness of given byte array\n * @return shifted byte array\n */\nstatic byte[] shiftLeft(byte[] byteArray,int shiftBitCount,ByteOrder byteOrder){\n  final int shiftMod=shiftBitCount % 8;\n  final byte carryMask=(byte)((1 << shiftMod) - 1);\n  final int offsetBytes=(shiftBitCount / 8);\n  int sourceIndex;\n  if (byteOrder == ByteOrder.BIG_ENDIAN) {\n    for (int i=0; i < byteArray.length; i++) {\n      sourceIndex=i + offsetBytes;\n      if (sourceIndex >= byteArray.length) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex + 1 < byteArray.length) {\n          dst|=byteArray[sourceIndex + 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n else {\n    for (int i=byteArray.length - 1; i >= 0; i--) {\n      sourceIndex=i - offsetBytes;\n      if (sourceIndex < 0) {\n        byteArray[i]=0;\n      }\n else {\n        byte src=byteArray[sourceIndex];\n        byte dst=(byte)(src << shiftMod);\n        if (sourceIndex - 1 >= 0) {\n          dst|=byteArray[sourceIndex - 1] >>> (8 - shiftMod) & carryMask & 0xff;\n        }\n        byteArray[i]=dst;\n      }\n    }\n  }\n  return byteArray;\n}\n",
+    "File_Path": "bytes-java/src/main/java/at/favre/lib/bytes/Util.java",
+    "Start": 9808,
+    "Stop": 12110,
+    "Project_Name": "data/projects/bytes-java",
+    "Method_Name": "shiftLeft"
+}

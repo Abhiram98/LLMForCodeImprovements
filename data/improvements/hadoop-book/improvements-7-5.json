@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Split the method into smaller methods",
+                "Change_Diff": "- public SolutionCategory getCategory(List<List<ColumnName>> names){\n+ private Piece findXPiece() {...}\n+ private Point calculateLowAndHighValues(List<ColumnName> row) {...}\n+ public SolutionCategory getCategory(List<List<ColumnName>> names) {...}",
+                "Description": "The getCategory method is doing too many things. It's better to split it into smaller methods, each doing one thing. For example, one method to find the xPiece, another to calculate the low and high values, and yet another to determine the category.",
+                "Start": 0,
+                "End": 42
+            },
+            {
+                "Improvement": "Use Optional to handle null values",
+                "Change_Diff": "- Piece xPiece=null;\n- for (  Piece p : pieces) {\n-   if (\"x\".equals(p.name)) {\n-     xPiece=p;\n-     break;\n-   }\n- }\n+ Optional<Piece> xPiece = findXPiece();\n+ if (!xPiece.isPresent()) {\n+   throw new NoSuchElementException(\"No piece with name 'x' found.\");\n+ }",
+                "Description": "The xPiece can be null if there is no piece with name 'x'. To avoid possible NullPointerException, use Optional.",
+                "Start": 4,
+                "End": 9
+            },
+            {
+                "Improvement": "Use Stream API for operations on collections",
+                "Change_Diff": "- for (  Piece p : pieces) {\n-   if (\"x\".equals(p.name)) {\n-     xPiece=p;\n-     break;\n-   }\n- }\n+ Optional<Piece> xPiece = pieces.stream().filter(p -> \"x\".equals(p.name)).findFirst();",
+                "Description": "Java 8 introduced the Stream API which provides a more declarative way to perform operations on collections. It can be used to find the xPiece and to calculate the low and high values.",
+                "Start": 4,
+                "End": 9
+            }
+        ],
+        "Final code": "private Optional<Piece> findXPiece() {\n    return pieces.stream().filter(p -> \"x\".equals(p.name)).findFirst();\n}\n\nprivate Point calculateLowAndHighValues(List<ColumnName> row) {\n    int low_x = width;\n    int high_x = 0;\n    int low_y = height;\n    int high_y = 0;\n    for (ColumnName col : row) {\n        if (col instanceof Point) {\n            int x = ((Point) col).x;\n            int y = ((Point) col).y;\n            if (x < low_x) low_x = x;\n            if (x > high_x) high_x = x;\n            if (y < low_y) low_y = y;\n            if (y > high_y) high_y = y;\n        }\n    }\n    return new Point(low_x, high_x, low_y, high_y);\n}\n\npublic SolutionCategory getCategory(List<List<ColumnName>> names) {\n    Optional<Piece> xPiece = findXPiece();\n    if (!xPiece.isPresent()) {\n        throw new NoSuchElementException(\"No piece with name 'x' found.\");\n    }\n    for (List<ColumnName> row : names) {\n        if (row.contains(xPiece.get())) {\n            Point point = calculateLowAndHighValues(row);\n            boolean mid_x = (point.low_x + point.high_x == width - 1);\n            boolean mid_y = (point.low_y + point.high_y == height - 1);\n            if (mid_x && mid_y) return SolutionCategory.CENTER;\n            else if (mid_x) return SolutionCategory.MID_X;\n            else if (mid_y) return SolutionCategory.MID_Y;\n            break;\n        }\n    }\n    return SolutionCategory.UPPER_LEFT;\n}"
+    },
+    "Old_Method": "/** \n * Find whether the solution has the x in the upper left quadrant, the x-midline, the y-midline or in the center.\n * @param names the solution to check\n * @return the catagory of the solution\n */\npublic SolutionCategory getCategory(List<List<ColumnName>> names){\n  Piece xPiece=null;\n  for (  Piece p : pieces) {\n    if (\"x\".equals(p.name)) {\n      xPiece=p;\n      break;\n    }\n  }\n  for (  List<ColumnName> row : names) {\n    if (row.contains(xPiece)) {\n      int low_x=width;\n      int high_x=0;\n      int low_y=height;\n      int high_y=0;\n      for (      ColumnName col : row) {\n        if (col instanceof Point) {\n          int x=((Point)col).x;\n          int y=((Point)col).y;\n          if (x < low_x) {\n            low_x=x;\n          }\n          if (x > high_x) {\n            high_x=x;\n          }\n          if (y < low_y) {\n            low_y=y;\n          }\n          if (y > high_y) {\n            high_y=y;\n          }\n        }\n      }\n      boolean mid_x=(low_x + high_x == width - 1);\n      boolean mid_y=(low_y + high_y == height - 1);\n      if (mid_x && mid_y) {\n        return SolutionCategory.CENTER;\n      }\n else       if (mid_x) {\n        return SolutionCategory.MID_X;\n      }\n else       if (mid_y) {\n        return SolutionCategory.MID_Y;\n      }\n      break;\n    }\n  }\n  return SolutionCategory.UPPER_LEFT;\n}\n",
+    "File_Path": "hadoop-book/src/main/java/com/hadoopilluminated/examples/dancing/Pentomino.java",
+    "Start": 6117,
+    "Stop": 8106,
+    "Project_Name": "data/projects/hadoop-book",
+    "Method_Name": "getCategory"
+}

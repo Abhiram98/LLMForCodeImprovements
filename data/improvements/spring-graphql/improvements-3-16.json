@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- factories.put(typeName,new DataFetcherFactory(){\n+ factories.put(typeName, createDataFetcherFactory(builder));",
+                "Description": "The creation of DataFetcherFactory is repeated twice within two for loops. This code can be extracted into a separate method to improve readability and reduce redundancy.",
+                "Start": 21,
+                "End": 33
+            },
+            {
+                "Improvement": "Use Java 8 Stream API",
+                "Change_Diff": "- for (QueryByExampleExecutor<?> executor : executors) {\n+ executors.stream().filter(Objects::nonNull).forEach(executor -> {...});",
+                "Description": "The traditional for loop can be replaced with Java 8 Stream API to iterate over the executors and reactiveExecutors. This provides better readability and makes the code more concise.",
+                "Start": 14,
+                "End": 20
+            },
+            {
+                "Improvement": "Use Java 8 Stream API",
+                "Change_Diff": "- for (ReactiveQueryByExampleExecutor<?> executor : reactiveExecutors) {\n+ reactiveExecutors.stream().filter(Objects::nonNull).forEach(executor -> {...});",
+                "Description": "The traditional for loop can be replaced with Java 8 Stream API to iterate over the reactiveExecutors. This provides better readability and makes the code more concise.",
+                "Start": 35,
+                "End": 47
+            }
+        ],
+        "Final code": "public static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QueryByExampleExecutor<?>> executors,List<ReactiveQueryByExampleExecutor<?>> reactiveExecutors,@Nullable CursorStrategy<ScrollPosition> cursorStrategy,@Nullable ScrollSubrange defaultScrollSubrange){\n Map<String,DataFetcherFactory> factories=new HashMap<>();\n executors.stream().filter(Objects::nonNull).forEach(executor -> {\n String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n if (typeName != null) {\n Builder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n factories.put(typeName, createDataFetcherFactory(builder));\n }\n });\n reactiveExecutors.stream().filter(Objects::nonNull).forEach(executor -> {\n String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n if (typeName != null) {\n ReactiveBuilder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n factories.put(typeName, createDataFetcherFactory(builder));\n }\n });\n if (logger.isTraceEnabled()) {\n logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n }\n return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}\n\nprivate static DataFetcherFactory createDataFetcherFactory(Builder<?,?> builder) {\n return new DataFetcherFactory(){\n @Override public DataFetcher<?> single(){\n return builder.single();\n }\n @Override public DataFetcher<?> many(){\n return builder.many();\n }\n @Override public DataFetcher<?> scrollable(){\n return builder.scrollable();\n }\n };\n}"
+    },
+    "Old_Method": "/** \n * Return a  {@link RuntimeWiringConfigurer} that installs a{@link graphql.schema.idl.WiringFactory} to find queries with a returntype whose name matches to the domain type name of the given repositories and registers  {@link DataFetcher}s for them. <p><strong>Note:<\/strong> This applies only to top-level queries and repositories annotated with  {@link GraphQlRepository @GraphQlRepository}.\n * @param executors repositories to consider for registration\n * @param reactiveExecutors reactive repositories to consider for registration\n * @param cursorStrategy for decoding cursors in pagination requests;if  {@code null}, then  {@link Builder#cursorStrategy} defaults apply.\n * @param defaultScrollSubrange default parameters for scrolling;if  {@code null}, then  {@link Builder#defaultScrollSubrange} defaults apply.\n * @return the created configurer\n * @since 1.2.0\n */\npublic static RuntimeWiringConfigurer autoRegistrationConfigurer(List<QueryByExampleExecutor<?>> executors,List<ReactiveQueryByExampleExecutor<?>> reactiveExecutors,@Nullable CursorStrategy<ScrollPosition> cursorStrategy,@Nullable ScrollSubrange defaultScrollSubrange){\n  Map<String,DataFetcherFactory> factories=new HashMap<>();\n  for (  QueryByExampleExecutor<?> executor : executors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      Builder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  for (  ReactiveQueryByExampleExecutor<?> executor : reactiveExecutors) {\n    String typeName=RepositoryUtils.getGraphQlTypeName(executor);\n    if (typeName != null) {\n      ReactiveBuilder<?,?> builder=customize(executor,builder(executor).cursorStrategy(cursorStrategy).defaultScrollSubrange(defaultScrollSubrange));\n      factories.put(typeName,new DataFetcherFactory(){\n        @Override public DataFetcher<?> single(){\n          return builder.single();\n        }\n        @Override public DataFetcher<?> many(){\n          return builder.many();\n        }\n        @Override public DataFetcher<?> scrollable(){\n          return builder.scrollable();\n        }\n      }\n);\n    }\n  }\n  if (logger.isTraceEnabled()) {\n    logger.trace(\"Auto-registration candidate typeNames \" + factories.keySet());\n  }\n  return new AutoRegistrationRuntimeWiringConfigurer(factories);\n}\n",
+    "File_Path": "spring-graphql/spring-graphql/src/main/java/org/springframework/graphql/data/query/QueryByExampleDataFetcher.java",
+    "Start": 8299,
+    "Stop": 11102,
+    "Project_Name": "data/projects/spring-graphql",
+    "Method_Name": "autoRegistrationConfigurer"
+}

@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Avoid calling the same method multiple times",
+                "Change_Diff": "- getPage().getWebClient().setCurrentWindow(getPage().getEnclosingWindow());\n+ Page currentPage = getPage();\n+ currentPage.getWebClient().setCurrentWindow(currentPage.getEnclosingWindow());",
+                "Description": "The method `getPage()` is called multiple times. Assign its result to a variable and use that variable to avoid the overhead of calling the method several times.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Reduce the length of the method",
+                "Change_Diff": "",
+                "Description": "This method is quite long. It is generally a good practice to keep methods short and focused. Consider breaking it up into several smaller helper methods, each performing a specific task.",
+                "Start": 1,
+                "End": 72
+            },
+            {
+                "Improvement": "Use polymorphism instead of checking instance type",
+                "Change_Diff": "- if (this instanceof HtmlTextInput || this instanceof HtmlTextArea || this instanceof HtmlTelInput|| this instanceof HtmlNumberInput|| this instanceof HtmlSearchInput|| this instanceof HtmlPasswordInput) {\n+ this.triggerKeyboardEvent();",
+                "Description": "Instead of checking the type of this instance in the if statement, consider using polymorphism. You can create a method in the parent class and override it in the child classes to provide the specific behavior.",
+                "Start": 44,
+                "End": 44
+            }
+        ],
+        "Final code": "private Page type(final char c,final boolean lastType) throws IOException {\n  if (isDisabledElementAndDisabled()) {\n    return getPage();\n  }\n  Page currentPage = getPage();\n  currentPage.getWebClient().setCurrentWindow(currentPage.getEnclosingWindow());\n  final HtmlPage page=(HtmlPage)currentPage;\n  if (page.getFocusedElement() != this) {\n    focus();\n  }\n  handleKeyDown(c);\n  handleKeyPress(c);\n  handleKeyUp(c);\n  handleFormSubmit(c);\n  return currentPage.getWebClient().getCurrentWindow().getEnclosedPage();\n}\n\nprivate void handleKeyDown(final char c) {...}\nprivate void handleKeyPress(final char c) {...}\nprivate void handleKeyUp(final char c) {...}\nprivate void handleFormSubmit(final char c) {...}"
+    },
+    "Old_Method": "/** \n * Simulates typing the specified character while this element has focus, returning the page contained by this element's window after typing. Note that it may or may not be the same as the original page, depending on the JavaScript event handlers, etc. Note also that for some elements, typing <code>'\\n'<\/code> submits the enclosed form.\n * @param c the character you wish to simulate typing\n * @param lastType is this the last character to type\n * @return the page contained in the current window as returned by {@link WebClient#getCurrentWindow()}\n * @exception IOException if an IO error occurs\n */\nprivate Page type(final char c,final boolean lastType) throws IOException {\n  if (isDisabledElementAndDisabled()) {\n    return getPage();\n  }\n  getPage().getWebClient().setCurrentWindow(getPage().getEnclosingWindow());\n  final HtmlPage page=(HtmlPage)getPage();\n  if (page.getFocusedElement() != this) {\n    focus();\n  }\n  final boolean isShiftNeeded=KeyboardEvent.isShiftNeeded(c,shiftPressed_);\n  final Event shiftDown;\n  final ScriptResult shiftDownResult;\n  if (isShiftNeeded) {\n    shiftDown=new KeyboardEvent(this,Event.TYPE_KEY_DOWN,KeyboardEvent.DOM_VK_SHIFT,true,ctrlPressed_,altPressed_);\n    shiftDownResult=fireEvent(shiftDown);\n  }\n else {\n    shiftDown=null;\n    shiftDownResult=null;\n  }\n  final Event keyDown=new KeyboardEvent(this,Event.TYPE_KEY_DOWN,c,shiftPressed_ || isShiftNeeded,ctrlPressed_,altPressed_);\n  final ScriptResult keyDownResult=fireEvent(keyDown);\n  if (!keyDown.isAborted(keyDownResult)) {\n    final Event keyPress=new KeyboardEvent(this,Event.TYPE_KEY_PRESS,c,shiftPressed_ || isShiftNeeded,ctrlPressed_,altPressed_);\n    final ScriptResult keyPressResult=fireEvent(keyPress);\n    if ((shiftDown == null || !shiftDown.isAborted(shiftDownResult)) && !keyPress.isAborted(keyPressResult)) {\n      doType(c,lastType);\n    }\n  }\n  final WebClient webClient=page.getWebClient();\n  if (this instanceof HtmlTextInput || this instanceof HtmlTextArea || this instanceof HtmlTelInput|| this instanceof HtmlNumberInput|| this instanceof HtmlSearchInput|| this instanceof HtmlPasswordInput) {\n    fireEvent(new KeyboardEvent(this,Event.TYPE_INPUT,c,shiftPressed_ || isShiftNeeded,ctrlPressed_,altPressed_));\n  }\n  HtmlElement eventSource=this;\n  if (!isAttachedToPage()) {\n    final BrowserVersion browserVersion=page.getWebClient().getBrowserVersion();\n    if (browserVersion.hasFeature(HTMLELEMENT_DETACH_ACTIVE_TRIGGERS_NO_KEYUP_EVENT)) {\n      eventSource=null;\n    }\n else {\n      eventSource=page.getBody();\n    }\n  }\n  if (eventSource != null) {\n    final Event keyUp=new KeyboardEvent(this,Event.TYPE_KEY_UP,c,shiftPressed_ || isShiftNeeded,ctrlPressed_,altPressed_);\n    eventSource.fireEvent(keyUp);\n    if (isShiftNeeded) {\n      final Event shiftUp=new KeyboardEvent(this,Event.TYPE_KEY_UP,KeyboardEvent.DOM_VK_SHIFT,false,ctrlPressed_,altPressed_);\n      eventSource.fireEvent(shiftUp);\n    }\n  }\n  final HtmlForm form=getEnclosingForm();\n  if (form != null && c == '\\n' && isSubmittableByEnter()) {\n    final HtmlSubmitInput submit=form.getFirstByXPath(\".//input[@type='submit']\");\n    if (submit != null) {\n      return submit.click();\n    }\n    form.submit((SubmittableElement)this);\n    webClient.getJavaScriptEngine().processPostponedActions();\n  }\n  return webClient.getCurrentWindow().getEnclosedPage();\n}\n",
+    "File_Path": "htmlunit/src/main/java/org/htmlunit/html/HtmlElement.java",
+    "Start": 20113,
+    "Stop": 24471,
+    "Project_Name": "data/projects/htmlunit",
+    "Method_Name": "type"
+}

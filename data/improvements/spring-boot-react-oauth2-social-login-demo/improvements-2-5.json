@@ -1,0 +1,18 @@
+{
+    "Method_Improvements": {
+        "Improvements": [{
+            "Improvement": "Refactor repetitive cookie operations into a separate method",
+            "Change_Diff": "- if (cookie.getName().equals(name)) {\n-    cookie.setValue(\"\");\n-    cookie.setPath(\"/\");\n-    cookie.setMaxAge(0);\n-    response.addCookie(cookie);\n+ if (cookie.getName().equals(name)) {\n+    deleteCookie(response, cookie);\n}",
+            "Description": "The operations on a cookie (setValue, setPath, setMaxAge, addCookie) are repetitive and can be refactored into a separate method to keep the code DRY (Don't Repeat Yourself).",
+            "Start": 5,
+            "End": 9
+        }],
+        "Final code": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        deleteCookie(response, cookie);\n      }\n    }\n  }\n}\n\nprivate static void deleteCookie(HttpServletResponse response, Cookie cookie) {\n  cookie.setValue(\"\");\n  cookie.setPath(\"/\");\n  cookie.setMaxAge(0);\n  response.addCookie(cookie);\n}"
+    },
+    "Old_Method": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (    Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        cookie.setValue(\"\");\n        cookie.setPath(\"/\");\n        cookie.setMaxAge(0);\n        response.addCookie(cookie);\n      }\n    }\n  }\n}\n",
+    "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/util/CookieUtils.java",
+    "Start": 1016,
+    "Stop": 1537,
+    "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
+    "Method_Name": "deleteCookie"
+}

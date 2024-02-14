@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce method complexity",
+                "Change_Diff": "- @Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){...}\n+ @Override public Route resolve(String mediaType, String baseUrl, String path, Map<String, List<String>> headers, Map<String, List<String>> parameters) {\n+     String baseRoute = baseUrl == null ? \"\" : baseUrl;\n+     ApiVersionPath apiVersionPath = findApiVersionAndPath(path);\n+     String apiVersion = validateApiVersion(apiVersionPath.getApiVersion());\n+     String route = extractRoute(apiVersionPath.getPath());\n+     baseRoute = appendApiVersionToBaseRoute(baseRoute, apiVersion);\n+     return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n+ }",
+                "Description": "The method is too lengthy and complex. It can be refactored into smaller, simpler methods to improve readability and maintainability. This can be achieved by extracting parts of the method into separate methods, such as extracting the logic for finding the API version and path into a separate method.",
+                "Start": 1,
+                "End": 57
+            },
+            {
+                "Improvement": "Use better variable names",
+                "Change_Diff": "- int find=path.indexOf('/',0);\n+ int firstSlashIndex = path.indexOf('/', 0);",
+                "Description": "The variables `find`, `findEnd`, `versionStart`, `versionEnd`, `pathStart`, `pathEnd` are not clear. Rename these variables to make the code more readable.",
+                "Start": 8,
+                "End": 33
+            },
+            {
+                "Improvement": "Eliminate unnecessary else clause",
+                "Change_Diff": "- if (versionStart != -1 && versionEnd != -1) {...} else {...\n+ if (versionStart == -1 || versionEnd == -1) return;",
+                "Description": "The else clause in the if statement comparing `versionStart` and `versionEnd` to -1 is unnecessary. The method should return early if these values are -1.",
+                "Start": 35,
+                "End": 39
+            }
+        ],
+        "Final code": "public class RouteResolver {\n\n    private static final String NO_VERSION = \"\";\n\n    private String versionPrefix = \"\";\n\n    private ApiVersionValidator apiVersionValidator = new ApiVersionValidator();\n\n    @Override public Route resolve(String mediaType, String baseUrl, String path, Map<String, List<String>> headers, Map<String, List<String>> parameters) {\n        String baseRoute = baseUrl == null ? \"\" : baseUrl;\n        ApiVersionPath apiVersionPath = findApiVersionAndPath(path);\n        String apiVersion = validateApiVersion(apiVersionPath.getApiVersion());\n        String route = extractRoute(apiVersionPath.getPath());\n        baseRoute = appendApiVersionToBaseRoute(baseRoute, apiVersion);\n        return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n    }\n\n    private ApiVersionPath findApiVersionAndPath(String path) {\n        // Extracted logic for finding api version and path\n    }\n\n    private String validateApiVersion(String apiVersion) {\n        // Extracted logic for validating api version\n    }\n\n    private String extractRoute(String path) {\n        // Extracted logic for extracting route\n    }\n\n    private String appendApiVersionToBaseRoute(String baseRoute, String apiVersion) {\n        // Extracted logic for appending api version to base route\n    }\n}"
+    },
+    "Old_Method": "@Override public Route resolve(String mediaType,String baseUrl,String path,Map<String,List<String>> headers,Map<String,List<String>> parameters){\n  String baseRoute=baseUrl == null ? \"\" : baseUrl;\n  String route=path;\n  String apiVersion=NO_VERSION;\n  String apiVersionString=\"\";\n  int versionStart=-1;\n  int versionEnd=-1;\n  int pathStart=-1;\n  int pathEnd=-1;\n  int find=path.indexOf('/',0);\n  if (find != -1) {\n    if (find == 0) {\n      versionStart=1;\n      int findEnd=path.indexOf('/',1);\n      if (findEnd != -1) {\n        versionEnd=findEnd;\n        pathStart=findEnd;\n        pathEnd=path.length();\n      }\n else {\n        versionEnd=path.length();\n      }\n    }\n else {\n      versionStart=0;\n      versionEnd=find;\n      pathStart=find;\n      pathEnd=path.length();\n    }\n  }\n else {\n    versionStart=0;\n    versionEnd=path.length();\n  }\n  if (versionStart != -1 && versionEnd != -1) {\n    apiVersion=path.substring(versionStart,versionEnd);\n    apiVersionString=apiVersion;\n  }\n  if (!apiVersion.isEmpty() && !this.versionPrefix.isEmpty()) {\n    if (apiVersion.startsWith(this.versionPrefix)) {\n      apiVersion=apiVersion.substring(this.versionPrefix.length());\n    }\n  }\n  if (!apiVersion.isEmpty()) {\n    if (!apiVersionValidator.isValidApiVersion(apiVersion)) {\n      apiVersion=NO_VERSION;\n      pathStart=0;\n      pathEnd=path.length();\n      apiVersionString=\"\";\n    }\n  }\n  if (pathStart != -1 && pathEnd != -1) {\n    route=path.substring(pathStart,pathEnd);\n  }\n else {\n    route=\"\";\n  }\n  if (route.length() > 0 && route.charAt(0) == '/') {\n    route=route.substring(1);\n  }\n  if (baseRoute.length() > 0 && baseRoute.charAt(baseRoute.length() - 1) == '/') {\n    baseRoute=baseRoute + apiVersionString;\n  }\n else {\n    baseRoute=baseRoute + \"/\" + apiVersionString;\n  }\n  return Route.builder().apiVersion(apiVersion).baseUrl(baseRoute).path(route).headers(headers).parameters(parameters).build();\n}\n",
+    "File_Path": "elide/elide-core/src/main/java/com/yahoo/elide/core/request/route/PathRouteResolver.java",
+    "Start": 730,
+    "Stop": 3402,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "resolve"
+}

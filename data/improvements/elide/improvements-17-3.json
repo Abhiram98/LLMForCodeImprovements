@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use polymorphism instead of instanceof and typecasting",
+                "Change_Diff": "- if (exception instanceof GraphQLException) {\n- String body=e.getMessage();\n- return ElideResponse.status(HttpStatus.SC_OK).body(body);\n- }\n- if (exception instanceof InvalidEntityBodyException) {\n- if (e.getCause() instanceof JsonParseException) {\n- return buildResponse(e,errorContext);\n- }\n- return buildResponse(HttpStatus.SC_OK,e,errorContext);\n- }\n- if (exception instanceof InvalidApiVersionException) {\n- return buildResponse(e,errorContext);\n- }\n- if (exception instanceof HttpStatusException) {\n- return buildResponse(HttpStatus.SC_OK,e,errorContext);\n- }\n- if (exception instanceof ConstraintViolationException) {\n- //...\n- }\n+ return exception.handleException(errorContext);",
+                "Description": "The code uses multiple if statements with instanceof checks to determine the type of exception and handle it accordingly. This can be replaced with a more object-oriented approach by defining a method in the exception classes that encapsulates the different behaviors. This makes the code easier to read and maintain.",
+                "Start": 3,
+                "End": 30
+            },
+            {
+                "Improvement": "Use appropriate HTTP status codes",
+                "Change_Diff": "- return ElideResponse.status(HttpStatus.SC_OK).body(body);\n- //...\n- return buildResponse(HttpStatus.SC_OK,e,errorContext);\n- //...\n- return buildResponse(HttpStatus.SC_OK,e,errorContext);\n- //...\n- return buildResponse(HttpStatus.SC_OK,e,errorContext);\n+ return exception.handleException(errorContext);",
+                "Description": "The code uses HTTP 200 OK status for all types of exceptions which is not appropriate. It should use appropriate HTTP status codes based on the type of the exception.",
+                "Start": 4,
+                "End": 26
+            }
+        ],
+        "Final code": "@Override protected ElideResponse<?> handleRuntimeException(RuntimeException exception, GraphQLErrorContext errorContext) {\n    return exception.handleException(errorContext);\n}"
+    },
+    "Old_Method": "@Override protected ElideResponse<?> handleRuntimeException(RuntimeException exception,GraphQLErrorContext errorContext){\n  if (exception instanceof GraphQLException) {\n    String body=e.getMessage();\n    return ElideResponse.status(HttpStatus.SC_OK).body(body);\n  }\n  if (exception instanceof InvalidEntityBodyException) {\n    if (e.getCause() instanceof JsonParseException) {\n      return buildResponse(e,errorContext);\n    }\n    return buildResponse(HttpStatus.SC_OK,e,errorContext);\n  }\n  if (exception instanceof InvalidApiVersionException) {\n    return buildResponse(e,errorContext);\n  }\n  if (exception instanceof HttpStatusException) {\n    return buildResponse(HttpStatus.SC_OK,e,errorContext);\n  }\n  if (exception instanceof ConstraintViolationException) {\n    final GraphQLErrors.GraphQLErrorsBuilder errors=GraphQLErrors.builder();\n    if (e.getConstraintViolations() != null) {\n      for (      ConstraintViolation<?> constraintViolation : e.getConstraintViolations()) {\n        errors.error(error -> {\n          error.message(constraintViolation.getMessage());\n          error.extension(\"code\",constraintViolation.getConstraintDescriptor().getAnnotation().annotationType().getSimpleName());\n          error.extension(\"type\",\"ConstraintViolation\");\n          final String propertyPathString=constraintViolation.getPropertyPath().toString();\n          if (!propertyPathString.isEmpty()) {\n            error.extension(\"property\",propertyPathString);\n          }\n        }\n);\n      }\n    }\n    return buildResponse(HttpStatus.SC_OK,errors.build());\n  }\n  log.error(\"Error or exception uncaught by Elide\",exception);\n  throw exception;\n}\n",
+    "File_Path": "elide/elide-graphql/src/main/java/com/yahoo/elide/graphql/DefaultGraphQLExceptionHandler.java",
+    "Start": 1763,
+    "Stop": 3792,
+    "Project_Name": "data/projects/elide",
+    "Method_Name": "handleRuntimeException"
+}

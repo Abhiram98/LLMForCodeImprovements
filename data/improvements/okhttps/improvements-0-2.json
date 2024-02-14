@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of English for Exception messages",
+                "Change_Diff": "- throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n+ throw new IllegalStateException(\"No taskExecutor, download operation cannot be performed!\");\n- throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n+ throw new IllegalStateException(\"Incorrect download path:\" + file.getPath());\n- throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n+ throw new IllegalStateException(\"Cannot create parent directory:\" + parent.getPath());\n- throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n+ throw new IllegalStateException(\"The file has just been occupied by another thread:\" + parent.getPath());\n- throw new OkHttpsException(\"文件下载失败\",e);\n+ throw new OkHttpsException(\"File download failed\",e);",
+                "Description": "The exception messages are currently in Chinese. To make code universally understandable, it is better to use English for these messages.",
+                "Start": 5,
+                "End": 17
+            },
+            {
+                "Improvement": "Improve error handling",
+                "Change_Diff": "- try {\n... (lines of code) ...\ncatch (Exception e) {\n... (lines of code) ...\n}\n+ try {\n... (lines of code) ...\n} catch (Exception e) {\n... (lines of code) ...\n}\ntry {\n... (lines of code) ...\n} catch (Exception e) {\n... (lines of code) ...\n}\n... (and so on) ...",
+                "Description": "Try-catch block covers a large area of code which can make it difficult to understand which section of the code threw the exception. It is better to use separate try-catch blocks for each operation that can throw an exception.",
+                "Start": 4,
+                "End": 20
+            }
+        ],
+        "Final code": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"No taskExecutor, download operation cannot be performed!\");\n    }\n  } catch (Exception e) {\n    response.close();\n    throw new OkHttpsException(\"TaskExecutor check failed\",e);\n  }\n  try {\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"Incorrect download path:\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"Cannot create parent directory:\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"The file has just been occupied by another thread:\" + parent.getPath());\n      }\n    }\n  } catch (Exception e) {\n    response.close();\n    throw new OkHttpsException(\"File creation failed\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}"
+    },
+    "Old_Method": "@Override public Download toFile(File file){\n  try {\n    if (taskExecutor == null) {\n      throw new IllegalStateException(\"没有 taskExecutor， 不可进行下载操作！\");\n    }\n    if (!file.exists()) {\n      File parent=file.getParentFile();\n      if (parent == null) {\n        throw new IllegalStateException(\"不正确的下载路径：\" + file.getPath());\n      }\n      if (!parent.exists() && !parent.mkdirs()) {\n        throw new IllegalStateException(\"不能创建父目录：\" + parent.getPath());\n      }\n      if (!file.createNewFile()) {\n        throw new IllegalStateException(\"文件刚被其它线程占用：\" + parent.getPath());\n      }\n    }\n  }\n catch (  Exception e) {\n    response.close();\n    throw new OkHttpsException(\"文件下载失败\",e);\n  }\n  return taskExecutor.download(result.getTask(),file,toByteStream(),getRangeStart());\n}\n",
+    "File_Path": "okhttps/okhttps/src/main/java/cn/zhxu/okhttps/internal/ResultBody.java",
+    "Start": 3853,
+    "Stop": 4601,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "toFile"
+}

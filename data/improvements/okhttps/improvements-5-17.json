@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constants instead of hard-coded values",
+                "Change_Diff": "- long size=3 * 1024 * 1024;\n+ long size=CHUNK_SIZE;\n- .toFile(\"D:/download/test.zip\")\n+ .toFile(FILE_PATH)",
+                "Description": "Hard-coded values like '3 * 1024 * 1024' and 'D:/download/test.zip' can be replaced with constants. This makes the code more maintainable and prevents potential errors if these values are used in multiple places.",
+                "Start": 3,
+                "End": 7
+            },
+            {
+                "Improvement": "Extract repeated code to a method",
+                "Change_Diff": "- HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n-    if (end < totalSize) {\n-      download(totalSize,index + 1);\n-    }\n- else {\n-      println(\"下载完成\");\n-    }\n-  }\n- ).start();\n+ downloadChunk(start, end, totalSize, index);",
+                "Description": "The code to download a chunk of the file is repeated. It can be extracted into a separate method to avoid repetition and make the code more readable.",
+                "Start": 5,
+                "End": 9
+            }
+        ],
+        "Final code": "private static final long CHUNK_SIZE = 3 * 1024 * 1024;\nprivate static final String FILE_PATH = \"D:/download/test.zip\";\n\nstatic void download(long totalSize,int index){\n  long start=index * CHUNK_SIZE;\n  long end=Math.min(start + CHUNK_SIZE,totalSize);\n  downloadChunk(start, end, totalSize, index);\n}\n\nstatic void downloadChunk(long start, long end, long totalSize, int index) {\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(FILE_PATH).setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n ).start();\n}"
+    },
+    "Old_Method": "static void download(long totalSize,int index){\n  long size=3 * 1024 * 1024;\n  long start=index * size;\n  long end=Math.min(start + size,totalSize);\n  HttpUtils.sync(\"/download/test.zip\").setRange(start,end).get().getBody().toFile(\"D:/download/test.zip\").setAppended().setOnSuccess((  File file) -> {\n    if (end < totalSize) {\n      download(totalSize,index + 1);\n    }\n else {\n      println(\"下载完成\");\n    }\n  }\n).start();\n}\n",
+    "File_Path": "okhttps/okhttps/src/test/java/cn/zhxu/okhttps/DownloadTests.java",
+    "Start": 680,
+    "Stop": 1474,
+    "Project_Name": "data/projects/okhttps",
+    "Method_Name": "download"
+}

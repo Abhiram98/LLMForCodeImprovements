@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract method for initializing monitors",
+                "Change_Diff": "- queueSizeTracer=Monitors.newTimer(\"queue_size\");\n- batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n- avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n- processCount=Monitors.newCounter(\"messages_processed\");\n- threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n- processTimeTracer=Monitors.newTimer(\"message_processTime\");\n- queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n+ this.initializeMonitors();",
+                "Description": "Extracting a separate method for initializing the monitors will make the constructor more readable and organized. It will also promote code reuse if monitors need to be initialized in other methods.",
+                "Start": 12,
+                "End": 21
+            },
+            {
+                "Improvement": "Extract method for setting batch size and delay",
+                "Change_Diff": "- setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n- batch=new ArrayList<Object>(maxMessages);\n- setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n+ this.setBatchSizeAndDelay();",
+                "Description": "Extracting a separate method for setting the batch size and delay will make the constructor more readable and organized. It will also promote code reuse if these settings need to be changed elsewhere in the code.",
+                "Start": 5,
+                "End": 8
+            }
+        ],
+        "Final code": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  this.setBatchSizeAndDelay();\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  this.initializeMonitors();\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n catch (  Throwable e) {\n    if (CONFIGURATION.shouldPrintLoggingErrors()) {\n      e.printStackTrace();\n    }\n  }\n}\n\nprivate void initializeMonitors(){\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n}\n\nprivate void setBatchSizeAndDelay(){\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n}"
+    },
+    "Old_Method": "public MessageBatcher(String name,MessageProcessor target){\n  this.name=BATCHER_PREFIX + name;\n  this.target=target;\n  queue=new ArrayBlockingQueue<T>(CONFIGURATION.getBatcherQueueMaxMessages(this.name));\n  setBatchMaxMessages(CONFIGURATION.getBatchSize(this.name));\n  batch=new ArrayList<Object>(maxMessages);\n  setBatchMaxDelay(CONFIGURATION.getBatcherMaxDelay(this.name));\n  collector=new Collector(this,this.name + COLLECTOR_SUFFIX);\n  createProcessor(this.name);\n  queueSizeTracer=Monitors.newTimer(\"queue_size\");\n  batchSyncPutTracer=Monitors.newTimer(\"waitTimeforBuffer\");\n  avgBatchSizeTracer=Monitors.newTimer(\"batch_size\");\n  processCount=Monitors.newCounter(\"messages_processed\");\n  threadSubmitTracer=Monitors.newTimer(\"thread_invocation_time\");\n  processTimeTracer=Monitors.newTimer(\"message_processTime\");\n  queueOverflowCounter=Monitors.newCounter(\"queue_overflow\");\n  blockingProperty=CONFIGURATION.shouldWaitWhenBatcherQueueNotEmpty(this.name);\n  collector.setDaemon(true);\n  collector.start();\n  try {\n    Monitors.registerObject(this.name,this);\n  }\n catch (  Throwable e) {\n    if (CONFIGURATION.shouldPrintLoggingErrors()) {\n      e.printStackTrace();\n    }\n  }\n}\n",
+    "File_Path": "blitz4j/src/main/java/com/netflix/logging/messaging/MessageBatcher.java",
+    "Start": 4433,
+    "Stop": 5937,
+    "Project_Name": "data/projects/blitz4j",
+    "Method_Name": "MessageBatcher"
+}

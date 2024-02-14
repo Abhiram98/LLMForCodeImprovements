@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use of local variable for random number",
+                "Change_Diff": "- if (rand.nextInt() % 3 == 0) {\n+ int randNum = rand.nextInt();\n+ if (randNum % 3 == 0) {",
+                "Description": "Instead of generating a new random integer in each iteration of the loop, a single random integer could be generated before the loop and used throughout it. This way, the random number generation is done only once, which could lead to performance improvements.",
+                "Start": 6,
+                "End": 7
+            },
+            {
+                "Improvement": "Avoid unnecessary system call",
+                "Change_Diff": "- System.currentTimeMillis();",
+                "Description": "The call to System.currentTimeMillis() in the loop does not appear to be necessary. It should be removed to improve performance.",
+                "Start": 14,
+                "End": 14
+            }
+        ],
+        "Final code": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  final int randNum = rand.nextInt();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (randNum % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (Object testObject : testSetWeak) {}\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}"
+    },
+    "Old_Method": "@Test public void testIteratorCleanup(){\n  final HashSet<Object> permanentElements=new HashSet<Object>();\n  final Collection testSetWeak=createSet();\n  final Random rand=new Random();\n  for (int i=0; i < numberOfElements; i++) {\n    Object candidate=new Object();\n    if (rand.nextInt() % 3 == 0) {\n      permanentElements.add(candidate);\n    }\n    testSetWeak.add(candidate);\n  }\n  runGC();\n  ConcurrentExecutor.runConcurrent(new Runnable(){\n    @Override public void run(){\n      for (      Object testObject : testSetWeak) {\n        System.currentTimeMillis();\n      }\n    }\n  }\n,numberOfThreads);\n  assertTrue(permanentElements.size() <= testSetWeak.size() && testSetWeak.size() < numberOfElements);\n  for (  Object test : testSetWeak) {\n    assertTrue(permanentElements.contains(test));\n  }\n}\n",
+    "File_Path": "mbassador/src/test/java/net/engio/mbassy/WeakConcurrentSetTest.java",
+    "Start": 506,
+    "Stop": 2025,
+    "Project_Name": "data/projects/mbassador",
+    "Method_Name": "testIteratorCleanup"
+}
