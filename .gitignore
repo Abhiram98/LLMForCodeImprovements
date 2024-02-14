@@ -65,3 +65,8 @@ build/
 /openai_key
 /data/projects/
 data/Java-Corpus.json
+/data/improvements2/
+/data/improvements3/
+/src/main/python/query_llm.py
+data/applied-*
+data/java_home_paths.json

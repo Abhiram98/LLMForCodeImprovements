@@ -175,41 +175,41 @@
    }
   }
  },
- "MockBukkit##MockBukkit": {
-  "github": {
-   "owner": "MockBukkit",
-   "repository": "MockBukkit",
-   "default_branch": "v1.18",
-   "commit_sha": "v1.18",
-   "stars": "291",
-   "forks": "75",
-   "is_forked": "False",
-   "created": "2017-12-05T22:16:02Z",
-   "updated": "2022-01-30T10:10:47Z",
-   "download_url": "https://github.com/MockBukkit/MockBukkit/archive/v1.18.zip",
-   "github_link": "https://github.com/MockBukkit/MockBukkit"
+ "spring-projects##spring-ws": {
+ "github": {
+  "owner": "spring-projects",
+  "repository": "spring-ws",
+  "default_branch": "main",
+  "commit_sha": "main",
+  "stars": "258",
+  "forks": "260",
+  "is_forked": "False",
+  "created": "2013-01-30T12:50:51Z",
+  "updated": "2022-01-22T08:36:38Z",
+  "download_url": "https://github.com/spring-projects/spring-ws/archive/main.zip",
+  "github_link": "https://github.com/spring-projects/spring-ws"
+ },
+ "metrics": {
+  "files": 826,
+  "blank": 14791,
+  "comment": 26508,
+  "code": 44952,
+  "jars": 1
+ },
+ "systems": {
+  "build_types": {
+   "ant": false,
+   "maven": true,
+   "gradle": false,
+   "none": false
   },
-  "metrics": {
-   "files": 183,
-   "blank": 4620,
-   "comment": 2402,
-   "code": 24166,
-   "jars": 3
-  },
-  "systems": {
-   "build_types": {
-    "ant": false,
-    "maven": false,
-    "gradle": true,
-    "none": false
-   },
-   "ci_type": "travis",
-   "build_info": {
+  "build_info": {
     "basepath": "",
     "java_version": "default"
-   }
-  }
- },
+  },
+  "ci_type": "jenkins"
+ }
+},
  "code-disaster##steamworks4j": {
   "github": {
    "owner": "code-disaster",
