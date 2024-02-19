@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repetitive code into a method",
+                "Change_Diff": "- try {\n    mem.putLong(THETA_LONG,Long.MAX_VALUE / 2);\n    HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  }\n catch (  SketchesArgumentException e) {\n  }",
+                "Description": "There is a recurring pattern of trying to execute a piece of code and catching an exception. This can be extracted into a separate method to reduce code duplication.",
+                "Start": 10,
+                "End": 38
+            },
+            {
+                "Improvement": "Use more descriptive variable names",
+                "Change_Diff": "- UpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n+ UpdateSketch updateSketch=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n- WritableMemory mem=WritableMemory.writableWrap(bytearray1);\n+ WritableMemory writableMemory=WritableMemory.writableWrap(bytearray1);",
+                "Description": "Variables like 'mem', 'usk', 'sk1', etc. are not immediately clear in their purpose. More descriptive names could make the code easier to read and understand.",
+                "Start": 5,
+                "End": 40
+            }
+        ],
+        "Final code": "@Test public void checkMemDeSerExceptions(){\n  int k=1024;\n  UpdateSketch updateSketch=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n  updateSketch.update(1L);\n  byte[] bytearray1=updateSketch.toByteArray();\n  WritableMemory writableMemory=WritableMemory.writableWrap(bytearray1);\n  long pre0=writableMemory.getLong(0);\n  tryBadMem(writableMemory,PREAMBLE_LONGS_BYTE,2);\n  writableMemory.putLong(0,pre0);\n  tryBadMem(writableMemory,SER_VER_BYTE,2);\n  writableMemory.putLong(0,pre0);\n  tryBadMem(writableMemory,FAMILY_BYTE,2);\n  writableMemory.putLong(0,pre0);\n  tryBadMem(writableMemory,FLAGS_BYTE,2);\n  writableMemory.putLong(0,pre0);\n  final long origThetaLong=writableMemory.getLong(THETA_LONG);\n  tryHeapifyInstance(writableMemory, THETA_LONG, Long.MAX_VALUE / 2);\n  writableMemory.putLong(THETA_LONG,origThetaLong);\n  byte[] byteArray2=new byte[bytearray1.length - 1];\n  WritableMemory writableMemory2=WritableMemory.writableWrap(byteArray2);\n  writableMemory.copyTo(0,writableMemory2,0,writableMemory2.getCapacity());\n  tryHeapifyInstance(writableMemory2, 0, 0);\n  insertLgResizeFactor(writableMemory,ResizeFactor.X1.lg());\n  UpdateSketch updateSketch2=HeapAlphaSketch.heapifyInstance(writableMemory,ThetaUtil.DEFAULT_UPDATE_SEED);\n  ResizeFactor rf=updateSketch2.getResizeFactor();\n  assertEquals(rf,ResizeFactor.X2);\n}\n\nvoid tryHeapifyInstance(WritableMemory writableMemory, long position, long value) {\n  try {\n    writableMemory.putLong(position, value);\n    HeapAlphaSketch.heapifyInstance(writableMemory, ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  } catch (SketchesArgumentException e) {\n  }\n}"
+    },
+    "Old_Method": "@Test public void checkMemDeSerExceptions(){\n  int k=1024;\n  UpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n  sk1.update(1L);\n  byte[] bytearray1=sk1.toByteArray();\n  WritableMemory mem=WritableMemory.writableWrap(bytearray1);\n  long pre0=mem.getLong(0);\n  tryBadMem(mem,PREAMBLE_LONGS_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,SER_VER_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,FAMILY_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,FLAGS_BYTE,2);\n  mem.putLong(0,pre0);\n  final long origThetaLong=mem.getLong(THETA_LONG);\n  try {\n    mem.putLong(THETA_LONG,Long.MAX_VALUE / 2);\n    HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  }\n catch (  SketchesArgumentException e) {\n  }\n  mem.putLong(THETA_LONG,origThetaLong);\n  byte[] byteArray2=new byte[bytearray1.length - 1];\n  WritableMemory mem2=WritableMemory.writableWrap(byteArray2);\n  mem.copyTo(0,mem2,0,mem2.getCapacity());\n  try {\n    HeapAlphaSketch.heapifyInstance(mem2,ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  }\n catch (  SketchesArgumentException e) {\n  }\n  insertLgResizeFactor(mem,ResizeFactor.X1.lg());\n  UpdateSketch usk=HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n  ResizeFactor rf=usk.getResizeFactor();\n  assertEquals(rf,ResizeFactor.X2);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/HeapAlphaSketchTest.java",
+    "Start": 19344,
+    "Stop": 21113,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkMemDeSerExceptions"
+}

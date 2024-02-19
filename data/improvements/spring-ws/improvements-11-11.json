@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use switch instead of multiple if-else statements",
+                "Change_Diff": "- if (OperationType.REQUEST_RESPONSE.equals(operation.getStyle())) {...}\n- else if (OperationType.ONE_WAY.equals(operation.getStyle())) {...}\n- else if (OperationType.NOTIFICATION.equals(operation.getStyle())) {...}\n- else if (OperationType.SOLICIT_RESPONSE.equals(operation.getStyle())) {...}\n+ switch(operation.getStyle()) {\n+     case REQUEST_RESPONSE: ...\n+     case ONE_WAY: ...\n+     case NOTIFICATION: ...\n+     case SOLICIT_RESPONSE: ...\n+ }",
+                "Description": "Instead of using multiple if-else statements to handle different cases of operation style, a switch case can be used. This will make the code cleaner and easier to read.",
+                "Start": 10,
+                "End": 22
+            },
+            {
+                "Improvement": "Move the creation of BindingFault outside the loop",
+                "Change_Diff": "- for (Object faultValue : operation.getFaults().values()) {...}\n+ BindingFault bindingFault = definition.createBindingFault();\n+ for (Object faultValue : operation.getFaults().values()) {...}",
+                "Description": "The creation of BindingFault can be moved outside the loop, as the same instance can be reused for each operation. This will reduce the number of object creations and hence, improve performance.",
+                "Start": 25,
+                "End": 31
+            }
+        ],
+        "Final code": "private void createBindingOperations(Definition definition,Binding binding) throws WSDLException {\n  PortType portType=binding.getPortType();\n  for (Object operationValue : portType.getOperations()) {\n    Operation operation=(Operation)operationValue;\n    BindingOperation bindingOperation=definition.createBindingOperation();\n    bindingOperation.setOperation(operation);\n    populateBindingOperation(definition,bindingOperation);\n    switch(operation.getStyle()) {\n      case REQUEST_RESPONSE:\n        createBindingInput(definition,operation,bindingOperation);\n        createBindingOutput(definition,operation,bindingOperation);\n        break;\n      case ONE_WAY:\n        createBindingInput(definition,operation,bindingOperation);\n        break;\n      case NOTIFICATION:\n      case SOLICIT_RESPONSE:\n        createBindingOutput(definition,operation,bindingOperation);\n        createBindingInput(definition,operation,bindingOperation);\n        break;\n    }\n    BindingFault bindingFault=definition.createBindingFault();\n    for (Object faultValue : operation.getFaults().values()) {\n      Fault fault=(Fault)faultValue;\n      populateBindingFault(definition,bindingFault,fault);\n      if (StringUtils.hasText(bindingFault.getName())) {\n        bindingOperation.addBindingFault(bindingFault);\n      }\n    }\n    binding.addBindingOperation(bindingOperation);\n  }\n}"
+    },
+    "Old_Method": "private void createBindingOperations(Definition definition,Binding binding) throws WSDLException {\n  PortType portType=binding.getPortType();\n  for (  Object operationValue : portType.getOperations()) {\n    Operation operation=(Operation)operationValue;\n    BindingOperation bindingOperation=definition.createBindingOperation();\n    bindingOperation.setOperation(operation);\n    populateBindingOperation(definition,bindingOperation);\n    if (OperationType.REQUEST_RESPONSE.equals(operation.getStyle())) {\n      createBindingInput(definition,operation,bindingOperation);\n      createBindingOutput(definition,operation,bindingOperation);\n    }\n else     if (OperationType.ONE_WAY.equals(operation.getStyle())) {\n      createBindingInput(definition,operation,bindingOperation);\n    }\n else     if (OperationType.NOTIFICATION.equals(operation.getStyle())) {\n      createBindingOutput(definition,operation,bindingOperation);\n    }\n else     if (OperationType.SOLICIT_RESPONSE.equals(operation.getStyle())) {\n      createBindingOutput(definition,operation,bindingOperation);\n      createBindingInput(definition,operation,bindingOperation);\n    }\n    for (    Object faultValue : operation.getFaults().values()) {\n      Fault fault=(Fault)faultValue;\n      BindingFault bindingFault=definition.createBindingFault();\n      populateBindingFault(definition,bindingFault,fault);\n      if (StringUtils.hasText(bindingFault.getName())) {\n        bindingOperation.addBindingFault(bindingFault);\n      }\n    }\n    binding.addBindingOperation(bindingOperation);\n  }\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/main/java/org/springframework/ws/wsdl/wsdl11/provider/DefaultConcretePartProvider.java",
+    "Start": 4622,
+    "Stop": 6150,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "createBindingOperations"
+}

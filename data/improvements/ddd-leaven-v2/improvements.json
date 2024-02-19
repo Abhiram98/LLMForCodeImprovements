@@ -1,69 +1,350 @@
 [
     {
-        "Method_Improvements": [{
-            "Improvements": [
-                {
-                    "Improvement": "Use for-each loop instead of traditional for loop",
-                    "Change_Diff": "- for (String loaderBeanName : loadersNames) {\n+ for (String loaderBeanName : loadersNames) {",
-                    "Description": "Instead of using a traditional for loop to iterate over loadersNames, use a for-each loop.",
-                    "Start": 4,
-                    "End": 4
-                },
-                {
-                    "Improvement": "Use optional chaining to simplify code",
-                    "Change_Diff": "- BeanDefinition loaderBeanDefinition = beanFactory.getBeanDefinition(loaderBeanName);\n+ BeanDefinition loaderBeanDefinition = beanFactory.getBeanDefinition(loaderBeanName)?.getBeanClassName();",
-                    "Description": "Instead of calling `beanFactory.getBeanDefinition(loaderBeanName)` followed by `getBeanClassName()`, use optional chaining operator `?.` to simplify the code.",
-                    "Start": 6,
-                    "End": 6
-                },
-                {
-                    "Improvement": "Catch ClassNotFoundException instead of catching all Exceptions",
-                    "Change_Diff": "+ catch (ClassNotFoundException e) {\n+   throw new RuntimeException(e);\n+ }",
-                    "Description": "Change the catch clause to only catch ClassNotFoundException. This will make the code more specific in handling the exception.",
-                    "Start": 10,
-                    "End": 11
-                }
-            ],
-            "Final code": "private void registerSagaLoaderBeans() {\n  String[] loadersNames = beanFactory.getBeanNamesForType(SagaManager.class);\n  for (String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition = beanFactory.getBeanDefinition(loaderBeanName)?.getBeanClassName();\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition), loaderBeanName);\n    } catch (ClassNotFoundException e) {\n      throw new RuntimeException(e);\n    }\n  }\n}"
-        }],
         "Old_Method": "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n catch (    Exception e) {\n      throw new RuntimeException(e);\n    }\n  }\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Add null check for loadersNames",
+                "Change_Diff": "+ if(loadersNames == null || loadersNames.length == 0) return;\n- for (  String loaderBeanName : loadersNames) {",
+                "Description": "It's a good practice to add a null check for the object before using it. In this case, the loadersNames object returned from getBeanNamesForType might be null.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Change catch block to catch specific exceptions",
+                "Change_Diff": "- catch (Exception e) {\n+ catch (ClassNotFoundException | BeanDefinitionStoreException e) {",
+                "Description": "Catching the general Exception is not considered good practice because it can make debugging difficult. It's better to catch specific exceptions to handle them appropriately.",
+                "Start": 7,
+                "End": 9
+            },
+            {
+                "Improvement": "Add logging in case of Exception",
+                "Change_Diff": "+ Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, e);",
+                "Description": "Adding logging in case of exceptions can provide valuable insight into what went wrong in the code.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use Specific Exception",
+                "Change_Diff": "- catch (Exception e) {\n+ catch (ClassNotFoundException e) {",
+                "Description": "You are currently catching any type of Exception, which is too generic and can hide potential bugs. Since the only checked exception that can be thrown in the try block is ClassNotFoundException, you should catch this specific exception instead.",
+                "Start": 7,
+                "End": 7
+            },
+            {
+                "Improvement": "Add a null check before fetching bean definition",
+                "Change_Diff": "- BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n+ BeanDefinition loaderBeanDefinition = beanFactory.getBeanDefinition(loaderBeanName);\n+ if(loaderBeanDefinition == null) {\n+    continue;\n+ }",
+                "Description": "We are assuming that the bean factory will always return a non-null bean definition. It's a good practice to add null check to avoid NullPointerException.",
+                "Start": 3,
+                "End": 7
+            },
+            {
+                "Improvement": "Use Spring's ClassUtils for class loading",
+                "Change_Diff": "- registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n+ registerSagaLoader(ClassUtils.forName(loaderBeanDefinition.getBeanClassName(), null), loaderBeanName);",
+                "Description": "Instead of using Class.forName, use Spring's ClassUtils for class loading. It handles array class names and inner class names as well.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Handle specific exceptions",
+                "Change_Diff": "- catch (    Exception e) {\n+ catch (ClassNotFoundException | BeanCreationException e) {\n- throw new RuntimeException(e);\n+ throw new BeanInitializationException(\"Failed to register SagaLoader for \" + loaderBeanName, e);",
+                "Description": "Rather than catching all exceptions and re-throwing them as a RuntimeException, only catch ClassNotFoundException and BeanCreationException as those are the expected exceptions in this case.",
+                "Start": 6,
+                "End": 9
+            },
+            {
+                "Improvement": "Use specific exception instead of generic Exception",
+                "Change_Diff": "- } catch (Exception e) {\n+ } catch (ClassNotFoundException e) {",
+                "Description": "Instead of catching a generic Exception, catch a more specific exception, in this case, ClassNotFoundException. This makes the code more robust and easier to debug.",
+                "Start": 6,
+                "End": 8
+            },
+            {
+                "Improvement": "Replace RuntimeException with a more specific exception",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new ClassNotFoundException(\"Unable to load class\", e);",
+                "Description": "Rather than throwing a generic RuntimeException, it is more informative to throw a more specific exception. In this case, since the exception is in relation to class loading, a ClassNotFoundException would be more appropriate.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Add null check for loaderBeanDefinition",
+                "Change_Diff": "+ if(loaderBeanDefinition == null) { \n+ throw new BeanDefinitionNotFoundException(\"Bean definition not found for name: \" + loaderBeanName); \n+ }",
+                "Description": "The method getBeanDefinition might return a null value. It is good practice to add a null check to avoid NullPointerException.",
+                "Start": 6,
+                "End": 6
+            },
+            {
+                "Improvement": "Use Arrays.stream instead of for loop",
+                "Change_Diff": "- for (String loaderBeanName : loadersNames) {\n... \n+ Arrays.stream(loadersNames).forEach(loaderBeanName -> { \n... \n+ });",
+                "Description": "Instead of using a traditional for loop to iterate over the array, use Java 8's stream API. It is more readable and provides more functionality like parallel executing.",
+                "Start": 4,
+                "End": 11
+            },
+            {
+                "Improvement": "Use Java 8 streams instead of for loop",
+                "Change_Diff": "- for (String loaderBeanName : loadersNames) {\n-     BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n-     try {\n-          registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n-     }\n-     catch (Exception e) {\n-          throw new RuntimeException(e);\n-     }\n- }\n+ Arrays.stream(loadersNames)\n+    .map(loaderBeanName -> beanFactory.getBeanDefinition(loaderBeanName))\n+    .forEach(loaderBeanDefinition -> {\n+        try {\n+            registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()), loaderBeanName);\n+        } catch (Exception e) {\n+            throw new RuntimeException(e);\n+        }\n+    });",
+                "Description": "Instead of using a traditional for loop, you can use Java 8 streams to iterate over `loadersNames`. This makes the code more declarative and easier to read.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "+ /**\n+  * This method registers saga loader beans.\n+  */\n private void registerSagaLoaderBeans(){",
+                "Description": "Adding method documentation to explain what this method does, it's parameters, and its return value (if any), is a best practice. This makes the code easier to understand for other developers.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add exception details in the RuntimeException",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw new RuntimeException(\"Exception occurred while registering saga loader: \" + loaderBeanName, e);",
+                "Description": "When catching an Exception and throwing a RuntimeException, it is a good practice to add some context about what was being done when the Exception occurred. This will help in debugging if the RuntimeException is ever thrown.",
+                "Start": 9,
+                "End": 11
+            },
+            {
+                "Improvement": "Use of meaningful variable names",
+                "Change_Diff": "- String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n+ String[] sagaManagerNames=beanFactory.getBeanNamesForType(SagaManager.class);\n- for (  String loaderBeanName : loadersNames) {\n+ for (  String sagaManagerName : sagaManagerNames) {",
+                "Description": "Instead of using generic names like `loadersNames` and `loaderBeanName`, use more descriptive names that explain the purpose of these variables. This improves the readability and understandability of the code.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Use meaningful variable names",
+                "Change_Diff": "- String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n- for (  String loaderBeanName : loadersNames) {\n+ String[] sagaManagerBeanNames=beanFactory.getBeanNamesForType(SagaManager.class);\n+ for (  String sagaManagerBeanName : sagaManagerBeanNames) {",
+                "Description": "Instead of using `loadersNames`, use `sagaManagerBeanNames`. Instead of `loaderBeanName`, use `sagaManagerBeanName`. These names are more descriptive and make the code easier to understand.",
+                "Start": 2,
+                "End": 9
+            },
+            {
+                "Improvement": "Avoid throwing generic exceptions",
+                "Change_Diff": "- throw new RuntimeException(e);\n+ throw e;",
+                "Description": "Instead of throwing a generic RuntimeException, rethrow the specific exception that caused the failure. This will make it easier to understand and handle the error.",
+                "Start": 8,
+                "End": 9
+            }
+        ],
         "File_Path": "ddd-leaven-v2/src/main/java/pl/com/bottega/ecommerce/system/saga/impl/SpringSagaRegistry.java",
         "Start": 2646,
         "Stop": 3169,
+        "All_Improved_Methods": [
+            "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  if(loadersNames == null || loadersNames.length == 0) return;\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n catch (ClassNotFoundException | BeanDefinitionStoreException e) {\n      Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, e);\n      throw new RuntimeException(e);\n    }\n  }\n}",
+            "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n    catch (ClassNotFoundException e) {\n      throw new RuntimeException(\"Failed to register saga loader for bean: \" + loaderBeanName, e);\n    }\n  }\n}",
+            "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition = beanFactory.getBeanDefinition(loaderBeanName);\n    if(loaderBeanDefinition == null) {\n        continue;\n    }\n    try {\n      registerSagaLoader(ClassUtils.forName(loaderBeanDefinition.getBeanClassName(), null), loaderBeanName);\n    } catch (ClassNotFoundException | BeanCreationException e) {\n      throw new BeanInitializationException(\"Failed to register SagaLoader for \" + loaderBeanName, e);\n    }\n  }\n}",
+            "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    } catch (ClassNotFoundException e) {\n      LOGGER.error(\"Exception while registering saga loader\", e);\n      throw new RuntimeException(e);\n    }\n  }\n}",
+            "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  Arrays.stream(loadersNames).forEach(loaderBeanName -> {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    if(loaderBeanDefinition == null) { \n      throw new BeanDefinitionNotFoundException(\"Bean definition not found for name: \" + loaderBeanName); \n    }\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n    }\n    catch (ClassNotFoundException e) {\n      throw new ClassNotFoundException(\"Unable to load class\", e);\n    }\n  });\n}",
+            "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  Arrays.stream(loadersNames)\n    .map(loaderBeanName -> beanFactory.getBeanDefinition(loaderBeanName))\n    .forEach(loaderBeanDefinition -> {\n        try {\n            registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()), loaderBeanName);\n        } catch (Exception e) {\n            throw new RuntimeException(\"Failed to register Saga Loader: \" + loaderBeanName, e);\n        }\n    });\n}",
+            "    /**\n    * This method registers saga loader beans.\n    */\n    private void registerSagaLoaderBeans(){\n        String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n        for (String loaderBeanName : loadersNames) {\n            BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n            try {\n                registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n            }\n            catch (Exception e) {\n                throw new RuntimeException(\"Exception occurred while registering saga loader: \" + loaderBeanName, e);\n            }\n        }\n    }",
+            "private void registerSagaLoaderBeans(){\n  String[] sagaManagerNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (String sagaManagerName : sagaManagerNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(sagaManagerName);\n    try {\n      registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),sagaManagerName);\n    } catch (ClassNotFoundException e) {\n      e.printStackTrace();\n    }\n  }\n}",
+            "private void registerSagaLoaderBeans(){\n  String[] sagaManagerBeanNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (  String sagaManagerBeanName : sagaManagerBeanNames) {\n    BeanDefinition sagaManagerBeanDefinition=beanFactory.getBeanDefinition(sagaManagerBeanName);\n    try {\n      registerSagaLoader(Class.forName(sagaManagerBeanDefinition.getBeanClassName()),sagaManagerBeanName);\n    }\n catch (    Exception e) {\n      Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, e);\n      throw e;\n    }\n  }\n}",
+            "    /**\n     * This method registers saga loader beans. It gets the bean names for the type SagaManager\n     * and registers each saga loader after getting their class name.\n     * @throws RuntimeException if any error occurs while getting the class for a bean.\n     */\n    private void registerSagaLoaderBeans(){\n        String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n        for (String loaderBeanName : loadersNames) {\n            BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n            try {\n                registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n            } catch (ClassNotFoundException e) {\n                throw new RuntimeException(\"Error while registering saga loader: \" + loaderBeanName, e);\n            }\n        }\n    }",
+            "private void registerSagaLoaderBeans(){\n  String[] loadersNames=beanFactory.getBeanNamesForType(SagaManager.class);\n  for (String loaderBeanName : loadersNames) {\n    BeanDefinition loaderBeanDefinition=beanFactory.getBeanDefinition(loaderBeanName);\n    try {\n      if(loaderBeanDefinition != null) {\n        registerSagaLoader(Class.forName(loaderBeanDefinition.getBeanClassName()),loaderBeanName);\n      } else {\n        //handle null case or log error\n      }\n    }\n    catch (ClassNotFoundException e) {\n      throw new RuntimeException(e);\n    }\n  }\n}"
+        ],
         "Project_Name": "data/projects/ddd-leaven-v2",
         "Method_Name": "registerSagaLoaderBeans"
     },
     {
-        "Method_Improvements": [{
-            "Improvements": [
-                {
-                    "Improvement": "Rename 'canNotPurchaseIfOfferChanged' to 'testCannotPurchaseIfOfferChanged'",
-                    "Change_Diff": "- @Test public void canNotPurchaseIfOfferChanged(){\n+ @Test public void testCannotPurchaseIfOfferChanged(){",
-                    "Description": "Update the method name to better describe the purpose of the test case.",
-                    "Start": 1,
-                    "End": 1
-                },
-                {
-                    "Improvement": "Extract creation of order and products into separate methods",
-                    "Change_Diff": "{\n+ \n}\n\nprivate AggregateId createOrderWithProducts() {\n  AggregateId orderId = orderingService.createOrder();\n  orderingService.addProduct(orderId, new AggregateId(\"p1\"), 1);\n  orderingService.addProduct(orderId, new AggregateId(\"p2\"), 20);\n  return orderId;\n}\n\nprivate void addProductToOrder(AggregateId orderId, AggregateId productId, int quantity) {\n  orderingService.addProduct(orderId, productId, quantity);\n}",
-                    "Description": "Extract the creation of order and products into separate methods to improve readability and reusability of the code.",
-                    "Start": 3,
-                    "End": 8
-                },
-                {
-                    "Improvement": "Use 'assertEquals' instead of 'Assert.fail' to assert the expected exception",
-                    "Change_Diff": "- Assert.fail();\n+ Assert.assertEquals(OfferChangedException.class, assertThrows(OfferChangedException.class, () -> orderingService.confirm(orderId, new OrderDetailsCommand(), offer)));",
-                    "Description": "Replace the use of 'Assert.fail' with 'assertEquals' and 'assertThrows' to assert the expected exception in a more clear and concise way.",
-                    "Start": 9,
-                    "End": 9
-                }
-            ],
-            "Final code": "@Test\npublic void testCannotPurchaseIfOfferChanged() {\n  AggregateId orderId = createOrderWithProducts();\n  Offer offer = orderingService.calculateOffer(orderId);\n  addProductToOrder(orderId, new AggregateId(\"p2\"), 30);\n\n  Assert.assertEquals(OfferChangedException.class, assertThrows(OfferChangedException.class, () -> orderingService.confirm(orderId, new OrderDetailsCommand(), offer)));\n}\n\nprivate AggregateId createOrderWithProducts() {\n  AggregateId orderId = orderingService.createOrder();\n  orderingService.addProduct(orderId, new AggregateId(\"p1\"), 1);\n  orderingService.addProduct(orderId, new AggregateId(\"p2\"), 20);\n  return orderId;\n}\n\nprivate void addProductToOrder(AggregateId orderId, AggregateId productId, int quantity) {\n  orderingService.addProduct(orderId, productId, quantity);\n}"
-        }],
         "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Use Assert.assertThrows instead of try-catch",
+                "Change_Diff": "- try {\n-    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n-    Assert.fail();\n- }\n- catch (  OfferChangedExcpetion e) {\n- }\n+ Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));",
+                "Description": "In the given test case, there is a try-catch block used to handle the OfferChangedException. Instead of using this, use the Assert.assertThrows method from JUnit to make the test case more readable and intention revealing. This method verifies that execution of the supplied executable throws an exception of the expectedType and returns the exception. Also, it is a more modern and recommended way of testing for exceptions in JUnit.",
+                "Start": 9,
+                "End": 14
+            },
+            {
+                "Improvement": "Use Assert.assertThrows for exception testing",
+                "Change_Diff": "- try {\n-   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n-   Assert.fail();\n- }\n- catch (OfferChangedExcpetion e) {\n- }\n+ Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));",
+                "Description": "Instead of using a try-catch block to test for an exception, use the Assert.assertThrows method from Junit. It makes the code cleaner and easier to understand.",
+                "Start": 8,
+                "End": 13
+            },
+            {
+                "Improvement": "Use final for orderId",
+                "Change_Diff": "- AggregateId orderId=orderingService.createOrder();\n+ final AggregateId orderId=orderingService.createOrder();",
+                "Description": "As the orderId doesn't change after its initialization, it should be declared as final. It can improve the readability of the code and makes it clear that orderId will not change.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Split long method into multiple shorter methods",
+                "Change_Diff": "- @Test public void canNotPurchaseIfOfferChanged(){...}",
+                "Description": "The current method is doing multiple operations which can be broken down into smaller methods. This would make the code more readable and maintainable.",
+                "Start": 1,
+                "End": 14
+            },
+            {
+                "Improvement": "Assert that an exception is thrown",
+                "Change_Diff": "- try {...} catch (OfferChangedExcpetion e) {...} \n+ assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId, new OrderDetailsCommand(), offer));",
+                "Description": "Instead of using try-catch to check if an exception is thrown, use JUnit's assertThrows to make the code cleaner and more readable.",
+                "Start": 11,
+                "End": 14
+            },
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- new AggregateId(\"p1\"),1);\n- new AggregateId(\"p2\"),20);\n+ new AggregateId(\"firstProduct\"),1);\n+ new AggregateId(\"secondProduct\"),20);",
+                "Description": "Instead of using generic names like 'p1' and 'p2' for AggregateId, use more descriptive names which indicate their purpose or usage. This improves the readability of the code.",
+                "Start": 3,
+                "End": 4
+            },
+            {
+                "Improvement": "Handle exceptions properly",
+                "Change_Diff": "- catch (  OfferChangedExcpetion e) {\n  }\n+ catch (OfferChangedExcpetion e) {\n+   e.printStackTrace();\n+ }",
+                "Description": "Instead of leaving the catch block empty, exceptions should be properly logged or handled to avoid silent failure. It will help in debugging in case the exception occurs.",
+                "Start": 12,
+                "End": 14
+            },
+            {
+                "Improvement": "Use AssertJ for assertions",
+                "Change_Diff": "- Assert.fail();\n+ fail(\"Exception was expected\");\n- try {\n- orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n+ assertThatThrownBy(() -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer))",
+                "Description": "AssertJ provides a rich set of assertions, which are more readable and can provide more detailed error messages. It's better to use AssertJ's assertThatThrownBy function to check if exception is thrown.",
+                "Start": 10,
+                "End": 11
+            },
+            {
+                "Improvement": "Add meaningful comments",
+                "Change_Diff": "+ // Create an order\n AggregateId orderId=orderingService.createOrder();\n\n+ // Add products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n\n+ // Calculate the offer for the order\n Offer offer=orderingService.calculateOffer(orderId);\n\n+ // Add more products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n\n+ // Try to confirm the order with the old offer\n try {\n   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n   Assert.fail();\n }\n catch (  OfferChangedExcpetion e) {\n }\n",
+                "Description": "Adding comments in the code makes it easier to understand what the code does. This is useful for others who may read your code, or for yourself if you return to it after a break.",
+                "Start": 1,
+                "End": 13
+            },
+            {
+                "Improvement": "Handle the exception properly",
+                "Change_Diff": "- catch (  OfferChangedExcpetion e) {\n }\n\n+ catch (  OfferChangedExcpetion e) {\n+    e.printStackTrace();\n+ }\n",
+                "Description": "Instead of leaving the catch block empty, handle the exception properly by logging it or wrapping it in an unchecked exception so that the stack trace is not lost.",
+                "Start": 12,
+                "End": 13
+            },
+            {
+                "Improvement": "Add comments to clarify the purpose of each operation",
+                "Change_Diff": "+ // Create a new order\n AggregateId orderId=orderingService.createOrder();\n+ // Add product 'p1' to the order\n orderingService.addProduct(orderId,new AggregateId('p1'),1);\n+ // Add product 'p2' to the order\n orderingService.addProduct(orderId,new AggregateId('p2'),20);\n+ // Calculate the offer for the order\n Offer offer=orderingService.calculateOffer(orderId);\n+ // Add additional quantity of product 'p2' to the order\n orderingService.addProduct(orderId,new AggregateId('p2'),30);\n+ // Try to confirm the order\n try {\n     orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n+    // If the offer has changed, the confirmation should fail\n     Assert.fail();\n }\n catch (  OfferChangedExcpetion e) {\n+  // Catch the exception if the offer has changed\n }",
+                "Description": "Adding comments to the code can improve its readability and maintainability by explaining the purpose and functionality of each operation.",
+                "Start": 1,
+                "End": 11
+            },
+            {
+                "Improvement": "Handle the exception properly",
+                "Change_Diff": "- catch (  OfferChangedExcpetion e) {\n+ catch (  OfferChangedExcpetion e) {\n+    // Log exception or re-throw\n }",
+                "Description": "Instead of leaving the catch block empty, it's better to handle the exception properly. This could be logging the exception or re-throwing it.",
+                "Start": 10,
+                "End": 10
+            },
+            {
+                "Improvement": "Rename method to reflect its test case",
+                "Change_Diff": "- @Test public void canNotPurchaseIfOfferChanged(){\n+ @Test public void shouldThrowExceptionIfOfferChangedAfterAddingProduct(){",
+                "Description": "The method name should clearly convey what the test case is about. In this case, it should highlight that it is testing the case where an offer cannot be purchased if it has been changed.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Refactor hard-coded product IDs to variables",
+                "Change_Diff": "- orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n- orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n+ String productId1 = \"p1\";\n+ String productId2 = \"p2\";\n+ orderingService.addProduct(orderId,new AggregateId(productId1),1);\n+ orderingService.addProduct(orderId,new AggregateId(productId2),20);",
+                "Description": "Hard-coded product IDs ('p1' and 'p2') can lead to errors if these IDs change in the future. It would be better to refactor them to variables for easier maintenance.",
+                "Start": 2,
+                "End": 5
+            },
+            {
+                "Improvement": "Use @Test(expected = Exception.class) for testing exceptions",
+                "Change_Diff": "- @Test\n public void canNotPurchaseIfOfferChanged(){\n...\n  try {\n    ...\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n- }\n+ @Test(expected = OfferChangedExcpetion.class)\n public void canNotPurchaseIfOfferChanged(){\n...\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n+ }",
+                "Description": "Instead of using try/catch blocks for testing exceptions, we can make use of the JUnit's @Test annotation and specify the expected exception. This makes the code cleaner and easier to understand.",
+                "Start": 8,
+                "End": 14
+            },
+            {
+                "Improvement": "Remove redundant new AggregateId initialization",
+                "Change_Diff": "- orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n...\n- orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n+ AggregateId product2Id = new AggregateId(\"p2\");\n+ orderingService.addProduct(orderId,product2Id,20);\n...\n+ orderingService.addProduct(orderId,product2Id,30);",
+                "Description": "The AggregateId initialization with the same parameter 'p2' is used twice. It's better to initialize it once and reuse it to make the code more efficient and cleaner.",
+                "Start": 4,
+                "End": 6
+            },
+            {
+                "Improvement": "Use assertThrows instead of try/catch",
+                "Change_Diff": "- try {\n-   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n-   Assert.fail();\n- }\n- catch (  OfferChangedExcpetion e) {\n- }\n+ assertThrows(OfferChangedExcpetion.class, () -> {\n+   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n+ });",
+                "Description": "Instead of using try/catch to expect an exception, you can use JUnit's assertThrows. It makes the test more concise and clear about the expected exception.",
+                "Start": 10,
+                "End": 15
+            },
+            {
+                "Improvement": "Add a message to the fail assertion",
+                "Change_Diff": "- Assert.fail();\n+ Assert.fail(\"Expected an OfferChangedExcpetion to be thrown\");",
+                "Description": "If you want to keep the fail assertion, it's better to add a message to it. This will give more information in case the test fails.",
+                "Start": 12,
+                "End": 12
+            },
+            {
+                "Improvement": "Use assertThatThrownBy from AssertJ instead of try-catch",
+                "Change_Diff": "- try {\n-    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n-    Assert.fail();\n-  }\n- catch (  OfferChangedExcpetion e) {\n-  }\n+ assertThatThrownBy(() -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer)).isInstanceOf(OfferChangedExcpetion.class);",
+                "Description": "Instead of using try-catch to expect an exception, use `assertThatThrownBy` from AssertJ. This makes the test more readable and idiomatic.",
+                "Start": 7,
+                "End": 13
+            },
+            {
+                "Improvement": "Use final for constants",
+                "Change_Diff": "- AggregateId orderId=orderingService.createOrder();\n+ final AggregateId orderId=orderingService.createOrder();\n- AggregateId p1Id = new AggregateId(\"p1\");\n+ final AggregateId p1Id = new AggregateId(\"p1\");\n- AggregateId p2Id = new AggregateId(\"p2\");\n+ final AggregateId p2Id = new AggregateId(\"p2\");",
+                "Description": "Using final for constant values improves readability and avoids unnecessary reassignments.",
+                "Start": 3,
+                "End": 5
+            },
+            {
+                "Improvement": "Add meaningful comments",
+                "Change_Diff": "+ // Creating order and adding products\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId('p1'),1);\n  orderingService.addProduct(orderId,new AggregateId('p2'),20);\n+ // Calculating and storing the initial offer\n  Offer offer=orderingService.calculateOffer(orderId);\n+ // Adding another product which should change the offer\n  orderingService.addProduct(orderId,new AggregateId('p2'),30);",
+                "Description": "In order to make the code more readable and understandable, add meaningful comments to the code.",
+                "Start": 2,
+                "End": 8
+            },
+            {
+                "Improvement": "Use descriptive variable names",
+                "Change_Diff": "- new AggregateId(\"p1\"),1);\n- new AggregateId(\"p2\"),20);\n+ new AggregateId(\"product1\"),1);\n+ new AggregateId(\"product2\"),20);",
+                "Description": "Descriptive variable names can make the code easier to understand. The variable name 'p1' and 'p2' could be replaced with more descriptive names that reflect their purpose or the values they hold.",
+                "Start": 4,
+                "End": 5
+            },
+            {
+                "Improvement": "Remove unused object",
+                "Change_Diff": "- orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n+ orderingService.confirm(orderId,offer);",
+                "Description": "The 'OrderDetailsCommand' object created inside the 'confirm' method is not used anywhere. It's better to remove unused objects to improve readability and performance.",
+                "Start": 11,
+                "End": 11
+            },
+            {
+                "Improvement": "Add failure message to Assert.fail()",
+                "Change_Diff": "- Assert.fail();\n+ Assert.fail(\"Order confirmation should have failed due to offer change.\");",
+                "Description": "Adding a failure message to the Assert.fail() method will make it easier to understand why a test failed when looking at the test results.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Use @ExpectedException JUnit annotation",
+                "Change_Diff": "+ @Test(expected = OfferChangedExcpetion.class)\n- try {\n... (entire try-catch block) ... \n- } catch (OfferChangedExcpetion e) {\n- }",
+                "Description": "Instead of catching the exception and failing the test manually, you can use the @ExpectedException annotation provided by JUnit. This will make your test more readable and concise.",
+                "Start": 1,
+                "End": 12
+            }
+        ],
         "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
         "Start": 2542,
         "Stop": 3087,
+        "All_Improved_Methods": [
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  final AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}",
+            "@Test\npublic void canNotPurchaseIfOfferChanged(){\n    AggregateId orderId = createOrder();\n    addProductToOrder(orderId, \"p1\", 1);\n    addProductToOrder(orderId, \"p2\", 20);\n    Offer offer = calculateOffer(orderId);\n    addProductToOrder(orderId, \"p2\", 30);\n    assertThrows(OfferChangedExcpetion.class, () -> confirmOrder(orderId, offer));\n}\n\nprivate AggregateId createOrder() {\n    return orderingService.createOrder();\n}\n\nprivate void addProductToOrder(AggregateId orderId, String productId, int quantity) {\n    orderingService.addProduct(orderId, new AggregateId(productId), quantity);\n}\n\nprivate Offer calculateOffer(AggregateId orderId) {\n    return orderingService.calculateOffer(orderId);\n}\n\nprivate void confirmOrder(AggregateId orderId, Offer offer) {\n    orderingService.confirm(orderId, new OrderDetailsCommand(), offer);\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"firstProduct\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"secondProduct\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"secondProduct\"),30);\n  assertThatThrownBy(() -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer)).isInstanceOf(OfferChangedException.class);\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n\n // Create an order\n AggregateId orderId=orderingService.createOrder();\n\n // Add products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n\n // Calculate the offer for the order\n Offer offer=orderingService.calculateOffer(orderId);\n\n // Add more products to the order\n orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n\n // Try to confirm the order with the old offer\n try {\n   orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n   Assert.fail();\n }\n catch (  OfferChangedExcpetion e) {\n   e.printStackTrace();\n }\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  // Create a new order\n AggregateId orderId=orderingService.createOrder();\n  // Add product 'p1' to the order\n orderingService.addProduct(orderId,new AggregateId('p1'),1);\n  // Add product 'p2' to the order\n orderingService.addProduct(orderId,new AggregateId('p2'),20);\n  // Calculate the offer for the order\n Offer offer=orderingService.calculateOffer(orderId);\n  // Add additional quantity of product 'p2' to the order\n orderingService.addProduct(orderId,new AggregateId('p2'),30);\n  // Try to confirm the order\n try {\n     orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n     // If the offer has changed, the confirmation should fail\n     Assert.fail();\n }\n catch (  OfferChangedExcpetion e) {\n     // Log exception or re-throw\n }\n}",
+            "@Test public void shouldThrowExceptionIfOfferChangedAfterAddingProduct(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n    Assert.assertEquals(OfferChangedExcpetion.class, e.getClass());\n  }\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  String productId1 = \"p1\";\n  String productId2 = \"p2\";\n  orderingService.addProduct(orderId,new AggregateId(productId1),1);\n  orderingService.addProduct(orderId,new AggregateId(productId2),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(productId2),30);\n  assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId, new OrderDetailsCommand(), offer));\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"product1Id\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"product2Id\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"product2Id\"),30);\n  Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}",
+            "@Test(expected = OfferChangedExcpetion.class)\n public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  AggregateId product2Id = new AggregateId(\"p2\");\n  orderingService.addProduct(orderId,product2Id,20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,product2Id,30);\n  orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n }",
+            "@Test public void testCannotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  Assert.assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  assertThrows(OfferChangedExcpetion.class, () -> {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n  });\n}",
+            "@Test public void canAddProductToOrder(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId('p1'),1);\n  orderingService.addProduct(orderId,new AggregateId('p2'),20);\n }\n\n@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId('p1'),1);\n  orderingService.addProduct(orderId,new AggregateId('p2'),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId('p2'),30);\n  assertThatThrownBy(() -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer)).isInstanceOf(OfferChangedExcpetion.class);\n }",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  final AggregateId orderId=orderingService.createOrder();\n  final AggregateId p1Id = new AggregateId(\"p1\");\n  orderingService.addProduct(orderId, p1Id, 1);\n  final AggregateId p2Id = new AggregateId(\"p2\");\n  orderingService.addProduct(orderId, p2Id, 20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId, p2Id, 30);\n  assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId, new OrderDetailsCommand(), offer));\n}",
+            "@Test\npublic void canNotPurchaseIfOfferChanged(){\n  // Creating order and adding products\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId('p1'),1);\n  orderingService.addProduct(orderId,new AggregateId('p2'),20);\n  // Calculating and storing the initial offer\n  Offer offer=orderingService.calculateOffer(orderId);\n  // Adding another product which should change the offer\n  orderingService.addProduct(orderId,new AggregateId('p2'),30);\n  // Confirming the order should throw an OfferChangedException as the offer has changed\n  assertThatThrownBy(() -> {\n    orderingService.confirm(orderId, new OrderDetailsCommand(), offer);\n  }).isInstanceOf(OfferChangedExcpetion.class);\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"product1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"product2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"product2\"),30);\n  try {\n    orderingService.confirm(orderId,offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n    System.out.println(\"Offer has been changed.\");\n  }\n}",
+            "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"productOne\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"productTwo\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"productTwo\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail(\"Order confirmation should have failed due to offer change.\");\n  }\n catch (OfferChangedException e) {\n  }\n}",
+            "@Test public void shouldThrowExceptionWhenConfirmingOrderIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}",
+            "@Test(expected = OfferChangedExcpetion.class)\npublic void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n}"
+        ],
         "Project_Name": "data/projects/ddd-leaven-v2",
         "Method_Name": "canNotPurchaseIfOfferChanged"
     }

@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Extract repeated code into separate method",
+                "Change_Diff": "- URI uri1=new URI(url1);\n- HttpHost host1=new HttpHost(uri1.getScheme(),uri1.getHost(),getPort(uri1));\n- HttpRoute route1=new HttpRoute(host1,null,true);\n+ HttpRoute route1 = createHttpRoute(url1, true);\n... (Repeat for url2 and url3)",
+                "Description": "The code for creating a HttpHost and HttpRoute is repeatedly written for each URL. This can be extracted into a separate method.",
+                "Start": 3,
+                "End": 16
+            },
+            {
+                "Improvement": "Use constants for URL strings",
+                "Change_Diff": "- final String url1=\"https://www.example.com\";\n+ final String URL1=\"https://www.example.com\";\n... (Repeat for url2 and url3)",
+                "Description": "URL strings are used as keys in a HashMap. It is better to use constants for these to avoid mistakes due to typos.",
+                "Start": 17,
+                "End": 31
+            }
+        ],
+        "Final code": "@Test void testMaxConnections() throws Exception {\n  final String URL1=\"https://www.example.com\";\n  final String URL2=\"http://www.example.com:8080\";\n  final String URL3=\"http://www.springframework.org\";\n\n  HttpRoute route1=createHttpRoute(URL1, true);\n  HttpRoute route2=createHttpRoute(URL2, false);\n  HttpRoute route3=createHttpRoute(URL3, false);\n\n  HttpComponents5ClientFactory clientFactory=new HttpComponents5ClientFactory();\n  Map<String,String> maxConnectionsPerHost=new HashMap<>();\n  maxConnectionsPerHost.put(URL1,\"1\");\n  maxConnectionsPerHost.put(URL2,\"7\");\n  maxConnectionsPerHost.put(URL3,\"10\");\n\n  clientFactory.setMaxTotalConnections(2);\n  clientFactory.setMaxConnectionsPerHost(maxConnectionsPerHost);\n  CloseableHttpClient client=clientFactory.getObject();\n\n  PoolingHttpClientConnectionManager poolingHttpClientConnectionManager=clientFactory.getConnectionManager();\n  assertThat(poolingHttpClientConnectionManager.getMaxPerRoute(route1)).isEqualTo(1);\n  assertThat(poolingHttpClientConnectionManager.getMaxPerRoute(route2)).isEqualTo(7);\n  assertThat(poolingHttpClientConnectionManager.getMaxPerRoute(route3)).isEqualTo(10);\n}\n\nprivate HttpRoute createHttpRoute(String url, boolean isSecure) throws URISyntaxException {\n  URI uri=new URI(url);\n  HttpHost host=new HttpHost(uri.getScheme(),uri.getHost(),getPort(uri));\n  return new HttpRoute(host,null,isSecure);\n}"
+    },
+    "Old_Method": "@Test void testMaxConnections() throws Exception {\n  final String url1=\"https://www.example.com\";\n  URI uri1=new URI(url1);\n  HttpHost host1=new HttpHost(uri1.getScheme(),uri1.getHost(),getPort(uri1));\n  HttpRoute route1=new HttpRoute(host1,null,true);\n  assertThat(route1.isSecure()).isTrue();\n  assertThat(route1.getTargetHost().getHostName()).isEqualTo(\"www.example.com\");\n  assertThat(route1.getTargetHost().getPort()).isEqualTo(443);\n  final String url2=\"http://www.example.com:8080\";\n  URI uri2=new URI(url2);\n  HttpHost host2=new HttpHost(uri2.getScheme(),uri2.getHost(),getPort(uri2));\n  HttpRoute route2=new HttpRoute(host2);\n  assertThat(route2.isSecure()).isFalse();\n  assertThat(route2.getTargetHost().getHostName()).isEqualTo(\"www.example.com\");\n  assertThat(route2.getTargetHost().getPort()).isEqualTo(8080);\n  final String url3=\"http://www.springframework.org\";\n  URI uri3=new URI(url3);\n  HttpHost host3=new HttpHost(uri3.getScheme(),uri3.getHost(),getPort(uri3));\n  HttpRoute route3=new HttpRoute(host3);\n  assertThat(route3.isSecure()).isFalse();\n  assertThat(route3.getTargetHost().getHostName()).isEqualTo(\"www.springframework.org\");\n  assertThat(route3.getTargetHost().getPort()).isEqualTo(80);\n  HttpComponents5ClientFactory clientFactory=new HttpComponents5ClientFactory();\n  Map<String,String> maxConnectionsPerHost=new HashMap<>();\n  maxConnectionsPerHost.put(url1,\"1\");\n  maxConnectionsPerHost.put(url2,\"7\");\n  maxConnectionsPerHost.put(url3,\"10\");\n  clientFactory.setMaxTotalConnections(2);\n  clientFactory.setMaxConnectionsPerHost(maxConnectionsPerHost);\n  CloseableHttpClient client=clientFactory.getObject();\n  assertThat(client).isNotNull();\n  PoolingHttpClientConnectionManager poolingHttpClientConnectionManager=clientFactory.getConnectionManager();\n  assertThat(poolingHttpClientConnectionManager.getMaxPerRoute(route1)).isEqualTo(1);\n  assertThat(poolingHttpClientConnectionManager.getMaxPerRoute(route2)).isEqualTo(7);\n  assertThat(poolingHttpClientConnectionManager.getMaxPerRoute(route3)).isEqualTo(10);\n}\n",
+    "File_Path": "spring-ws/spring-ws-core/src/test/java/org/springframework/ws/transport/http/HttpComponents5MessageSenderIntegrationTest.java",
+    "Start": 2188,
+    "Stop": 4372,
+    "Project_Name": "data/projects/spring-ws",
+    "Method_Name": "testMaxConnections"
+}

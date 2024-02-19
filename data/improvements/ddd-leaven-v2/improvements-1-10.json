@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use @Test(expected = Exception.class) for testing exceptions",
+                "Change_Diff": "- @Test\n public void canNotPurchaseIfOfferChanged(){\n...\n  try {\n    ...\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n- }\n+ @Test(expected = OfferChangedExcpetion.class)\n public void canNotPurchaseIfOfferChanged(){\n...\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n+ }",
+                "Description": "Instead of using try/catch blocks for testing exceptions, we can make use of the JUnit's @Test annotation and specify the expected exception. This makes the code cleaner and easier to understand.",
+                "Start": 8,
+                "End": 14
+            },
+            {
+                "Improvement": "Remove redundant new AggregateId initialization",
+                "Change_Diff": "- orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n...\n- orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n+ AggregateId product2Id = new AggregateId(\"p2\");\n+ orderingService.addProduct(orderId,product2Id,20);\n...\n+ orderingService.addProduct(orderId,product2Id,30);",
+                "Description": "The AggregateId initialization with the same parameter 'p2' is used twice. It's better to initialize it once and reuse it to make the code more efficient and cleaner.",
+                "Start": 4,
+                "End": 6
+            }
+        ],
+        "Final code": "@Test(expected = OfferChangedExcpetion.class)\n public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  AggregateId product2Id = new AggregateId(\"p2\");\n  orderingService.addProduct(orderId,product2Id,20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,product2Id,30);\n  orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n }"
+    },
+    "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+    "Start": 2542,
+    "Stop": 3087,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "canNotPurchaseIfOfferChanged"
+}

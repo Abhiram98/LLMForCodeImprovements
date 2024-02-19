@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < bbCount; i++) {\n-    sb.append(String.format(\"%10.1f\",combBuf[i]));\n+ for (double num : combBuf) {\n+    sb.append(String.format(\"%10.1f\",num));",
+                "Description": "Instead of using a traditional for loop to iterate over `combBuf`, use an enhanced for loop. This makes the code more readable and concise.",
+                "Start": 9,
+                "End": 11
+            },
+            {
+                "Improvement": "Use try-with-resources for StringBuilder",
+                "Change_Diff": "- final StringBuilder sb=new StringBuilder();\n+ try (final StringBuilder sb=new StringBuilder()) {",
+                "Description": "StringBuilder does not need to be closed, but it's a good practice to use it within a try-with-resources statement. This ensures that the StringBuilder object is properly disposed of, preventing memory leaks.",
+                "Start": 3,
+                "End": 3
+            }
+        ],
+        "Final code": "private static String getDataDetail(final DoublesSketch sketchIn){\n  final DoublesSketch sketch=sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n  try (final StringBuilder sb=new StringBuilder()) {\n    final String skName=sketch.getClass().getSimpleName();\n    sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n    final int k=sketch.getK();\n    final long n=sketch.getN();\n    final int bbCount=sketch.getBaseBufferCount();\n    final long bitPattern=sketch.getBitPattern();\n    final double[] combBuf=sketch.getCombinedBuffer();\n    sb.append(\"   BaseBuffer   : \");\n    for (double num : combBuf) {\n      sb.append(String.format(\"%10.1f\",num));\n    }\n    sb.append(LS);\n    final int combBufSize=combBuf.length;\n    if (n >= (2 * k)) {\n      sb.append(\"   Valid | Level\");\n      for (int j=2 * k; j < combBufSize; j++) {\n        if ((j % k) == 0) {\n          final int levelNum=(j / k) - 2;\n          final String validLvl=((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n          final String lvl=String.format(\"%5d\",levelNum);\n          sb.append(LS).append(\"   \").append(validLvl).append(\" \").append(lvl).append(\": \");\n        }\n        sb.append(String.format(\"%10.1f\",combBuf[j]));\n      }\n      sb.append(LS);\n    }\n    sb.append(\"### END DATA DETAIL\").append(LS);\n  }\n  return sb.toString();\n}"
+    },
+    "Old_Method": "private static String getDataDetail(final DoublesSketch sketchIn){\n  final DoublesSketch sketch=sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n  final StringBuilder sb=new StringBuilder();\n  final String skName=sketch.getClass().getSimpleName();\n  sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n  final int k=sketch.getK();\n  final long n=sketch.getN();\n  final int bbCount=sketch.getBaseBufferCount();\n  final long bitPattern=sketch.getBitPattern();\n  final double[] combBuf=sketch.getCombinedBuffer();\n  sb.append(\"   BaseBuffer   : \");\n  for (int i=0; i < bbCount; i++) {\n    sb.append(String.format(\"%10.1f\",combBuf[i]));\n  }\n  sb.append(LS);\n  final int combBufSize=combBuf.length;\n  if (n >= (2 * k)) {\n    sb.append(\"   Valid | Level\");\n    for (int j=2 * k; j < combBufSize; j++) {\n      if ((j % k) == 0) {\n        final int levelNum=(j / k) - 2;\n        final String validLvl=((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n        final String lvl=String.format(\"%5d\",levelNum);\n        sb.append(LS).append(\"   \").append(validLvl).append(\" \").append(lvl).append(\": \");\n      }\n      sb.append(String.format(\"%10.1f\",combBuf[j]));\n    }\n    sb.append(LS);\n  }\n  sb.append(\"### END DATA DETAIL\").append(LS);\n  return sb.toString();\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/quantiles/DoublesUtil.java",
+    "Start": 7871,
+    "Stop": 9398,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "getDataDetail"
+}

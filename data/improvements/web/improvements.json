@@ -1,96 +1,236 @@
 [
     {
-        "Method_Improvements": [{
-            "Improvements": [
-                {
-                    "Improvement": "Consolidate multiple formLogin() calls",
-                    "Change_Diff": "- http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n+ http.formLogin()\n                .loginPage(\"/login.jsp\")\n                .loginProcessingUrl(\"/login\")\n                .defaultSuccessUrl(\"/home\")\n                .failureUrl(\"/?error=1\");",
-                    "Description": "Instead of calling formLogin() multiple times, consolidate them into a single call with method chaining.",
-                    "Start": 32,
-                    "End": 32
-                },
-                {
-                    "Improvement": "Consolidate multiple logout() calls",
-                    "Change_Diff": "- http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n+ http.logout()\n                .logoutUrl(\"/logout\")\n                .logoutSuccessUrl(\"/\")\n                .deleteCookies(\"JSESSIONID\");",
-                    "Description": "Instead of calling logout() multiple times, consolidate them into a single call with method chaining.",
-                    "Start": 33,
-                    "End": 33
-                },
-                {
-                    "Improvement": "Consolidate multiple rememberMe() calls",
-                    "Change_Diff": "- http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n+ http.rememberMe()\n                .tokenValiditySeconds(1209600)\n                .rememberMeParameter(\"remember-me\");",
-                    "Description": "Instead of calling rememberMe() multiple times, consolidate them into a single call with method chaining.",
-                    "Start": 34,
-                    "End": 34
-                },
-                {
-                    "Improvement": "Use lambda expression for HeaderWriter",
-                    "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){\n    public void writeHeaders(HttpServletRequest request,HttpServletResponse response){\n        response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n        response.setHeader(\"Expires\",\"0\");\n        response.setHeader(\"Pragma\",\"no-cache\");\n        response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n        response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n        response.setHeader(\"x-content-type-options\",\"nosniff\");\n    }\n}\n;\n+ HeaderWriter headerWriter = (request, response) -> {\n            response.setHeader(\"Cache-Control\", \"no-cache, no-store, max-age=0, must-revalidate\");\n            response.setHeader(\"Expires\", \"0\");\n            response.setHeader(\"Pragma\", \"no-cache\");\n            response.setHeader(\"X-Frame-Options\", \"SAMEORIGIN\");\n            response.setHeader(\"X-XSS-Protection\", \"1; mode=block\");\n            response.setHeader(\"x-content-type-options\", \"nosniff\");\n        };",
-                    "Description": "Use a lambda expression for the HeaderWriter instead of creating an anonymous class.",
-                    "Start": 37,
-                    "End": 37
-                }
-            ],
-            "Final code": "@Override\nprotected void configure(HttpSecurity http) throws Exception {\n    http.formLogin()\n        .loginPage(\"/login.jsp\")\n        .loginProcessingUrl(\"/login\")\n        .defaultSuccessUrl(\"/home\")\n        .failureUrl(\"/?error=1\");\n\n    http.logout()\n        .logoutUrl(\"/logout\")\n        .logoutSuccessUrl(\"/\")\n        .deleteCookies(\"JSESSIONID\");\n\n    http.rememberMe()\n        .tokenValiditySeconds(1209600)\n        .rememberMeParameter(\"remember-me\");\n\n    CharacterEncodingFilter encodeFilter = new CharacterEncodingFilter();\n    encodeFilter.setEncoding(\"utf-8\");\n    encodeFilter.setForceEncoding(true);\n    http.addFilterBefore(encodeFilter, CsrfFilter.class);\n\n    http.headers().disable();\n\n    HeaderWriter headerWriter = (request, response) -> {\n        response.setHeader(\"Cache-Control\", \"no-cache, no-store, max-age=0, must-revalidate\");\n        response.setHeader(\"Expires\", \"0\");\n        response.setHeader(\"Pragma\", \"no-cache\");\n        response.setHeader(\"X-Frame-Options\", \"SAMEORIGIN\");\n        response.setHeader(\"X-XSS-Protection\", \"1; mode=block\");\n        response.setHeader(\"x-content-type-options\", \"nosniff\");\n    };\n    List<HeaderWriter> headerWriterFilterList = new ArrayList<>();\n    headerWriterFilterList.add(headerWriter);\n    HeaderWriterFilter headerFilter = new HeaderWriterFilter(headerWriterFilterList);\n    http.addFilter(headerFilter);\n}"
-        }],
         "Old_Method": "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n  http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n  http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter=new HeaderWriter(){\n    public void writeHeaders(    HttpServletRequest request,    HttpServletResponse response){\n      response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n      response.setHeader(\"Expires\",\"0\");\n      response.setHeader(\"Pragma\",\"no-cache\");\n      response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n      response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n      response.setHeader(\"x-content-type-options\",\"nosniff\");\n    }\n  }\n;\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Avoid chaining methods excessively",
+                "Change_Diff": "- http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n- http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n- http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n+ FormLoginConfigurer<HttpSecurity> loginConfigurer = http.formLogin();\n+ loginConfigurer.loginPage(\"/login.jsp\");\n+ loginConfigurer.loginProcessingUrl(\"/login\");\n+ loginConfigurer.defaultSuccessUrl(\"/home\");\n+ loginConfigurer.failureUrl(\"/?error=1\");\n+ LogoutConfigurer<HttpSecurity> logoutConfigurer = http.logout();\n+ logoutConfigurer.logoutUrl(\"/logout\");\n+ logoutConfigurer.logoutSuccessUrl(\"/\");\n+ logoutConfigurer.deleteCookies(\"JSESSIONID\");\n+ RememberMeConfigurer<HttpSecurity> rememberMeConfigurer = http.rememberMe();\n+ rememberMeConfigurer.tokenValiditySeconds(1209600);\n+ rememberMeConfigurer.rememberMeParameter(\"remember-me\");",
+                "Description": "The method chaining in formLogin, logout, and rememberMe methods makes the code harder to read. It is recommended to break it down for better readability.",
+                "Start": 2,
+                "End": 3
+            },
+            {
+                "Improvement": "Use lambda expression",
+                "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){\n- public void writeHeaders( HttpServletRequest request, HttpServletResponse response){\n- response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n- response.setHeader(\"Expires\",\"0\");\n- response.setHeader(\"Pragma\",\"no-cache\");\n- response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n- response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n- response.setHeader(\"x-content-type-options\",\"nosniff\");\n- }\n- };\n+ HeaderWriter headerWriter = (request, response) -> {\n+ response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n+ response.setHeader(\"Expires\",\"0\");\n+ response.setHeader(\"Pragma\",\"no-cache\");\n+ response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n+ response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n+ response.setHeader(\"x-content-type-options\",\"nosniff\");\n+ };",
+                "Description": "You can create the HeaderWriter instance using a lambda expression, which is more concise and readable.",
+                "Start": 12,
+                "End": 20
+            },
+            {
+                "Improvement": "Move header settings to a separate method",
+                "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){\n    public void writeHeaders(    HttpServletRequest request,    HttpServletResponse response){\n      response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n      response.setHeader(\"Expires\",\"0\");\n      response.setHeader(\"Pragma\",\"no-cache\");\n      response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n      response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n      response.setHeader(\"x-content-type-options\",\"nosniff\");\n    }\n  };\n+ private HeaderWriter createHeaderWriter() {\n    return (request, response) -> {\n        response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n        response.setHeader(\"Expires\",\"0\");\n        response.setHeader(\"Pragma\",\"no-cache\");\n        response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n        response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n        response.setHeader(\"x-content-type-options\",\"nosniff\");\n    };\n}",
+                "Description": "The header settings are hard-coded and the method looks cluttered. It would be better to move these settings to a separate private method. This will make the code cleaner and more maintainable.",
+                "Start": 13,
+                "End": 20
+            },
+            {
+                "Improvement": "Move anonymous class to a private method",
+                "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){\n-    public void writeHeaders(    HttpServletRequest request,    HttpServletResponse response){\n-      response.setHeader('Cache-Control','no-cache, no-store, max-age=0, must-revalidate');\n-      response.setHeader('Expires','0');\n-      response.setHeader('Pragma','no-cache');\n-      response.setHeader('X-Frame-Options','SAMEORIGIN');\n-      response.setHeader('X-XSS-Protection','1; mode=block');\n-      response.setHeader('x-content-type-options','nosniff');\n-    }\n-  }\n+ HeaderWriter headerWriter = createHeaderWriter();",
+                "Description": "Move anonymous HeaderWriter class to a private method for better readability and reusability.",
+                "Start": 11,
+                "End": 20
+            },
+            {
+                "Improvement": "Make anonymous class a separate class",
+                "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){...}\n+ CustomHeaderWriter headerWriter = new CustomHeaderWriter();",
+                "Description": "Instead of using an anonymous class for the HeaderWriter, it would be better to create a separate class. This will make the code more readable and maintainable. The new class can be named as CustomHeaderWriter.",
+                "Start": 13,
+                "End": 21
+            },
+            {
+                "Improvement": "Refactor repetitive method calls",
+                "Change_Diff": "- http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n+ http.formLogin().loginPage(\"/login.jsp\").loginProcessingUrl(\"/login\").defaultSuccessUrl(\"/home\").failureUrl(\"/?error=1\");",
+                "Description": "Instead of repeatedly calling the same method, you can chain the methods together in one call. It reduces the length of the code and increases readability.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Refactor repetitive method calls",
+                "Change_Diff": "- http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n+ http.logout().logoutUrl(\"/logout\").logoutSuccessUrl(\"/\").deleteCookies(\"JSESSIONID\");",
+                "Description": "Instead of repeatedly calling the same method, you can chain the methods together in one call. It reduces the length of the code and increases readability.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Refactor repetitive method calls",
+                "Change_Diff": "- http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n+ http.rememberMe().tokenValiditySeconds(1209600).rememberMeParameter(\"remember-me\");",
+                "Description": "Instead of repeatedly calling the same method, you can chain the methods together in one call. It reduces the length of the code and increases readability.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Avoid chaining method calls",
+                "Change_Diff": "- http.formLogin().loginPage(\"/login.jsp\").and().formLogin().loginProcessingUrl(\"/login\").and().formLogin().defaultSuccessUrl(\"/home\").and().formLogin().failureUrl(\"/?error=1\");\n- http.logout().logoutUrl(\"/logout\").and().logout().logoutSuccessUrl(\"/\").and().logout().deleteCookies(\"JSESSIONID\");\n- http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter(\"remember-me\");\n+ http.formLogin()\n+   .loginPage(\"/login.jsp\")\n+   .loginProcessingUrl(\"/login\")\n+   .defaultSuccessUrl(\"/home\")\n+   .failureUrl(\"/?error=1\");\n+ http.logout()\n+   .logoutUrl(\"/logout\")\n+   .logoutSuccessUrl(\"/\")\n+   .deleteCookies(\"JSESSIONID\");\n+ http.rememberMe()\n+   .tokenValiditySeconds(1209600)\n+   .rememberMeParameter(\"remember-me\");",
+                "Description": "Chaining method calls can make the code hard to read and debug. Instead of chaining methods, use multiple lines for each method call.",
+                "Start": 2,
+                "End": 4
+            },
+            {
+                "Improvement": "Use lambda expression",
+                "Change_Diff": "- HeaderWriter headerWriter=new HeaderWriter(){\n-    public void writeHeaders(    HttpServletRequest request,    HttpServletResponse response){\n-      response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n-      response.setHeader(\"Expires\",\"0\");\n-      response.setHeader(\"Pragma\",\"no-cache\");\n-      response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n-      response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n-      response.setHeader(\"x-content-type-options\",\"nosniff\");\n-    }\n-  }\n-;\n+ HeaderWriter headerWriter = (request, response) -> {\n+     response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n+     response.setHeader(\"Expires\",\"0\");\n+     response.setHeader(\"Pragma\",\"no-cache\");\n+     response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n+     response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n+     response.setHeader(\"x-content-type-options\",\"nosniff\");\n+ };",
+                "Description": "Java 8 introduces lambda expressions, which provide a clear and concise way to represent one method interface using an expression. Lambda expressions are commonly used when we need to provide the implementation of a method which is declared in a functional interface.",
+                "Start": 12,
+                "End": 21
+            }
+        ],
         "File_Path": "web/back/src/main/java/com/aitongyi/web/back/conf/SecurityConfig.java",
         "Start": 1726,
         "Stop": 3424,
+        "All_Improved_Methods": [
+            "@Override protected void configure(HttpSecurity http) throws Exception {\n  FormLoginConfigurer<HttpSecurity> loginConfigurer = http.formLogin();\n  loginConfigurer.loginPage(\"/login.jsp\");\n  loginConfigurer.loginProcessingUrl(\"/login\");\n  loginConfigurer.defaultSuccessUrl(\"/home\");\n  loginConfigurer.failureUrl(\"/?error=1\");\n  LogoutConfigurer<HttpSecurity> logoutConfigurer = http.logout();\n  logoutConfigurer.logoutUrl(\"/logout\");\n  logoutConfigurer.logoutSuccessUrl(\"/\");\n  logoutConfigurer.deleteCookies(\"JSESSIONID\");\n  RememberMeConfigurer<HttpSecurity> rememberMeConfigurer = http.rememberMe();\n  rememberMeConfigurer.tokenValiditySeconds(1209600);\n  rememberMeConfigurer.rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter = (request, response) -> {\n    response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n    response.setHeader(\"Expires\",\"0\");\n    response.setHeader(\"Pragma\",\"no-cache\");\n    response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n    response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n    response.setHeader(\"x-content-type-options\",\"nosniff\");\n  };\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}",
+            "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin()\n    .loginPage(\"/login.jsp\")\n    .loginProcessingUrl(\"/login\")\n    .defaultSuccessUrl(\"/home\")\n    .failureUrl(\"/?error=1\")\n    .and()\n    .logout()\n    .logoutUrl(\"/logout\")\n    .logoutSuccessUrl(\"/\")\n    .deleteCookies(\"JSESSIONID\")\n    .and()\n    .rememberMe()\n    .tokenValiditySeconds(1209600)\n    .rememberMeParameter(\"remember-me\");\n\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n\n  HeaderWriter headerWriter = createHeaderWriter();\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}\n\nprivate HeaderWriter createHeaderWriter() {\n  return (request, response) -> {\n      response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n      response.setHeader(\"Expires\",\"0\");\n      response.setHeader(\"Pragma\",\"no-cache\");\n      response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n      response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n      response.setHeader(\"x-content-type-options\",\"nosniff\");\n  };\n}",
+            "@Override protected void configure(HttpSecurity http) throws Exception {\n  FormLoginConfigurer<HttpSecurity> formLogin = http.formLogin();\n  formLogin.loginPage('/login.jsp').loginProcessingUrl('/login').defaultSuccessUrl('/home').failureUrl('/?error=1');\n  LogoutConfigurer<HttpSecurity> logout = http.logout();\n  logout.logoutUrl('/logout').logoutSuccessUrl('/').deleteCookies('JSESSIONID');\n  http.rememberMe().tokenValiditySeconds(1209600).and().rememberMe().rememberMeParameter('remember-me');\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding('utf-8');\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter = createHeaderWriter();\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}\n\nprivate HeaderWriter createHeaderWriter() {\n    return new HeaderWriter() {\n        public void writeHeaders(HttpServletRequest request, HttpServletResponse response) {\n            response.setHeader('Cache-Control','no-cache, no-store, max-age=0, must-revalidate');\n            response.setHeader('Expires','0');\n            response.setHeader('Pragma','no-cache');\n            response.setHeader('X-Frame-Options','SAMEORIGIN');\n            response.setHeader('X-XSS-Protection','1; mode=block');\n            response.setHeader('x-content-type-options','nosniff');\n        }\n    };\n}",
+            "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin().loginPage(\"/login.jsp\").loginProcessingUrl(\"/login\").defaultSuccessUrl(\"/home\").failureUrl(\"/?error=1\");\n  http.logout().logoutUrl(\"/logout\").logoutSuccessUrl(\"/\").deleteCookies(\"JSESSIONID\");\n  http.rememberMe().tokenValiditySeconds(1209600).rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  CustomHeaderWriter headerWriter = new CustomHeaderWriter();\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}\n\nclass CustomHeaderWriter implements HeaderWriter {\n  public void writeHeaders(HttpServletRequest request, HttpServletResponse response){\n    response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n    response.setHeader(\"Expires\",\"0\");\n    response.setHeader(\"Pragma\",\"no-cache\");\n    response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n    response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n    response.setHeader(\"x-content-type-options\",\"nosniff\");\n  }\n}",
+            "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin().loginPage(\"/login.jsp\").loginProcessingUrl(\"/login\").defaultSuccessUrl(\"/home\").failureUrl(\"/?error=1\");\n  http.logout().logoutUrl(\"/logout\").logoutSuccessUrl(\"/\").deleteCookies(\"JSESSIONID\");\n  http.rememberMe().tokenValiditySeconds(1209600).rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter=new HeaderWriter(){\n    public void writeHeaders(    HttpServletRequest request,    HttpServletResponse response){\n      response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n      response.setHeader(\"Expires\",\"0\");\n      response.setHeader(\"Pragma\",\"no-cache\");\n      response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n      response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n      response.setHeader(\"x-content-type-options\",\"nosniff\");\n    }\n  };\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}",
+            "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin()\n     .loginPage(\"/login.jsp\")\n     .loginProcessingUrl(\"/login\")\n     .defaultSuccessUrl(\"/home\")\n     .failureUrl(\"/?error=1\");\n  http.logout()\n     .logoutUrl(\"/logout\")\n     .logoutSuccessUrl(\"/\")\n     .deleteCookies(\"JSESSIONID\");\n  http.rememberMe()\n     .tokenValiditySeconds(1209600)\n     .rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter = (request, response) -> {\n     response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n     response.setHeader(\"Expires\",\"0\");\n     response.setHeader(\"Pragma\",\"no-cache\");\n     response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n     response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n     response.setHeader(\"x-content-type-options\",\"nosniff\");\n  };\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}",
+            "@Override protected void configure(HttpSecurity http) throws Exception {\n  http.formLogin()\n  .loginPage(\"/login.jsp\")\n  .loginProcessingUrl(\"/login\")\n  .defaultSuccessUrl(\"/home\")\n  .failureUrl(\"/?error=1\");\n  http.logout()\n  .logoutUrl(\"/logout\")\n  .logoutSuccessUrl(\"/\")\n  .deleteCookies(\"JSESSIONID\");\n  http.rememberMe()\n  .tokenValiditySeconds(1209600)\n  .rememberMeParameter(\"remember-me\");\n  CharacterEncodingFilter encodeFilter=new CharacterEncodingFilter();\n  encodeFilter.setEncoding(\"utf-8\");\n  encodeFilter.setForceEncoding(true);\n  http.addFilterBefore(encodeFilter,CsrfFilter.class);\n  http.headers().disable();\n  HeaderWriter headerWriter=(request, response) -> {\n    response.setHeader(\"Cache-Control\",\"no-cache, no-store, max-age=0, must-revalidate\");\n    response.setHeader(\"Expires\",\"0\");\n    response.setHeader(\"Pragma\",\"no-cache\");\n    response.setHeader(\"X-Frame-Options\",\"SAMEORIGIN\");\n    response.setHeader(\"X-XSS-Protection\",\"1; mode=block\");\n    response.setHeader(\"x-content-type-options\",\"nosniff\");\n  };\n  List<HeaderWriter> headerWriterFilterList=new ArrayList<>();\n  headerWriterFilterList.add(headerWriter);\n  HeaderWriterFilter headerFilter=new HeaderWriterFilter(headerWriterFilterList);\n  http.addFilter(headerFilter);\n}",
+            "no response"
+        ],
         "Project_Name": "data/projects/web",
         "Method_Name": "configure"
     },
     {
-        "Method_Improvements": [{
-            "Improvements": [
-                {
-                    "Improvement": "Use try-with-resources to automatically close the Jedis resource",
-                    "Change_Diff": "- jedis=jedisPool.getResource();\n+ try (Jedis jedis = jedisPool.getResource()) {",
-                    "Description": "Instead of manually closing the Jedis resource, use try-with-resources to automatically close it.",
-                    "Start": 5,
-                    "End": 5
-                },
-                {
-                    "Improvement": "Remove the finally block for closing Jedis",
-                    "Change_Diff": "- finally {\n-     if (jedis != null) {\n-         jedis.close();\n-     }\n- }",
-                    "Description": "With try-with-resources, there is no need for the finally block to close the Jedis resource.",
-                    "Start": 9,
-                    "End": 13
-                }
-            ],
-            "Final code": "/**\n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  try (Jedis jedis = jedisPool.getResource()) {\n    jedis.del(key);\n  }\n}"
-        }],
         "Old_Method": "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  Jedis jedis=null;\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  }\n  finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Add exception handling",
+                "Change_Diff": "+ try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n+ } catch (Exception e) {\n+    e.printStackTrace();\n+ }",
+                "Description": "The current implementation does not handle any potential exceptions that might occur during the execution of the function. It's always good practice to catch and handle potential exceptions, especially for I/O operations like interacting with a database.",
+                "Start": 5,
+                "End": 8
+            },
+            {
+                "Improvement": "Use try-with-resources statement",
+                "Change_Diff": "- Jedis jedis=null;\n- try {\n-   jedis=jedisPool.getResource();\n-   jedis.del(key);\n- } finally {\n-   if (jedis != null) {\n-     jedis.close();\n-   }\n- }\n+ try (Jedis jedis = jedisPool.getResource()) {\n+   jedis.del(key);\n+ } catch (Exception e) {\n+   e.printStackTrace();\n+ }",
+                "Description": "Java 7 introduced the try-with-resources statement, which ensures that each resource is closed at the end of the statement. This would make your code cleaner and you don't have to explicitly close the resource in a finally block.",
+                "Start": 5,
+                "End": 12
+            },
+            {
+                "Improvement": "Add null check for key",
+                "Change_Diff": "+ if (key == null) {\n+     throw new IllegalArgumentException(\"Key cannot be null\");\n+ }",
+                "Description": "It's a good practice to check the validity of the method's parameters. In this case, if a null key is passed to the method, the jedis.del(key) will throw NullPointerException. So, we need to add a null check for key at the beginning of the method.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Add exception handling",
+                "Change_Diff": "+ } catch (Exception e) {\n+    System.err.println(\"An error occurred while deleting the key from Jedis: \" + e.getMessage());\n+    e.printStackTrace();\n+ }",
+                "Description": "The current method does not handle any exceptions that might occur when interacting with the Jedis resource. It's better to add a catch clause to handle probable exceptions and provide more informative error messages.",
+                "Start": 4,
+                "End": 8
+            },
+            {
+                "Improvement": "Use try-with-resources for auto-closable instances",
+                "Change_Diff": "- Jedis jedis=null;\n- try {\n-   jedis=jedisPool.getResource();\n-   jedis.del(key);\n- }\n- finally {\n-   if (jedis != null) {\n-     jedis.close();\n-   }\n- }\n+ try (Jedis jedis = jedisPool.getResource()) {\n+   jedis.del(key);\n+ }",
+                "Description": "The `Jedis` instance is a closeable resource and should be handled using a try-with-resources statement. This ensures that the resource is closed automatically at the end of the statement and makes the code more readable by reducing clutter.",
+                "Start": 3,
+                "End": 11
+            },
+            {
+                "Improvement": "Add exception handling",
+                "Change_Diff": "- jedis=jedisPool.getResource();\n- jedis.del(key);\n+ try {\n+     jedis=jedisPool.getResource();\n+     jedis.del(key);\n+ } catch (Exception e) {\n+     // Log the exception or rethrow it\n+     throw new RuntimeException(\"Failed to delete key from cache\", e);\n+ }",
+                "Description": "The code does not currently handle any exceptions that might occur while getting the resource or deleting the key. Exception handling should be added to ensure that errors are properly handled and communicated",
+                "Start": 4,
+                "End": 7
+            },
+            {
+                "Improvement": "Check for null key",
+                "Change_Diff": "- jedis.del(key);\n+ if (key != null) {\n+     jedis.del(key);\n+ } else {\n+     throw new IllegalArgumentException(\"Key cannot be null\");\n+ }",
+                "Description": "The code does not currently check if the key is null before trying to delete it. A null key would cause a NullPointerException. A null check should be added to prevent this",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "- /**\n-  * 删除缓存对象\n-  * @param key\n-  */\n+ /**\n+  * Deletes an object from cache\n+  * @param key the key of the object to delete\n+  */",
+                "Description": "The method documentation is not in English which makes it difficult for non-Chinese speakers to understand. It should be translated to English",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Add Exception Handling",
+                "Change_Diff": "- try {\n+ try {\n+   jedis=jedisPool.getResource();\n+   jedis.del(key);\n+ } catch (JedisException je) {\n+   System.out.println(\"Error while deleting key: \" + je.getMessage());\n+ }",
+                "Description": "Jedis operations may throw a JedisException if something goes wrong. To handle this, we should add a catch block to handle such exceptions.",
+                "Start": 6,
+                "End": 9
+            },
+            {
+                "Improvement": "Check for null key",
+                "Change_Diff": "+ if (key == null) {\n+   throw new IllegalArgumentException(\"Key cannot be null\");\n+ }\n  try {",
+                "Description": "The key parameter should be checked for null value before performing 'del' operation. If key is null, we can either throw an IllegalArgumentException or simply return from the method.",
+                "Start": 6,
+                "End": 6
+            }
+        ],
         "File_Path": "web/cache/src/main/java/com/aitongyi/web/cache/CacheService.java",
         "Start": 1034,
         "Stop": 1334,
+        "All_Improved_Methods": [
+            "no response",
+            "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  try (Jedis jedis = jedisPool.getResource()) {\n    jedis.del(key);\n  } catch (Exception e) {\n    e.printStackTrace();\n  }\n}",
+            "public void del(String key){\n  if (key == null) {\n    throw new IllegalArgumentException(\"Key cannot be null\");\n  }\n  Jedis jedis=null;\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  } catch (Exception e) {\n    System.err.println(\"An error occurred while deleting the key from Jedis: \" + e.getMessage());\n    e.printStackTrace();\n  } finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}",
+            "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  if (key == null || key.isEmpty()) {\n    throw new IllegalArgumentException(\"Key cannot be null or empty\");\n  }\n  try (Jedis jedis = jedisPool.getResource()) {\n    jedis.del(key);\n  }\n}",
+            "    /**\n     * Deletes an object from cache\n     * @param key the key of the object to delete\n     */\n    public void del(String key) {\n        if (key == null) {\n            throw new IllegalArgumentException(\"Key cannot be null\");\n        }\n\n        Jedis jedis = null;\n        try {\n            jedis = jedisPool.getResource();\n            jedis.del(key);\n        } catch (Exception e) {\n            throw new RuntimeException(\"Failed to delete key from cache\", e);\n        } finally {\n            if (jedis != null) {\n                jedis.close();\n            }\n        }\n    }",
+            "public void del(String key){\n  Jedis jedis=null;\n  if (key == null) {\n    throw new IllegalArgumentException(\"Key cannot be null\");\n  }\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  } catch (JedisException je) {\n    System.out.println(\"Error while deleting key: \" + je.getMessage());\n  }\n  finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}",
+            "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key){\n  if (key == null || key.isEmpty()) {\n    throw new IllegalArgumentException(\"Key cannot be null or empty.\");\n  }\n  Jedis jedis=null;\n  try {\n    jedis=jedisPool.getResource();\n    jedis.del(key);\n  } catch (Exception e) {\n    logger.error(\"An error occurred while deleting a key from cache\", e);\n    throw e;\n  } finally {\n    if (jedis != null) {\n      jedis.close();\n    }\n  }\n}",
+            "/** \n * 删除缓存对象\n * @param key\n */\npublic void del(String key) {\n  if (key == null) {\n    throw new IllegalArgumentException(\"Key cannot be null.\");\n  }\n  try (Jedis jedis = jedisPool.getResource()) {\n    jedis.del(key);\n  }\n}"
+        ],
         "Project_Name": "data/projects/web",
         "Method_Name": "del"
     },
     {
-        "Method_Improvements": [{
-            "Improvements": [
-                {
-                    "Improvement": "Remove unnecessary logging statement",
-                    "Change_Diff": "- logger.info(\"mysql url:\" + dbUrl);\n+ // logger.info(\"mysql url:\" + dbUrl);",
-                    "Description": "There is a logging statement that prints the MySQL URL. This statement can be removed as it does not provide any useful information.",
-                    "Start": 6,
-                    "End": 6
-                },
-                {
-                    "Improvement": "Use try-with-resources for DataSource creation",
-                    "Change_Diff": "- BasicDataSource dataSource=new BasicDataSource();\n+ try (BasicDataSource dataSource = new BasicDataSource()) {",
-                    "Description": "Using try-with-resources for DataSource creation ensures that the DataSource is closed properly after its use.",
-                    "Start": 7,
-                    "End": 7
-                }
-            ],
-            "Final code": "@Bean(destroyMethod=\"close\")\npublic DataSource dataSource(){\n  // logger.info(\"mysql url:\" + dbUrl);\n  try (BasicDataSource dataSource = new BasicDataSource()) {\n    dataSource.setDriverClassName(jdbcDriver);\n    dataSource.setUrl(dbUrl);\n    dataSource.setUsername(username);\n    dataSource.setPassword(password);\n    dataSource.setMaxTotal(maxTotal);\n    dataSource.setMinIdle(minIdle);\n    dataSource.setMaxIdle(maxIdle);\n    return dataSource;\n  }\n}"
-        }],
         "Old_Method": "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(\"mysql url:\" + dbUrl);\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Avoid logging sensitive information",
+                "Change_Diff": "- logger.info(\"mysql url:\" + dbUrl);\n+ //Sensitive data logging removed",
+                "Description": "Sensitive information such as database URL, username, and password should not be logged due to security reasons.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Use Dependency Injection for BasicDataSource",
+                "Change_Diff": "- BasicDataSource dataSource=new BasicDataSource();\n+ //BasicDataSource instance managed by Spring Framework",
+                "Description": "Instead of creating a new instance of BasicDataSource every time this method is called, consider using Dependency Injection to manage this resource.",
+                "Start": 3,
+                "End": 10
+            },
+            {
+                "Improvement": "Add null checks for mandatory properties",
+                "Change_Diff": "+ if(jdbcDriver == null || dbUrl == null || username == null || password == null) {\n+     throw new IllegalArgumentException(\"Mandatory properties are missing\");\n+ }",
+                "Description": "The properties like jdbcDriver, dbUrl, username, and password are mandatory for creating a DataSource. Hence, we should add null checks for these properties to avoid null pointer exceptions.",
+                "Start": 4,
+                "End": 7
+            },
+            {
+                "Improvement": "Use constructor injection for setting up DataSource",
+                "Change_Diff": "- BasicDataSource dataSource=new BasicDataSource();\n- dataSource.setDriverClassName(jdbcDriver);\n- dataSource.setUrl(dbUrl);\n- dataSource.setUsername(username);\n- dataSource.setPassword(password);\n- dataSource.setMaxTotal(maxTotal);\n- dataSource.setMinIdle(minIdle);\n- dataSource.setMaxIdle(maxIdle);\n+ BasicDataSource dataSource = new BasicDataSource(jdbcDriver, dbUrl, username, password, maxTotal, minIdle, maxIdle);",
+                "Description": "Instead of setting properties individually, we can use a constructor to set all properties at once. This can make the code cleaner and easier to read.",
+                "Start": 3,
+                "End": 8
+            },
+            {
+                "Improvement": "Use try-catch for potential exceptions",
+                "Change_Diff": "+ try {\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n+ } catch (SQLException e) {\n+   logger.error(\"Failed to create data source\", e);\n+   throw new RuntimeException(e);\n+ }",
+                "Description": "As the data source connection could fail for various reasons and throw SQLException, it is better to handle potential exceptions.",
+                "Start": 3,
+                "End": 11
+            }
+        ],
         "File_Path": "web/dao/src/main/java/com/aitongyi/web/dao/conf/DatabaseConfig.java",
         "Start": 1211,
         "Stop": 1703,
+        "All_Improved_Methods": [
+            "no response",
+            "@Bean(destroyMethod=\"close\") public DataSource dataSource() {\n    //Sensitive data logging removed\n    //Dependency Injection for BasicDataSource\n    dataSource.setDriverClassName(jdbcDriver);\n    dataSource.setUrl(dbUrl);\n    dataSource.setUsername(username);\n    dataSource.setPassword(password);\n    dataSource.setMaxTotal(maxTotal);\n    dataSource.setMinIdle(minIdle);\n    dataSource.setMaxIdle(maxIdle);\n    return dataSource;\n}",
+            "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(\"mysql url: {}\", dbUrl);\n  if(jdbcDriver == null || dbUrl == null || username == null || password == null) {\n     throw new IllegalArgumentException(\"Mandatory properties are missing\");\n  }\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}",
+            "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n\nBasicDataSource dataSource = new BasicDataSource(jdbcDriver, dbUrl, username, password, maxTotal, minIdle, maxIdle);\n\nreturn dataSource;\n}",
+            "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  // logger.info(String.format(\"mysql url: %s\", dbUrl)); // Removed logging of sensitive information\n  BasicDataSource dataSource=new BasicDataSource();\n  dataSource.setDriverClassName(jdbcDriver);\n  dataSource.setUrl(dbUrl);\n  dataSource.setUsername(username);\n  dataSource.setPassword(password);\n  dataSource.setMaxTotal(maxTotal);\n  dataSource.setMinIdle(minIdle);\n  dataSource.setMaxIdle(maxIdle);\n  return dataSource;\n}",
+            "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  try {\n    logger.info(\"mysql url:{}\", dbUrl);\n    BasicDataSource dataSource=new BasicDataSource();\n    dataSource.setDriverClassName(jdbcDriver);\n    dataSource.setUrl(dbUrl);\n    dataSource.setUsername(username);\n    dataSource.setPassword(password);\n    dataSource.setMaxTotal(maxTotal);\n    dataSource.setMinIdle(minIdle);\n    dataSource.setMaxIdle(maxIdle);\n    return dataSource;\n  } catch (SQLException e) {\n    logger.error(\"Failed to create data source\", e);\n    throw new RuntimeException(e);\n  }\n}",
+            "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  StringBuilder sb = new StringBuilder();\n  sb.append(\"mysql url:\");\n  sb.append(dbUrl);\n  logger.info(sb.toString());\n  try (BasicDataSource dataSource = new BasicDataSource()) {\n    dataSource.setDriverClassName(jdbcDriver);\n    dataSource.setUrl(dbUrl);\n    dataSource.setUsername(username);\n    dataSource.setPassword(password);\n    dataSource.setMaxTotal(maxTotal);\n    dataSource.setMinIdle(minIdle);\n    dataSource.setMaxIdle(maxIdle);\n    return dataSource;\n  }\n}",
+            "@Bean(destroyMethod=\"close\") public DataSource dataSource(){\n  logger.info(String.format(\"mysql url: %s\", dbUrl));\n  try (BasicDataSource dataSource = new BasicDataSource()) {\n    dataSource.setDriverClassName(jdbcDriver);\n    dataSource.setUrl(dbUrl);\n    dataSource.setUsername(username);\n    dataSource.setPassword(password);\n    dataSource.setMaxTotal(maxTotal);\n    dataSource.setMinIdle(minIdle);\n    dataSource.setMaxIdle(maxIdle);\n    return dataSource;\n  }\n}"
+        ],
         "Project_Name": "data/projects/web",
         "Method_Name": "dataSource"
     }

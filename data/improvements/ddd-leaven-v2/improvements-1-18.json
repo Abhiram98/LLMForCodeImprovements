@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use descriptive test method name",
+                "Change_Diff": "- @Test public void canNotPurchaseIfOfferChanged(){\n+ @Test public void shouldThrowExceptionWhenConfirmingOrderIfOfferChanged(){",
+                "Description": "The name of a test method should clearly state what is being tested. It should also include the expected behavior and the state under which the behavior is expected.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use AssertThrows instead of try-catch block",
+                "Change_Diff": "- try {\n- orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n- Assert.fail();\n- }\n- catch (  OfferChangedExcpetion e) {\n- }\n+ assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));",
+                "Description": "Instead of using a try-catch block to test if an exception is thrown, you can use the AssertThrows method from the JUnit library. This makes the code more readable and concise.",
+                "Start": 8,
+                "End": 14
+            }
+        ],
+        "Final code": "@Test public void shouldThrowExceptionWhenConfirmingOrderIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  assertThrows(OfferChangedExcpetion.class, () -> orderingService.confirm(orderId,new OrderDetailsCommand(),offer));\n}"
+    },
+    "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+    "Start": 2542,
+    "Stop": 3087,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "canNotPurchaseIfOfferChanged"
+}

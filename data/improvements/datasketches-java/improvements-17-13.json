@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove extra variable initializations",
+                "Change_Diff": "- int t1=2;\n- int t2=2;\n- int rt=2;\n- int lgK1=7;\n- int lgK2=7;\n- int lgMaxK=7;\n- int n1=7;\n- int n2=7;\n\n+ int t1, t2, rt, lgK1, lgK2, lgMaxK, n1, n2;\n+ t1 = t2 = rt = 2;\n+ lgK1 = lgK2 = lgMaxK = n1 = n2 = 7;",
+                "Description": "In the provided code, there are some variables initialized with the same value multiple times. This is redundant and can be avoided by initializing the variables once and reusing them when necessary.",
+                "Start": 11,
+                "End": 11
+            },
+            {
+                "Improvement": "Use enhanced for loop",
+                "Change_Diff": "- for (i=7; i <= 13; i++) {\n+ int[] iArray = {7, 8, 9, 10, 11, 12, 13};\n+ for (int i : iArray) {",
+                "Description": "The current code uses a traditional for loop to iterate. Using an enhanced for loop can make the code more readable and easier to understand.",
+                "Start": 32,
+                "End": 34
+            },
+            {
+                "Improvement": "Remove redundant code blocks",
+                "Change_Diff": "- {\n  n1=((1 << (i - 3)) * 3) / 4;\n  n2=n1;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1-=2;\n  n2+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n}\n\n+ performBasicUnionOperations(i, lgK1, lgK2, lgMaxK, t1, t2, rt);",
+                "Description": "The code contains several redundant blocks that perform the same operations on different values of variables. These blocks can be replaced with a single method call with parameters.",
+                "Start": 37,
+                "End": 61
+            }
+        ],
+        "Final code": "@Test public void checkUnions(){\n  int t1, t2, rt, lgK1, lgK2, lgMaxK, n1, n2;\n  t1 = t2 = rt = 2;\n  lgK1 = lgK2 = lgMaxK = n1 = n2 = 7;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=8;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=7;\n  n2=8;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=n2=8;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=7;\n  n2=14;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  println(\"++END BASE GROUP++\");\n  int[] iArray = {7, 8, 9, 10, 11, 12, 13};\n  for (int i : iArray) {\n    performBasicUnionOperations(i, lgK1, lgK2, lgMaxK, t1, t2, rt);\n    println(\"--END MINOR GROUP--\");\n    lgK1=i;\n    lgK2=i + 1;\n    performBasicUnionOperations(i, lgK1, lgK2, lgMaxK, t1, t2, rt);\n    println(\"--END MINOR GROUP--\");\n    lgK1=i + 1;\n    lgK2=i;\n    performBasicUnionOperations(i, lgK1, lgK2, lgMaxK, t1, t2, rt);\n    println(\"--END MINOR GROUP--\");\n    lgK1=lgK2=i + 1;\n    performBasicUnionOperations(i, lgK1, lgK2, lgMaxK, t1, t2, rt);\n    println(\"++END MAJOR GROUP++\");\n  }\n}\n\npublic void performBasicUnionOperations(int i, int lgK1, int lgK2, int lgMaxK, int t1, int t2, int rt) {\n  int n1=((1 << (i - 3)) * 3) / 4;\n  int n2=n1;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1-=2;\n  n2+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n}"
+    },
+    "Old_Method": "/** \n * The task here is to check the transition boundaries as the sketch morphs between LIST to SET to HLL modes. The transition points vary as a function of lgConfigK. In addition, this checks that the union operation is operating properly based on the order the sketches are presented to the union.\n */\n@Test public void checkUnions(){\n  int t1=2;\n  int t2=2;\n  int rt=2;\n  println(\"TgtR: \" + TgtHllType.values()[rt].toString());\n  int lgK1=7;\n  int lgK2=7;\n  int lgMaxK=7;\n  int n1=7;\n  int n2=7;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=8;\n  n2=7;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=7;\n  n2=8;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=8;\n  n2=8;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=7;\n  n2=14;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  println(\"++END BASE GROUP++\");\n  int i=0;\n  for (i=7; i <= 13; i++) {\n    lgK1=i;\n    lgK2=i;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"--END MINOR GROUP--\");\n    lgK1=i;\n    lgK2=i + 1;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"--END MINOR GROUP--\");\n    lgK1=i + 1;\n    lgK2=i;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"--END MINOR GROUP--\");\n    lgK1=i + 1;\n    lgK2=i + 1;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"++END MAJOR GROUP++\");\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/hll/UnionTest.java",
+    "Start": 2061,
+    "Stop": 5085,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkUnions"
+}

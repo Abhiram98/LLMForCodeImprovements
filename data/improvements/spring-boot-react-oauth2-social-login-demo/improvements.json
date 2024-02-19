@@ -1,67 +1,369 @@
 [
     {
-        "Method_Improvements": [{
-            "details": "Expected a ',' or '}' at 2813 [character 1014 line 18]",
-            "error": "An unexpected error occurred"
-        }],
         "Old_Method": "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n  return false;\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Consolidate exception handling",
+                "Change_Diff": "- catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n+ catch (Exception ex) {\n    logger.error(\"JWT validation failed: \" + ex.getMessage());\n  }",
+                "Description": "Instead of handling each exception separately, you can catch all exceptions in a single catch block, thus reducing code redundancy. This is possible because the error handling code is the same for each exception type.",
+                "Start": 5,
+                "End": 18
+            },
+            {
+                "Improvement": "Refactor to single catch block",
+                "Change_Diff": "- catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n+ catch (Exception ex) {\n    logger.error(ex.getMessage());\n}",
+                "Description": "Multiple catch blocks for exceptions can be refactored into a single catch block, which makes the code cleaner. This is possible because the same action is performed in all catch blocks.",
+                "Start": 6,
+                "End": 16
+            },
+            {
+                "Improvement": "Use multi-catch instead of multiple catch blocks",
+                "Change_Diff": "- catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n+ catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(\"Invalid JWT token\", ex);\n  }",
+                "Description": "Instead of using multiple catch blocks to handle each specific exception type, you can use a multi-catch block to handle all these exceptions in one block. This reduces redundancy in the code and makes it cleaner.",
+                "Start": 6,
+                "End": 17
+            },
+            {
+                "Improvement": "Add specific error message for each exception",
+                "Change_Diff": "- logger.error(\"Invalid JWT token\", ex);\n+ logger.error(ex.getMessage(), ex);",
+                "Description": "This will help in identifying the exact cause of an exception. Instead of logging a generic message for all exceptions, you can use the exception message to get more specific information about the exception.",
+                "Start": 18,
+                "End": 18
+            },
+            {
+                "Improvement": "Use multi-catch block for exceptions",
+                "Change_Diff": "- catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n+ catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(ex.getMessage());\n  }",
+                "Description": "Instead of having multiple catch blocks for each type of JWT exception, you can use a multi-catch block to catch all exceptions of different types. This makes your code more concise and easier to read.",
+                "Start": 5,
+                "End": 15
+            },
+            {
+                "Improvement": "Use single catch block instead of multiple",
+                "Change_Diff": "- catch (  SignatureException ex) {\n-    logger.error(\"Invalid JWT signature\");\n- }\n- catch (  MalformedJwtException ex) {\n-    logger.error(\"Invalid JWT token\");\n- }\n- catch (  ExpiredJwtException ex) {\n-    logger.error(\"Expired JWT token\");\n- }\n- catch (  UnsupportedJwtException ex) {\n-    logger.error(\"Unsupported JWT token\");\n- }\n- catch (  IllegalArgumentException ex) {\n-    logger.error(\"JWT claims string is empty.\");\n- }\n+ catch (Exception ex) {\n+    logger.error(\"An error occurred while validating the JWT: \" + ex.getMessage());\n+ }",
+                "Description": "Instead of having multiple catch blocks for different exceptions, you can use a single catch block that catches the parent Exception class. This will make your code cleaner and easier to maintain.",
+                "Start": 4,
+                "End": 17
+            },
+            {
+                "Improvement": "Add final modifier to method parameter",
+                "Change_Diff": "- public boolean validateToken(String authToken){\n+ public boolean validateToken(final String authToken){",
+                "Description": "Adding the final modifier to the method parameter is a good practice that prevents inadvertent modification of the parameter within the method body.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Consolidate exception handling",
+                "Change_Diff": "- catch (SignatureException ex) {\n-     logger.error('Invalid JWT signature');\n- }\n- catch (MalformedJwtException ex) {\n-     logger.error('Invalid JWT token');\n- }\n- catch (ExpiredJwtException ex) {\n-     logger.error('Expired JWT token');\n- }\n- catch (UnsupportedJwtException ex) {\n-     logger.error('Unsupported JWT token');\n- }\n- catch (IllegalArgumentException ex) {\n-     logger.error('JWT claims string is empty.');\n- }\n+ catch (JwtException ex) {\n+     if (ex instanceof SignatureException) {\n+         logger.error('Invalid JWT signature');\n+     } else if (ex instanceof MalformedJwtException) {\n+         logger.error('Invalid JWT token');\n+     } else if (ex instanceof ExpiredJwtException) {\n+         logger.error('Expired JWT token');\n+     } else if (ex instanceof UnsupportedJwtException) {\n+         logger.error('Unsupported JWT token');\n+     } else if (ex instanceof IllegalArgumentException) {\n+         logger.error('JWT claims string is empty.');\n+     } else {\n+         logger.error('Unknown JWT exception');\n+     }\n+ }",
+                "Description": "Instead of catching each exception type individually, you can catch `JwtException` which is the parent class for all those exceptions. This will make your code cleaner and easier to maintain. If you want to log different messages for each exception, you could use `instanceof` within the catch block.",
+                "Start": 5,
+                "End": 16
+            },
+            {
+                "Improvement": "Use multi-catch block for exception handling",
+                "Change_Diff": "- catch (  SignatureException ex) {\n    logger.error(\"Invalid JWT signature\");\n  }\ncatch (  MalformedJwtException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\ncatch (  ExpiredJwtException ex) {\n    logger.error(\"Expired JWT token\");\n  }\ncatch (  UnsupportedJwtException ex) {\n    logger.error(\"Unsupported JWT token\");\n  }\ncatch (  IllegalArgumentException ex) {\n    logger.error(\"JWT claims string is empty.\");\n  }\n+ catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(\"An error occurred: \" + ex.getMessage());\n  }",
+                "Description": "Instead of having multiple catch blocks for each exception type, you can use a single catch block that handles multiple exceptions. This will make your code shorter and more readable.",
+                "Start": 5,
+                "End": 14
+            }
+        ],
         "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/TokenProvider.java",
         "Start": 1471,
         "Stop": 2183,
+        "All_Improved_Methods": [
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (Exception ex) {\n    logger.error(\"JWT validation failed: \" + ex.getMessage());\n    return false;\n  }\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (Exception ex) {\n    logger.error(ex.getMessage());\n    return false;\n  }\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(ex.getMessage(), ex);\n  }\n  return false;\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(\"An error occured while validating the token\", ex);\n  }\n  return false;\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(ex.getMessage());\n  }\n  return false;\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(ex.getMessage());\n  }\n  return false;\n}",
+            "public boolean validateToken(final String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (Exception ex) {\n    logger.error(\"An error occurred while validating the JWT: \" + ex.getMessage());\n  }\n  return false;\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (JwtException ex) {\n    if (ex instanceof SignatureException) {\n        logger.error('Invalid JWT signature');\n    } else if (ex instanceof MalformedJwtException) {\n        logger.error('Invalid JWT token');\n    } else if (ex instanceof ExpiredJwtException) {\n        logger.error('Expired JWT token');\n    } else if (ex instanceof UnsupportedJwtException) {\n        logger.error('Unsupported JWT token');\n    } else if (ex instanceof IllegalArgumentException) {\n        logger.error('JWT claims string is empty.');\n    } else {\n        logger.error('Unknown JWT exception');\n    }\n    return false;\n  }\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n  catch (Exception ex) {\n    logger.error(\"JWT validation failed: \" + ex.getMessage());\n  }\n  return false;\n}",
+            "public boolean validateToken(String authToken){\n  if (authToken == null) {\n    throw new IllegalArgumentException(\"authToken cannot be null\");\n  }\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  } catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(\"An error occurred: \" + ex.getMessage());\n  }\n  return false;\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (Exception ex) {\n    logger.error(ex.getMessage());\n  }\n  return false;\n}",
+            "public boolean validateToken(String authToken){\n  try {\n    Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(authToken);\n    return true;\n  }\n catch (SignatureException | MalformedJwtException | ExpiredJwtException | UnsupportedJwtException | IllegalArgumentException ex) {\n    logger.error(\"Invalid JWT token\");\n  }\n  return false;\n}"
+        ],
         "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
         "Method_Name": "validateToken"
     },
     {
-        "Method_Improvements": [{
-            "Improvements": [
-                {
-                    "Improvement": "Use isEmpty() method instead of StringUtils.isEmpty()",
-                    "Change_Diff": "- if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n+ if (oAuth2UserInfo.getEmail().isEmpty()) {",
-                    "Description": "Replace StringUtils.isEmpty() with the isEmpty() method of the email string to check if it is empty.",
-                    "Start": 4,
-                    "End": 4
-                },
-                {
-                    "Improvement": "Use map() and orElseThrow() methods instead of Optional.isPresent()",
-                    "Change_Diff": "- if (userOptional.isPresent()) {\n+ User user = userOptional.map(u -> updateExistingUser(u, oAuth2UserInfo)).orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \" + user.getProvider() + \" account to login.\"));",
-                    "Description": "Replace Optional.isPresent() with the map() method to update the existing user if present, or throw an exception using orElseThrow() if not present.",
-                    "Start": 12,
-                    "End": 13
-                }
-            ],
-            "Final code": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {\n    OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());\n    if (oAuth2UserInfo.getEmail().isEmpty()) {\n        throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n    }\n    User user = userRepository.findByEmail(oAuth2UserInfo.getEmail())\n            .map(u -> updateExistingUser(u, oAuth2UserInfo))\n            .orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \" + user.getProvider() + \" account to login.\"));\n    return UserPrincipal.create(user, oAuth2User.getAttributes());\n}"
-        }],
         "Old_Method": "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Rearrange the if-else condition for checking userOptional.isPresent()",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }",
+                "Description": "Using Optional's ifPresentOrElse() method, we can rewrite the if-else condition in a more readable and concise way.",
+                "Start": 7,
+                "End": 15
+            },
+            {
+                "Improvement": "Add method documentation",
+                "Change_Diff": "+ /**\n+ * This method processes an OAuth2 User. It fetches the user information based on the OAuth2UserRequest,\n+ * validates the email, checks whether a user with the given email exists and updates it or registers a new user,\n+ * and finally creates and returns a UserPrincipal object.\n+ *\n+ * @param oAuth2UserRequest OAuth2UserRequest object\n+ * @param oAuth2User OAuth2User object\n+ * @return UserPrincipal object\n+ */",
+                "Description": "Method should have a documentation to explain what it does, its parameters, and its return value.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Use Optional's map and orElse methods",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-    user=userOptional.get();\n-    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n-      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n-    }\n-    user=updateExistingUser(user,oAuth2UserInfo);\n-  }\n- else {\n-    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n-  }\n+ user = userOptional.map(u -> {\n+     if (!u.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n+         throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + u.getProvider() + \" account. Please use your \"+ u.getProvider()+ \" account to login.\");\n+     }\n+     return updateExistingUser(u, oAuth2UserInfo);\n+ }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));",
+                "Description": "Instead of using if-else to check if an Optional is present or not, use the map and orElse methods of Optional class for better readability and fewer lines of code.",
+                "Start": 8,
+                "End": 15
+            },
+            {
+                "Improvement": "Refactor code to separate concerns",
+                "Change_Diff": "- private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n...\n}\n+ private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\nOAuth2UserInfo oAuth2UserInfo = createOAuth2UserInfo(oAuth2UserRequest, oAuth2User);\ncheckUserEmail(oAuth2UserInfo);\nUser user = getUser(oAuth2UserInfo);\nreturn UserPrincipal.create(user, oAuth2User.getAttributes());\n}",
+                "Description": "The method processOAuth2User() is doing too many things. It's creating OAuth2UserInfo, checking if the user's email is empty, getting the user from the database, checking if the user's provider matches the OAuth request's registration ID, updating the user, or registering a new one if it doesn't exist, and finally creating a UserPrincipal. Each of these operations should ideally be in its own method. This would make the code more readable, easier to maintain, and would also allow for better unit testing.",
+                "Start": 1,
+                "End": 23
+            },
+            {
+                "Improvement": "Avoid unnecessary object creation",
+                "Change_Diff": "- OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n+ // Moved object creation after email check",
+                "Description": "The object `OAuth2UserInfo oAuth2UserInfo` is being created before the email check. If the email is not found, the method throws an exception, making the creation of `oAuth2UserInfo` unnecessary. We should create this object only when we need it, after the email check.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Use map function for Optional",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-     user=userOptional.get();\n-     if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n-       throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n-     }\n-     user=updateExistingUser(user,oAuth2UserInfo);\n- }\n+ user = userOptional.map(user -> {\n+     if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n+         throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n+     }\n+     return updateExistingUser(user,oAuth2UserInfo);\n+ }).orElseGet(() -> registerNewUser(oAuth2UserRequest,oAuth2UserInfo));",
+                "Description": "Instead of using `isPresent()` and `get()`, we should take advantage of the `map` function of `Optional`. This function applies the changes only if the value is present and returns an Optional. This way, we can avoid explicitly checking `isPresent()` and the code becomes more readable and concise.",
+                "Start": 6,
+                "End": 12
+            },
+            {
+                "Improvement": "Improve error message content",
+                "Change_Diff": "- throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n+ throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider: \" + oAuth2UserRequest.getClientRegistration().getRegistrationId());",
+                "Description": "Instead of using a generic error message for different cases, customize the error message to make it more user-friendly and informative.",
+                "Start": 5,
+                "End": 5
+            },
+            {
+                "Improvement": "Avoid calling oAuth2UserRequest.getClientRegistration().getRegistrationId() multiple times",
+                "Change_Diff": "- OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n+ String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n+ OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());",
+                "Description": "Instead of calling oAuth2UserRequest.getClientRegistration().getRegistrationId() multiple times, assign it to a variable at the beginning of the method and use that variable instead. This makes the code cleaner and may improve performance as well.",
+                "Start": 2,
+                "End": 11
+            },
+            {
+                "Improvement": "Use map function of Optional",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-    user=userOptional.get();\n-    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n-      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n-    }\n-    user=updateExistingUser(user,oAuth2UserInfo);\n-  }\n- else {\n-    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n-  }\n+ user = userOptional.map(user -> {\n+   if (!user.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n+     throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n+   }\n+   return updateExistingUser(user, oAuth2UserInfo);\n+ }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));",
+                "Description": "Instead of checking if userOptional.isPresent() and then getting the value, you can use the map function of Optional which applies the changes only if the value is present.",
+                "Start": 7,
+                "End": 11
+            },
+            {
+                "Improvement": "Avoid calling method multiple times",
+                "Change_Diff": "- oAuth2UserRequest.getClientRegistration().getRegistrationId()\n+ String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n\n- user.getProvider()\n+ AuthProvider provider = user.getProvider();",
+                "Description": "Instead of calling `oAuth2UserRequest.getClientRegistration().getRegistrationId()` and `user.getProvider()` multiple times, store the result in a variable and reuse it in the code. It makes code cleaner and potentially more efficient.",
+                "Start": 2,
+                "End": 12
+            },
+            {
+                "Improvement": "Prefer early return over if-else",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n+ if (!userOptional.isPresent()) { return registerNewUser(oAuth2UserRequest, oAuth2UserInfo); }",
+                "Description": "Instead of using if-else conditions, use early return. This can make the code cleaner and easier to follow.",
+                "Start": 6,
+                "End": 14
+            },
+            {
+                "Improvement": "Avoid calling 'get' on Optional without 'isPresent' check",
+                "Change_Diff": "- user=userOptional.get();\n+ user = userOptional.orElseThrow(() -> new UsernameNotFoundException(\"User Not Found\"));",
+                "Description": "It is a good practice to avoid calling 'get' on Optional without 'isPresent' check. It can throw NoSuchElementException if value is not present. Instead, 'orElse' or 'orElseThrow' can be used.",
+                "Start": 8,
+                "End": 8
+            },
+            {
+                "Improvement": "Use Java Optional's orElseGet method",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n    user=userOptional.get();\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n}\nelse {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n}\n+ user = userOptional.orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\nif (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n    throw new OAuth2AuthenticationProcessingException('Looks like you are signed up with ' + user.getProvider() + ' account. Please use your ' + user.getProvider() + ' account to login.');\n}\nuser = updateExistingUser(user, oAuth2UserInfo);",
+                "Description": "Instead of using if-else to check if the userOptional is present, you can use the orElseGet method of Java Optional. This way, if the Optional is empty, it will directly call the method to register a new user, making the code cleaner.",
+                "Start": 9,
+                "End": 18
+            },
+            {
+                "Improvement": "Use Optional's map method to update the existing user",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-    user=userOptional.get();\n-    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n-      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n-    }\n-    user=updateExistingUser(user,oAuth2UserInfo);\n-  }\n+ user = userOptional\n+   .map(user -> {\n+    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n+      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n+    }\n+    return updateExistingUser(user, oAuth2UserInfo);\n+   })\n+   .orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));",
+                "Description": "Instead of checking if the userOptional is present and then getting the user, use the map method of Optional. The map method applies the changes if the value is present and does nothing if the value is not present.",
+                "Start": 10,
+                "End": 16
+            },
+            {
+                "Improvement": "Avoid using multiple exit points in method",
+                "Change_Diff": "- throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n- throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n+ OAuth2AuthenticationProcessingException exception;\n+ if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n+   exception = new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n+ }... \n+ if(exception != null) {\n+   throw exception;\n+ }",
+                "Description": "The method currently has multiple exit points due to the exceptions being thrown. Instead, you should consider using a single exit point for a cleaner and more maintainable code. This can be achieved by refactoring the exceptions to be stored in a variable and thrown at the end of the method if necessary.",
+                "Start": 5,
+                "End": 13
+            },
+            {
+                "Improvement": "Use Optional's map and orElseGet methods",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-   user=userOptional.get();\n... \n- } else {\n-   user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n- }\n+ user = userOptional.map(u -> updateExistingUser(u, oAuth2UserInfo)).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));",
+                "Description": "Rather than manually checking if an Optional value is present and then getting it, you can use the map method to apply a function if the value is present, and the orElseGet method to supply a default value if it is not. This makes the code more readable and idiomatic.",
+                "Start": 9,
+                "End": 17
+            },
+            {
+                "Improvement": "Avoid unnecessary use of StringUtils for null/empty checks",
+                "Change_Diff": "- if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n+ if (oAuth2UserInfo.getEmail() == null || oAuth2UserInfo.getEmail().isEmpty()) {",
+                "Description": "Java provides built-in methods for checking null or empty strings. We can use these methods instead of external libraries such as StringUtils, which can improve performance and remove unnecessary dependencies.",
+                "Start": 4,
+                "End": 4
+            },
+            {
+                "Improvement": "Avoid unnecessary boxing of Boolean",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n+ if (userOptional.isPresent) {",
+                "Description": "In the conditional check, there is no need to box the boolean primitive into a Boolean object. Using the primitive directly can improve performance.",
+                "Start": 8,
+                "End": 10
+            },
+            {
+                "Improvement": "Use try-catch block for handling exceptions",
+                "Change_Diff": "+ try {\n <existing code> \n+ } catch (OAuth2AuthenticationProcessingException e) {\n+     e.printStackTrace();\n+ }",
+                "Description": "Consider wrapping the code blocks that could potentially throw exceptions in a try-catch block. This way, you can handle any exceptions that might occur and also provide more informative error messages to the user.",
+                "Start": 1,
+                "End": 18
+            },
+            {
+                "Improvement": "Use Optional.map() method",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-   user=userOptional.get();\n-   if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n-     throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n-   }\n-   user=updateExistingUser(user,oAuth2UserInfo);\n- }\n+ user = userOptional\n+     .map(existingUser -> {\n+         if (!existingUser.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n+             throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + existingUser.getProvider() + \" account. Please use your \"+ existingUser.getProvider()+ \" account to login.\");\n+         }\n+         return updateExistingUser(existingUser, oAuth2UserInfo);\n+     })\n+     .orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));",
+                "Description": "Instead of using Optional.isPresent() and Optional.get(), use the Optional.map() method. This is a recommended way to work with Optionals as it makes the code more readable and less error-prone.",
+                "Start": 7,
+                "End": 14
+            },
+            {
+                "Improvement": "Use Optional's map and orElseGet methods instead of isPresent and get",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-   user=userOptional.get();\n+ user = userOptional.map(existingUser -> {\n    if (!existingUser.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + existingUser.getProvider() + \" account. Please use your \"+ existingUser.getProvider()+ \" account to login.\");\n    }\n    return updateExistingUser(existingUser,oAuth2UserInfo);\n}).orElseGet(() -> registerNewUser(oAuth2UserRequest,oAuth2UserInfo));",
+                "Description": "Instead of checking if an optional value is present and then getting it, you can use the map and orElseGet methods of the Optional class. This will make your code more functional and readable.",
+                "Start": 9,
+                "End": 16
+            },
+            {
+                "Improvement": "Use Optional's map and orElse methods",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-     user=userOptional.get();\n+ user = userOptional.map(u -> {\n+     if (!u.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n+         throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + u.getProvider() + \" account. Please use your \"+ u.getProvider()+ \" account to login.\");\n+     }\n+     return updateExistingUser(u,oAuth2UserInfo);\n+ }).orElseGet(() -> registerNewUser(oAuth2UserRequest,oAuth2UserInfo));",
+                "Description": "Instead of using the isPresent and get methods of Optional, you should use the map and orElse methods. This will make your code cleaner and more readable, and it will also help you avoid potential NullPointerExceptions.",
+                "Start": 8,
+                "End": 16
+            },
+            {
+                "Improvement": "Use .orElseThrow() for Optional",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n- user=userOptional.get();\n+ user = userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException('User not found'));",
+                "Description": "Instead of checking if the optional value is present and then getting the value, we can use .orElseThrow() which will throw an exception if the Optional is empty. This will make the code cleaner and more readable.",
+                "Start": 7,
+                "End": 13
+            },
+            {
+                "Improvement": "Use Optional.orElseThrow instead of if condition",
+                "Change_Diff": "- if (userOptional.isPresent()) {...}\n+ User user = userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \" + user.getProvider() + \" account to login.\"));",
+                "Description": "To handle the optional value, it's better to use the Optional.orElseThrow method instead of if condition. This way, the code is more concise and easier to understand.",
+                "Start": 6,
+                "End": 13
+            },
+            {
+                "Improvement": "Use 'orElseGet' method instead of 'else' block",
+                "Change_Diff": "- else {\n-    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n+ user = userOptional.orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));",
+                "Description": "The 'orElseGet' method of the Optional class can be used to provide a default value when the Optional is empty, which can make the code more readable and efficient.",
+                "Start": 10,
+                "End": 14
+            },
+            {
+                "Improvement": "Use Optional's orElseThrow instead of isPresent and get",
+                "Change_Diff": "- if (userOptional.isPresent()) {\n-     user=userOptional.get();\n+ user=userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"User not found\"));",
+                "Description": "The use of Optional's isPresent method followed by get can be replaced by the orElseThrow method. This would make the code more readable and concise by removing the need for an if statement.",
+                "Start": 8,
+                "End": 13
+            }
+        ],
         "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/security/oauth2/CustomOAuth2UserService.java",
         "Start": 1883,
         "Stop": 3147,
+        "All_Improved_Methods": [
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  userOptional.ifPresentOrElse(\n    existingUser -> {\n        if (!existingUser.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n            throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + existingUser.getProvider() + \" account. Please use your \" + existingUser.getProvider() + \" account to login.\");\n        }\n        user = updateExistingUser(existingUser, oAuth2UserInfo);\n    },\n    () -> user = registerNewUser(oAuth2UserRequest, oAuth2UserInfo)\n  );\n\n  return UserPrincipal.create(user, oAuth2User.getAttributes());\n}",
+            "    /**\n     * This method processes an OAuth2 User. It fetches the user information based on the OAuth2UserRequest,\n     * validates the email, checks whether a user with the given email exists and updates it or registers a new user,\n     * and finally creates and returns a UserPrincipal object.\n     *\n     * @param oAuth2UserRequest OAuth2UserRequest object\n     * @param oAuth2User OAuth2User object\n     * @return UserPrincipal object\n     */\n    private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n        OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n        if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n            throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n        }\n        Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n        User user = userOptional.map(u -> {\n            if (!u.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n                throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + u.getProvider() + \" account. Please use your \"+ u.getProvider()+ \" account to login.\");\n            }\n            return updateExistingUser(u, oAuth2UserInfo);\n        }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n        return UserPrincipal.create(user,oAuth2User.getAttributes());\n    }",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\nOAuth2UserInfo oAuth2UserInfo = createOAuth2UserInfo(oAuth2UserRequest, oAuth2User);\ncheckUserEmail(oAuth2UserInfo);\nUser user = getUser(oAuth2UserInfo);\nreturn UserPrincipal.create(user, oAuth2User.getAttributes());\n}\n\nprivate OAuth2UserInfo createOAuth2UserInfo(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {\nreturn OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n}\n\nprivate void checkUserEmail(OAuth2UserInfo oAuth2UserInfo) {\nif (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\nthrow new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n}\n}\n\nprivate User getUser(OAuth2UserInfo oAuth2UserInfo) {\nOptional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\nUser user;\nif (userOptional.isPresent()) {\nuser=userOptional.get();\nif (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\nthrow new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n}\nuser=updateExistingUser(user,oAuth2UserInfo);\n}\nelse {\nuser=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n}\nreturn user;\n}\n",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  if (StringUtils.isEmpty(oAuth2UserRequest.getClientRegistration().getRegistrationId())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user = userOptional.map(user -> {\n     if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n         throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n     }\n     return updateExistingUser(user,oAuth2UserInfo);\n  }).orElseGet(() -> registerNewUser(oAuth2UserRequest,oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider: \" + oAuth2UserRequest.getClientRegistration().getRegistrationId());\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  user = userOptional.map(u -> {\n     if (!u.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n         throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + u.getProvider() + \" account. Please use your \"+ u.getProvider()+ \" account to login.\");\n     }\n     return updateExistingUser(u, oAuth2UserInfo);\n }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId,oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user = userOptional.map(user -> {\n   if (!user.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n     throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n   }\n   return updateExistingUser(user, oAuth2UserInfo);\n }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException('Email not found from OAuth2 provider');\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n  User user = userOptional.map(u -> {\n    if (!u.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n      throw new OAuth2AuthenticationProcessingException('Looks like you're signed up with ' + u.getProvider() + ' account. Please use your '+ u.getProvider()+ ' account to login.');\n    }\n    return updateExistingUser(u, oAuth2UserInfo);\n  }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user, oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  ClientRegistration clientRegistration = oAuth2UserRequest.getClientRegistration();\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(clientRegistration.getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  if (userOptional.isPresent()) {\n    user = userOptional.orElseThrow(() -> new UsernameNotFoundException(\"User Not Found\"));\n    if (!user.getProvider().equals(AuthProvider.valueOf(clientRegistration.getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n  }\n else {\n    user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  }\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException('Email not found from OAuth2 provider');\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  user = userOptional.orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n    throw new OAuth2AuthenticationProcessingException('Looks like you are signed up with ' + user.getProvider() + ' account. Please use your ' + user.getProvider() + ' account to login.');\n  }\n  user = updateExistingUser(user, oAuth2UserInfo);\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  user = userOptional\n   .map(user -> {\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    return updateExistingUser(user, oAuth2UserInfo);\n   })\n   .orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest, OAuth2User oAuth2User) {\n    OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(), oAuth2User.getAttributes());\n    OAuth2AuthenticationProcessingException exception = null;\n    if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n        exception = new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n    }\n    Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());\n    User user = userOptional.map(u -> {\n        if (!u.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n            exception = new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + u.getProvider() + \" account. Please use your \" + u.getProvider()+ \" account to login.\");\n        }\n        return updateExistingUser(u, oAuth2UserInfo);\n    }).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n    if(exception != null) {\n        throw exception;\n    }\n    return UserPrincipal.create(user, oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  try {\n    OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n    if (oAuth2UserInfo.getEmail() == null || oAuth2UserInfo.getEmail().isEmpty()) {\n      throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n    }\n    Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n    User user;\n    if (userOptional.isPresent) {\n      user=userOptional.get();\n      if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n        throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n      }\n      user=updateExistingUser(user,oAuth2UserInfo);\n    }\n   else {\n      user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n    }\n    return UserPrincipal.create(user,oAuth2User.getAttributes());\n  } catch (OAuth2AuthenticationProcessingException e) {\n    e.printStackTrace();\n  }\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  if (oAuth2UserRequest == null || oAuth2User == null) {\n    throw new IllegalArgumentException(\"Both oAuth2UserRequest and oAuth2User must not be null\");\n  }\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user = userOptional\n      .map(existingUser -> {\n          if (!existingUser.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n              throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + existingUser.getProvider() + \" account. Please use your \"+ existingUser.getProvider()+ \" account to login.\");\n          }\n          return updateExistingUser(existingUser, oAuth2UserInfo);\n      })\n      .orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user = userOptional.map(existingUser -> {\n    if (!existingUser.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + existingUser.getProvider() + \" account. Please use your \"+ existingUser.getProvider()+ \" account to login.\");\n    }\n    return updateExistingUser(existingUser,oAuth2UserInfo);\n}).orElseGet(() -> registerNewUser(oAuth2UserRequest,oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  user = userOptional.map(u -> {\n    if (!u.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n      throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + u.getProvider() + \" account. Please use your \"+ u.getProvider()+ \" account to login.\");\n    }\n    return updateExistingUser(u,oAuth2UserInfo);\n  }).orElseGet(() -> registerNewUser(oAuth2UserRequest,oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User) {\n  String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n  OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId, oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException('Email not found from OAuth2 provider');\n  }\n  Optional<User> userOptional = userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user = userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException('User not found'));\n  if (!user.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n    throw new OAuth2AuthenticationProcessingException('Looks like you're signed up with ' + user.getProvider() + ' account. Please use your '+ user.getProvider()+ ' account to login.');\n  }\n  user = user.isPresent() ? updateExistingUser(user, oAuth2UserInfo) : registerNewUser(oAuth2UserRequest, oAuth2UserInfo);\n  return UserPrincipal.create(user, oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  String registrationId = oAuth2UserRequest.getClientRegistration().getRegistrationId();\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(registrationId ,oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user = userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \" + user.getProvider() + \" account to login.\"));\n  if (!user.getProvider().equals(AuthProvider.valueOf(registrationId))) {\n    throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \" + user.getProvider() + \" account to login.\");\n  }\n  user = userOptional.isPresent() ? updateExistingUser(user,oAuth2UserInfo) : registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  userOptional.ifPresentOrElse(\n    existingUser -> {\n        if (!existingUser.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n            throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + existingUser.getProvider() + \" account. Please use your \"+ existingUser.getProvider()+ \" account to login.\");\n        }\n        user=updateExistingUser(existingUser,oAuth2UserInfo);\n    },\n    () -> user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo)\n  );\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n  OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n  if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n    throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n  }\n  Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n  User user;\n  user = userOptional.filter(user -> user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))).orElseGet(() -> registerNewUser(oAuth2UserRequest, oAuth2UserInfo));\n  return UserPrincipal.create(user,oAuth2User.getAttributes());\n}",
+            "private OAuth2User processOAuth2User(OAuth2UserRequest oAuth2UserRequest,OAuth2User oAuth2User){\n    if (oAuth2UserRequest == null) {\n        throw new IllegalArgumentException(\"oAuth2UserRequest cannot be null\");\n    }\n    if (oAuth2User == null) {\n        throw new IllegalArgumentException(\"oAuth2User cannot be null\");\n    }\n    OAuth2UserInfo oAuth2UserInfo=OAuth2UserInfoFactory.getOAuth2UserInfo(oAuth2UserRequest.getClientRegistration().getRegistrationId(),oAuth2User.getAttributes());\n    if (StringUtils.isEmpty(oAuth2UserInfo.getEmail())) {\n        throw new OAuth2AuthenticationProcessingException(\"Email not found from OAuth2 provider\");\n    }\n    Optional<User> userOptional=userRepository.findByEmail(oAuth2UserInfo.getEmail());\n    User user;\n    user=userOptional.orElseThrow(() -> new OAuth2AuthenticationProcessingException(\"User not found\"));\n    if (!user.getProvider().equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {\n        throw new OAuth2AuthenticationProcessingException(\"Looks like you're signed up with \" + user.getProvider() + \" account. Please use your \"+ user.getProvider()+ \" account to login.\");\n    }\n    user=updateExistingUser(user,oAuth2UserInfo);\n    else {\n        user=registerNewUser(oAuth2UserRequest,oAuth2UserInfo);\n    }\n    return UserPrincipal.create(user,oAuth2User.getAttributes());\n}"
+        ],
         "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
         "Method_Name": "processOAuth2User"
     },
     {
-        "Method_Improvements": [{
-            "Improvements": [
-                {
-                    "Improvement": "Use a foreach loop instead of traditional for loop",
-                    "Change_Diff": "- for (Cookie cookie : cookies) {\n+ for (int i = 0; i < cookies.length; i++) {\n+ Cookie cookie = cookies[i];",
-                    "Description": "Instead of using a traditional for loop to iterate over `cookies`, use a foreach loop or an enhanced for loop.",
-                    "Start": 5,
-                    "End": 5
-                },
-                {
-                    "Improvement": "Use lambda expression instead of if statement",
-                    "Change_Diff": "- if (cookie.getName().equals(name)) {\n+ Arrays.stream(cookies)\n    .filter(cookie -> cookie.getName().equals(name))\n    .findFirst()",
-                    "Description": "Instead of using an if statement to check if the cookie name is equal to the specified name, use a lambda expression and stream to find the first matching cookie.",
-                    "Start": 6,
-                    "End": 6
-                }
-            ],
-            "Final code": "public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {\n    Cookie[] cookies = request.getCookies();\n    if (cookies != null && cookies.length > 0) {\n        for (int i = 0; i < cookies.length; i++) {\n            Cookie cookie = cookies[i];\n            if (cookie.getName().equals(name)) {\n                cookie.setValue(\"\");\n                cookie.setPath(\"/\");\n                cookie.setMaxAge(0);\n                response.addCookie(cookie);\n            }\n        }\n    }\n}"
-        }],
         "Old_Method": "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (    Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        cookie.setValue(\"\");\n        cookie.setPath(\"/\");\n        cookie.setMaxAge(0);\n        response.addCookie(cookie);\n      }\n    }\n  }\n}\n",
+        "Improvements": [
+            {
+                "Improvement": "Null check for 'name'",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n+ if (name != null && cookie.getName().equals(name)) {",
+                "Description": "Before using 'name' in the equals method, it would be better to check if 'name' is null. This will prevent a NullPointerException from being thrown if 'name' is null.",
+                "Start": 1,
+                "End": 10
+            },
+            {
+                "Improvement": "Use a boolean for flagging",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n-   cookie.setValue(\"\");\n-   cookie.setPath(\"/\");\n-   cookie.setMaxAge(0);\n-   response.addCookie(cookie);\n+ boolean isCookieFound = cookie.getName().equals(name);\n+ if(isCookieFound) break;\n}\nif(isCookieFound) {\n   cookie.setValue(\"\");\n   cookie.setPath(\"/\");\n   cookie.setMaxAge(0);\n   response.addCookie(cookie);\n}",
+                "Description": "Instead of setting the cookie properties and adding it to the response inside the if statement, use a boolean to flag whether the cookie was found and then perform these operations after the loop. This way, the loop can be escaped as soon as the target cookie is found, making the process more efficient.",
+                "Start": 5,
+                "End": 9
+            },
+            {
+                "Improvement": "Refactoring to a separate method",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n-    cookie.setValue(\"\");\n-    cookie.setPath(\"/\");\n-    cookie.setMaxAge(0);\n-    response.addCookie(cookie);\n+    if (cookie.getName().equals(name)) {\n+        Cookie newCookie = createEmptyCookie(name);\n+        response.addCookie(newCookie);\n+    }\n...\n+private static Cookie createEmptyCookie(String name) {\n+    Cookie cookie = new Cookie(name, \"\");\n+    cookie.setPath(\"/\");\n+    cookie.setMaxAge(0);\n+    return cookie;\n+}",
+                "Description": "Refactor the code that creates a new cookie into a separate method for better readability and maintainability.",
+                "Start": 4,
+                "End": 8
+            },
+            {
+                "Improvement": "Adding null check for 'name'",
+                "Change_Diff": "+ if (name == null) {\n+     return;\n+ }\n...",
+                "Description": "Add null check for 'name'. If 'name' is null, the method should return immediately to avoid NullPointerException.",
+                "Start": 1,
+                "End": 13
+            },
+            {
+                "Improvement": "Handle null or empty cookie name",
+                "Change_Diff": "+ if (name == null || name.isEmpty()) return;",
+                "Description": "Before trying to delete a cookie, we should check if the provided cookie name is null or empty. This will prevent unnecessary iterations over the cookies array when the name is invalid, enhancing the performance of the method.",
+                "Start": 1,
+                "End": 1
+            },
+            {
+                "Improvement": "Check for null cookies",
+                "Change_Diff": "- Cookie[] cookies=request.getCookies();\n+ Cookie[] cookies = request.getCookies();\n+ if (cookies == null) return;",
+                "Description": "It's good practice to check whether the retrieved cookies are null before proceeding to the for loop. This can prevent potential NullPointerExceptions.",
+                "Start": 3,
+                "End": 3
+            },
+            {
+                "Improvement": "Use continue statement",
+                "Change_Diff": "- if (cookie.getName().equals(name)) {\n+ if (!cookie.getName().equals(name)) continue;",
+                "Description": "If the cookie name does not match the given name, you can use a continue statement to skip to the next iteration, reducing the level of nesting and improving readability.",
+                "Start": 5,
+                "End": 11
+            }
+        ],
         "File_Path": "spring-boot-react-oauth2-social-login-demo/spring-social/src/main/java/com/example/springsocial/util/CookieUtils.java",
         "Start": 1016,
         "Stop": 1537,
+        "All_Improved_Methods": [
+            "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  if(name == null) return;\n  Cookie[] cookies=request.getCookies();\n  boolean isCookieFound = false;\n  Cookie targetCookie = null;\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        targetCookie = cookie;\n        isCookieFound = true;\n        break;\n      }\n    }\n  }\n  if(isCookieFound) {\n    targetCookie.setValue(\"\");\n    targetCookie.setPath(\"/\");\n    targetCookie.setMaxAge(0);\n    response.addCookie(targetCookie);\n  }\n}",
+            "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  if (name == null) {\n    return;\n  }\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        Cookie newCookie = createEmptyCookie(name);\n        response.addCookie(newCookie);\n      }\n    }\n  }\n}\n\nprivate static Cookie createEmptyCookie(String name) {\n  Cookie cookie = new Cookie(name, \"\");\n  cookie.setPath(\"/\");\n  cookie.setMaxAge(0);\n  return cookie;\n}",
+            "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  if (name == null || name.isEmpty()) return;\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        Cookie deleteCookie = new Cookie(name, \"\");\n        deleteCookie.setPath(\"/\");\n        deleteCookie.setMaxAge(0);\n        response.addCookie(deleteCookie);\n        break;\n      }\n    }\n  }\n}",
+            "public static void deleteCookie(HttpServletRequest request, HttpServletResponse response, String name) {\n    Cookie[] cookies = request.getCookies();\n    if (cookies == null) return;\n    if (cookies.length > 0) {\n        for (Cookie cookie : cookies) {\n            if (!cookie.getName().equals(name)) continue;\n            cookie.setValue(\"\");\n            cookie.setPath(\"/\");\n            cookie.setMaxAge(0);\n            response.addCookie(cookie);\n        }\n    }\n}",
+            "no response",
+            "public static void deleteCookie(HttpServletRequest request,HttpServletResponse response,String name){\n  Cookie[] cookies=request.getCookies();\n  if (cookies != null && cookies.length > 0) {\n    for (Cookie cookie : cookies) {\n      if (cookie.getName().equals(name)) {\n        deleteCookie(response, cookie);\n      }\n    }\n  }\n}\n\nprivate static void deleteCookie(HttpServletResponse response, Cookie cookie) {\n  cookie.setValue(\"\");\n  cookie.setPath(\"/\");\n  cookie.setMaxAge(0);\n  response.addCookie(cookie);\n}"
+        ],
         "Project_Name": "data/projects/spring-boot-react-oauth2-social-login-demo",
         "Method_Name": "deleteCookie"
     }

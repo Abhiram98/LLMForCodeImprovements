@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Use constant for repeated values",
+                "Change_Diff": "- tryBadMem(mem,PREAMBLE_LONGS_BYTE,2);\n+ tryBadMem(mem,PREAMBLE_LONGS_BYTE,CONSTANT);",
+                "Description": "The value 2 is repeated multiple times in your `tryBadMem` calls. Consider creating a constant for this value to improve readability and maintainability.",
+                "Start": 8,
+                "End": 14
+            },
+            {
+                "Improvement": "Extract duplicate code into a method",
+                "Change_Diff": "- try {\n... \ncatch ( SketchesArgumentException e) { \n}\n+ handleException(mem, THETA_LONG, Long.MAX_VALUE / 2, HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED));",
+                "Description": "The code for handling exceptions is duplicated. It's a good practice to extract duplicate code into a separate method to enhance readability and maintainability.",
+                "Start": 18,
+                "End": 25
+            }
+        ],
+        "Final code": "public void checkMemDeSerExceptions() {\n final int CONSTANT = 2;\n int k=1024;\n UpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n sk1.update(1L);\n byte[] bytearray1=sk1.toByteArray();\n WritableMemory mem=WritableMemory.writableWrap(bytearray1);\n long pre0=mem.getLong(0);\n tryBadMem(mem,PREAMBLE_LONGS_BYTE,CONSTANT);\n mem.putLong(0,pre0);\n tryBadMem(mem,SER_VER_BYTE,CONSTANT);\n mem.putLong(0,pre0);\n tryBadMem(mem,FAMILY_BYTE,CONSTANT);\n mem.putLong(0,pre0);\n tryBadMem(mem,FLAGS_BYTE,CONSTANT);\n mem.putLong(0,pre0);\n final long origThetaLong=mem.getLong(THETA_LONG);\n handleException(mem, THETA_LONG, Long.MAX_VALUE / 2, HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED));\n mem.putLong(THETA_LONG,origThetaLong);\n byte[] byteArray2=new byte[bytearray1.length - 1];\n WritableMemory mem2=WritableMemory.writableWrap(byteArray2);\n mem.copyTo(0,mem2,0,mem2.getCapacity());\n handleException(mem2, 0, 0, HeapAlphaSketch.heapifyInstance(mem2,ThetaUtil.DEFAULT_UPDATE_SEED));\n insertLgResizeFactor(mem,ResizeFactor.X1.lg());\n UpdateSketch usk=HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n ResizeFactor rf=usk.getResizeFactor();\n assertEquals(rf,ResizeFactor.X2);\n}\n\nprivate void handleException(WritableMemory mem, long theta, long value, UpdateSketch usk) {\n try {\n  mem.putLong(theta, value);\n  usk;\n  fail();\n } catch ( SketchesArgumentException e) {\n }\n}"
+    },
+    "Old_Method": "@Test public void checkMemDeSerExceptions(){\n  int k=1024;\n  UpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n  sk1.update(1L);\n  byte[] bytearray1=sk1.toByteArray();\n  WritableMemory mem=WritableMemory.writableWrap(bytearray1);\n  long pre0=mem.getLong(0);\n  tryBadMem(mem,PREAMBLE_LONGS_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,SER_VER_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,FAMILY_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,FLAGS_BYTE,2);\n  mem.putLong(0,pre0);\n  final long origThetaLong=mem.getLong(THETA_LONG);\n  try {\n    mem.putLong(THETA_LONG,Long.MAX_VALUE / 2);\n    HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  }\n catch (  SketchesArgumentException e) {\n  }\n  mem.putLong(THETA_LONG,origThetaLong);\n  byte[] byteArray2=new byte[bytearray1.length - 1];\n  WritableMemory mem2=WritableMemory.writableWrap(byteArray2);\n  mem.copyTo(0,mem2,0,mem2.getCapacity());\n  try {\n    HeapAlphaSketch.heapifyInstance(mem2,ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  }\n catch (  SketchesArgumentException e) {\n  }\n  insertLgResizeFactor(mem,ResizeFactor.X1.lg());\n  UpdateSketch usk=HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n  ResizeFactor rf=usk.getResizeFactor();\n  assertEquals(rf,ResizeFactor.X2);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/HeapAlphaSketchTest.java",
+    "Start": 19344,
+    "Stop": 21113,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkMemDeSerExceptions"
+}

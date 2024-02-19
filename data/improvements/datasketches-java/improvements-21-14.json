@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Replace magic numbers with constants",
+                "Change_Diff": "- for (int j=2 * k; j < combBufSize; j++) {\n+ for (int j=BUFFER_MULTIPLIER * k; j < combBufSize; j++) {\n- if ((j % k) == 0) {\n+ if ((j % k) == NO_REMAINDER) {\n- sb.append(String.format(\"%10.1f\",combBuf[j]));\n+ sb.append(String.format(FORMAT,combBuf[j]));",
+                "Description": "The magic numbers 2, 0, and 10 can be replaced with named constants to improve readability.",
+                "Start": 3,
+                "End": 22
+            },
+            {
+                "Improvement": "Use enhanced for loop instead of traditional for loop",
+                "Change_Diff": "- for (int i=0; i < bbCount; i++) {\n+ for (double comb : combBuf) {",
+                "Description": "Instead of using a traditional for loop to iterate over `combBuf`, use an enhanced for loop.",
+                "Start": 10,
+                "End": 12
+            },
+            {
+                "Improvement": "Extract repeated code into a method",
+                "Change_Diff": "- sb.append(String.format(\"%10.1f\",combBuf[i]));\n+ appendFormatted(sb, combBuf[i]);\n- sb.append(String.format(\"%10.1f\",combBuf[j]));\n+ appendFormatted(sb, combBuf[j]);",
+                "Description": "The code to append a formatted version of a combBuf element to the StringBuilder is repeated twice. It can be extracted into a separate method to improve code readability and reduce duplication.",
+                "Start": 12,
+                "End": 22
+            }
+        ],
+        "Final code": "private static final int BUFFER_MULTIPLIER = 2;\nprivate static final int NO_REMAINDER = 0;\nprivate static final String FORMAT = \"%10.1f\";\n\nprivate static String getDataDetail(final DoublesSketch sketchIn){\n  final DoublesSketch sketch=sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n  final StringBuilder sb=new StringBuilder();\n  final String skName=sketch.getClass().getSimpleName();\n  sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n  final int k=sketch.getK();\n  final long n=sketch.getN();\n  final int bbCount=sketch.getBaseBufferCount();\n  final long bitPattern=sketch.getBitPattern();\n  final double[] combBuf=sketch.getCombinedBuffer();\n  sb.append(\"   BaseBuffer   : \");\n  for (double comb : combBuf) {\n    appendFormatted(sb, comb);\n  }\n  sb.append(LS);\n  final int combBufSize=combBuf.length;\n  if (n >= (BUFFER_MULTIPLIER * k)) {\n    sb.append(\"   Valid | Level\");\n    for (int j=BUFFER_MULTIPLIER * k; j < combBufSize; j++) {\n      if ((j % k) == NO_REMAINDER) {\n        final int levelNum=(j / k) - BUFFER_MULTIPLIER;\n        final String validLvl=((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n        final String lvl=String.format(\"%5d\",levelNum);\n        sb.append(LS).append(\"   \").append(validLvl).append(\" \").append(lvl).append(\": \");\n      }\n      appendFormatted(sb, combBuf[j]);\n    }\n    sb.append(LS);\n  }\n  sb.append(\"### END DATA DETAIL\").append(LS);\n  return sb.toString();\n}\n\nprivate static void appendFormatted(StringBuilder sb, double value) {\n  sb.append(String.format(FORMAT, value));\n}"
+    },
+    "Old_Method": "private static String getDataDetail(final DoublesSketch sketchIn){\n  final DoublesSketch sketch=sketchIn.isCompact() ? copyToHeap(sketchIn) : sketchIn;\n  final StringBuilder sb=new StringBuilder();\n  final String skName=sketch.getClass().getSimpleName();\n  sb.append(LS).append(\"### Quantiles \").append(skName).append(\" DATA DETAIL: \").append(LS);\n  final int k=sketch.getK();\n  final long n=sketch.getN();\n  final int bbCount=sketch.getBaseBufferCount();\n  final long bitPattern=sketch.getBitPattern();\n  final double[] combBuf=sketch.getCombinedBuffer();\n  sb.append(\"   BaseBuffer   : \");\n  for (int i=0; i < bbCount; i++) {\n    sb.append(String.format(\"%10.1f\",combBuf[i]));\n  }\n  sb.append(LS);\n  final int combBufSize=combBuf.length;\n  if (n >= (2 * k)) {\n    sb.append(\"   Valid | Level\");\n    for (int j=2 * k; j < combBufSize; j++) {\n      if ((j % k) == 0) {\n        final int levelNum=(j / k) - 2;\n        final String validLvl=((1L << levelNum) & bitPattern) > 0 ? \"    T  \" : \"    F  \";\n        final String lvl=String.format(\"%5d\",levelNum);\n        sb.append(LS).append(\"   \").append(validLvl).append(\" \").append(lvl).append(\": \");\n      }\n      sb.append(String.format(\"%10.1f\",combBuf[j]));\n    }\n    sb.append(LS);\n  }\n  sb.append(\"### END DATA DETAIL\").append(LS);\n  return sb.toString();\n}\n",
+    "File_Path": "datasketches-java/src/main/java/org/apache/datasketches/quantiles/DoublesUtil.java",
+    "Start": 7871,
+    "Stop": 9398,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "getDataDetail"
+}

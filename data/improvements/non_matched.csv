@@ -1,0 +1,3695 @@
+Improvement, Count
+Simplify conditional statements with ternary operator,1
+Remove @Deprecated annotation,3
+Remove redundant declaration of JobConf,1
+Use Java Optional for null safety,2
+Reduce method complexity by using a switch or map based command pattern,1
+Use a constant for magic numbers,1
+Reduce code complexity using ternary operator,1
+Replace repetitive System.out.println with a single formatted output,1
+Replace multiple if-else conditions with a switch statement,1
+Refactor the repeated code into a function,1
+Use Optional instead of null check for FilterExpression,1
+Consolidate exception handling,2
+Replace == with equals() when comparing Strings,1
+Handle exceptions with a separate method,1
+Use dependency injection,1
+Replace the magic strings with constants,1
+Use BufferedOutputStream for efficiency,1
+Refactor duplicate logic,1
+Use Java 8's Stream API,1
+Separation of concerns,3
+Minimize the use of raw types,1
+Exception handling,8
+Throw specific exceptions instead of catching all,1
+Replace print statements with logger,1
+Use ternary operators to simplify checks for mid_x and mid_y,1
+Avoid unnecessary if statements,1
+Separate node initialization and linking logic,1
+Introduce local variable for repeated access,1
+Use of final for invariable,1
+Add nullity check for variables,1
+Handle exception,3
+Add logging in case of Exception,1
+Replace .equals with Objects.equals,1
+Change 'if' condition to 'filter' method call,1
+Abstract repeated logic to a method,1
+Add null check for 'webResponse',1
+Add null check for elideStandaloneSettings,1
+Eliminate redundant code in switch cases,1
+Avoid null checks inside loop,2
+Refactor condition check for OS,1
+Split long lines into multiple lines,1
+Use lambda reference in stream foreach,1
+Remove redundant HttpStatus check,3
+Use of Optional for nullable return types,1
+Avoid deep nesting,37
+Replace if-else-if structure with switch-case for handling annotation types,1
+Refactor condition check into a method,1
+Use constructor injection for ApiConfig,1
+Use File.mkdirs() directly,1
+Separation of Concerns,1
+Refactor RestTemplateBuilder instance creation,1
+Use a switch statement instead of multiple if-else statements,5
+Add try/catch block for JobClient.runJob(job),1
+Avoid modifying the list while iterating,1
+Use Java Logging instead of System.out.println,1
+Use constant for common QName,1
+Prevent null appenderName,1
+Define AWS S3 client,1
+Use of Java 8 Streams and Lambdas for better readability,1
+Avoid repeated method calls,3
+Avoid System.out.println,1
+Avoid repeated calls to the same method,2
+Refactor magic numbers into constants,1
+Define constants for magic numbers,1
+Remove redundant null check on appenders object,1
+Refactor code to eliminate code duplication,1
+Replace the 'Throwable' catch with specific exceptions,1
+Refactor if conditions in for loop,1
+Reduce Cyclomatic Complexity,4
+Use try-finally or try-with-resources for resource clean-ups,1
+Replace repetitive method calls with a variable,1
+Change visibility of WebSecurityConfig(),1
+Add constants for Magic numbers,1
+Merge Duplicate Code,1
+Use ternary operator instead of if-else statement,1
+Redundant null check for 'mergedPlan',1
+Add a log statement in the catch block for UnsupportedCallbackException,1
+Remove unnecessary boolean comparison,1
+Use constants for repeated strings,11
+Use @Before annotation for initialization,2
+Remove redundant else block,3
+Refactor if conditions into a helper method,1
+Error Handling,1
+Avoid duplicate code for closing windows,1
+Use StringBuilder append pattern consistently,1
+Avoid redundant code,2
+Refactor to multiple methods,2
+Use a Map to reduce the if-else statements,1
+Use String.format() instead of string concatenation,1
+Use the ternary operator to shorten your code,2
+Check for null and empty list,1
+Refactor code using a method to add items to the lists,1
+Refactor repetitive code into a helper method,3
+Refactor code to use try-catch block,1
+Catch more specific exceptions,1
+Use Logger Instead of System.out,1
+Logging instead of System.out.println,1
+Use try-finally to ensure cleanup,2
+Use method reference,5
+Exception Handling,2
+Avoid hard-coded strings,1
+Use Optional for xPiece,1
+Avoid calling expensive operations in loop,1
+Use @Test(expected = Exception.class) instead of try-catch blocks,1
+Remove unnecessary String concatenation in logging statements,1
+Use Java streams API to simplify code,1
+Add logging,2
+Refactor repetitive code,16
+Encapsulate error handling,1
+Use appropriate HTTP status codes,1
+Improve exception message,3
+Remove unnecessary conditional check and return statement,1
+Replace multiple OR conditions with a method call,1
+Use try-catch block to handle null pointer exceptions,1
+Check for null key,2
+Error handling,2
+Use Java streams to set children,1
+Replace deprecated methods,1
+Replace if-else chains with switch,1
+Use consistent error messages,1
+Remove unnecessary currentTimeMillis call,1
+Check for Null and Empty String,1
+Improve readability by extracting complex lines into separate methods,1
+Use StringUtils for string concatenation,1
+Reduce the number of nested if-else statements,1
+Use appropriate data structures,1
+Use String.format for string concatenation,7
+Replace 'new ArrayList<String>(Arrays.asList("true"))' with 'Collections.singletonList("true")',1
+Avoid using same variable name,1
+Encapsulate condition checks in separate methods,1
+Use Set instead of List for eventsDisplayed to avoid duplicates,1
+Use of Java Enums instead of raw constants,1
+Simplify if conditions,1
+Replace multiple return statements with single return,1
+Remove redundant check for deprecated tag,1
+Apply DRY principle,1
+Method Decomposition,1
+Simplify the code by using a filter in the for loop,1
+Simplify conditional statements with Regular Expressions,1
+Use try-catch block for parsing integers,1
+Use Dependency Injection for bean creation,1
+Remove code redundancy,3
+Refactor magic number,1
+Use local variable for repetitive calls,1
+Improve method readability by eliminating the else block,1
+Use Logger to print the stack trace,1
+Add null check for `name` in `pathParams` forEach loop,1
+Simplify null check,2
+Adding error handling,1
+Avoid instantiating a new LinkedHashMap,1
+Avoid hardcoding file names and contents,1
+Add documentation comment for the method,1
+Remove redundant parentheses,1
+Use Java Optional for null check,1
+Explicitly handle the potential IllegalStateException,1
+Remove redundant space append,1
+Add null-check for `file` parameter,1
+Use try-finally to ensure resources are closed,4
+Use Java Stream API to find matching subscribers,1
+Remove unnecessary creation of HashMap,1
+Rewrite the method to simplify the logic,1
+Refactor the large method into smaller, more manageable ones,1
+Remove redundant if statement,1
+Use a separate method for exception testing,1
+Reduce Nested Conditionals,1
+Replace if-else ladder with switch statement,4
+Refactor redundant code into a separate method,1
+Use a more efficient data structure,1
+Use Builder Design Pattern,1
+Use final keyword where appropriate,1
+Remove unnecessary check for null,1
+Avoid Deep Nesting,5
+Eliminate code redundancy,1
+Remove unnecessary pause,2
+Consistent event publishing,1
+Avoid checking for response status twice,1
+Replace System.out.println with a logging framework,12
+Simplify and optimize string concatenation,1
+Externalize sensitive data,1
+Refactor null checks into a separate method,1
+Use JUnit's assertThrows to handle exceptions,1
+Add null check for entityProjection,1
+Split the constructor into smaller methods,1
+Use Configurator Pattern for ApiConfig,1
+Use String.format instead of string concatenation,1
+Use Java 8 streams for cleaner code,1
+Avoid Synchronized Blocks,1
+Use 'try-catch' blocks for exception handling,1
+Use instanceof pattern matching in if else statements,1
+Add Method Comments,1
+Reduce redundant code,1
+Remove unnecessary 'mark' invocation,1
+Avoid hardcoding the field types,1
+Return result instead of modifying instance variables,1
+Replace system call within the loop with a variable,1
+Return a result instead of setting class fields,1
+Simplify setting of the request parameters,1
+Use Java 8 Stream API for checking elements,1
+Use Set instead of List for sessionTypes, sessionNames and subProfilerIds,1
+Replace concatenation with StringBuilder in loop,1
+Add missing annotations,1
+Refactor the if-else control structure,1
+Remove redundant null check,15
+Use String.format instead of concatenation,1
+Logging instead of directly using System.out.println,1
+Use Java 7's try-with-resources,1
+Replace casting with `instanceof` checks,1
+Refactor printing statements to use Logger,1
+Use Set instead of List for 'merged' to avoid duplicates,1
+Use logger instead of System.out.println,6
+Add logging for UnsupportedCallbackException,2
+Avoid nested for loop,1
+Separate GeoInfo instantiation from data population,1
+Replace System.out.println with logger,2
+Use try-finally to ensure resource cleanup,1
+Use Java Optional class to avoid NullPointerException,1
+Use private static final for constants,1
+Consolidate duplicate catch blocks,1
+Replace repetitive calls to config setters with a method,1
+Replace anonymous classes with lambda,1
+Avoid deep nesting by returning early,1
+Use local variable for repeated calculations,1
+Logger instance should be a class member,1
+Use Java 8 Optional to avoid NullPointerException,1
+Use StringBuilder append() method more efficiently,1
+Remove magic number,2
+Use else-if construct instead of multiple if statements,1
+Avoid returning within try block,1
+Define Constants for Repeated String Literals,1
+Use default case in switch statement,1
+Check 'current' is not null before calling 'remove' in 'remove' method,1
+Remove unnecessary println statement,1
+Remove null checks,1
+Remove redundant coercion check,1
+Reduce Code Duplication,3
+Avoid early return in lambda expressions,1
+Avoid reassigning method parameters,2
+Replace nested if-else with guard clauses,1
+Refactor annotation handling to a separate method,1
+Replace manual array joining,1
+Use Java 8 stream API,2
+Use try-catch for parsing long from string,1
+Use finally block to reset memory,1
+Add null check for 'postponedActions_' and 'javaScriptRunning_' before calling remove() method,1
+Avoid creating multiple Robots,1
+Add null check for the input list,1
+Refactor to reduce method complexity,4
+Replace System.err.println with a logging framework,3
+Use remove(Object o) method,1
+Simplify the initialization of ArrayList,1
+Remove the sleep call,1
+Remove redundant assertNotNull() check,1
+Use the ternary operator for conditional assignment,2
+Use constant for repeated strings,1
+Add null checks for session and payload objects,1
+Encapsulate complex logic in separate methods,1
+Move error handling to separate method,1
+Replace continue with else clause,1
+Use specific exception classes,1
+Refactor if condition to avoid unnecessary variable assignment,1
+Use StringUtils to check if class name starts with 'java.',1
+Add null check for ByteBuffer,1
+Use Java's built-in shift methods,1
+Use diamond operator,1
+Move repeated code to a separate method,1
+Use HashMap's method containsKey instead of checking for the replacement start index,1
+Use Apache Commons CLI for command line parsing,1
+Use switch statement instead of multiple if-else,4
+Use constants for error messages,2
+Reduce multiple instanceof checks,1
+Use enhanced switch statement instead of multiple if-else,1
+Avoid unnecessary synchronization,4
+Replace System.out.println with logging framework,1
+Improving readability and maintainability by breaking down the method,1
+Use ResponseEntity<T> to avoid calling toString() method,1
+Use a more specific Exception,1
+Use StringBuilder more efficiently,5
+Move the 'if' condition inside the 'synchronized' block,1
+Throw specific exception,1
+Handle SQLException,2
+Replace null return value with an empty list,1
+Replace multiple if statements with switch-case,1
+Use Java's built-in `String.split()` method,1
+Use switch statement instead of multiple if else statements,1
+Splitting code into smaller methods,1
+Include error handling,1
+Use Java 8 stream API for collection operations,1
+Replace System.out.println with a Logger,9
+Use finally block in try-catch,1
+Improve readability by avoiding deep nesting,1
+Remove unnecessary checks for file existence and parent directory creation,1
+Use log placeholders instead of string concatenation,1
+Use Optional instead of null,9
+Add null check for byte array,1
+Use String.format or StringBuilder for string concatenation,1
+Move the setting of content type before getting the output stream,1
+Add null checks for parameters,3
+Minimize method calls inside loop,1
+Use StringBuilder Append Chaining,1
+Add null check for input,1
+Use Java 8's stream API to filter required annotations,1
+Use finally to ensure resources are closed,1
+Remove unnecessary print statements,4
+Refactor Complex Conditional Logic,1
+Use Objects.requireNonNull() instead of manual null check to simplify the code,1
+Use switch statement,1
+Use trim() instead of manual trimming,1
+Replace ternary with if-else for clarity,1
+Move common configuration to separate method,1
+Use isEmpty() method instead of CollectionUtil.isEmpty(),2
+Remove redundant type arguments,1
+Reduce repeated code by using a data structure to store test values,1
+Avoid deep nesting by early return,1
+Refactor to use method reference,1
+Error Handling for Parsing,1
+Use constants for repeated String literals,3
+Use constants for magic numbers,13
+Remove Redundant Code,3
+Improve the method name and parameters,1
+Use java.util.logging.Logger for logging messages,1
+Use a switch statement instead of if-else statements,2
+Use Optional for nullable parameter,1
+Remove redundant initialization of result,1
+Replace manual array comparison with Assertions,1
+Replace absolute file path with relative file path,1
+Check for null values at the start of the method,1
+Check for null or empty strings for 'name' and 'value' in urlParams,1
+Use Generics for type safety,1
+Use Optional to handle null value,4
+Avoid hardcoding values,7
+Use try-catch block for RuntimeException,1
+Remove redundant else statement,6
+Remove unnecessary toString call,2
+Remove redundant verification,1
+Refactor repeated code,10
+Use Java 8 Stream API for string concatenation,1
+Refactor large method into smaller methods,4
+Add Method Description,2
+Replace conditional checks on null with Optional,1
+Simplify condition checks,2
+Add a constant for magic number,1
+Avoid direct use of magic strings,1
+Replace Exception with Specific Exceptions,1
+Avoid Null Check on error object,1
+Reduce the depth of conditional nesting,1
+Avoid multiple calls to CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName),1
+Use Optional instead of Nullable,1
+Remove Magic Numbers,2
+Refactoring of repetitive code,1
+Replace magic numbers with constant,2
+Reduce method complexity and length,1
+Refactoring to avoid duplicate code,1
+Remove unnecessary else statement,10
+Use AssertThrows instead of try-catch block,1
+Add error handling for version mismatch,1
+Remove type casting,1
+Avoid null check after a method call on the object,1
+Use try-catch with resources,3
+Use of Java Enums instead of ByteOrder,1
+Use Java's built-in String methods more effectively,1
+Use Optional for nullable fields,1
+Refactor to use regular expression,1
+Simplify the code logic,1
+Simplify null check for superclass,1
+Use Optional instead of null check,10
+Remove unnecessary space character,1
+Replace System.out.println with Logger,15
+Avoid Duplicated Code,1
+Avoid duplicate subscription of listeners,1
+Add error handling for Class.forName,1
+Use EnumMap or switch on Enum instead of manual mapping,1
+Refactor repetitive code into a method,10
+Nullify objects in finally block,1
+Use try with resources for StringBuilder,1
+Refactor repetitive condition checks into methods,1
+Use Descriptive Variable Names,1
+Reduce code duplication in tag checking,1
+Eliminate redundant null checks,2
+Move creation of Apis object to a separate method,1
+Move contentType setting before outputStream is acquired,1
+Avoiding repetitive code using DRY principle,1
+Use try/catch block for exception handling,1
+Use logger instead of printStackTrace(),1
+Refactor the large method into smaller ones,1
+Split long method into smaller ones,1
+Add null check for `newBean` before using it,1
+Avoid null checks inside lambda,1
+Avoid creating empty array for toArray method,1
+Remove redundant final keyword,1
+Avoid calling the same method multiple times,4
+Use try-catch for error handling,11
+Use Java 8 Streams API for calculations,1
+Introduce finally block to close response,1
+Use a loop to populate the maxConnectionsPerHost map,1
+Avoid catching generic exception,1
+Avoid suppressing InterruptedException,1
+Encapsulate condition checks in a method,1
+Use StringBuilder append method in chained manner,1
+Use Java Streams API,2
+Avoid calling getValue() method multiple times,1
+Replace HttpStatus.SC_OK with appropriate status codes,1
+Avoid code repetition by using a helper function,1
+Use var keyword for variable declaration,1
+Check for null or empty response body,3
+Remove unnecessary variable 'ordered',2
+Remove unnecessary annotations,1
+Add check for null OAuth2UserRequest and OAuth2User,1
+Remove redundant empty string checks,1
+Wrap GeoInfo object in Optional when ipAddress is null,1
+Avoid using hardcoded class name for comparison,1
+Use collection.isEmpty() to check whether the collection has elements.,1
+Use constant for property keys,1
+Replace multiple if conditions with switch statement,1
+Remove unnecessary closing of resources,1
+Move ResultSet inside try-with-resources,1
+Avoid catching generic 'Throwable' exception,1
+Replace System.err.println() with logging,1
+Replace System.currentTimeMillis() with an actual operation,1
+Use Java Optional for destination parameter,1
+Split the method into smaller methods to improve readability,1
+Use IllegalArgumentException instead of JavaScriptEngine.reportRuntimeError,1
+Replace System.out with Logger,2
+Declare constants for repeated strings,1
+Remove unnecessary String initialization,1
+Use StringBuilder append for new lines,1
+Add meaningful comments,3
+Externalize Configuration,1
+Use Java 8 Optional to handle null values,1
+Use Java 8 Stream API for better readability and performance,4
+Use Enhanced for loop,1
+Replace anonymous inner class with lambda expression,1
+Remove redundant check for disabled element,1
+Use Optional for nullable variables,1
+Use finally block to ensure resources are always released,1
+Use more descriptive names for variables,1
+Use local variables to reduce duplicated method calls,1
+Early return for null check,1
+Use try-catch for exceptions,1
+Reduce complexity of argument coercion,1
+Replace repetitive code blocks with a helper method,1
+Use Finally block for code cleanup,1
+Remove redundant SuppressFBWarnings,1
+Avoid Null Checks in Lambda,1
+Remove hardcoded string "result",1
+Avoid multiple lookups of the same annotation,1
+Split complex method into smaller methods,3
+Remove redundant whitespace characters split and join,1
+Create Constants for API Paths,1
+Use descriptive test method name,1
+Use Java 8 streams,2
+Avoid explicit Garbage Collection,1
+Use Java 8 Stream API for merging annotations,2
+Separate the creation of mocks and their expectations,1
+Refactor and simplify code,1
+Remove redundant curly braces,1
+Remove redundant call to `toFile().getAbsolutePath()`,1
+Add meaningful test names,1
+Use Java Streams API for null replacement,1
+Replace string comparisons with switch-case statement,1
+Move repeated string to constant,1
+Improve null safety,1
+Assign repeated method calls to a variable,1
+Use isEmpty() to check for empty strings,1
+Use constants for error messages to avoid duplication,1
+Refactor switch-case into separate functions,1
+Use `equals()` instead of `==` for string comparison,1
+Use finally block to reset the state,1
+Encapsulate collector statuses into a dedicated class,1
+Remove redundant variable declaration,1
+Use Java 8 Streams API for better performance and readability,1
+Make the magic number a constant,1
+Avoid using labels and continue statements,1
+Move fireOnSuccess() call inside finally block,1
+Use 'try-with-resources' for 'WritableHandle' to automatically close it,1
+Remove redundant comments,1
+Move the Base64 encoder to a constant,1
+Use String Builder for String Concatenation,1
+Refactor Conditional Statement,1
+Assign default value to expectedAlerts directly,1
+Use private constants for recurring values,1
+Refactor the code to reduce string duplications,1
+Refactor the validate method into smaller methods,1
+Handle Null Values Effectively,1
+Ensure resources are closed properly,1
+Add proper error message in Exception,1
+Reduce nesting by using try-with-resources,1
+Use Java constant for server URL,1
+Consolidate try-catch blocks,3
+Use meaningful names for variables,3
+Replacing magic numbers with named constants,1
+Add null check for response body,1
+Add null check for 'query' parameter,1
+Use Java 8 Stream API for iteration,1
+Improve formatting and indentation,1
+Use Generics for List declaration,1
+Use a loop to bind entities,1
+Refactor subsession creation into its own method,1
+Add null checks,5
+Avoid Nested Conditionals,1
+Throw specific exception instead of RuntimeException,1
+Adopt early return coding style for simplicity and readability,1
+Reduce Nested If conditions,1
+Use meaningful names for test methods,1
+Avoid assigning a value more than once to a field,1
+Remove unnecessary isDebugEnabled() check,1
+Map initialization can be simplified,1
+Move the incrementing of 'i' out of the 'setProperty' method call,1
+Use Stream API to check if destination already exists,1
+Remove redundant HashMap initialisation,1
+Avoid repeatedly calling the same method,2
+Use Set instead of List for checking duplicates,1
+Use Optional instead of null check for mergedPlan,1
+Avoid repeated calls to same method,1
+Avoid using recursive calls in the next() method,1
+Replace explicit type argument with <>,2
+Better variable naming,2
+Initialize dynamic and initial attributes in the SubSession constructor,1
+Refactor SSLContext Creation,1
+Eliminate redundant `else`,1
+Use final keyword with Java methods and parameters,1
+Replace multiple if statements with a switch statement,4
+Add null check for the 'entityProjection' object,1
+Avoid using `this` for synchronization,1
+Refactor code to avoid deep nesting,1
+Avoid swallowing exceptions,7
+Check for null input,1
+Use dependency injection for CONFIGURATION,1
+Replace repetitive code with methods,1
+Replace System.out.println calls with a logger,1
+Use of constants for property keys,1
+Reduce the complexity of the function,1
+Use containsAll() method instead of a loop,1
+Replace ArrayList's constructor with Collections.emptyList(),1
+Remove redundant null check for deprecated,1
+Use of try-with-resources for AutoCloseable resources,1
+Remove extra variable initializations,1
+Reduce redundancy,1
+Avoid hardcoding of the URL,1
+Avoid Code Duplication,4
+Avoid raw types,1
+Avoid code duplication by creating a method,1
+Use try-finally for time measurement,1
+Exception handling for parsing integers and longs,1
+Refactor anonymous inner classes to named classes,1
+Remove repeated code by creating a helper method,2
+Use enhanced switch instead of multiple if-else,1
+Reduce nested condition checks,1
+Remove redundancy in null and empty checks,1
+Avoid creating unnecessary objects,7
+Reduce nested blocks for readability,1
+Replace boolean expressions with methods,1
+Avoid throwing raw Exception,1
+Use Java 8 Stream API instead of Observable,1
+Use Optional to avoid null values,1
+Remove Redundant Robot Initialization,1
+Use optional for xPiece,1
+Avoid null checks with Optional,2
+Use private constants for the URLs,1
+Remove unnecessary iterator,1
+Move the declaration of the 'res' variable closer to its usage,1
+Refactor HTML content into a constant,1
+Add null check for key,2
+Replace anonymous inner class with lambda,1
+Reuse formLogin and logout instances,1
+Replace magic numbers with named constants,21
+Use ternary operator for boolean assignment,2
+Avoid calling `toLowerCase()` in return statement,1
+Add null check for remoteDAO before calling its method,1
+Use constant for magic number,1
+Replace instance of check with polymorphism,1
+Use Java 8's lambda expression instead of anonymous class,1
+Replace multiple if-else with switch-case,2
+Refactor switch-case to use Map,1
+Replace repeated string concatenations with String.format,1
+Refactor repeated code into separate method,2
+Remove unused object,1
+Remove redundant check for presence of Appender,1
+Use Optional for 'conf' variable,1
+Replace `synchronized (this)` with a more specific lock object,1
+Use of Java Logging instead of System.out.println,1
+Use `else if` to make the code more readable,1
+Use optional to avoid null check,1
+Use computeIfAbsent method for Map,1
+Replace multiple calls to ReflectionUtils.getAnnotation with a single call,1
+Replace printStackTrace() with logger,1
+Use specific exceptions instead of Throwable,1
+Simplify the switch-case statement,1
+Replace Anonymous Class with Lambda Expression,1
+Use Optional to avoid null checks,14
+Use switch case instead of if-else,1
+Use try-catch block to handle possible exceptions,1
+Avoid using 'continue' in a loop,1
+Use Stream API for optimizers loop,1
+Removing Unused Variables,1
+Use assertJ assertions for better readability and more detailed error messages,1
+Avoid calling `toLowerCase()` multiple times,1
+Avoid Magic Numbers,6
+Reduce complexity by separating concerns,1
+Avoid unnecessary condition check,1
+Remove redundant check,1
+Use Switch-case instead of multiple if-else,1
+Remove unnecessary throws Exception declaration,1
+Avoid null checks for error.getMessage() and error.getAttributes(),1
+Add final keyword to the Configuration object,1
+Use specific exceptions instead of catch-all,1
+Add proper error handling,1
+Remove unnecessary toString call on single-value lists,1
+Avoid repeated calls to getAllAppenders(),1
+Avoid recursive call in the next() method,1
+Add null check for jsonKeyValuePairs,2
+Define Constants instead of Magic Values,1
+Replace type casting with `Optional`,1
+Combine catch blocks,2
+Remove redundant initialization of variables,1
+Replace string concatenation with StringBuilder in debug message,2
+Wrap GeoInfo object in Optional,1
+Remove unnecessary 'if' conditions,1
+Use constructor chaining,4
+Add null check for chars array,1
+Remove unnecessary conditional check,1
+Use logging instead of System.out.println for error messages,1
+Refactor to use Optional to avoid null checks,1
+Move hardcoded values to constants or configuration files,1
+Avoid long method,1
+Refactor the code to reduce the method's complexity,1
+Add null check for properties object,1
+Refactor to use Optional,3
+Ensure non-null response body,1
+Use early return to reduce the nesting,1
+Use Junit Assert.assertThrows instead of try-catch,1
+Add error handling for possible exceptions,1
+Add null checks at the beginning of the method,1
+Replace checks for null or empty strings with Apache StringUtils,1
+Define constants for string literals,1
+Use @Before and @After for setup and cleanup,1
+Use else-if instead of separate if statements,1
+Avoid chaining methods excessively,1
+Use Collection.isEmpty() to check whether the collection is empty or not,1
+Remove unnecessary inputStream marking,1
+Use try-catch for parsing integers,3
+Consolidate return statements in hasNext(),1
+Break down the run() method into smaller methods,1
+Replace concatenation in logging with a formatted string,1
+Use constants for repetitive strings,1
+Reduce scope of variable,1
+Prevent unnecessary duplicate HttpStatus check,1
+Use Java Logger instead of System.out and System.err,1
+Add specific exception handling,2
+Use logger parameters instead of string concatenation,1
+Replace if statements with a switch,1
+Handle exceptions more effectively,4
+Replace magic number with a constant,2
+Simplify the if-else statement by removing the else clause,1
+Use Java 8 Streams API for filtering and transformation,1
+Use ternary operator for conditional assignment.,1
+Remove redundant initializers,1
+Use constructor to initialize ApiConfig,1
+Use English language for readability,1
+Use the isEmpty() method more effectively,1
+Refactor repetitive code into a separate function,1
+UseJavaDoc to describe the method,1
+Use constructor instead of init method,1
+Logging exceptions,1
+Extracting repeated code into a method,1
+Remove redundant pause,1
+Handle potential ArrayIndexOutOfBoundsException,1
+Use private method to load properties,1
+Avoid using 'this' keyword unnecessarily,1
+Eliminate unnecessary null check,1
+Use Optional to handle null,1
+Remove unnecessary type casting,4
+Avoid returning magic numbers,3
+Add a space surrounding operators,1
+Split the function into multiple smaller functions,2
+Adding Null Check,1
+Use String constant for repeated strings,1
+Avoid deep nesting by using return statement early,1
+Replace 'exception' with 'e' in rest of the catch blocks,1
+Break up the publishAsync method into smaller methods,1
+Add logging to the UnsupportedCallbackException catch block,1
+Refactor the if-else logic,1
+Use static import for frequently used static methods,1
+Handle exceptions properly,36
+Use try-catch blocks for parsing integers and longs,1
+Reduce Duplication when getting GroupId,1
+Use constants for repeating strings,1
+Avoid use of 'break' in loop,1
+Move Configuration initialization to constructor or as a field,1
+Avoid repetitive checks for the 'envelope' being not null,1
+Reduce Redundant Code,3
+Use method to avoid duplicate code,1
+Avoid Repeated Code,2
+Reduce redundancy in creating argumentResolvers and returnValueHandlers,1
+Combine catch blocks with the same error handling,1
+Check for null and empty string simultaneously,1
+Avoid printing stack trace in catch block,1
+Add error logging instead of printStackTrace,2
+Replace printStackTrace with proper logging,1
+Long Method,1
+Use try-finally block to ensure resources are closed,1
+Reduce nesting by returning early,2
+Avoid duplicate code by creating a method for subSession creation,1
+Use 'try-with-resources' for managing resources,1
+Use try-catch for validation,1
+Use meaningful message for println,1
+Remove hard-coded values and use constants,1
+Remove redundant instantiation of Robot,1
+Replace conditional with polymorphism for JMX and Metrics,1
+Add meaningful exception handling instead of empty catch blocks,1
+Use constant for repeated string values,2
+Add null check for 'reader' object,1
+Reduce coupling,1
+Avoid using multiple conditions in a single line,1
+Replace repetitive code with a loop,1
+Null check and isEmpty check of error.getAttributes() can be combined,1
+Eliminate deeply nested conditions,1
+Use final for immutable variables,3
+Replace for loop with enhanced for loop,1
+Refactoring repeated code,1
+Use ternary operator for conditional assignment,3
+Use try-catch block for potential JSONException,1
+Use parameterized tests,5
+Combine nested if conditions,1
+Avoid creating new objects in loops,1
+Refactor code to reduce complexity and improve readability,1
+Improve readability by extracting inner logic to separate methods,1
+Avoid recursive calls,1
+Separate the declaration and instantiation of QueryPlanTranslator,1
+Use the equals method for object comparison,1
+Move 'byte[] buff' initialization outside of the loop,1
+Add method description comment,1
+Remove unnecessary removal of Appender,1
+Remove redundant assertThat,1
+Replace multiple return statements with a single return statement,1
+Handle potential exceptions,1
+Remove unnecessary singleton instance check,1
+Replace string concatenation with String.format in exceptions,1
+Method Signature,1
+Add error message to RuntimeException,1
+Avoid creating the same pathElement and path objects repeatedly,1
+Use method extraction to reduce complexity,1
+Add explicit exception handling,1
+Use Java 8 Stream API to merge annotations,1
+Remove unnecessary e.printStackTrace(),1
+Add Detailed Error Message,1
+Avoid unnecessary conditional check,1
+Add null check for all properties,1
+Check for null in remove() method,1
+Replace manual array iteration with Stream API,1
+Avoid catching and rethrowing IOException,1
+Use English in comments and output,1
+Avoid direct manipulation of collections,1
+Remove unnecessary debug logging,1
+Avoid hardcoding delay,1
+Replace conditional checks with a map,1
+Use Constants,2
+Remove e.printStackTrace(),1
+Reduce method complexity by creating helper methods,1
+Use String.format for better readability,1
+Avoid instanceof checks,1
+Remove unnecessary `contains` check,1
+Remove the use of System.out.println for debugging,1
+Remove unnecessary initialization of 'source',1
+Refactor optimizer loop to a separate method,1
+Add error handling for invalid shiftBitCount,1
+Remove unnecessary InputStream marking,1
+Use constants instead of repeated strings,1
+Use String.format() for concatenating strings,1
+Refactor repetitive test assertions,1
+Refactor the try-catch-finally blocks,1
+Remove redundant semicolon,1
+Use of logger instead of System.out.println,1
+Use Logger instead of System.out.println,16
+Move the declaration of 'selectFields' variable up,1
+Remove code duplication,6
+Change StringBuffer to StringBuilder,1
+Remove redundant code blocks,1
+Handle InterruptedException,1
+Refactor the method to reduce its complexity and increase readability,1
+Separate test setup from action and assertion,1
+Use constant for static string,1
+Use Java Stream API for adding entries to map,1
+Move variable declarations to the top of the method for readability,1
+Improve method readability with helper function,1
+Avoid repetitive toString() call,1
+Use Java 8 forEach() function instead of traditional for loop,1
+Avoid hardcoding,3
+Remove redundant intValue() call,1
+Use try-catch for Class.forName,1
+Avoid creating unnecessary arrays,1
+Replace if-else with Polymorphism,1
+Replace traditional for loop with Stream API,1
+Add logging instead of throwing a RuntimeException,1
+Remove 'Deprecated' annotation,1
+Replace traditional loop with enhanced for loop,1
+Use proper logging instead of System.out.println,1
+Refactor repetitive code into separate method,2
+Use constructor to initialize ApiConfig object,1
+Using StringBuilder for String Concatenation,1
+Avoid deep nesting of if-else constructs,1
+Encapsulate SSL context building in separate method,1
+Add input validation for 'sql' parameter,1
+Replace null check with Objects.nonNull,2
+Refactor conditionals into separate methods,1
+Avoid complex expressions inside loop,1
+Deduplicate Exception Handling,1
+Reduce nested control flow,1
+Avoid checking requestBody == null twice,1
+Replace printStackTrace() with proper logging,2
+Use Java 8's stream API,1
+Remove duplicate HttpStatus check,1
+Refactor code for DRY principle,1
+Reduce complexity with a factory method,1
+Replace anonymous Runnable with lambda,2
+Use Java 8 Stream API for better readability,1
+Use constant for 'java.',1
+Split long method into multiple shorter methods,1
+Remove unnecessary context parameter,1
+Remove redundant null and empty check,1
+Avoid repeated object instantiation inside loop,1
+Refactor complex conditionals into smaller methods,1
+Check for null before using an object,1
+Use constants instead of hard-coded Strings,1
+Eliminate redundant local variable,1
+Move properties file name to a constant,1
+Refactor repetitive code into a separate method,9
+Introduce loop to remove repetitive code,1
+Refactor complex method into smaller, more manageable methods,1
+Use try-finally blocks to ensure the StringBuilder is always closed,1
+Avoid repeating code,4
+Use final keyword for event,1
+Reduce nested if-else blocks,2
+Replace null check with StringUtils.isNotBlank method,1
+Use Optional's map and orElseGet methods instead of isPresent and get,1
+Directly append token without checking the last character,1
+Combine setter calls,1
+Avoid creating a new instance of `QueryPlanTranslator` in every method call,1
+Move repeated code to a method,1
+Use isEmpty() to check for nullity or emptiness,1
+Use Java 8's Optional instead of null check,1
+Extracting Common Code Blocks,1
+Avoid null check for Map values,1
+Use a more robust logging system instead of System.out.println,1
+Use 'final' keyword with Object candidate,1
+Check if `bodyData` is null before accessing it,1
+Extracting the Runnable implementation into a separate class,1
+Throw exception instead of logging,2
+Use logging instead of printStackTrace(),2
+Use descriptive names,1
+Use constants for string literals which are used multiple times,1
+Split this large method into smaller helper methods,1
+Check for null on file before checking if it exists,1
+Correct error message,2
+Switch-case instead of if-else for browser versions,1
+Split method into smaller methods,9
+Add JavaDoc for the method,1
+Refactor code to remove duplicated blocks,1
+Use @Before annotation for test setup,1
+Use a finally block to ensure Thread.yield() is always called,1
+Avoid catch-all exception handling,1
+Use more meaningful exception messages,1
+Use a guard clause instead of nested ifs,1
+Refactor duplicate code,4
+Extracting similar code to a new method,1
+Use switch-case instead of if-else ladder,1
+Use early return for error checking,1
+Avoid magic strings or numbers,1
+Avoid returning 'this' in the method,1
+Use Java trim() method instead of manual implementation,1
+Use interface type instead of implementation type,1
+Check for division by zero,2
+Check for null or empty strings for 'name' and 'value' in pathParams,1
+Using a logger instead of System.out.println,1
+Abstract exception test,1
+Use @After annotation for tear down,1
+Remove redundant final boolean,1
+Use constant for version checking,1
+Add Java Doc for the method,1
+Use logging system instead of System.out.println,1
+Use constant for HTTP status,1
+Add meaningful assert messages,1
+Remove unnecessary 'out' label,1
+Avoid code duplication,22
+Use constants for repetitive string values,2
+Use of Java's built-in logging system instead of printStackTrace,1
+Refactor repetitive null checks into a private method,1
+Use try-catch blocks,1
+Use StringBuilder's append() method in a chained manner,1
+Use local variables to reduce repetitive method calls,1
+Check for empty collection before creating ArrayList,1
+Add proper javadoc for the method,1
+Refactor repeated code blocks,3
+Remove unnecessary loop,1
+Use switch case instead of multiple if conditions,1
+Use Java 8 Stream API for improved performance and readability,1
+Use switch statement over if-else,1
+Removal of unnecessary null checks,2
+Use finally block to handle clean up,1
+Use Dependency Injection for BasicDataSource,1
+Divide long method into smaller methods,1
+Add null checks for all properties,1
+Use final for unmodified variables,1
+Avoid returning null in the next() method,1
+Refactor the method to handle exceptions,1
+Use polymorphism instead of checking instance type,1
+Replace the use of CollectionUtil.isNotEmpty() with Collection.isEmpty(),1
+Use of Enhanced Switch Statements,1
+Use of constants for all hard-coded strings,1
+Use 'else if' instead of 'if' in the last 'if' block,1
+Replace System.err.println with logging,1
+Remove Redundant Initialization,1
+Reduce repetitive code and improve readability,1
+Eliminate unnecessary if-else checks,1
+Add constants for magic numbers,1
+Avoid usage of magic numbers,1
+Use Java's inbuilt logging mechanism,1
+Print remaining objects inside the catch block,1
+Remove console output in unit tests,1
+Include a try-catch block,1
+Avoid Type Casting,1
+Use Optional to handle nullable values,2
+Extracting constant values,1
+Separate finding x piece into its own method,1
+Replace Anonymous Inner Classes with Lambda Expressions,1
+Use isEmpty() method instead of ArrayUtils.isEmpty(),2
+Use the equals() method instead of '==' for string comparison,1
+Refactor the code to use separate methods for listeners,1
+Refactor repetitive IllegalArgumentException catch blocks,1
+Avoid using raw types,3
+Use 'orElseGet' method instead of 'else' block,1
+Avoid concatenating strings using '+' in a loop,1
+Reduce nesting,5
+Use Constants for String Entities,1
+Remove else statement to reduce nesting,1
+Eliminate unnecessary toString method call,1
+Handle exceptions appropriately,1
+Simplify null check for `alerts` and `buggyWebDriver`,1
+Check method accessibility,1
+Use a private method to avoid code duplication,1
+Avoid using recursion in the next() method,1
+Avoid redundant null checks,2
+Remove unnecessary null check and getInstance() call,1
+Return a meaningful value,1
+Avoid repeated code,2
+Use final keyword with local variables,1
+Remove console output,3
+Avoid creating new objects inside a loop,1
+Replace repetitive if-else statement with a switch-case,1
+Refactor to Reduce Cyclomatic Complexity,1
+Use Enum in Switch Statement,1
+Use setUp() method to initialize common objects,1
+Avoid using System.out.println for debugging,1
+Move object instantiation into the loop,1
+Method is too long,1
+Use meaningful parameter names,1
+Remove redundant whitespace handling,1
+Use a do-while loop,1
+Use constants for fixed strings,1
+Use switch case instead of multiple if else statements,4
+Use Java 8 streams for processing annotations,1
+Assert that an exception is thrown,1
+Use Guard Clauses,1
+Remove unnecessary if condition,2
+Use the toString method directly on the HttpMethod enum,1
+Use a boolean for flagging,1
+Replace multiple if-else with switch,1
+Handle possible null pointer exception,1
+Split the method into smaller, more manageable methods,4
+Avoid using labels,2
+Use Java 8 Stream API for collection processing,1
+Remove unnecessary 'return true' statements,1
+Consolidate catch blocks,2
+Reduce Repetition,1
+Replace lambda with method reference,1
+Guard clause for null or empty annotations,1
+Use specific exceptions instead of a general exception,1
+Use StringUtils from Apache Commons Lang for string manipulation,1
+Remove code repetition,1
+Move lock.writeLock() outside of the method,1
+Refactor validation into separate method,1
+Refactor repeated attribute processing code into a separate method,1
+Move the selectFields calculation to outside the while loop,1
+Use Java 8 Streams to simplify the method,1
+Avoid initializing x, y, num to -1,1
+Use String format for appending,1
+Remove redundant new AggregateId initialization,1
+Use switch-case instead of multiple if-else conditions,5
+Reduce code redundancy by using Optional,1
+Avoid complex nested logic,1
+Replace magic number with constant variable,1
+Use Strings instead of StringBuilders for constant strings,1
+Avoid Null Object Reference,1
+Use the String.format method for complex string concatenation,1
+Combine all catch blocks into one,1
+Refactor code to make it DRY,1
+Replace nested if conditions with switch case or map,1
+Add missing semicolon,1
+Use else-if instead of multiple if statements,2
+Avoid unnecessary branching,1
+Use either publish or post().now(),1
+Avoid duplicate calls to getAnnotation,1
+Replace if-else chain with a switch statement,3
+Avoid re-assigning loop variable inside loop,1
+Eliminate repetitive calls to CollectionUtil.isNotEmpty(),1
+Add null check for solution list,1
+Replace '|'' with '||' in conditional statements,1
+Combine multiple catch blocks,2
+Avoid unnecessary system call,1
+Extracting base64 key generation to a separate method,1
+Use a switch-case statement instead of multiple if-else conditions,2
+Use specific exception instead of generic Exception,1
+Use more descriptive exception messages,1
+Handle null case for StaxSource,1
+Use early return to improve readability,1
+Use assertThrows instead of try/catch,1
+Guard clause for null check,1
+Refactor hard-coded product IDs to variables,1
+Remove System.currentTimeMillis() call,1
+Handle exceptions more specifically,3
+Refactor code into smaller methods,1
+Use a logger instead of System.out.println statements,1
+Return early to avoid deep nesting,1
+Use of final keyword for constants,1
+Handle null values before using them,1
+Avoid throwing generic exceptions,3
+Use method references in stream operations,1
+Replace Magic Strings,1
+Include else clause for better readability,1
+Refactor complex condition in assertTrue to make it more readable,1
+Replace anonymous classes with lambdas,1
+Reduce the number of conditional checks,1
+Avoid multiple return statements,1
+Replace printStackTrace() method with logging,1
+Convert visibility check into switch statement,1
+Use Java 7's try-with-resources Statement,1
+Remove redundant toString() call,1
+Replace string concatenation with StringBuilder append,2
+Use Java streams for list creation,1
+Add null check before calling methods on javaScriptExecutor_,1
+Improve naming convention,1
+Use @Test(expected = Exception.class) to simplify test for exceptions,1
+Use ternary operator for totalRWeight initialization,1
+Enhance for loop instead of traditional for loop,1
+Refactor repeated code into a method,5
+Group related operations,1
+Use try-finally to ensure resources are always released,1
+Avoid duplicate subscriptions,2
+Avoid Broad Catch,1
+Remove unnecessary status code check,2
+Use Java Optional's orElseGet method,1
+Replace magic string with constant variable,1
+Replace the if-else chain with a switch statement,1
+Avoid calling `System.currentTimeMillis()` inside the loop,1
+Use Collections.emptyList() instead of new ArrayList<>(0),1
+Use Optional in next() method,1
+Avoid multiple returns,2
+Use @BeforeEach annotation,1
+Replace manual incrementation with AtomicInteger's incrementAndGet method,1
+Use Java 8 Streams for filtering and transforming data,1
+Use StringBuilder's append method instead of '+=' operator,1
+Replace System.currentTimeMillis() with meaningful operation,1
+Refactor If-Else condition,1
+Use StringBuilder's append method instead of string concatenation in logs,1
+Replace Anonymous Classes with Lambda Expressions,1
+Use JUnit's ExpectedException rule,1
+Use final modifier for variables,1
+Check for null or empty before processing the data,1
+Use separate methods for BIG_ENDIAN and LITTLE_ENDIAN,1
+Simplify condition checking,2
+Replace System.out.println and System.err.println with a Logger,1
+Remove unnecessary exception testing,1
+Apply ternary operation for baseRoute assignment,1
+Remove redundant length check before getting charAt,1
+Use annotations for test setup,1
+Refactor lengthy ternary operation into if-else statement,1
+Handle specific exceptions instead of Throwable,1
+Refactoring nested loops into separate methods,1
+Add error handling,5
+Remove unnecessary call to getNativeHandle,1
+Move test assertions to separate method,1
+Eliminate repeated status code check,1
+Avoid deep nesting and large method,1
+Remove redundant variable,1
+Parameterize the retry configuration,1
+Replace conditional with polymorphism,1
+Avoid repeated code by creating a helper method,1
+Add method parameter validation,2
+Avoid using printStackTrace,1
+Use List::stream and forEach instead of manual loop,1
+Check for Negative Index and Length,1
+Avoid multiple calls to 'getClientRegistration',1
+Use 'equals' method for string comparison,1
+Use AssertJ for better assertion,1
+Use Optional for handling possible null values,2
+Use Objects.requireNonNull for Null Check,1
+Error messages should be descriptive,1
+Use a logger instead of print statements,1
+Replace string concatenation with append,1
+Combine catch blocks with same error handling,1
+Use Java 8 Stream API for list to string conversion,1
+Refactor long and repetitive if-else conditions to a switch statement,1
+Replace repetitive event.get calls with local variables,1
+Reduce nested if statements,1
+Avoid unnecessary boxing of Boolean,1
+Remove Unnecessary Cast,1
+Eliminate code repetition,1
+Use switch-case statement instead of consecutive if-else statements,1
+Use Java 8 stream API for operations,1
+Use Timer for measuring execution time,1
+Use proper Java naming conventions,1
+Use Logger instead of System.out and System.err,2
+Move RestTemplateBuilder initialization to constructor or as a class level variable,1
+Replace 'continue' with 'break',1
+Use JUnit's assertThrows instead of try-catch-fail pattern,1
+Refactor switch-case statements,1
+Avoid rethrowing exceptions,2
+Use finally block for cleanup,5
+Use switch instead of multiple if statements,1
+Reduce method complexity by breaking it down,1
+Use Java 8's Optional to handle potential null values,2
+Simplify JSONObject creation,1
+Use a named constant instead of a magic number,1
+Avoid using wildcard imports,1
+Use StringBuilder appendChaining,1
+Replace 'if' condition with 'continue' inside loop with 'filter' operation,1
+Use the diamond operator for type inference at ArrayList instantiation,1
+Combine catch blocks for exceptions that have the same handling,1
+Remove Duplicate code,1
+Removal of unnecessary else clauses,1
+Avoid redundant null check,6
+Use meaningful test method names,1
+Use method references instead of lambda expressions,1
+Simplify creation of List,1
+Use ternary operator for the `newValue` assignment,1
+Reduce repeated calls to CollectionUtil.isNotEmpty(),1
+Replace StringBuilder with StringBuffer for thread safety,1
+Use else if instead of multiple if statements,1
+Use StringBuilder efficiently,1
+Use parameterized test instead of repetitive code,1
+Use Constants for Magic Numbers,1
+Use a Set for eventsDisplayed to improve performance,1
+Use Java 8 lambda instead of anonymous class,1
+Reduce method complexity,24
+Break nested loops into separate methods,1
+Use String format to simplify string construction,1
+Use Optional to avoid null,1
+Use Java 8 streams for iteration,1
+Avoid re-declaration of variables inside switch-case,1
+Replace multiple map initializations with a single line,1
+Consistent error handling,1
+Improve readability by reducing nested conditions,2
+Avoid using deprecated annotation,1
+Refactor the nested if-else to separate methods,1
+Remove redundant if-else conditions,1
+Reorder exception handling,1
+Remove unnecessary return statements,1
+Refactor repeated code into separate private methods,1
+Use method reference for trimming,1
+Replace 'e' with 'exception',3
+Replace manual array filling with Arrays.fill,1
+Remove unnecessary 'Class.forName' call,1
+Split long method into smaller methods,1
+Use a switch-case statement instead of if-else statements,1
+Use constants for property keys,3
+Avoid calling 'get' on Optional without 'isPresent' check,1
+Replace if-else statements with guard clauses,1
+Use try-catch for exception handling,15
+Use Java Logger instead of printStackTrace,1
+Avoid changing input parameter values,1
+Replace if-else checks with a map,1
+Use isEmpty() method instead of isBlank(),1
+Make RetryConfig as a class member,1
+Refactor common SteamID retrieval code,1
+Using a try-catch block,1
+Refactor the code to reduce nesting,1
+Use Optional for handling null values,1
+Encapsulate operation creation into a separate method,1
+Separate into smaller methods for readability and testing,1
+Use a private static final String for file,1
+Add null check before method call to avoid NullPointerException,1
+Add Parameter Validations,1
+Use Java 8 stream API for collection filtering,1
+Add final to parameters,1
+Remove redundant initializations,6
+Avoid modifying input parameters,3
+Use do-while loop instead of while loop,2
+Add handling for AmazonServiceException,1
+Avoid repeated map lookups,1
+Replace if-else structure with switch-case,1
+Use ConcurrentHashMap for thread safety,2
+Use try-catch block for potential runtime exceptions,1
+Add assert in catch block to verify the correct exception is thrown,1
+Avoid Duplicate Code,3
+Use SLF4J for logging,1
+Use try-catch for possible RuntimeException,1
+Use Try-with-Resources,1
+Replace if-else chain with switch statement,2
+Use more specific exception instead of general Exception,1
+Move HTTP client creation to a separate method,1
+Combine multiple if conditions,1
+Use Optional's map and orElseGet methods,1
+Use Java's String.format method,1
+Use enums for string comparisons,1
+Use String.format for exception messages,1
+Move constant string comparison to a method,1
+Remove redundant continue statements,2
+Use EnumMap instead of switch-case statement,1
+Use a logging framework instead of System.out.println,3
+Replace if-else with ternary operator,1
+Refactor apiVersion extraction,1
+Assign new Callback array to variable,1
+Use StringBuilder's chained append method,1
+Remove redundant client variable,1
+Use Optional for the 'destination' parameter,1
+Use @BeforeEach to initialize common test data,1
+Use Optional in place of null,1
+Add null and empty check for 'name' parameter,1
+Break method into smaller methods,1
+Use optional for null safety in case of accessing cookies,1
+Refactor the long method into smaller methods,1
+Use Optional to handle possible null value,1
+Reduce redundancy in initiating the builder,1
+Use polymorphism instead of instance of,1
+Refactor large method into smaller ones,7
+Remove logging of sensitive information,1
+Avoid deep nesting by adding continue statement,1
+Add method visibility,4
+Remove repetitive code,3
+Handle SteamException properly,2
+Replace multiple if-else conditions with `switch`,1
+Use final for apiMethodDocs and hasDebugEnv parameters,1
+Add Exception Handling,2
+Remove unreachable return statement,1
+Use try-finally block to ensure resources are always released,1
+Use constants for strings,1
+Add Exception handling,1
+Avoid deep nesting by splitting the method into smaller ones,1
+Use Java 8 Streams for iteration,1
+Specify Exception types,1
+Avoid using infinite loop,1
+Split complex expressions into multiple lines,1
+Use 'final' keyword only when necessary,1
+Use constant for URL,1
+Encapsulate Recursion,1
+Use Java 8 forEach instead of traditional for loop,1
+Replace the throw clause with specific exceptions,1
+Use AssertJ assertions for better readability and more detailed error messages,1
+Use Stream API for filtering and transformations,1
+Use constants instead of hard-coded values,7
+Use Java Stream API for Collection operations,1
+Split the function into smaller ones,1
+Improve code readability by reducing nesting,1
+Use Map.computeIfAbsent() to replace conditional put in map,1
+Use String.format for concatenating strings,1
+Wrap long lines to improve readability,1
+Avoid hardcoding directory path,1
+Move ResultSet inside try-with-resources block,1
+Avoid using magic number,1
+Use Java 8 functional programming features to improve code readability,1
+Use constants for repeated string values,10
+Avoid use of magic numbers,4
+Remove redundant builder variable,1
+Check for null or empty bucket name,1
+Refactor nested if-else statements,3
+Add Override annotations to hasNext, next, and remove methods,1
+Use isEmpty method instead of length method to check if a string is empty,1
+Use constants for constant values,1
+Refactor multiple return statements,1
+Use meaningful names,3
+Add null check for `getName` method,1
+Remove redundant print statements,1
+Avoid unnecessary casting,2
+Use Java 8 Stream API,20
+Use try-catch block,7
+Add parameter for FilterExpression,1
+Replace unnecessary stream() usage,1
+Use Iterators instead of for-each loop for better performance,1
+Use constants instead of repeating string literals,2
+Move cache initialization to a separate method,1
+Add method parameter instead of using instance variable,1
+Use switch or if-else for multi-conditions instead of multiple if,1
+Avoid boxing Integer to Object,1
+Add logging instead of printStackTrace,1
+Avoid catching generic Exception,3
+Add null checks for list items,1
+Add error logging,2
+Separate different shift logic into two methods,1
+Use Java 8 Stream API instead of traditional for loop,2
+Add error message to the RuntimeException,1
+Avoid using magic strings,13
+Add null check for `authToken` parameter,1
+Add method arguments,1
+Use Java 8 Stream API to simplify list operations,1
+Refactor switch statement,1
+Remove unnecessary suppression of 'resource' warning,1
+Use Optional instead of null checks,16
+Early return for class names starting with 'java.',1
+Use constant for special characters,1
+Use Optional to handle possible null value of 'cached',1
+Use ternary operator for null check,1
+Use try-catch block to handle Class.forName() exceptions,1
+Refactor the method to reduce its length,1
+Avoid the use of magic numbers,2
+Split the handle method into smaller methods,1
+Use meaningful variable and method names,1
+Avoid using print statements in production code,1
+Refactor the creation of RequestBody,1
+Refactor the method into several smaller methods,1
+Use Set instead of List for eventsDisplayed,3
+Check if map is empty instead of null,1
+Use Switch Statement Instead of If-Else,1
+Handle IOException,1
+Remove unnecessary check for whether the appender is already present,1
+Break down complex nested code into smaller methods,1
+Refactor duplicate ApiResponse creation,1
+Use JSONObject's optString() method,1
+Use constants or enum for message types,1
+Check for null callback,1
+Use constants for URL strings,1
+Separate complex method into smaller methods,1
+Add null check for value,1
+Use else-if instead of else,2
+Use a properties file for configuration,1
+Use try-catch block to handle IllegalArgumentException,1
+Avoid throwing generic Exception,1
+Reduce code duplication,23
+Refactor nested conditionals,1
+Remove redundant code for adding column,1
+Return early to decrease indentation,1
+Combine the two if conditions regarding container,1
+Use HashSet instead of ArrayList for checking duplicates,1
+Reduce calls to ReflectionUtils.getAnnotation,1
+Remove unnecessary system print statements,1
+Eliminate Code Duplication,1
+Add null check for 'str',2
+Improve readability by removing redundant code,1
+Remove unnecessary boxing of Integer,1
+Use Optional for null checks,7
+Avoid hardcoding admin user name,1
+Remove unnecessary continue statements,1
+Use try-catch block for null checks,1
+Introduce Constants for Magic Numbers,1
+Simplify conditional logic,1
+Remove unnecessary check for paramSize,1
+Use try-finally to ensure resources are always cleaned up,1
+Use AssertJ for assertions,2
+Move variable declaration closer to usage,1
+Separate calculating bounds into its own method,1
+Avoid unnecessary copying of Maps,1
+Use constant variables for magic numbers,1
+Avoid duplicate code with BrowserVersion check,1
+Use final modifier for local variables,1
+Use Java Stream API to modify data,1
+Avoid calling the 'toLowerCase' method in a loop,1
+Remove unnecessary inputStream.mark(Integer.MAX_VALUE) call,1
+Remove redundant initialization,3
+Use Try-With-Resources for Exception Handling,1
+Use Constants for Reusable Text,1
+Specify exception message in Assert.fail(),1
+Remove magic strings,5
+Use switch case instead of multiple if else conditions,2
+Improve exception handling,19
+Remove excessive System.out.println() statements,1
+Combine catch blocks with the same logic,1
+Use the join method of the String class instead of manual concatenation,1
+Use a more descriptive method name,1
+Refactor repetitive attribute extraction code,1
+Avoid Null Pointer Exception in `isHidden` method,1
+Handle ArrayIndexOutOfBoundsException,1
+Use AssertJ for exception testing,1
+Use Java 8 Streams for matrix construction,1
+Use of array instead of varargs in Mono.zip,1
+Split method into smaller, more manageable methods,1
+Combine multiple append operations into one,1
+Avoid using multiple exit points in method,1
+Checking actionMap for null,1
+Reduce StringBuilder appends,1
+Refactor complex method to simpler methods,1
+Refactor the creation of BindingOperation into a separate method,1
+Avoid using 'synchronized' keyword on 'this',2
+Use constants for recurring strings,1
+Refactor condition check,1
+Use a Map for entityTag and entity pairs,1
+Encapsulate property loading in separate method,1
+Use Switch Case instead of multiple if-else statements,1
+Avoid unnecessary else statement,1
+Create a private method to handle conditional assignment,1
+Encapsulate fields,1
+Handle NumberFormatException,5
+Replace nested if-else,1
+Use @Test(expected = Exception.class) for testing exceptions,1
+Avoid Hardcoding,1
+Split the lengthy method into smaller ones,1
+Replace the repeated calls to getCounterByMetricName with a single call,1
+Add null check for 'values' array,1
+Introduce constructor chaining,1
+Replace if-else blocks with ternary operators,1
+Replace traditional for loop with enhanced for loop,14
+Introduce constants for magic numbers,1
+Use try-catch block for handling potential ArithmeticException,1
+Refactor url parameter appending to separate method,1
+Remove Deprecated Annotation,4
+Add 'private' visibility to method,1
+Move CORS headers to a filter,1
+Add null check for 'charset',1
+Replace Anonymous classes with Lambda Expressions,1
+Avoid string concatenation inside logger,1
+Use try-catch inside the loop,1
+Remove unnecessary variable initialization,3
+Catch a more specific exception,1
+Avoid instantiating Stopwatch object when not required,1
+Use Switch Case instead of If-Else,1
+Redefine the usage of anonymous classes,1
+Reduce the length of the method,1
+Refactor for better readability,1
+Refactor out array size calculation,1
+Remove printStackTrace,1
+Improve Exception messages for better debugging,1
+Use Spring's ClassUtils for class loading,1
+Replace break statement with return,1
+Specific exception handling,2
+Use of a logger for exceptions,1
+Remove redundant status code check,2
+Use more descriptive exception handling,1
+Use descriptive method names,1
+Reduce complexity by breaking the method into smaller methods,1
+Use of Switch-Case instead of multiple if-else conditions,1
+Add null check before using `remove` method,1
+Replace multiple if-else statements with a switch statement,1
+Use a data-driven approach for testing,1
+Replace System.err.println with Logger,2
+Use for loop instead of while loop,2
+Combine catch blocks with identical handling,1
+Eliminate redundant if-else in setting Query Params,1
+Remove the IOException from the constructor,1
+Remove unnecessary 'break' statement,1
+Avoid String object instantiation inside loop,1
+Use Java 8 Streams API,2
+Use Set instead of List for checking unique items,1
+Avoid returning null in functions,1
+Reduce redundancy in executing the client and verifying the result,1
+Make method public and change its name,1
+Check nullity at the beginning of the method,1
+Remove unnecessary cast,4
+Replace '== true' and '== false' with their boolean equivalents,2
+Replace System.out.println() with a logging framework,2
+Remove explicit close() calls,1
+Use stream API,1
+Remove unnecessary method,1
+Replace 'continue' statements,1
+Use streams for merging annotations,1
+Use Optional for possible null object,1
+Error handling and logging improvement,1
+Reduce redundant toString() calls,1
+Use Java 8 Streams API for setting children attribute,1
+Remove unnecessary @Deprecated annotations,1
+Use Try-with-resources when dealing with closeable resources,1
+Reduce complexity by methods extraction,1
+Use StringJoiner for concatenating strings,2
+Avoid synchronizing on non-final field 'this',1
+Use Java Stream API to filter and collect data,1
+Replace explicit type argument with diamond operator,2
+Remove duplicate code for closing windows,2
+Use Optional for null check,6
+Use @Mock annotation for mocking,1
+Replace raw type with parameterized type,1
+Use fluent API effectively,1
+Use the ternary operator for setting the URL,1
+Use Optional for null safety,1
+Use @Test(expected = Exception.class) for expected exceptions,1
+Replace Iterator with enhanced for loop,1
+Add meaningful variable names,1
+Remove redundant dictionary creation,1
+Remove unused variable,3
+Separate the logic for different byte orders into different methods,1
+Add check for null on analogActionData,1
+Use Logger instead of System.err.println,1
+Use final for variables that are not reassigned,1
+Refactor char validation to a separate method,1
+Use meaningful error messages,2
+Use constants for special characters,1
+Use try-with-resource to close RestTemplate,1
+Use 'try-finally' block for cleanup,1
+Refactor to read properties from a configuration class,1
+Remove unnecessary if else ladder,1
+Use String concatenation,1
+Separate concerns into different methods,1
+Use Stream API for list iteration,1
+Combine assertions,1
+Use method reference instead of lambda in stream,1
+Replace magic string with constant,3
+Avoid hardcoding Charset,1
+Use switch case instead of multiple if-else,1
+Add null check for queriedTable,1
+Use final for parameters,1
+Abstract shifting logic into a separate method,1
+Remove null checks before collections methods,1
+Avoid using System.out.println for logging,3
+Reduce Code Redundancy,1
+Replace System.out.println and System.err.println with a proper logging framework,1
+Replace the repeated calls to event.get with a single call,1
+Remove unnecessary setting of source,1
+Move HttpHeaders Initialization to a separate method,1
+Refactoring the large method into smaller ones,1
+Reduce repetition by creating a data structure,1
+Reduce Cognitive Complexity,1
+Abstract out the logic for updating configuration,1
+Use method references for better readability,1
+Simplify conditions,1
+Use Java Stream API for list creation,2
+Refactor duplicate code into a reusable method,1
+Early return for null or empty bodyParams,1
+Handle specific exceptions rather than a generic exception,1
+Use Java 8 Stream API to check for existing subscribers,1
+Use switch statement instead of multiple if statements,1
+Remove redundant 'final' keywords,1
+Simplify if-else conditions,1
+Use a helper function to extract filename,1
+Add null check for memArr,1
+Use Java StringJoiner for better readability and performance,1
+Replace nested for loop with stream API,1
+Combine two if conditions into one,1
+Improve null handling,2
+Use variable for repetitive method calls,1
+Replace printStackTrace with Logger,1
+Replace magic strings/numbers with constants,1
+Replace anonymous classes with lambda expressions,6
+Add null check for nodes,1
+Check for null or empty input,1
+Refactor Anonymous class to Lambda,1
+Use ternary operator instead of if-else,1
+Use Optional class to avoid null checks,2
+Use Java 8 stream API for better performance and readability,1
+Use of constants,1
+Separate the method into smaller methods,1
+Remove redundant if-else checks by using a switch-case statement,1
+Use constants instead of hardcoded numbers,1
+Refactor url parameter appending,1
+Avoid null assignment,1
+Replace magic number with constant,15
+Avoid hardcoding HTTP response codes,1
+Improve string concatenation performance,1
+Use final for orderId,1
+Use JUnit's @Before annotation for setup,1
+Return the result at the end of the method,1
+Add try-catch block,1
+Use descriptive error messages,2
+Use try-catch block for JSON operations,1
+Avoid modifying array inside the Mono.zip function,1
+Incorporate Optional to handle Null values,1
+Reduce complexity by splitting function,1
+Use of logger instead of System.out,1
+Add final modifier to method parameter,3
+Remove redundancy in Bytes creation,1
+Refactor Annotations into separate methods.,1
+Throw exception instead of returning null,2
+Use try-catch block to handle potential exceptions,4
+Refactor repetitive assertions into a method,2
+Replace println with Logger,1
+Remove unnecessary null check,17
+Use Java Optional instead of null,2
+Remove unnecessary ArrayList creation,2
+Use switch statement instead of multiple if-else blocks,1
+Avoid unnecessary variable assignment,1
+Use a data structure to avoid repetitive code,1
+Use Command Line Parser library,1
+Remove the unnecessary 'unchecked' warning suppression,1
+Replace manual array iteration with enhanced for loop,1
+Improve readability by separating method logic,1
+Avoid null check for `conf` twice,1
+Avoid recursion in 'next' method,1
+Refactor duplicate null checks,1
+Replace `new ArrayList<>()` with `Collections.emptyList()`,1
+Use a logger instead of System.out.println,3
+Avoid using multiple catch blocks for same operations,1
+Use parameterized tests for repetitive assertions,1
+Use a more descriptive test method name,1
+Refactor this method,1
+Use String format instead of multiple append calls,1
+Use Collection.isEmpty() to check for emptiness,1
+Use more specific exceptions,1
+Remove try-catch block,1
+Use Java 8 Stream API for List to String conversion,1
+Avoiding repetitive code,1
+Remove unnecessary 'qNamePrefix' variable,1
+Use final modifier for immutable variables,1
+Refactor conditional logic into switch statement,1
+Move Configuration initialization to class level,1
+Replace multiple String concatenation with StringBuilder,1
+Replace `if`-`else` chain with `switch` statement,1
+Split createOperations method into smaller methods,1
+Refactor nested if-else conditions,2
+Replace assertions with exceptions,1
+Avoid multiple calls to handler.getParameterTypes(),2
+Avoid redundant calls to size() and contains(),1
+Replace while loop with for loop,4
+Use constants instead of magic numbers,2
+Simplify code for marshaller and unmarshaller,1
+Use the Java 8 stream API,1
+Remove unnecessary null checks,4
+Avoid unnecessary usage of iterator and list contains method,1
+Throw specific exceptions,3
+Avoid hard-coded string literals,1
+Avoid Repetition,1
+Refactor large method into smaller, more manageable methods,1
+Check for null logger,1
+Reduce complexity by breaking down method,1
+Avoid variable declaration in the middle of the code,1
+Avoid using Thread.yield(),2
+Refactor repetitive null check,1
+Use multi-catch block for exception handling,1
+Reduce nested if-statements,1
+Remove Unnecessary Console Outputs,1
+Use constants for literal values,1
+Refactor switch-case statement,1
+Break down the method into smaller methods,2
+Ensure proper types for subscription,1
+Use the ternary operator for shorter assignments,1
+Use method references,2
+Add null checks for `measure`,1
+Eliminate repetitive code,1
+Break down complex method,1
+Use try-catch block for type casting,2
+Use a helper method for exception assertions,1
+Separate the test case into multiple smaller test cases,1
+Use Java 8 Streams instead of for-loop,1
+Replace if-else block with a switch case,1
+Avoid use of System.out.println in production code,1
+Use StringUtils.isBlank instead of isEmpty,1
+Unnecessary System.currentTimeMillis() call,1
+Reduce nesting by extracting logic into methods,1
+Use try-finally block to ensure proper shutdown of resources,1
+Avoid subscribing non-listeners to bus,1
+Use try-catch for potential ClassCastException,2
+Replace null check with Optional,3
+Simplify if condition,3
+Use streams instead of for loops,1
+Avoid using the SecurityManager,1
+Avoid busy waiting,1
+Avoid direct use of 'null',1
+Use Objects.requireNonNullElse to handle null values,1
+Avoid calling 'counterMap.size()' multiple times,1
+Avoid redundant null check for apiDoc.getOrder(),1
+Splitting big method into smaller methods,1
+Avoid printStackTrace(),1
+Use constant for byte size,1
+Use Java 8 Stream API for list concatenation,3
+Avoid unused variable,1
+Avoid magic numbers,42
+Use assertions instead of try-catch blocks for testing exceptions,1
+Use constants to avoid magic numbers,1
+Replace 'synchronized' method with 'synchronized' block,1
+Reduce nested blocks,1
+Replace StringBuffer with StringBuilder,1
+Use ternary operator instead of if-else to assign baseRoute,1
+Make exception messages more informative,1
+Use Java 8 Stream API to simplify code,1
+Use Java 8 Optional to handle possible null values,1
+Replace ArrayList with LinkedList for dataList,1
+Reduce the amount of type casting,1
+Magic string,1
+Avoid returning null for collections or arrays,1
+Handle the case when 'xacmlRequest' is null or empty earlier,1
+Use regular expressions for string manipulation,2
+Chaining method calls on separate lines,1
+Use Java method reference for subscriber subscription,1
+Replace startsWith checks with a switch case,1
+Remove Unnecessary Variables,1
+Use setUp method for common initializations,1
+Simplify null checks with StringUtils,1
+Refactor conditional statements in for-loop,1
+Refactor code to separate concerns,2
+Avoid swallowing InterruptedException,2
+Use the 'final' keyword for immutable variables,1
+Use of Java's URI or URL,1
+Check for null or empty before storing in cache,1
+Use explicit error messages,1
+Replace nested if conditions with early return,1
+Remove unnecessary if-else condition,2
+Removal of redundant boolean variable 'ordered',1
+Use Objects.requireNonNull() for null check,1
+Specify access modifier for method,1
+Use try-catch within if blocks,1
+Reduce nesting with early returns,1
+Use logging framework instead of System.out.println,1
+Add null check for name parameter,1
+Move ApiConfig configuration to a separate method,1
+Use meaningful method names,1
+Remove unnecessary boxing and unboxing,2
+Avoid catching generic Throwable,1
+Avoid potential NullPointerException,2
+Use constructor injection,1
+Combine similar catch blocks,4
+Use switch expression instead of switch statement,1
+Use 'containsKey' before 'get' for 'requestBuilderCache',1
+Refactor Exception handling,1
+Remove manual calls to close(),1
+Add parameters to the method,2
+Refactor common logic into a private method,1
+Avoid clearing memory unnecessarily,1
+Simplify boolean assignment,1
+Separate method into smaller, more manageable methods,1
+Use Java 8 Stream API to simplify list to string conversion,1
+Add 'public' access modifier,1
+Avoid unnecessary conditions,1
+Use method references for function calls,1
+Remove redundant `if` checks,1
+Use Assert.assertThrows for exception testing,2
+Replace Runnable with lambda,1
+Use Java logger instead of System.out.println,1
+Replace repetitive code with helper method,1
+Replace the null check with CollectionUtils.isNotEmpty(),1
+Use proper exception variable,1
+Avoid type casting,2
+Refactor the large method into smaller, more manageable methods,1
+Use regular expression for type extraction,1
+Split the catch blocks,1
+Replace magic strings with constants,33
+Replace System.out.println with logging,4
+Add null check for method.getParameterTypes(),1
+Replace println with proper logging,1
+Refactor if-else structure,1
+Replace if-else statement with Optional.orElseGet(),1
+Add null checks before calling methods,2
+Remove redundancy in if-else statements,1
+Remove redundant 'final' modifier,1
+Use try-catch to handle potential JSONException,1
+Use Java 8 Stream API for filtering,1
+Use StringBuilder append method chaining,1
+Use the enhanced for loop,1
+Code Refactoring: Remove Double Check Locking,1
+Use Optional to avoid null checking,1
+Avoid creating multiple instances of EncoderDecoder,1
+Use Java 8 Stream API to handle `values` array,1
+Add a comment to explain the bitwise shift operation,1
+Use method reference in sort,1
+Remove Unused Variables,3
+Avoid using Exception in method signature,1
+Use constant for base URL,1
+Replace multiple try-catch blocks with a single try-catch block,1
+Add null check for 'sessionizerMap.get(next.getName())' in processSessionizableEvent,1
+Improve JSON parsing,1
+Handle edge cases for '?' in url,1
+Replace if statements with switch case,1
+Avoid creating RestTemplate for every request,1
+Add null check for loaderBeanDefinition,2
+Handle Exceptions Properly,1
+Check for null or empty string,3
+Use @ExpectedException JUnit annotation,1
+Introduce constants for magic strings and values,1
+Use string interpolation instead of string concatenation,1
+Use computeIfAbsent instead of computeIfPresent and putIfAbsent,1
+Avoid unnecessary toString() call,2
+Add null check for `jsonKeyValuePairs`,1
+Replace CollectionUtil.isNotEmpty() method with Collection's native method,1
+Replace magic numbers with constants,8
+Split complex method into smaller ones,1
+Refactor to separate methods,1
+Use try-catch for JSON parsing,1
+Use Optional's map and orElse methods,3
+Refactor if condition,1
+Removing Hardcoded Values,1
+Refactor repeated code into a helper method,2
+Replace multiple usages of Config.get() with local variables,1
+Use Optional to avoid explicit null checks,1
+Add error handling for AWS S3 exceptions,1
+Replace System.out.println with a logger,27
+Use ternary operator for setting deprecated field,1
+Use constants for hard-coded strings,1
+Move header settings to a separate method,1
+Use try-with-resource for resource management,1
+Rethrow exception instead of returning 0,1
+Replace If-Else with Switch Case,1
+Refactor repetitive string concatenation,1
+Add null check before using response object,1
+Use method extraction to reduce duplication,1
+Use Junit's @Before annotation to initialize common objects,1
+Handle exceptions,1
+Replace multiple return statements with a single one,1
+Remove extra print statements,1
+Avoid null checks on method parameters,1
+Add null check for 'bodyParams' when creating FormBody,1
+Avoid calling `httpServletRequest.getParameter(value)` twice in the switch statement,1
+Avoid duplicate checks,1
+Replace 'Throwable' with specific exceptions,1
+Use Java 8 streams instead of explicit for-each loop,1
+Use try-catch for JSONObject creation,2
+Remove unnecessary else clause,9
+Simplify String Concatenation,1
+Combine nested if statements,1
+Use specific exception instead of general exception,1
+Reduce code duplication by extracting repeated code into a separate method,1
+Use the ternary operator to simplify null checks,1
+Handle the exception properly,2
+Eliminate redundant casting,1
+Refactor nested for-loop to a private method,1
+Use @Mock annotation instead of createMock method,1
+Merge identical catch blocks,1
+Replace System.out.println with a proper logging framework,2
+Reduce multiple calls to getPage(),1
+Use finally block to close resources,1
+Use @Test(expected = IndexOutOfBoundsException.class) for Exception Testing,1
+Add exception handling to provide more context for errors,1
+Combine similar case conditions in switch statement,1
+Use map function for Optional,2
+Remove break statement,1
+Remove redundant heapify and checkByRange calls,1
+Add null check for listener,1
+Encapsulate object creation,2
+Using Java 8 Stream API,1
+Use constants instead of literals,1
+Refactor conditional statement,1
+Avoid raw type for CallResults,1
+Replace multiple try-catch blocks with a single one,1
+Code Simplification and Exception Handling,1
+Use private constants for repeated literals,1
+Use try-catch for type casting,2
+Encapsulate the repeated code into a helper method,1
+Replace manual array-to-collection copy,1
+Avoid Hard-Coding,1
+Use parameterized testing,1
+Avoid direct usage of collection implementation,1
+Refactor multiple if statements,1
+Reduce Cookie object mutation and simplify code,1
+Optimize whitespace check,1
+Refactor repetitive code into a helper function,1
+Consolidate duplicate code,3
+Use logger instead of System.out.println for error messages,1
+Use try-finally to ensure clean up,1
+Early return pattern,1
+Using try-with-resources to handle resources,1
+Remove redundant method calls for event posting,1
+Move RequestAttributes cast to a separate line,1
+Use @Test(expected = Exception.class) to handle exceptions,1
+Replace System.err.println with logging framework,1
+Remove redundant else condition,2
+Avoid using RuntimeException,1
+Remove unnecessary 'counter.mark()' call,1
+Use String.join() method to join elements of the list,1
+Use Java's try-with-resources for resource management,1
+Handle possible null values,1
+Remove unnecessary clear operations,1
+Add error checking for input parameters,1
+Use ternary operator for setting url,1
+Remove unnecessary call to 'getInstance()',1
+Add null check for jsonKeyValuePairs parameter,1
+Remove redundant code by creating a method for repeated code,1
+Use Arrays.stream instead of for loop,1
+Use logger instead of system.out.println,1
+Avoid using raw RuntimeException,1
+Include parameters in method signature,1
+Move anonymous class to a private method,1
+Avoid type checking with instance of operator,1
+Replace repetitive assertions with a helper method,1
+Refactor nested 'if' statements to separate methods,1
+Avoid hardcoding policy,1
+Use final for local variables,2
+Remove manual resource closing,1
+Remove unnecessary double subscription of listener,1
+Remove redundant `@Deprecated` annotations,1
+Improve error handling,15
+Use Java 8 Stream API to filter list,1
+Remove hardcoded properties filenames,1
+Replace Manual Array Initialization,1
+Use the String format method for better readability,1
+Encapsulate code in smaller methods,1
+Consolidate catch blocks for exceptions with similar handling,1
+Improve method readability and maintainability by introducing variable for complex calculations,1
+Use try-catch block for potential exceptions,1
+Refactor duplicated code into a separate method,1
+Replace the if statement with a switch statement,1
+Externalize string literals,2
+Use constant for repetitive string and character literals,1
+Break down complex conditionals,1
+Reduce Nested if-else Structures,1
+Refactor Cache Creation,1
+Use List::stream and List::filter instead of traditional for loop,1
+Use constructor to initialize SteamUGCDetails,2
+Optimize the value assignment,1
+Reduce code duplication for resetAttributes and resetSessionData method calls,1
+Remove unnecessary trimming of String endpoint,1
+Avoid using magic values,2
+Close resources in separate try-catch blocks,2
+Refactor nested if conditions into separate methods,1
+Use String.join method instead of manual concatenation,1
+Add method visibility modifier,3
+Use a better exception handling approach,1
+Replace direct ByteBuffer access with helper method,1
+Avoid repeated retrieval of handler parameter types,1
+Use try with resources for automatic resource management,1
+Refactor route extraction,1
+Add exception handling or check for invalid data,1
+Use @Before annotation to initialize sketch object,1
+Add failure message to Assert.fail(),1
+Use switch-case for commands,1
+Add try-catch block for error handling,1
+Check null or empty for the array controllerHandles,1
+Use constants for fixed values,1
+Combine multiple if conditions into one,1
+Avoid null checks by using Optional,12
+Use methods of java.util.Iterator,1
+Reduce redundancy in basicUnion method calls,1
+Avoid chaining method calls,1
+Use try-catch block for testing,1
+Method extraction,1
+Use the try-with-resources statement to close resources,1
+Refactor repetitive code into methods,1
+Use Java 8 Streams for parsing and processing command line arguments,1
+Use ternary operator for single-element list check,1
+Use ternary operator for setting requestParams,1
+Improve variable naming,5
+Reducing duplicate code,1
+Add null check for 'applet' before iterating over its methods,1
+Use of Lambda Expressions,1
+Avoid repeated calls to elideStandaloneSettings.getAsyncProperties(),1
+Use String.trim() method,2
+Use the isEmpty() method instead of isBlank() to check the urlPath,1
+Eliminate code duplication,2
+Use 'equals' method instead of '==' operator for string comparison,1
+Separate the method into multiple smaller methods,2
+Add Comments for Better Understanding,1
+Add null check for the cookies,1
+Replace nested if-else with Strategy Pattern,1
+Split large method into smaller ones,1
+Fix error in line 91,1
+Use String Joiner for concatenation,1
+Split the function into smaller, more manageable functions,1
+Check for null or empty list of subscribers,1
+Use finally block to ensure resources are closed,1
+Use Optional to Avoid Explicit Null Checks,1
+Avoid using labels and 'continue' statements,2
+Refactor anonymous inner classes to separate methods,1
+Handle SecurityException separately,1
+Remove unnecessary semicolon,4
+Reduce code duplication for KeyboardEvent creation,1
+Remove unnecessary checks,1
+Add logging to catch block,1
+Use List::stream and filter instead of manual loop,1
+Use StringJoiner class for String concatenation,1
+Use a logger to handle exceptions,1
+Add method access modifier and return type,3
+Use 'switch' statement instead of multiple 'if-else' statements,1
+Refactor long method into smaller methods,1
+Remove unnecessary instantiation of 'blitz4jConfig' object,1
+Avoid duplicating the URL string,1
+Encapsulate repetitive code into private methods,1
+Remove redundant System.currentTimeMillis() call,1
+Refactor repetitive code using a loop,2
+Use collection's contains method,1
+Refactor repeated code blocks into a helper method,1
+Remove unnecessary final modifiers,2
+Replace exception messages with English for wider usage,1
+Refactor anonymous classes into separate methods,1
+Remove Hardcoded Values,1
+Add validation for arguments,1
+Consider making the method non-destructive,1
+Avoid casting in loop,1
+Check for null values earlier,1
+Remove redundant HttpStatus.OK check,2
+Replace conditional check with Optional,1
+Replace if-else ladder with switch-case,1
+Use StringBuilder append method instead of string concatenation for better performance,1
+Refactor to separate functions,1
+Use ternary operator for simple if-else,1
+Refactor switch-case block,1
+Replace multiple if-else statements with switch,1
+Use Optional for optional values,1
+Use final for objects that won't be re-assigned,1
+Define data types for instance variables,1
+Avoid redundant casting,1
+Simplify Conditional Statements,1
+Replace System.err.println with a Logger,1
+Apply null-object pattern for the collections,1
+Avoid `throws Exception` in the method signature,1
+Simplify null check for Alerts annotation,1
+Replace null checks with Optional,3
+Split single method into multiple methods,1
+Use try-catch to handle potential exceptions,1
+Replace exception variable 'e' with 'exception',1
+Avoid deeply nested control flow statements,2
+Refactoring the method to make it shorter and more readable,1
+Refactor exception messages to a function,1
+Use ternary operator for null checks,1
+Replace if-else statement with ternary operator,1
+Consistent naming convention,1
+Use try-catch instead of checking for support,1
+Use a switch-case instead of multiple if-else checks,1
+Use try-catch for JSON operations,1
+Remove redundant context declaration,1
+Use Optional to avoid explicit null check,2
+Avoid using negation in if condition,1
+Remove redundant calls to getWebWindows() and getTopLevelWindows() methods,1
+Remove redundant array length check,1
+Use try-catch for potential exceptions,3
+Use try/catch for error handling,1
+Use Java Streams for array transformations,1
+Avoiding Repetition of 'input.startsWith',1
+Reduce repetitive calls,1
+Use Optional to avoid explicitly checking for null,1
+Use Optional API to avoid null checks,1
+Handle IOException properly,2
+Use a switch statement instead of multiple if-else,1
+Avoid unnecessary null check,8
+Refactor error messages to English,1
+Define log2 method,1
+Move repeated code to finally block,1
+Use final keyword for immutable variables,1
+Replace Magic Numbers with Named Constants,2
+Use of private helper method to reduce repetition,1
+Decompose method,1
+Remove Thread.yield(),1
+Use finally to ensure cleanup,1
+Refactor repeated code into a separate method,7
+Avoid instantiating QueryPlanTranslator object inside method,1
+Use clearer error message,1
+Improve error message content,1
+Encapsulate calculation of execution time,1
+Use multi-catch block for exceptions,1
+Close resources in individual try-catch blocks,1
+Replace System.out.println with a logging library,1
+Use JavaDoc comments for method documentation,1
+Add null check for byteArray,1
+Avoid unnecessary print statements,1
+Split method into multiple smaller methods,1
+Add Null check for 'columns',1
+Remove redundant space,1
+Replace conditionals with Optional,1
+Use specific exceptions instead of a generic Exception,1
+Move constant strings to constants,1
+Use Assert.assertThrows instead of try-catch,2
+Refactor long method,7
+Define ASCII_MAX,1
+Use AssertJ's assertion methods for better readability and richer error messages,1
+Move the creation of BindingFault outside the loop,1
+Use constants instead of hard-coded strings,1
+Avoid instantiating objects within a loop,1
+Replace the enhanced for loop with iterator to avoid ConcurrentModificationException,1
+Replace instances of 'e' with 'exception',1
+Improve code readability by breaking down complex code into methods,1
+Remove unnecessary 'Objects.requireNonNull' for 'bytes',1
+Remove unnecessary SuppressFBWarnings annotations,1
+Add Error Handling,1
+Remove unnecessary parameter size check,2
+Use switch-case instead of if-else,7
+Replace repetitive method calls with variables,1
+Replace repetitive code with a method,1
+Prefer early return over if-else,1
+Use a constant for incrementing coupon count,1
+Add Null check for 'values' array,1
+Avoid modifying the original list,1
+Check for null values,3
+Replace continue label with method extraction,2
+Use of java.util.concurrent package instead of custom thread handling,1
+Avoid returning null,10
+Use Java 8 Stream API for sum operations,1
+Avoid System.out.println(),1
+Remove duplicate code,6
+Use proper naming conventions,2
+Remove unnecessary clear() calls,2
+Add input validation for input parameter 'values',1
+Combine conditionals into one,1
+Remove redundant checks in the first for loop,1
+Use Java Logger instead of System.out.println for better logging,1
+Refactor repetitive if-else branches,1
+Replace 'for' loop with 'foreach',1
+Better exception handling,1
+Extracting repeated code to method,1
+Use StringBuilder.append() in a chained manner,1
+Use switch case instead of nested if-else for browser version checking,1
+Use a switch-case statement,1
+Refactor the Argument Parsing,1
+Add null check for the `adapter` field,1
+Improve error message,2
+Use String constants,1
+Remove unnecessary map copy,1
+Use switch-case statement instead of multiple if-else statements,1
+Use StringUtils for string manipulation,1
+Splitting the method,1
+Reduce code duplication by extracting common code into a helper method,1
+Replace Throwable with specific exceptions,1
+Add method comment,3
+Use try-catch block for null check,1
+Separate validation and logging,1
+Use a logger instead of printStackTrace,1
+Reduce code duplication by creating a method for SubSession creation,1
+Add validation for input parameter,1
+Replace superclass condition check with Optional,1
+Use StringBuilder append method in a chained manner,1
+Use constants for URLs,1
+Refactoring nested if-else conditions,1
+Move condition check to begining of method,1
+Avoid returning value in multiple places,1
+Reduce Method Complexity,5
+Remove unnecessary conditions,1
+Use Java 8 Streams for parsing JSON,1
+Use Optional for optional parameters,1
+Replace System.arraycopy with Arrays.copyOf,1
+Remove unnecessary Thread.yield() call,2
+Use StringBuilder's chain method for cleaner code,1
+Add a message to the fail assertion,1
+Replace Class.forName().newInstance() with clazz.newInstance(),1
+Check for null before usage,1
+Use Optional to handle possible null values,10
+Replace multiple if-else with polymorphism,1
+Use 'equals' method for string comparison.,1
+Avoid unnecessary string manipulation,1
+Use 'try-with-resources' to ensure 'out' is closed,1
+Remove unnecessary length check,1
+Use a constant for the magic numbers,1
+Refactor nested conditions,3
+Handle exceptions locally,1
+Use of early return,1
+Use try-finally block for mapClear,1
+Use equals method for object comparison,1
+Use `equals` method instead of `==` for object comparison,1
+Replace if-continue statements with a single if statement,1
+Handle exception properly,7
+Replace magic numbers with well-named constants,1
+Reduce duplicated code,1
+Do not swallow exceptions,1
+Use Logger placeholders,1
+Use StringJoiner instead of StringBuilder for concatenating strings with a delimiter,1
+Refactor repeated code into a new method,2
+Use Set instead of List to remove duplicates,1
+Use Java 8 Stream API to simplify the code.,1
+Add proper error message for exceptions,1
+Use Set instead of List for sessionTypes and sessionNames,2
+Replace repeated if-else statements with a switch statement,1
+Remove unnecessary status check,1
+Use constants for repeated values,8
+Use Optional to avoid null check,6
+Use @BeforeEach annotation for initialization,1
+Add null checks for variables before using them,1
+Remove wildcard imports,1
+Avoid creating new list,1
+Replace continue statement in the nested loop with method extraction,1
+Add null check for ResultSet,1
+Replace if-else with switch statement,1
+Refactor repetitive column addition to a separate method,1
+Use of StringBuilder for string concatenation,1
+Use try-catch blocks for exception handling,1
+Decompose Method,1
+Reduce method complexity by splitting into smaller parts,1
+Handle UnsupportedCallbackException,6
+Use of Constants for property keys,1
+Use Java Streams instead of loops for list creation,1
+Combine two continue conditions in the loop,1
+Refactor the creation of BindingFault into a separate method,1
+Refactor the method to use a switch-case statement,1
+Add null check for error object,1
+Use .trim() method to remove leading and trailing white spaces,1
+Split method into submethods,1
+Use constant for magic numbers,1
+Remove unnecessary HashMap creation,1
+Avoid unnecessary null assignments,1
+Use Stream API for merging annotations,1
+Use `Arrays.stream` for iteration,1
+Replace If Statement with Polymorphism,1
+Refactor multiple CONFIGURATION.shouldSummarizeOverflow checks,1
+Avoid Null Pointer Exception,1
+Use of Optional,2
+Move the calculation of bytesPerChunk after calculation of mask,1
+Parameter validation at the start of the method,1
+Replace manual string manipulation with StringUtils,1
+Separate test logic from setup and tear down,1
+Use switch statement instead of if-else,1
+Replace multiple string concatenations with append,1
+Replace string concatenation with String.format(),3
+Use Optional instead of null checking,5
+Use HashMap to store entity tags and their corresponding methods,1
+Replace magic literals with constants,1
+Add a null check for the 'key' parameter,1
+Avoid catching Throwable,4
+Encapsulate System prints in a separate method,1
+Refactor `removeOrphans` method to reduce complexity,1
+Use switch case instead of multiple instanceof checks,1
+Use static factory method instead of direct instantiation,1
+Use before annotation for initial setup,1
+Use Stream API to find if destination already exists,1
+Avoid using assert statements for user input validation,1
+Validate IP address before processing,1
+Combine catch blocks for same exception handling,1
+Remove duplicated code,1
+Remove redundant clear() calls,1
+Replace repeated ArrayList initialization with a method,1
+Use Java Optional to avoid null checking,1
+Use Optional for null checks on method parameters,1
+Use @Before annotation for initializations,1
+Avoid NullPointerException,1
+Remove unnecessary printStackTrace,1
+Declare variables close to their usage,1
+Use a constructor to initialize SteamUGCDetails,1
+Use an enhanced for-each loop instead of the traditional for loop,1
+Avoid unnecessary use of StringUtils for null/empty checks,1
+Replace if-else chains with a switch statement,1
+Avoid using Magic Numbers,1
+Avoid SuppressWarnings annotation,1
+Avoid multiple calls to the same method,4
+Refactor to Builder Pattern,1
+Use Java Stream API instead of for loop,1
+Use the enhanced for loop instead of Iterator,1
+Check for null cookies,1
+Remove redundant else clause,3
+Use for-each loop instead of explicit iterator,2
+Replace Magic Number with Constant,1
+Reduce duplicate code,4
+Replace multiple if else conditions with a switch statement,1
+Avoid repetitive code,3
+Remove unnecessary call to System.currentTimeMillis(),2
+Encapsulate HashMap initialization,1
+Remove unnecessary initialization,3
+Remove unnecessary `this` keyword,1
+Remove redundant null-check for `log4jConfigurationFile`,1
+Refactor switch case statement,1
+Check for non null before calling methods on objects,1
+Exception handling and logging can be improved,1
+Consolidate Duplicate Code,1
+Remove Deprecated annotation,5
+Replace 'exception' with 'e' in catch blocks,1
+Avoid unnecessary removal and closing of Appender,1
+RestTemplate initialization should be done once,1
+Use 'trim' method directly without type checking,1
+Replace 'exception' with 'e' in the instanceof checks,1
+Use Map.merge to simplify map updating,1
+Avoid hard-coding file paths,1
+Check for null or empty path,1
+Refactoring to a separate method,1
+Improved exception handling,1
+Use inverted conditions,1
+Use meaningful message instead of Chinese text,1
+Split complex boolean expression to improve readability,1
+Use try-catch block to handle exceptions,6
+Use Stream API to handle value replacement,1
+Reducing Code Duplication,1
+Variable Renaming,1
+Code Duplication,4
+Use switch case for auth ticket commands,1
+Use Java 8 Streams for nested loops,1
+Remove unnecessary System.out.println statements,2
+Use a switch statement instead of multiple if else statements,1
+Reduce the depth of conditional checks,1
+Use split() instead of manual parsing,1
+Add null check for memoryManagers map,1
+Avoid incrementing 'order' unnecessarily,1
+Refactor duplicate code into methods,1
+Avoid unnecessary checks inside the loop,1
+Use constructor to initialize Apis object,1
+Avoid magic strings,6
+Use Optional's map method to update the existing user,1
+Avoid null checks on appenders in while loop condition,1
+Simplify the if-else structure,1
+Add logging for exceptions,2
+Reduce the depth of if-else statements,1
+Break down complex operations into smaller methods,1
+Refactor configuration retrieval,1
+Remove unnecessary assertions,5
+Replace if else with Optional,1
+Use Java 8 Stream API for Argument Parsing,1
+Avoid copying DoublesSketch object when it's compact,1
+Avoid hardcoding string values,1
+Avoid Deeply Nested Control Flow Statements,2
+Use @Before annotation for setup,1
+Use Java 8 Stream API to process children,1
+Consider using System.arraycopy for moving array elements,1
+Replace duplicate code with helper methods,1
+Replace '== null' check with Objects.requireNonNull,1
+Define magic strings as constants,1
+Check for null or empty string before processing,1
+Use logger instead of printing stack trace directly,1
+Simplify boolean return condition,2
+Replace explicit null and empty check with StringUtils,1
+Reuse HttpSecurity instance,1
+Simplify boolean expressions,2
+Avoid using System.arraycopy,1
+Move properties loading to a separate method,2
+Avoid repeated toUpperCase calls,1
+Null check for 'solution' list,1
+Use constants for repeated literal values,1
+Refactor repeated block of code into a function,1
+Refactor `if` condition to early return style,1
+Use equalsIgnoreCase instead of equals for string comparison,1
+Handle exceptions with specific messages,1
+Avoid printing stack trace directly,1
+Replace manual array iteration with Streams,1
+Use final modifier for local variables and parameters,1
+Use switch statement instead of multiple if-else statements,13
+Refactor Nested Method Calls,1
+Add error handling for UnsupportedCallbackException,1
+Add more meaningful variable names,1
+Avoid Infinite Loops,2
+Replace continue labels,1
+Avoid repeated string replacements,1
+Refactor duplicate code into a separate method,1
+Add null and empty check for 'typeName',1
+Use try-catch blocks to handle exceptions,2
+Use try-with-resource for locking,1
+Use constants for magic values,1
+Avoid hard coding of values,1
+Remove empty catch block,2
+Use assertSame instead of assertEquals,1
+Avoid returning inside a try block,1
+Avoid returning nulls,1
+Use switch-case instead of multiple if-else statements,16
+Avoid Duplicated Code Blocks,1
+Refactor code to use try-with-resources when reading a file,1
+Catch InterruptedException and restore interrupt,1
+Split complex expression into multiple lines,1
+Replace System.out.println() with a Logger,1
+Use Java String format instead of concatenation,1
+Improve code readability by breaking down complex method,1
+Minimize code duplication,1
+Refactor duplicate code into a local function,1
+Refactor redundant 'if' conditions,1
+Use the try-with-resource statement to automatically close resources,1
+Move field accessibility change to initialization,1
+Use Loop to Avoid Repetition,1
+Check for null before calling shutdown on javaScriptExecutor_,1
+Use constants for repeated Strings,1
+Use logging instead of System.out.println,13
+Split the test into multiple tests,1
+Remove unnecessary setSource() calls,1
+Check properties object before using,1
+Break down complex method into smaller, more manageable methods,1
+Simplify if else condition in the last loop,1
+Check for valid index range,1
+Use ternary operator instead of if-else to assign apiVersion,1
+Replace explicit type with <>,3
+Separate recursive call from callback,1
+Remove unused parameter,2
+Refactor to avoid duplicate code,1
+Use isEmpty() to verify if the collection is empty,1
+Remove System.out.println statements,5
+Refactor tag trimming into a separate method,1
+Replace System.out.println() with logging,1
+Use a configuration file for configuration settings,1
+Refactor Optimizer loop to improve readability,1
+Use @Before method to initialize sketch,1
+Avoid declaring multiple variables in one line,1
+Improve error messages,5
+Avoid instantiating objects in loops,1
+Replace System.out with a Logger,1
+Remove unused function call,1
+Refactor nested for loop into a separate method,1
+Replace magic number -1 with a constant,1
+Separate RetryConfig creation,1
+Remove explicit comparison with boolean,2
+Split the method into smaller ones,1
+Handle InterruptedException properly,14
+Use logger instead of printStackTrace,5
+Guard clause for setHandle,1
+Check for null values immediately after loading properties,1
+Handle MalformedURLException,2
+Use StringBuilder's chaining feature,2
+Replace repetitive code with a private method,1
+Handle specific exceptions,13
+Refactoring duplicate code,1
+Avoid using hard-coded array indices,1
+Split method into smaller, more readable methods,1
+Remove code redundancy by creating a method to check and initialize attributes,1
+Avoid repeated addition of appenderName to configuredAppenderList,1
+Improve readability by reducing complexity,2
+Consolidate status checks,1
+Replace repetitive try-catch blocks with a helper method,1
+Reduce code duplication in checking path element type,1
+Use finally to ensure resource cleanup,1
+Use Logger instead of System.out.println for logging,3
+Split method into smaller parts,1
+Adding null check for 'name',1
+Avoid null-check for method getAnnotation,1
+Avoid calling oAuth2UserRequest.getClientRegistration().getRegistrationId() multiple times,2
+Add braces to 'else if' statements,1
+Reduce code complexity by refactoring nested if-else blocks,1
+Use try-catch for handling possible exceptions,1
+Avoid catching and throwing the same exception,3
+Use Optional to simplify logic,1
+Refactor config update into separate method,1
+Refactor exception handling,3
+Add method comments for readability,1
+Remove 'out' labeled break,1
+Reuse Builder variable,1
+Reduce code complexity by creating a helper method,1
+Replace switch statement with a map of strategies,1
+Add null checks for 'current' and 'head' in 'removeOrphans' method,1
+Remove unnecessary final keywords,2
+Avoid repeated map lookup,1
+Use Java 8 streams for processing parameters,1
+Replace RuntimeException with a more specific exception,4
+Use polymorphism instead of instanceof checks,1
+Replace multiple if-else conditions with switch statement,1
+Use Java 8 Stream API to iterate over messages,1
+Null check before accessing methods,1
+Use constant string values for property keys,1
+Replace if-else conditions with assertions,2
+Instantiate RestTemplate as a bean,1
+Don't swallow exceptions,1
+Remove repetitive code by creating a reusable method,1
+Reduce redundancy in code,1
+Reduce the number of continue statements,1
+Replace traditional for loop with foreach loop,1
+Use Java Optional to avoid NullPointerException,2
+Add null check for 'callable',1
+Separate the code into smaller methods,1
+Encapsulate switch cases into individual methods,1
+Use method reference in stream operations,1
+Refactor error handling,3
+Use enhanced switch statement instead of multiple if else conditions,1
+Refactor common ApiResponse objects initialization into helper methods,1
+Use local variable for numberOfElements,1
+Avoid creating new Objects unnecessarily,1
+Replace if-else statement with ternary operator for assigning groupId,1
+Refactor method to handle exceptions more robustly,1
+Use Java Optional to handle potential null values,1
+Reduce code duplication by creating a method for registration and logging,1
+Refactor repetitive SecurityContextUser creation code,1
+Refactor nested control flow,1
+Avoid excessive console output,1
+Use Method Extraction for common code,3
+Use constructor instead of individual setter methods,1
+Avoid using System.nanoTime() directly,1
+Reduce code complexity by breaking up the method,1
+Extracting constants,1
+Replace if-else blocks with polymorphism,1
+Refactor repeated code into separate methods,4
+Refactor large method,6
+Add throws clause to the method signature,1
+Refactor redundant code blocks into a method,1
+Use specific exceptions instead of generic,1
+Refactor nested for loop,1
+Avoid unnecessary calls to System.currentTimeMillis(),1
+Use meaningful test method name,1
+Remove Code Duplication,1
+Add specific exception types,2
+Use explicit type instead of Object,1
+Use final for constant values,1
+Reduce nested conditions and loops,1
+Use Java 8 feature Stream API instead of Iterator,1
+Separate method for level information,1
+Reduce calls to getPage() method,1
+Add null check for 'key' parameter,2
+Combine similar code blocks,1
+Avoid double-checked locking for thread safety,1
+Replace recursion with iteration in the next() method,1
+Use polymorphism for checking instance,1
+Avoid the use of RuntimeException for exception handling,1
+Use var for local variables,2
+Replace if-else statements with switch-case,3
+Remove redundant check and code,1
+Use switch case instead of if else,3
+Use the ternary operator,1
+Eliminate repetition by extracting method,1
+Remove the calculation of runtime,1
+Change method to return Optional<GeoInfo>,1
+Use AssertJ assertThat instead of Junit assertions,1
+Utilize Optional to avoid null check,1
+Refactor multiple if-else to switch-case,1
+Avoid unnecessary else clause,1
+Replace System.err.println with proper logging,1
+Use Java Streams for merging annotations,1
+Break down large method into smaller ones,1
+Use @BeforeEach for setup,2
+Replace type casting with parameterized method,1
+Avoid hardcoding sleep time,1
+Avoid endless loops,1
+Use a logger instead of System.out and System.err,1
+Use Optional for 'filterExpression',1
+Refactoring the code for building paths,1
+Use constants for repeated literals,1
+Use Optional for nullable return type,1
+Avoid creating a new RestTemplate for each request,1
+Replace explicit type with var,1
+Replace String concatenation in StringBuilder with append,1
+Replace repeated code with a method,2
+Add null check for 'wmem',2
+Define constants instead of using magic strings multiple times,1
+Avoid using printStackTrace(),1
+Use Java Optional's ifPresentOrElse,1
+Add null/empty checks for propertyType and value,1
+Avoid repeating code to check if response is OK,1
+Follow Java Naming Conventions,1
+Consolidate null checks,1
+Use try-catch block for exception handling,11
+Create a data structure to store the test cases,1
+Replace magic strings and numbers with constants,1
+Simplify if-else structure,2
+Use try-catch block for IllegalStateException,1
+Split the method into smaller parts,2
+Use a ternary operator for the return statement,1
+Replace multiple if-else blocks with switch-case for better readability,1
+Remove Unnecessary Assertions,2
+Remove redundant method calls for event publishing,1
+Refactor the anonymous classes to named inner classes,1
+Use constants for static parameters,1
+Avoid null check for error.getMessage(),1
+Optimize Object Creation,1
+Remove unnecessary assertNotNull,1
+Use Optional.map() method,1
+Remove unnecessary check for HttpStatus.OK,2
+Change the method name to follow the camel case convention,1
+Use Arrays.fill,1
+Add assertion in exception catch blocks,1
+Replace bitwise OR operator with logical OR in condition checking,1
+Refactor exception message,1
+Use constants for string literals,7
+Avoid repetitive calls to 'getOperationName' method,1
+Use finally block to handle all resource closing,1
+Use the String join method instead of manual concatenation,1
+Use Java Stream API for better readability and efficiency,1
+Refactor the code to remove duplicate code,1
+Use constant for static text,1
+Avoid creating unnecessary objects inside loop,1
+Replace manual array copying with System.arraycopy,2
+Use a constructor to initialize SteamUGCDetails object,2
+Use Stream API for list search,1
+Use multi-catch instead of multiple catch blocks,2
+Use Set for eventsDisplayed,2
+Remove redundancy in Entity binding,1
+Use ternary operator instead of if-else statements,1
+Improper use of properties object,1
+Catch specific exceptions,5
+Use try-catch for each individual operation,1
+Avoid using System.out.println,2
+Add specific exceptions in catch block,1
+Use of Enums in switch-case,1
+Nullability check for logger,1
+Error handling improvement,1
+Use proper exception handling,1
+Encapsulate block of code into a separate method,1
+Simplify conditional branches with optional,1
+Remove redundant null checks,8
+Split the method into smaller methods,11
+Avoid code repetition,3
+Avoid returning in the middle of the method,1
+Reduce code repetition,4
+Remove unnecessary copy of map,1
+Remove unnecessary mark on input stream,1
+Ensure null safety when handling objects,1
+Handle IOException more effectively,1
+Add exception handling for Class.forName,1
+Throw exception instead of returning 0,1
+Avoid raw use of parameterized class,1
+Use Set instead of List for uniqueness checking,1
+Refactor repetitive code into a new method,1
+Avoid duplicate code,10
+Better Variable Naming,1
+Use Optional instead of returning null,5
+Use Java 8 Streams,4
+Use StringUtils.defaultIfEmpty,1
+Avoid resetting session data with the same session,1
+Add null check for `wmem`,1
+Refactor the large if-else block,1
+Add check for negative coupon value,1
+Refactor nested condition checks,1
+Use Enhanced For Loop,4
+Use Set instead of List for uniqueness,2
+Use modern Java features to simplify the code,1
+Use a helper method to avoid code repetition,1
+Use method reference for cleaner code,1
+Improve logging statement,1
+Use string formatting for building the string,1
+Use Optional to prevent NullPointerException,1
+Remove irrelevant subscriptions,1
+Remove redundant initialisation of batchSize,1
+Use private helper methods to reduce code redundancy,1
+Avoid hardcoded strings,1
+Replace conditional checks with a switch case,1
+Move the RestTemplateBuilder outside the function,1
+Replace if-else branches with switch,1
+Avoid null checks on appenders,1
+Combine if-else conditions,1
+Use of Java 8 stream API,1
+Simplify the baseRoute assignment,1
+Use a list instead of an array for storing InputSplits,1
+Use lambda function for checking event existence,1
+Handling InterruptedException properly,1
+Avoid multiple calls to getAnnotation for the same annotation,1
+Don't suppress exceptions,1
+Avoid redundant byte creation,1
+Use specific exceptions,6
+Replace String concatenation with StringBuilder,1
+Use Assert instead of throwing RuntimeException,1
+Encapsulate setting properties of Apis into a separate method,1
+Avoid Explicit Type Casting,1
+Refactor the method into smaller methods,3
+Replace assertTrue with more specific assertions,1
+Refactor baseRoute construction,1
+Set Access Control Headers,1
+Avoid using continue with a label,1
+Reduce usage of redundant variables,1
+Array Size,1
+Wrap IOException in UncheckedIOException,1
+Remove nested try-catch blocks,1
+Remove redundant else statements,1
+Refrain from returning null,1
+Use Java Stream API in the Mono.zip function,1
+Use Optional for possible null values,1
+Assert specific exception messages,1
+Use Optional to handle missing properties,1
+Refactor condition check for empty actionMap,1
+Use .orElseThrow() for Optional,1
+Check for valid array index,1
+Separate concerns in different methods,1
+Check HTTP status directly using ResponseEntity.ok(),1
+Use Java 8 Streams API for iterating over keys,1
+Use try-catch block for parsing,1
+Simplify boolean return in attribute function,1
+Break down createOperations method into smaller methods,1
+Refactor conditional statements,1
+Use Java Optionals to handle potential null values,1
+Reduce the number of calls to getPage(),1
+Use foreach instead of for loop,1
+Refactor condition for subSession attributes,1
+Add missing import statements,1
+Use Constants for repeated string values,1
+Avoid creating unnecessary ApiReqParam objects,1
+Use try-finally to ensure proper resource cleanup,1
+Separate logic for big and little endian into different methods,1
+Use a finally block to ensure 'Thread.yield()' is always called,1
+Rearrange the if-else condition for checking userOptional.isPresent(),1
+Add null check for 'constraints',2
+Refactor if-else conditions to switch statement,1
+Avoid using hard-coded strings,2
+Use a for loop instead of a while loop,2
+Reduce redundancy in binding entities,1
+Avoid throwing raw Exceptions,1
+Use AssertJ for more fluent assertions,1
+Use of switch instead of multiple if-else statements,1
+Use @Before annotation to initialize common objects for tests,1
+Removing unnecessary else statement,2
+Use a loop to reduce code redundancy,1
+Use assertJ fluent assertions,1
+Replace null return with Optional,1
+Avoid using '== true' and '== false' in conditions,1
+Remove redundancy,1
+Remove unnecessary initialization of 'encodings' variable,1
+Prevent ArrayIndexOutOfBoundsException,1
+Simplify the method by breaking down into smaller methods,1
+Replace if statements with a switch statement,1
+Refactor redundant code,2
+Refactor redundant code into separate methods,1
+Use Java 8 Stream API for collection filtering,1
+Avoid Repeated String Concatenation,1
+Refactor to remove duplicate code,1
+Add NullPointerException check,1
+Replace if conditions with a switch statement,1
+Use Java Stream API for merging annotations,2
+Reduce complexity by extracting code into separate methods,1
+Avoid repeated string concatenation using '+' operator in loops.,1
+Make use of Optional,1
+Use try with resources for exception handling,1
+Use StringJoiner instead of StringBuilder,1
+Use Optional to avoid NullPointerException,10
+Use a constants class for magic numbers,1
+Refactoring RestTemplate as a bean,1
+Define constant for common strings,1
+Refactor repeated code into methods,2
+Use switch case instead of multiple if / else if statements,1
+Use try with resources,2
+Use Dependency Injection for Properties,1
+Close resources in a finally block,1
+Simplify condition checks for 'conf',1
+Refactor repetitive code into method,1
+Simplify conditional statements,1
+Encapsulate repeated code into methods,1
+Remove unnecessary intermediate collection,1
+Avoid unnecessary iteration and closure of Appender,1
+Improve logging messages,1
+Use enhanced switch statement,1
+Add method documentation,19
+Avoid catching general Exception,2
+Define constants for literal values,1
+Streamline code by avoiding multiple calls to method 'enableDynamicModelConfigAPI',1
+Avoid code redundancy by creating a helper method,1
+Use String.format or StringBuilder format,1
+Replace null-checking with Optional,1
+Refactor repetitive test code into helper method,1
+Remove redundant casting,1
+Check for null FilterExpression in the calling method,1
+Use try-catch to handle exceptions,1
+Remove unnecessary variable declaration,2
+Use assertThrows instead of try-catch,4
+Use Arrays.asList() for repetitive tests,1
+Reduce the scope of the variable 'combBufSize',1
+Replace System.out.println() with proper logging,1
+Split method into smaller ones,2
+Remove unnecessary checks for null,1
+Remove redundant variable initializations,1
+Use parametrized unit tests,1
+Use specific exception instead of general Exception,1
+Add error handling for getForEntity,1
+Use Java streams instead of traditional for-each loop,1
+Use Java 8 Stream API for list processing,2
+Use try-catch blocks for error handling,1
+Simplify frequent dictionary binding,1
+Improve the flow of the method by removing unnecessary else statements,1
+Reduce duplication by extracting repeated code to a method,1
+Avoid unnecessary object creation,5
+Use of Logger,1
+Use Java Streams to filter elements,1
+Use Optional for nullable return value,1
+Add null check,2
+Avoid unnecessary loop,1
+Remove redundant status check,3
+Remove unused variables,7
+Using try-with-resources for JobClient,1
+Use constants instead of repeating strings,1
+Use logger for error message,1
+Remove redundant null-check,2
+Reduce redundant calls to getPage() method,1
+Use Optional for handling null returns,1
+Use specific exceptions instead of generic Exception,1
+Avoid using absolute file paths,1
+Use braces for all if statements,1
+Avoid Synchronization on Non-Final Field,1
+Use early return to reduce nesting,4
+Replace for loop with IntStream.range,1
+Remove magic numbers,10
+Use constants for HTTP headers,1
+Split long throw statement into multiple lines,1
+Use @Rule ExpectedException instead of try-catch,1
+Replace magic number with a named constant,1
+Remove unnecessary exception handling,1
+Replace RuntimeException with more specific exception,1
+Use dedicated logging framework instead of System.out,1
+Simplify boolean condition,1
+Use private constants for string literals,1
+Improve parameter validation,1
+Avoid unnecessary calls to getResult(),1
+Replace the for loop with Arrays.fill,1
+Refactor magic number in the code,1
+Eliminate double-checked locking,1
+Prefer early return instead of wrapping the whole code inside if-else statements,1
+Use switch statement instead of multiple if else,2
+Handle possible null return of getApplet() method,1
+Use constants for repeated string literals,13
+Avoid catching and swallowing exceptions,1
+Avoid null assignment inside the loop,1
+Eliminate redundant null check,1
+Eliminate unnecessary else clause,1
+Use JUnit's assertThrows instead of try-catch for testing exceptions,1
+Improve exception handling in next() method,1
+Refactor large try-catch block,1
+Add null check for input parameter,1
+Improve null check in hasNext() method,1
+Add exception details in the RuntimeException,1
+Use finally block,1
+Avoid null check and isEmpty() for error.getAttributes(),1
+Reduce complexity,1
+Enhance readability by removing unnecessary code,1
+Replace the string concatenation with String.format(),1
+Use polymorphism instead of instanceof and typecasting,1
+Move property loading to a separate method,1
+Use Arrays.fill to fill the rest of the array with zeroes,1
+Add null checks for session and payload,1
+Use switch case instead of multiple if-else statements,3
+Replace the for loop for finding low and high values with a separate method,1
+Use regex for type extraction,1
+Consider using a constant for bucket URL,1
+Replace string concatenation with String.format,2
+Replace System.out.println with appropriate logging,1
+Use method reference in stream forEach,1
+Refactoring repeated code blocks,1
+Use trim() method,1
+Use try-catch block for casting,1
+Remove unnecessary toLowerCase() method,1
+Separate test cases,3
+Handle the exception or declare it to be thrown,1
+Avoid null check after potential dereference,2
+Exception handling and error messages,1
+Use of 'Optional' for null checks,1
+Use String.join for constructing string,1
+Use AssertThrows Instead of Try-Catch,1
+Reduce repetition in error handling,1
+Remove Inline Comments,1
+Reducing code duplication,1
+Simplify the function used with Mono.zip,1
+Use Java 8 streams for nested loops,1
+Introducing constants,1
+Use Optional to handle potential null,2
+Avoid using assert statement,1
+Avoid unnecessary counter,1
+Split long method,1
+Use try with resources to ensure proper resource management,2
+Replace the complex if-else structure with a switch,1
+Refactor out `method.invoke(applet,realArgs)` call into a separate method,1
+Avoid creating new ArrayList unnecessarily,1
+Refactor row addition to a separate method,1
+Refactor method to smaller methods,2
+Use '===' and '!==' for comparison,1
+Use JSONObject's getEnum() method,1
+Use loop instead of repetitive code,1
+Use Java Streams API instead of explicit loop,1
+Check if objects are null before accessing methods,1
+Handle ClassNotFoundException,1
+Remove unnecessary validation of parameters size,1
+Avoid calling method multiple times,1
+Use switch case instead of multiple if blocks,1
+Use Switch-Case Instead of If-Else,2
+Move magic numbers to constants,3
+Split method into several smaller methods,2
+Use String.format for cleaner code,1
+Use Constants for String Literals,1
+Add null check for `event` argument,1
+Avoid using magic numbers,38
+Use try-With-Resources to automatically close resources,1
+Avoid hardcoding numbers,2
+Reduce method complexity by splitting into smaller methods,2
+Improve clarity of visibility check,1
+Refactor code to reduce length and complexity,1
+Replace multiple OR conditions with an array and contains check,1
+Handle null cases at the beginning of the method,1
+Replace Throwable with specific exception,1
+Avoid creating a copy of the map,1
+Handle potential NullPointerException,3
+Remove redundant conditional checks,1
+Use @Test(expected = Exception.class) for exception testing,1
+Avoid hardcoding file paths,1
+Use logger instead of System.out.println and System.err.println,2
+Add null check for parameters,3
+Refactor null check,3
+Avoid infinite loop with no exit condition,1
+Use Constants for Error Messages,1
+Add spaces for better readability,1
+Avoid using JSObject and applet(),1
+Move RestTemplate instantiation outside the method,1
+Define URL as a constant,1
+Remove unnecessary else block,3
+Add method parameters instead of directly accessing instance variables,1
+Use constants for repeating values,1
+Replace null return with an empty list,1
+Use a switch-case instead of multiple if-else statements,1
+Use Java Optional for null checks,2
+Replace variable 'e' with 'exception',1
+Use @Test(expected) for exception testing,1
+Eliminate redundant deprecation check,1
+Replace for loop with Streams API,1
+Use of Java Logging instead of System.out.println and System.err.println,1
+Avoid unnecessary iteration,1
+Use try-finally for resource clean-up,1
+Catch specific exception,1
+Use switch-case statement instead of multiple if-else,1
+Add error handling for invalid input,2
+Declare variables as close as possible to their usage,1
+Add null check for objectListing,1
+Refactor repetitive code into separate methods,2
+Use Java 8 Streams for processing faults,1
+Use Java 8 Optional to handle potential null values,1
+Factor out common logic into helper methods,1
+Remove unnecessary check for appender presence,1
+Reduce repetitive code,1
+Avoid subscribing objects that are not listeners,1
+Modularize the code,1
+Split testEntityFilterCrud into several smaller tests,1
+Move magic strings to constants,1
+Use Java's Optional class to avoid NullPointerException,1
+Avoid using raw type in casting,1
+Use HashSet instead of ArrayList for sessionTypes and sessionNames,2
+Avoid Empty Catch Block,1
+Introduce a dedicated logger instead of System.out.println,1
+Eliminate redundant HashMap,1
+Use String.format for logging,1
+Check for null before calling methods,1
+Use String.format instead of StringBuilder,1
+Use final for constant variables,1
+Refactor nested try-finally blocks,1
+Avoid repetitive call to `System.nanoTime()`,1
+Use try-catch block around potential exceptions,1
+Reduce Nesting,2
+Use try-catch block for handling exceptions,2
+Check for null before operation,1
+Eliminate redundant code,2
+Avoid SuppressWarnings,2
+Avoid type casting multiple times,2
+Return an empty list instead of null,4
+Use isEmpty() for checking string emptiness,1
+Use try-finally to ensure 'counterMap' is cleared,1
+Add null checks for fields before setting them to null,1
+Improve code readability,3
+Refactor Node creation into a separate method,1
+Avoid using labels like 'out',1
+Remove Unnecessary Boxing and Unboxing,1
+Use finally block to ensure batch is always cleared,1
+Encapsulate exception handling in a separate method,1
+Use Java 8 String.join for list concatenation,1
+Use try-finally for cleanup,1
+Avoid catch and ignore,1
+Refactor repeated code into helper method,1
+Avoid creating new objects inside loop,1
+Split testInvokeMimeMarshaller method into smaller unit tests,1
+Use logging instead of System.out.println for debugging,1
+Remove redundant HTTP status check,1
+Use English for println statement,2
+Replace '|' with '||' in condition checks,1
+Refactor repeated code to separate method,1
+Avoid Redundant Variable Assignment,1
+Replace System.out.println() with a logger,2
+Separate declaration and assignment,1
+Remove redundant checks,2
+Use modern Java features,1
+Remove unnecessary local variable,1
+Use early returns to reduce nesting,1
+Use proper naming for count variable,1
+Use final for constants,7
+Refactor code to separate responsibilities,1
+Add null check for memoryManagers,3
+Add null check to the input parameters,1
+Avoid redundant else clauses,1
+Use more descriptive logging,1
+Check before adding to list,1
+Move 'headerAnnotation' initialization to the start of the method,1
+Replace wildcard (*) in Access-Control-Allow-Methods with specific methods,1
+Use a do-while loop instead of a while-true loop,1
+Replace the usage of String#toUpperCase(Locale.ENGLISH) with String#equalsIgnoreCase(String),1
+Use 'try-catch' block around 'putIfAbsent',1
+Reduce code repetition by using a loop,1
+Use the Optional class for handling null values,1
+Use specific exception,1
+Use try-catch block to handle NullPointerException,1
+Replace System.arraycopy with Arrays.copyOfRange,6
+Refactoring repetitive try-catch blocks,1
+Replace multiple map containsKey and get operations with single get operation,1
+Refactor to avoid code redundancy,1
+Replace e with exception,2
+Handle potential IndexOutOfBoundsException for otherArgs.get(0),1
+Use try with resources to handle exceptions in file handling,1
+Handle exceptions at a higher level,1
+Add null check for `sessionizer` parameter,1
+Use a variable for repeated byte initializations,1
+Move the creation of SessionizerConfigValidator to the beginning of the method,1
+Encapsulate ApiConfig instantiation into a separate method,1
+Reduce Nested Blocks,1
+Use constants,2
+Refactor conditional statement for better readability,1
+Check for null body in response,1
+Abstract repeated try-catch blocks into a separate method,1
+Use method for repeated code,1
+Reduce nested conditions,3
+Null Check,1
+Replace printStackTrace with logging or rethrowing,1
+Move the Access-Control-Allow headers to the beginning of the method,1
+Replace StringBuilder initial append with String.join,1
+Refactor complex conditions,1
+Add null check for 'paramAnns',1
+Reduce duplication with a method extraction,1
+Use a standard logging framework instead of custom logging,1
+Use Optional to deal with null values,1
+Replace hard-coded values with constants,1
+Avoid using continue statement,1
+Use for loop to reduce code repetition,1
+Move string concatenation to String.format,1
+Make use of Java's try-with-resources,1
+Use ExecutorService for managing threads,1
+Use of Generics,1
+Refactor conditional statements into separate methods,1
+Replace if-else checks with switch-case,1
+Refactor if-else structure to reduce complexity,1
+Add meaningful logs in catch blocks,1
+Avoid marking the ServletInputStream,2
+Simplify ternary operation,1
+Remove unnecessary System.currentTimeMillis() call,1
+Avoid null check,1
+Use of Optional<T> for next() method instead of returning null,1
+Avoid null assignments,1
+Consolidate Try Blocks,1
+Replace null with Optional,1
+Replace for loop with Stream API,2
+Use correct exception variable,2
+Use try-catch for casting,1
+Replace println with a proper logging statement,1
+Remove unnecessary else statement in next(),1
+Replace multiple calls to event.get() with a single call,1
+Remove redundancy in setting myNewNumLevels,1
+Avoid deeply nested control flow,1
+Reduce nesting for readability,1
+Use Java Optional instead of null checks,1
+Refactor method to multiple smaller methods,1
+Replace the nested loop with the 'contains' method,1
+Use meaningful names for variables and mocks,1
+Use 'isEmpty' method to check for an empty collection,1
+Separate setup and action parts of the test,1
+Use of local variable for random number,1
+Use a helper function to eliminate repetitive code,1
+Reduce method length,5
+Move the 'SourceMethodArgumentResolver' check to a separate method,1
+Use Java Stream API for improved readability,1
+Use 'Optional' instead of null checks,1
+Reuse RestTemplate instance,2
+Reduce nested conditionals,2
+Exception handling when no next element,1
+Use Set instead of List to avoid duplicates,2
+Handling exceptions and errors effectively,1
+Add null check for 'str' parameter,2
+Remove redundant type casting,1
+Remove code duplicates,1
+Use forEach instead of another for loop,1
+Remove redundant variable assignment,1
+Remove unnecessary 'final' keyword,1
+Avoid multiple calls to `getAllAppenders()`,1
+Handle NullPointerException,2
+Eliminate unnecessary space and newline character,1
+Use PreparedStatement get methods according to field type,1
+Remove direct system output,1
+Improve Exception handling,1
+Reduce code complexity,1
+Break down method into smaller methods,1
+Replace infinite loop with a finite loop,1
+Improve error message consistency,1
+Reduce nesting by inverting if conditions,1
+Use constructor instead of individual assignments,1
+Simplify boolean return conditions,1
+Improve Exception Handling,4
+Combine catch blocks with the same error processing,1
+Use switch statement instead of multiple if else if statements,1
+Use 'equals' method instead of '==' for string comparison,1
+Reduce Replication of Null Check and HashMap creation,1
+Remove unnecessary use of 'Deprecated' annotation,1
+Use else if instead of multiple if conditions,1
+Refactor the repeated code to a new method,1
+Add nullability annotations,1
+Remove redundant else if checks,1
+Use parameterized error messages,1
+Replace multiple if statements with a single one using logical OR,1
+Move reusable code to setup method,1
+Use Java 8's Optional to handle nullable values,1
+Use String constants for repeatedly used strings,1
+Avoid Negations in Conditionals,1
+Use try-catch block to handle ClassCastException,2
+Refactor condition checking block,1
+Simplify repeated operations by creating a method,1
+Refactor to single catch block,1
+Add Constants for Configuration Key Strings,1
+Check for null in next() method,1
+Replace loop with System.arraycopy,1
+Refactoring the method into smaller helper methods,1
+Reduce Variable Declarations,1
+Use Java 8 predicates for collection filtering,1
+Use Java 8 functional programming,1
+Use else if instead of else,1
+Avoid returning values in try block,1
+Combine catch clauses for exceptions,1
+Early exit when bodyParams is null,1
+Avoid code duplication in appending to StringBuilder,1
+Refactor try-catch-finally block to try-with-resources,1
+Separate validation into its own method,1
+Early exit,1
+Use try-catch block for entire method,1
+Use StringUtils.isEmpty() to check for empty string,1
+Move Configuration initialization to constructor or use Singleton Pattern,1
+Add null checks for mandatory properties,1
+Refactor error handling with exceptions,1
+Use JUnit assertions instead of custom logic,1
+Avoid unnecessary null checks,4
+Avoid declaring variables in the middle of the method,1
+Split into multiple methods,1
+Remove unnecessary else statements,2
+Use of logging instead of stack trace,1
+Use logging instead of System.out.println and System.err.println,1
+Use equalsIgnoreCase instead of equals,10
+Replace multiple else if condition with switch case for readability,1
+Improve readability,1
+Avoiding direct manipulation of `head` within `removeOrphans()`,1
+Remove unnecessary parentheses,2
+Remove unnecessary continue statement,1
+Include variable description comments,1
+Refactor error handling into a separate method,1
+Move the removeOrphans method out of the iterator,1
+Log exception with a message,1
+Remove redundant 'else' after 'continue',1
+Remove redundant assertNotNull,1
+Refactor the method to reduce its complexity,4
+Use String.format for error output,1
+Avoid unnecessary re-assignment of 'tag' variable,1
+Refactor code to reduce nested if statements,1
+Consolidate return statements,1
+Use meaningful and clear exception messages,1
+Use Else If for Multiple Conditions,1
+Avoid null check on every method invocation,1
+Use try-finally for clean-up code,1
+Use constant for repeated string literals,1
+Refactor if-else chain into a switch statement,1
+Remove double-checked locking,1
+Replace the switch statement with a map of lambdas,1
+Avoid Null Pointer Exception in `value` method,1
+Separate checking conditions into different methods,1
+Replace runtime exception with specific exception,1
+Thread Interruption,1
+Use a ternary operator for boolean string representation,1
+Remove unnecessary type checking and casting,1
+Avoid return in lambda expression,1
+Change catch block to catch specific exceptions,1
+Add error message to Exception,1
+Simplify code with ternary operator,2
+Refactor repetitive try-catch blocks,4
+Avoid code duplication by extracting common assertions into a helper method,1
+Use method chaining for StringBuilder,1
+Avoid unnecessary cast to String and trim operation,1
+Remove redundant return statements,1
+Change to use optional to avoid null checks,1
+Add null check for sql and params,1
+Use a method to initialize SocketOptions,1
+Use ternary operator,6
+Use assertThatThrownBy from AssertJ instead of try-catch,1
+Avoid creating new RestTemplate for each request,1
+Replace RuntimeException with specific exceptions,1
+Use Optional.orElseThrow instead of if condition,1
+Remove redundant session in resetSessionData,1
+Use of try-catch-finally statement,1
+Add null check for 'queriedTable',4
+Reduce casting by introducing variables for the Node types,1
+Ensure thread safety when setting variables to null,1
+Avoid Hardcoding Values,1
+Replace 'continue out' with a method return,1
+Use of Set instead of List for duplicate checks,1
+Avoid deep nesting by using continue statement,3
+Remove duplicate session data reset,1
+Early return to reduce nesting,1
+Use constants instead of repeating the same string,1
+Refactor to use a single return statement,1
+Avoid redundant casting and trim operation,1
+Change variable naming convention,1
+Use a more specific exception,1
+Use HashSet instead of ArrayList for subProfilerIds,1
+Avoid hard coding,1
+Use Try-With-Resources for AutoClosable Objects,1
+Move RestTemplateBuilder to Class level,1
+Add a catch block for exceptions,1
+Remove unnecessary 'else' keyword,1
+Replace Anonymous Classes with Lambda,1
+Consistent method usage,1
+Refactor duplicated code,1
+Refactor to switch case,1
+Improve null check,3
+Replace continue with specific if-else condition,1
+Use Stream forEach instead of for loop,1
+Use Objects.requireNonNullElse function,1
+Use ArrayList instead of ManagedList,1
+Replace multiple null checks with Optional class,1
+Avoid duplicating code,3
+Move Variable Closer to Usage,1
+Remove redundancy in checking table hints,1
+Set holdPostponedActions_ to false at the beginning of method,1
+Reduce instanceOf checks,1
+Use Java 8 Stream API for initial loop,1
+Use Optional's orElseThrow instead of isPresent and get,1
+Refactor the method into smaller, more readable methods,1
+Use ternary operator for short if-else statements,1
+Reduce cyclomatic complexity,3
+Refactor validation checks into separate methods,1
+Add a throws clause for SQLException,1
+Throw RuntimeException in catch block,1
+Use Java logging instead of System.out.println,3
+Add null checks for method parameters,1
+Use Optional to handle null values,18
+Use the enhanced-for loop,1
+Refactor the method into smaller, more manageable methods,1
+Extracting repeated method calls to variables,1
+Leverage Java 8 Streams,1
+Class Casting,1
+Breaking down the test method,1
+Combine exception catches,1
+Avoid creating new ArrayList with size 0,1
+Replace assert with exceptions,1
+Refactor method into smaller methods,1
+Use 'try-with-resources' for transaction management,1
+Replace stream().forEach() with forEach() method,1
+Avoid printing unnecessary info,1
+Use a constant for repeated string,1
+Add method parameter instead of accessing instance variable,1
+Use try-catch for parsing string to long,1
+Use Java Optional for handling null values,1
+Use a constructor to initialize all fields,1
+Eliminating redundant initializations,1
+Replace printStackTrace with a logger,2
+Use a more descriptive name for the Collection,1
+Reduce repetition by creating a helper function,1
+Avoid hardcoding string,1
+Use method reference instead of lambda in stream forEach,1
+Avoid multiple replaceAll calls,1
+Remove unnecessary toString() calls,1
+Use switch expression,1
+Add null check for method parameter,1
+Move the BinaryToTextEncoding.EncoderDecoder instance creation out of the loop,1
+Redundant Code,1
+Replace redundant if-else,1
+Handle exceptions in a more granular way,1
+Use lambda instead of anonymous class,1
+Include null checks before setting to null,1
+Simplify control flow,1
+Remove deprecated annotations,1
+Input validation for indices,1
+Add exception handling,6
+Use Java 8 streams API for list filtering,1
+Remove Duplicated Code,1
+Refactor `hasNext` method to improve readability,1
+Use try-catch block for error handling,4
+Use Java 8 Stream API to process executors and reactiveExecutors,1
+Remove redundant null-check for 'tags',1
+Avoid null checks before instanceof,1
+Use Optional to handle null checks,3
+Use constant for repeated values,3
+Use constants for redundant values,1
+Code readability,3
+Exception Specificity,1
+Refactor to smaller methods,12
+Handle exception in a better way,1
+Adding null checks for config and oldConfig,1
+Use Set instead of List for subProfilerIds,1
+Use @After for cleaning up,1
+Specific Exception Handling,2
+Replace System.err.println() with a logger,1
+Replace RuntimeException with its specific exceptions,1
+Avoid using System.out.println in production code,2
+Handle null or empty cookie name,1
+Use parameterized types,1
+Add null check for FilterConstraints,1
+Add null check for typeName,1
+Reduce the level of nesting,1
+Use Stream API to handle value replacements,1
+Add a new method to perform set operations,1
+Use switch-case instead of multiple if statements,1
+Simplify null check for 'count',1
+Replace LinkedList with ArrayList,1
+Simplify file path creation,1
+Avoid swallowing the original exception,1
+Improve condition check,1
+Avoid unnecessary object creation in loop,1
+Create separate methods for different childElement localName cases,1
+Avoid redundancy in comparison,2
+Use @Autowired for dependency injection,1
+Make anonymous class a separate class,1
+Use a try-catch block to handle potential exceptions,1
+Add exception handling to catch specific exceptions,1
+Avoid modifying a list while iterating over it,1
+Avoid unnecessary condition check for CONFIGURATION.shouldSummarizeOverflow(this.originalAppenderName),1
+Replace traditional for-each loop with lambda expression,1
+Avoid using instanceof operator,1
+Reduce type checking,1
+Refactor repetitive code into a function,2
+Use Objects.isNull() method,1
+Use Specific Exceptions,1
+Add more meaningful error message,1
+Create a utility method for setting the factory attribute,1
+Avoid excessive use of if-else statements,1
+Reduce nested try-catch blocks,1
+Use @Test(expected = Exception.class) to simplify exception testing,1
+Avoid unnecessary else branch,1
+Use better naming for ResponseEntity,1
+Replace multiple if-else statements with a switch-case block,1
+Avoid empty catch block,8
+Use try-catch block for parsing Long,1
+Remove unnecessary empty catch blocks,1
+Use ternary operator to simplify if-else statements,1
+Reduce Nested If-Else conditions,1
+Add a null check before fetching bean definition,1
+Usage of ternary operator,1
+Avoid redundant status code check,1
+Use switch instead of multiple if-else statements,2
+Replace System.err.println with a logger,2
+Avoid creating unnecessary ArrayList,1
+Avoid creating new map 'allMap',1
+Use Optional class for null safety,1
+Check for null in the beginning,1
+Refactor repeated 'if' conditions to separate method,1
+Improve readability with early return,1
+Remove assert statements from production code,1
+Reduce scope of variables,1
+Add error logging for all exceptions,1
+Eliminate unnecessary check for Validated annotation,1
+Reduce redundancy in switch-case,1
+Combine condition check in hasNext() method,1
+Use 'foreach' loop,1
+Reduce nested if-else conditions,2
+Use List.contains() method,1
+Replace System.out.println with proper logging,2
+Avoid multiple calls to getAnnotation,2
+Add null check for 'current' in 'next' method,1
+Specific exception catching,1
+Refactor repetitive code to a separate method,1
+Remove unnecessary casting,8
+Avoid unnecessary checks,1
+Replace repeated 'if' statements with 'switch' statement,1
+Replace Magic String,1
+Use Java logging instead of System.err.println,1
+Use Java Stream API for filtering and transforming data,1
+Add method visibility and return type,1
+Use Atomic Integer instead of int,1
+Remove unused code,2
+Use Java 8 Stream API for checking if event is already displayed,1
+Use finally block for clean up,1
+Remove Duplicate Code,3
+Use try-catch for RestTemplate operations,1
+Use of Java 8 String.join method instead of manual concatenation,1
+Add method comments,9
+Refactor code to remove repetitive code,1
+Use final keyword for parameters,1
+Avoid re-throwing exception,1
+Add try-with-resources for automatic resource management,1
+Use final keyword for local variables,1
+Reduce redundancy with a helper function,1
+Replace '|' operator with '||' operator,1
+Use @BeforeEach for initialization,1
+Add log warning for UnsupportedCallbackException,1
+Use finally block for resource leak,1
+Refactor repetitive print statements,1
+Avoid empty catch blocks,24
+Split long method into multiple smaller methods,1
+Refactor test to multiple smaller tests,1
+Use modern Java logging instead of System.out.println,1
+Use Java 8's String.join() method,1
+Separate tests into individual methods,1
+Replace magic values with constants,1
+Eliminate unnecessary null-check,1
+Check for appender presence first,1
+Avoid creating new RestTemplate each time,1
+Remove redundant string trim,1
+Use Java 8 Stream API for improved readability and performance,1
+Use builder pattern effectively,1
+Refactor the Runnable into a separate method,1
+Use JUnit Assert instead of plain assert,1
+Use Java Stream API,2
+Avoid returning null for collections,3
+Use final for loop variables,1
+Reduce the method complexity and improve readability,1
+Use expected exception in JUnit test instead of try-catch,1
+Duplicate code in for-loops,1
+Improve method parameter validation,1
+Use early return for upper left category,1
+Remove manual closing of resources,2
+Use constants for string values,1
+Use constant for repeated string,5
+Use switch-case instead of multiple if-else,19
+Use switch case instead of multiple if else,3
+Improve assertion message,1
+Encapsulate repetitive code in helper methods,1
+Add method parameters instead of using instance variables,1
+Improve method readability,1
+Reduce repetitive calls to getPage(),1
+Avoid hardcoding URL,1
+Create a separate method for printing debug info,1
+Replace multiple instanceof checks with a method,1
+Use a time measurement method that provides better readability,1
+Refactor code to remove unnecessary else clause,1
+Use Streams API for List filtering and transformations,1
+Add specific error message for each exception,1
+Use method reference in forEach,1
+Avoid reassigning variables unnecessarily,1
+Replace null checks with Objects.requireNonNull(),1
+Use switch-case structure instead of multiple if-else statements,1
+Use Java 8 Streams API for Properties Enumeration,1
+Replace Anonymous Inner Class with Lambda Expression,1
+Use Optional instead of checking for null,5
+Check for invalid input,1
+Use early return,3
+Use Java Optional to handle potential null value,1
+Method too long and complex,1
+Store `webClient` in a variable to avoid multiple calls,1
+Use Java Optional to avoid null check,1
+Improve SocketOptions creation by using a separate method,1
+Avoid infinite while loop,1
+Use optional to handle potential null values,1
+Use parameterized test,1
+Use a constructor to initialize Apis object,1
+Add error handling for listing objects,1
+Handle null properties,1
+Avoid Null Checks,1
+Avoid using hardcoded strings,1
+Use a separate method for the Runnable implementation,1
+Move setContentType before getting OutputStream,1
+Reduce use of String concatenation,1
+Encapsulate code within try-catch block,1
+Avoid unnecessary conditional checks,2
+Avoid unnecessary nullity check,1
+Avoid using System.setSecurityManager,1
+Refactor to a more specific exception,1
+Avoid nested if-else statements,1
+Use Optional to handle potential null values,7
+Use trim() to remove leading and trailing white-spaces,1
+Remove explicit type argument,2
+Use Optional API,1
+Use final keyword where possible,1
+Use try-catch-resources to automatically close resources,1
+Use 'final' keyword for constants,1
+Refactor repetitive cookie operations into a separate method,1
+Use try-with-resource,2
+Use of constants instead of hardcoded values,1
+Refactor the code to reduce complexity,1
+Use of constant for repeated string,1
+Add throws declaration for method,1
+Add exception handling description,2
+Avoid null check for getThreadSize(),1
+Refactor duplicate code into separate function,1
+Add null check for method object,1
+Minimize the scope of variables,2
+Handle MalformedURLException properly,1
+Use meaningful exception messages,6
+Avoid repeated calls to method getAnnotation,1
+Use final keyword for constants,3
+Use EnumMap for switch case,1
+Use map function of Optional,1
+Use of try-with-resources,1
+Error Handling for Number Parsing,1
+Reduction of nested if-else blocks,1
+Split complex logic into smaller methods,1
+Use instanceof pattern matching introduced in Java 14,1
+Remove redundancy in class instantiation,1
+Reduce code redundancy,16
+Refactor repetitive method calls,4
+Remove unnecessary Thread.yield(),1
+Externalize hardcoded configuration values,1
+Use ternary operator for `promote`,1
+Use a static initializer to load properties,1
+Combine the two try-catch blocks at the end into one,1
+Use ternary operator for concise code,1
+Simplify null checks,1
+Use continue statement,1
+Use a separate output byte array,1
+Avoid hard coding values,1
+Check for null value early,1
+Eliminate duplicate code,3
+Use try-finally for resource cleanup,4
+Consolidate duplicate code blocks,1
+Use of English for Exception messages,1
+Use Apache Commons StringUtils for String manipulations,1
+Improve readability by extracting the namespace URI as a variable,1
+Use Java Stream API to simplify merging annotations,1
+Use try-catch for Integer.parseInt,1
+Removing Duplicated Code,1
+Use method reference instead of lambda,3
+Avoid unnecessary boxing of primitive types,2
+Use assertNotEquals instead of assertFalse and assertTrue,1
+Improve method readability and maintainability,1
+Check for NULL,1
+Check for null or empty String earlier,1
+Use @InjectMocks annotation to inject mock objects,1
+Remove unnecessary final keyword,4
+Use Java 8 Stream instead of Observable,1
+Refactor multiple try-catch blocks,1
+Remove unnecessary call to Thread.yield(),1
+Protect method from null input,1
+Use Java 8 Streams for checking if an event is displayed,1
+Refactor 'typeName' resolution into a method,1
+Use braces in all if statements,1
+Use early return instead of multiple if-else,1
+Replace 'return' statements with 'else' clause,1
+Replace System.nanoTime() with TimeSource,1
+Use final keyword for variables,1
+Avoid modifying method parameters,1
+Refactor repetitive calls to buildResponse,1
+Add Null check for `query` parameter,1
+Combine catch clauses for exceptions that are handled in the same way,1
+Use java.util.Optional to avoid null checks,1
+Use try-catch-resource for handling exceptions,1
+Remove unnecessary toString() call,5
+Avoid null checks,7
+Use braces in all if statements.,1
+Combine conditional checks,1
+Use Objects.nonNull instead of null check,1
+Make use of fail-fast behavior of iterators,1
+Use logging instead of printStackTrace,1
+Avoid modifying input arguments,1
+Replace `== true` and `== false` comparisons,1
+Avoid code duplication with the use of Generics,1
+Remove unnecessary use of 'final' keyword,1
+Add null check for 'name' parameter,3
+Remove the repetition of code in the if-else conditions,1
+Avoid raw usage of Entry,1
+Replace the for-each loop with Stream API,1
+Replace the if-else block with a switch statement,1
+Use a helper function for repetitive code,1
+Refactor repetitive assertEquals and assertNull calls into a method,1
+Add a meaningful message or action in the catch block of UnsupportedCallbackException,1
+Refactor duplicate code for creating 'builder',1
+Remove unnecessary else,4
+Remove redundant variable `sql`,1
+Use Logger instead of printStackTrace(),1
+Use String.join() instead of manually appending with StringBuilder,1
+Handle specific exceptions separately,1
+Null safety in JSONObject creation,1
+Use System.nanoTime() for all time measurements,1
+Refactor repeated use of Config.get(),1
+Combine repeated code into a helper method,1
+Separate method invocation into a separate method,1
+Use StringBuilder's chaining instead of multiple append calls,1
+Refactor magic strings,1
+Use String.format() for string concatenation,2
+Add null check for 'jsonKeyValuePairs',1
+Refactor duplicate checks into a separate method,1
+Simplify nested conditionals,1
+Use ThreadLocalRandom for thread-safe random number,1
+Add specific exceptions,1
+Use Java Optional to handle null and avoid NullPointerException,1
+Use Objects.isNull() for null checks,1
+Refactor code to reduce redundancy,2
+Use assertThrows for exception testing,4
+Code Refactoring for handling different conditionals,1
+Use single catch block instead of multiple,1
+Throw exception when SQL error occurs,1
+Remove redundant initialization of ServletHolder,1
+Refactor exception variable naming,1
+Add missing parameter in SessionizerConfigValidator,1
+Simplifying conditional expressions,1
+Refactor lengthy method,1
+Reduce Multiple Returns,1
+Check for null before calling methods on objects,1
+Introduce constants for hardcoded strings,1
+Remove unnecessary synchronization,2
+Use optional instead of returning null,1
+Avoid null checks on `anns` by initializing it to an empty array,1
+Eliminate magic numbers,1
+Combine Catch Blocks,1
+Reduce nesting with early return,1
+Remove repeated code,1
+Refactor repetitive code blocks,1
+Handle exceptions in a more informative way,1
+Refactor the method to reduce its size and complexity,1
+Remove assert statements,1
+Use Java 8 Streams for filtering,1
+Introduce a method for node initialization,1
+Refactor to methods,1
+Use try-catch-finally for exception handling,1
+Throw an exception for invalid bucket names,1
+Use constructor injection for setting up DataSource,1
+Use 'equalsIgnoreCase' instead of 'equals' for string comparison,1
+Avoid multiple calls to methods,1
+Add function parameter for FilterExpression,1
+Consider using Optional,1
+Refactor setSessionPayload method,1
+Replace string concatenation with StringBuilder,3
+Direct append in StringBuilder,1
+Use a more descriptive exception message,1
+Remove redundant code,38
+Use Specific Exception,1
+Reduce the scope of variables,1
+Refactor if/else statements,1
+Move initialization of Properties object to a separate method,1
+Avoid null check for values in 'values' array,1
+Refactor nested if-else blocks,1
+Guard clause for `wmem` null check,1
+Use ternary operator for assignment,1
+Use the final keyword for variables that are not being reassigned,1
+Add more specific error handling,1
+Refactor the loop to use enhanced for loop,1
+Add method access modifier,3
+Use Java 8 Stream API for better performance and readability,1
+Eliminate Code Redundancy,1
+Avoid null checks in the getInt method,1
+Use try-catch for catching potential exceptions,1
+Consolidate Exception Handling,1
+Use of exception handling in separate utility method,1
+Replace RuntimeException with a specific exception,1
+Avoid using labels and break statements,1
+Avoid unnecessary boxing and unboxing,2
+Use a Stream filter instead of a for loop,1
+Refactor the method to smaller methods,1
+Exception handling and logging,1
+Recommend using Optional,1
+Use try-catch block for checking null arguments,1
+Use `StandardCharsets` instead of string for encoding,1
+Consolidate condition checks,1
+Use early return to reduce nested control flow,1
+Replace while(true) loop with a more specific condition,1
+Improve null checks,1
+Remove unnecessary code,3
+Reduce Duplication when getting count,1
+Simplify if-else constructs,1
+Use Java 8 Stream API for cleaner code,1
+Consolidate the multiple if-else statements,1
+Use Java 8's String.join() method instead of manual concatenation,1
+Use constants or configuration file for hard-coded values,1
+Refactor Magic Numbers,2
+Magic Numbers,1
+Separate logic for trimming string endpoints,1
+Reduce repetitive code blocks,1
+Reduce Duplication of Code,1
+Avoid duplicate calls to `shouldSummarizeOverflow`,1
+Refactor duplicate code of ServletHolder initialization into a separate method,1
+Avoid using `this` keyword when not necessary,1
+Combine catch blocks with the same exception handling,2
+Use logging instead of System.out.println for error handling,1
+Reduce length of test method,1
+Refactor anonymous inner classes to lambda expressions,1
+Improvement in Exception Handling,1
+Combine conditional statements,1
+Use static import for true and false boolean literals,1
+Code duplication,2
+Use better exception handling,1
+Remove unnecessary `@Deprecated` annotations,1
+Add null checks before dereferencing objects,1
+Use try-catch for RuntimeException,1
+Avoid Empty Catch Blocks,7
+Use Java Streams instead of traditional for loop,1
+Remove unnecessary 'final' keyword from local variables,1
+Move configuration retrieval to a separate method,1
+Refactor nested if conditions,1
+Avoid printing stack trace,3
+Explicitly define the exception message,1
+Use early return for null or invalid cases,1
+Use `continue` to reduce nesting inside loop,1
+Reduce repetition with a for loop,1
+Avoid using Class.forName(),1
+Add null check for loadersNames,1
+Combine consecutive if conditions,1
+Use final keyword for variables that are not modified,2
+Remove System.out.println,1
+Add a null check for exception,1
+Use finally block to log '< init Robot',1
+Replace if else structure with guard clauses,1
+Remove redundant request reading in catch block,1
+Reduce method complexity by splitting it into smaller methods,1
+Refactor duplicate code into separate method,1
+Replace multiple try-finally blocks with try-with-resources,1
+Replace explicit types with diamond operator,1
+Refactor method for better readability,1
+Reduce Cyclomatic Complexity and Improve Readability,1
+Close resources in individual try-finally blocks,1
+Add parameter validation,1
+Avoid assert statements in production code,1
+Use forEach method of List interface,1
+Use Logger instead of println,2
+Use Java Streams instead of forEach,1
+Avoid creating ApiResponse objects multiple times,1
+Use method reference instead of traditional method calling,1
+Null check for 'name',1
+Replace System.out.println() with Logger,1
+Use Java 8 streams instead of for loop,1
+Use assertAll for multiple assertions,1
+Use final keyword for method parameter,1
+Use multiple catch blocks,1
+Add method description,3
+Replace repeated if-else condition checks with a method,1
+Reduce complexity by breaking method into smaller methods,1
+Remove unnecessary Thread.yield,2
+Check if response body is null before converting it to JSONObject,1
+Check if 'x', 'y' and 'num' are assigned,1
+Improve empty actionMap handling,1
+Reduce method complexity by breaking it into smaller methods,1
+Refactor the nested loop into a separate method,1
+Use either publishAsync or post().asynchronously(),1
+Use Optional for checking superclass,1
+Use `java.util.Optional` for null checks,1
+Use try-catch for array index out of bounds,1
+Replace magic numbers with constant variables,6
+Use Optional,5
+Use string formatting for better readability,1
+Use Logger instead of printStackTrace,2
+Replace repeated method calls with a loop,1
+Replace manual encoding counter with built-in array length,1
+Avoid logging sensitive information,1
+Replace system.out.println with logger for better logging,1
+Use loggers instead of System.out.println,1
+Use Optional for Config values to avoid NullPointerExceptions,1
+Refactor Anonymous Inner Classes to Named Inner Classes,1
+Use try catch block for exception handling,1
+Use Java 8 Optional,1
+Avoid potential null pointer exception,1
+Handle Exception,1
+Handle potential NumberFormatException,1
+Early return when API version is invalid,1
+Separate Concerns,1
+Remove unnecessary intermediate variables,1
+Refactor code to reduce complexity,1
+Replace type checking with polymorphism,1
+Reduce complexity by dividing the method into smaller, more manageable methods,1
+Use constant for 'Permit' string,1
+Split into smaller methods,2
+Adding null checks,1
+Use a constant for repeated multiplication operations,1
+Use of Java 8's Optional to avoid null checks,1
+Use Java 8 Streams to filter methods,1
+Reduce the nesting level,1
+Use try-catch block for handling WSDLException,1
+Remove unnecessary field accessibility change,1
+Avoid repetitive calls to `whitespaceChars()` method,1
+Avoid string concatenation within a loop,1
+Check for null value before setting GeoInfo,1
+Streamline 'switch' statement,1
+Use early return to reduce nested if,1
+Use Collection.contains() for checking visibility,1
+Combine duplicate exception handlers,1
+Use try-catch for handling exceptions,1
+Remove redundant assertions,1
+Use Conditional Operator,1
+Avoid calling expensive operations in condition checks,1
+Use var keyword for local variable type inference,1
+Avoid calling getPage() multiple times,1
+Use Java 8 streams for merging annotations,1
+Use Java 8 features like Stream API,1
+Remove unnecessary null check for order,1
+Move hardcoded string to a constant,1
+Avoid unchecked casting,1
+Avoid checking null at multiple places,1
+Use Try-Catch for Exception Handling,1
+Use a constructor to set 'SteamUGCDetails' properties,1
+Provide meaningful variable names,1
+Simplify the if-else condition,1

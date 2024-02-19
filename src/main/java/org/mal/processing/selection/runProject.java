@@ -4,19 +4,15 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.Configurations;
 import org.mal.FileIO;
-import org.mal.OpenAIRequestHandler;
-import org.mal.Prompt;
+import org.mal.prompts.PromptForImprovements;
 import org.mal.apply.Improvement;
 import org.mal.utils.LLMResponseHandler;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class runProject {
 
@@ -34,8 +30,8 @@ public class runProject {
     private JSONObject runMethod(JSONObject method){
         try {
             String stringResponse = LLMResponseHandler.askLLM(
-                    Prompt.getPrompt(method.get("Old_Method").toString()),
-                    Prompt.SYSTEM_MSG,
+                    PromptForImprovements.getPrompt(method.get("Old_Method").toString()),
+                    PromptForImprovements.SYSTEM_MSG,
                     0.7
             );
             return new JSONObject(stringResponse);
@@ -55,8 +51,9 @@ public class runProject {
                             impObj.getInt("Start"),
                             impObj.getInt("End"),
                             "not_important",
-                            "not_important_2",
-                            "not_important_3"
+                            impObj.getString("Improvement"),
+                            impObj.getString("Description"),
+                            "not_important_4"
                     ));
                 } catch (Exception e) { }
             }
@@ -75,6 +72,25 @@ public class runProject {
         }
     }
 
+    private String fetchFinalMethodFromResponse(JSONObject response){
+        try {
+            return response.getJSONObject("Method_Improvements").getString("Final code");
+        } catch (Exception e){
+            return "no response";
+        }
+    }
+    private String fetchFinalMethodFromFile(String filePath){
+        List<Improvement> improvements;
+        try {
+            JSONObject obj = FileIO.readJSONObjectFromFile(Path.of(filePath));
+            return fetchFinalMethodFromResponse(obj);
+        } catch (Exception e){
+            return null;
+        }
+    }
+
+
+
     private void runIterations(JSONObject method, Integer methodNumber){
 
 //        File f = new File(Configurations.IMPROVEMENTS + projectName + "/improvements-" + methodNumber + "-0.json");
@@ -91,6 +107,7 @@ public class runProject {
         Boolean newSuggestions = true;
         List<Improvement> allImprovements = new ArrayList<>();
         Integer chaces = maxChances;
+        List<String> allMethodRewrites = new ArrayList<>();
 
         for(int iteration = 0; iteration< maxIterations; iteration++) {
             System.out.println(iteration+" iteration(s) complete.");
@@ -109,9 +126,12 @@ public class runProject {
             JSONObject response=null;
             if (f.exists()){
                 newImprovements = fetchImprovementsFromFile(filePath);
+                allMethodRewrites.add(fetchFinalMethodFromFile(filePath));
             }else {
                 response = runMethod(method);
                 newImprovements = collectSelections(response);
+                allMethodRewrites.add(
+                        fetchFinalMethodFromResponse(response));
             }
             for (Improvement imp: newImprovements){
                 List<Improvement> matches = allImprovements.stream()
@@ -144,6 +164,19 @@ public class runProject {
                 e.printStackTrace();
             }
         }
+        method.put("Improvements", allImprovements.toString());
+
+        method.put("Improvements", new JSONArray(
+                allImprovements.stream()
+                    .map(x-> new JSONObject()
+                            .put("Improvement", x.getExplanationShort())
+                            .put("Change_Diff", x.getImprovedCode())
+                            .put("Description", x.getExplanationLong())
+                            .put("Start", x.getStart())
+                            .put("End", x.getStop()))
+                    .toList())
+        );
+        method.put("All_Improved_Methods", new JSONArray(allMethodRewrites));
     }
 
     public void run(){

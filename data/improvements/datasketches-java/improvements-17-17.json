@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Reduce repetitive code",
+                "Change_Diff": "- basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n...\n- basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n+ executeBasicUnionOperations(n1, n2, lgK1, lgK2, lgMaxK, t1, t2, rt);",
+                "Description": "The block of code with basicUnion() calls is repeated 4 times with minor changes. This can be abstracted into a separate method to reduce code repetition and increase readability.",
+                "Start": 37,
+                "End": 84
+            },
+            {
+                "Improvement": "Replace magic numbers with named constants",
+                "Change_Diff": "- int t1=2;\n...\n- int n2=14;\n+ final int INITIAL_T_VALUE = 2;\n...\n+ final int INITIAL_N2_VALUE = 14;",
+                "Description": "Numbers like 7, 8, 14, etc. are used directly in the code. It's better to replace these magic numbers with named constants to make the code more readable and maintainable.",
+                "Start": 8,
+                "End": 22
+            },
+            {
+                "Improvement": "Extract duplicate code to a method",
+                "Change_Diff": "- n1=((1 << (i - 3)) * 3) / 4;\n+ n1=calculateN1Value(i);",
+                "Description": "The calculation `((1 << (i - 3)) * 3) / 4` is repeated multiple times in the code. Extract this calculation into a separate method to enhance readability and maintainability.",
+                "Start": 37,
+                "End": 84
+            }
+        ],
+        "Final code": "public void checkUnions(){\n  final int INITIAL_T_VALUE = 2;\n  final int INITIAL_N2_VALUE = 14;\n  int rt=INITIAL_T_VALUE;\n  println(\"TgtR: \" + TgtHllType.values()[rt].toString());\n  int lgK1=7;\n  int lgK2=7;\n  int lgMaxK=7;\n  int n1=7;\n  int n2=INITIAL_N2_VALUE;\n  executeBasicUnionOperations(n1, n2, lgK1, lgK2, lgMaxK, INITIAL_T_VALUE, INITIAL_T_VALUE, rt);\n  println(\"++END BASE GROUP++\");\n  int i=0;\n  for (i=7; i <= 13; i++) {\n    lgK1=i;\n    lgK2=i;\n    lgMaxK=i;\n    executeBasicUnionOperations(calculateN1Value(i), n2, lgK1, lgK2, lgMaxK, INITIAL_T_VALUE, INITIAL_T_VALUE, rt);\n    println(\"--END MINOR GROUP--\");\n    lgK1=i;\n    lgK2=i + 1;\n    executeBasicUnionOperations(calculateN1Value(i), n2, lgK1, lgK2, lgMaxK, INITIAL_T_VALUE, INITIAL_T_VALUE, rt);\n    println(\"--END MINOR GROUP--\");\n    lgK1=i + 1;\n    lgK2=i;\n    executeBasicUnionOperations(calculateN1Value(i), n2, lgK1, lgK2, lgMaxK, INITIAL_T_VALUE, INITIAL_T_VALUE, rt);\n    println(\"--END MINOR GROUP--\");\n    lgK1=i + 1;\n    lgK2=i + 1;\n    executeBasicUnionOperations(calculateN1Value(i), n2, lgK1, lgK2, lgMaxK, INITIAL_T_VALUE, INITIAL_T_VALUE, rt);\n    println(\"++END MAJOR GROUP++\");\n  }\n}\n\npublic void executeBasicUnionOperations(int n1, int n2, int lgK1, int lgK2, int lgMaxK, int t1, int t2, int rt) {\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1-=2;\n  n2+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1+=2;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n}\n\npublic int calculateN1Value(int i) {\n  return ((1 << (i - 3)) * 3) / 4;\n}"
+    },
+    "Old_Method": "/** \n * The task here is to check the transition boundaries as the sketch morphs between LIST to SET to HLL modes. The transition points vary as a function of lgConfigK. In addition, this checks that the union operation is operating properly based on the order the sketches are presented to the union.\n */\n@Test public void checkUnions(){\n  int t1=2;\n  int t2=2;\n  int rt=2;\n  println(\"TgtR: \" + TgtHllType.values()[rt].toString());\n  int lgK1=7;\n  int lgK2=7;\n  int lgMaxK=7;\n  int n1=7;\n  int n2=7;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=8;\n  n2=7;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=7;\n  n2=8;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=8;\n  n2=8;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  n1=7;\n  n2=14;\n  basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n  println(\"++END BASE GROUP++\");\n  int i=0;\n  for (i=7; i <= 13; i++) {\n    lgK1=i;\n    lgK2=i;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"--END MINOR GROUP--\");\n    lgK1=i;\n    lgK2=i + 1;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"--END MINOR GROUP--\");\n    lgK1=i + 1;\n    lgK2=i;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"--END MINOR GROUP--\");\n    lgK1=i + 1;\n    lgK2=i + 1;\n    lgMaxK=i;\n{\n      n1=((1 << (i - 3)) * 3) / 4;\n      n2=n1;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1-=2;\n      n2+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n      n1+=2;\n      basicUnion(n1,n2,lgK1,lgK2,lgMaxK,t1,t2,rt);\n    }\n    println(\"++END MAJOR GROUP++\");\n  }\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/hll/UnionTest.java",
+    "Start": 2061,
+    "Stop": 5085,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkUnions"
+}

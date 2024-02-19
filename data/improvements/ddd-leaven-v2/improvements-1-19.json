@@ -1,0 +1,27 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Specify exception message in Assert.fail()",
+                "Change_Diff": "- Assert.fail();\n+ Assert.fail(\"Ordering service should have thrown an OfferChangedExcpetion\");",
+                "Description": "In order to give more information when the test fails, you should specify a failure message within Assert.fail(). This message will be displayed if the test fails and help you quickly identify the problem.",
+                "Start": 9,
+                "End": 9
+            },
+            {
+                "Improvement": "Use @ExpectedException JUnit annotation",
+                "Change_Diff": "+ @Test(expected = OfferChangedExcpetion.class)\n- try {\n... (entire try-catch block) ... \n- } catch (OfferChangedExcpetion e) {\n- }",
+                "Description": "Instead of catching the exception and failing the test manually, you can use the @ExpectedException annotation provided by JUnit. This will make your test more readable and concise.",
+                "Start": 1,
+                "End": 12
+            }
+        ],
+        "Final code": "@Test(expected = OfferChangedExcpetion.class)\npublic void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n}"
+    },
+    "Old_Method": "@Test public void canNotPurchaseIfOfferChanged(){\n  AggregateId orderId=orderingService.createOrder();\n  orderingService.addProduct(orderId,new AggregateId(\"p1\"),1);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),20);\n  Offer offer=orderingService.calculateOffer(orderId);\n  orderingService.addProduct(orderId,new AggregateId(\"p2\"),30);\n  try {\n    orderingService.confirm(orderId,new OrderDetailsCommand(),offer);\n    Assert.fail();\n  }\n catch (  OfferChangedExcpetion e) {\n  }\n}\n",
+    "File_Path": "ddd-leaven-v2/src/test/java/pl/com/bottega/ecommerce/sales/acceptancetests/OrderingTest.java",
+    "Start": 2542,
+    "Stop": 3087,
+    "Project_Name": "data/projects/ddd-leaven-v2",
+    "Method_Name": "canNotPurchaseIfOfferChanged"
+}

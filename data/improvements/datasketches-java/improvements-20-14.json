@@ -1,0 +1,34 @@
+{
+    "Method_Improvements": {
+        "Improvements": [
+            {
+                "Improvement": "Remove unnecessary variable initialization",
+                "Change_Diff": "- int k=1024;\n- UpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n+ UpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(1024).build();",
+                "Description": "The variable 'k' is set to 1024 and used only once, this can be replaced directly by the value 1024 in the method call.",
+                "Start": 2,
+                "End": 2
+            },
+            {
+                "Improvement": "Consolidate try-catch blocks",
+                "Change_Diff": "- try {\n...\n}\ncatch (SketchesArgumentException e) {\n}\ntry {\n...\n}\ncatch (SketchesArgumentException e) {\n}\n...\n+ try {\n...\n...\n}\ncatch (SketchesArgumentException e) {\n}",
+                "Description": "Multiple try-catch blocks with the same exception can be consolidated into a single try-catch block. This makes the code cleaner and easier to follow.",
+                "Start": 7,
+                "End": 35
+            },
+            {
+                "Improvement": "Avoid magic numbers",
+                "Change_Diff": "- tryBadMem(mem,PREAMBLE_LONGS_BYTE,2);\n...\n+ final int BAD_MEM_INDEX = 2;\n+ tryBadMem(mem,PREAMBLE_LONGS_BYTE,BAD_MEM_INDEX);\n...",
+                "Description": "Magic numbers are present in the code. It is recommended to replace these magic numbers with named constants to improve code readability.",
+                "Start": 6,
+                "End": 33
+            }
+        ],
+        "Final code": "@Test public void checkMemDeSerExceptions(){\nUpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(1024).build();\nsk1.update(1L);\nbyte[] bytearray1=sk1.toByteArray();\nWritableMemory mem=WritableMemory.writableWrap(bytearray1);\nlong pre0=mem.getLong(0);\nfinal int BAD_MEM_INDEX = 2;\ntry {\ntryBadMem(mem,PREAMBLE_LONGS_BYTE,BAD_MEM_INDEX);\nmem.putLong(0,pre0);\ntryBadMem(mem,SER_VER_BYTE,BAD_MEM_INDEX);\nmem.putLong(0,pre0);\ntryBadMem(mem,FAMILY_BYTE,BAD_MEM_INDEX);\nmem.putLong(0,pre0);\ntryBadMem(mem,FLAGS_BYTE,BAD_MEM_INDEX);\nmem.putLong(0,pre0);\nfinal long origThetaLong=mem.getLong(THETA_LONG);\nmem.putLong(THETA_LONG,Long.MAX_VALUE / 2);\nHeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\nfail();\nmem.putLong(THETA_LONG,origThetaLong);\nbyte[] byteArray2=new byte[bytearray1.length - 1];\nWritableMemory mem2=WritableMemory.writableWrap(byteArray2);\nmem.copyTo(0,mem2,0,mem2.getCapacity());\nHeapAlphaSketch.heapifyInstance(mem2,ThetaUtil.DEFAULT_UPDATE_SEED);\nfail();\n}\ncatch (SketchesArgumentException e) {\n}\ninsertLgResizeFactor(mem,ResizeFactor.X1.lg());\nUpdateSketch usk=HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\nResizeFactor rf=usk.getResizeFactor();\nassertEquals(rf,ResizeFactor.X2);\n}"
+    },
+    "Old_Method": "@Test public void checkMemDeSerExceptions(){\n  int k=1024;\n  UpdateSketch sk1=UpdateSketch.builder().setFamily(ALPHA).setNominalEntries(k).build();\n  sk1.update(1L);\n  byte[] bytearray1=sk1.toByteArray();\n  WritableMemory mem=WritableMemory.writableWrap(bytearray1);\n  long pre0=mem.getLong(0);\n  tryBadMem(mem,PREAMBLE_LONGS_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,SER_VER_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,FAMILY_BYTE,2);\n  mem.putLong(0,pre0);\n  tryBadMem(mem,FLAGS_BYTE,2);\n  mem.putLong(0,pre0);\n  final long origThetaLong=mem.getLong(THETA_LONG);\n  try {\n    mem.putLong(THETA_LONG,Long.MAX_VALUE / 2);\n    HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  }\n catch (  SketchesArgumentException e) {\n  }\n  mem.putLong(THETA_LONG,origThetaLong);\n  byte[] byteArray2=new byte[bytearray1.length - 1];\n  WritableMemory mem2=WritableMemory.writableWrap(byteArray2);\n  mem.copyTo(0,mem2,0,mem2.getCapacity());\n  try {\n    HeapAlphaSketch.heapifyInstance(mem2,ThetaUtil.DEFAULT_UPDATE_SEED);\n    fail();\n  }\n catch (  SketchesArgumentException e) {\n  }\n  insertLgResizeFactor(mem,ResizeFactor.X1.lg());\n  UpdateSketch usk=HeapAlphaSketch.heapifyInstance(mem,ThetaUtil.DEFAULT_UPDATE_SEED);\n  ResizeFactor rf=usk.getResizeFactor();\n  assertEquals(rf,ResizeFactor.X2);\n}\n",
+    "File_Path": "datasketches-java/src/test/java/org/apache/datasketches/theta/HeapAlphaSketchTest.java",
+    "Start": 19344,
+    "Stop": 21113,
+    "Project_Name": "data/projects/datasketches-java",
+    "Method_Name": "checkMemDeSerExceptions"
+}
