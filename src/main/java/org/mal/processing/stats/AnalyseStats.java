@@ -1,10 +1,10 @@
-package org.mal.stats;
+package org.mal.processing.stats;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.Configurations;
-import org.mal.FileIO;
-import org.mal.utils.SelectedProjects;
+import org.mal.utils.FileIO;
+import org.mal.utils.FetchProjectsAndData;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -141,7 +141,7 @@ public class AnalyseStats {
 //            e.printStackTrace();
 //            return Collections.emptyList();
 //        }
-        return SelectedProjects.getProjectNames();
+        return FetchProjectsAndData.getProjectNames();
     }
 
     private static boolean validJSON(Path json) throws IOException {

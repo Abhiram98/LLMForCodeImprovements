@@ -1,10 +1,10 @@
-package org.mal.stats;
+package org.mal.processing.stats;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.Configurations;
-import org.mal.FileIO;
-import org.mal.utils.SelectedProjects;
+import org.mal.utils.FileIO;
+import org.mal.utils.FetchProjectsAndData;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,7 +15,7 @@ public class FetchImrovements {
     public static void main(String[] args){
         List<String> allImprovementsRaw = new ArrayList<>();
 
-        List<String> projectNames = SelectedProjects.getProjectNames();
+        List<String> projectNames = FetchProjectsAndData.getProjectNames();
         for (String pName: projectNames){
             List<String> imps = getImprovements(pName);
             allImprovementsRaw.addAll(imps);

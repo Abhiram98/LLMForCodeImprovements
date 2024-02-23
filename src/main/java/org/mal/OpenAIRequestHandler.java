@@ -10,6 +10,7 @@ import java.net.http.HttpResponse.BodyHandlers;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mal.utils.FileIO;
 
 public class OpenAIRequestHandler {
 

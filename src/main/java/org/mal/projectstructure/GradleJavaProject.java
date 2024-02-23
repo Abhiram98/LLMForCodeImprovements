@@ -1,7 +1,9 @@
-package org.mal.apply;
+package org.mal.projectstructure;
+
+import org.mal.apply.BuildCommandResult;
+import org.mal.apply.GradleCommandRunner;
 
 import java.io.File;
-import java.nio.file.Path;
 
 public class GradleJavaProject extends JavaProject {
     public GradleJavaProject(String projectName, String projectPath, String buildSystem, String buildCommand, String javaHome) throws IllegalArgumentException {

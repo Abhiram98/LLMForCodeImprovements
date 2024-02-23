@@ -11,4 +11,5 @@ public class Configurations {
     public static String OUTPUT_REGEX = "improvements-\\d+.json";
     public static String LLM_PY_QUERY_FILE = "src/main/python/query_llm.py";
     public static Integer MAX_ITERATIONS = 20;
+    public static String OVERLAP_RESULTS = "data/overlaps";
 }

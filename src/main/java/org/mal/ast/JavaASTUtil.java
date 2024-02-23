@@ -1,4 +1,4 @@
-package org.mal;
+package org.mal.ast;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;

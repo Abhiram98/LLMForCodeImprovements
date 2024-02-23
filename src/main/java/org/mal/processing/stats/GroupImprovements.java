@@ -1,16 +1,14 @@
-package org.mal.stats;
+package org.mal.processing.stats;
 
 import com.opencsv.CSVWriter;
-import io.vavr.collection.Array;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.Configurations;
-import org.mal.FileIO;
-import org.mal.apply.Improvement;
-import org.mal.utils.SelectedProjects;
+import org.mal.utils.FileIO;
+import org.mal.projectstructure.Improvement;
+import org.mal.utils.FetchProjectsAndData;
 import org.mal.utils.FetchImprovements;
 
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
@@ -25,7 +23,7 @@ public class GroupImprovements {
      */
     public static void main(String[] args) throws Exception {
 
-        System.out.println("Total method count "+SelectedProjects.getTotalMethodCount());
+        System.out.println("Total method count "+ FetchProjectsAndData.getTotalMethodCount());
 
         List<String> improvements = getImprovements().stream().map(s -> s.replaceAll("^\\d+\\. ", "")).toList();
         System.out.println("Total Improvements "+improvements.size());
@@ -200,7 +198,7 @@ public class GroupImprovements {
 
 
     private static void getAllImprovements(){
-        List<String> allProjects = SelectedProjects.getProjectNames();
+        List<String> allProjects = FetchProjectsAndData.getProjectNames();
     }
 
 }

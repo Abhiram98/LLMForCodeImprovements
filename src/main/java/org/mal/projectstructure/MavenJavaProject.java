@@ -1,6 +1,7 @@
-package org.mal.apply;
+package org.mal.projectstructure;
 
-import org.mal.Configurations;
+import org.mal.apply.BuildCommandResult;
+import org.mal.apply.MavenCommandRunner;
 
 import java.io.File;
 

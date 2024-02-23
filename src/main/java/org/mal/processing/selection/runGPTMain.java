@@ -1,16 +1,14 @@
-package org.mal.selection;
+package org.mal.processing.selection;
 
-import org.mal.Configurations;
-import org.mal.utils.SelectedProjects;
+import org.mal.utils.FetchProjectsAndData;
 
-import java.io.File;
 import java.util.List;
 
 public class runGPTMain {
     public static void main(String[] args){
 
 //        File projectDir = new File(Configurations.PROJECT_REPOSITORY);
-        List<String> projectNames = SelectedProjects.getProjectNames();
+        List<String> projectNames = FetchProjectsAndData.getProjectNames();
         for (String name : projectNames) {
             System.out.println("Running: " + name);
             runProject rp = new runProject(name, 1, 1);

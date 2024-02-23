@@ -1,4 +1,4 @@
-package org.mal;
+package org.mal.ast;
 
 public class MethodDeclaration {
     private org.eclipse.jdt.core.dom.MethodDeclaration method;

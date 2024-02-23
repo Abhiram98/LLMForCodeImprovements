@@ -1,12 +1,16 @@
-package org.mal.apply;
+package org.mal.projectstructure;
 
 import org.json.JSONObject;
 import org.mal.Configurations;
-import org.mal.FileIO;
+import org.mal.apply.BuildCommandResult;
+import org.mal.apply.CommandRunner;
+import org.mal.utils.FileIO;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class JavaProject {
     String projectPath = "";
@@ -14,6 +18,9 @@ public class JavaProject {
     String buildCommand = "";
     String javaHome = "";
     String cleanCommand = "";
+
+
+    List<JavaMethod> methods;
 
 
     public static String findJavaHome (String javaVersion)  throws IOException {
@@ -79,4 +86,29 @@ public class JavaProject {
     public BuildCommandResult build(){
         return CommandRunner.runCommand(buildCommand, new File(projectPath+"/"), javaHome);
     }
+
+    public String getProjectPath() {
+        return projectPath;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setMethods(List<JavaMethod> methods) {
+        this.methods = methods;
+    }
+    public List<JavaMethod> getMethods() {
+        return methods;
+    }
+
+    public List<Improvement> getAllImprovements(){
+        List<Improvement> imps = new ArrayList<>();
+        for(JavaMethod method: this.methods){
+            imps.addAll(method.improvementList);
+        }
+        return imps;
+    }
+
+
 }

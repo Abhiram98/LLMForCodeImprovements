@@ -1,9 +1,12 @@
-package org.mal;
+package org.mal.utils;
 
 import org.apache.log4j.Logger;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,6 +17,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.stream.Stream;
 
 public class FileIO {
@@ -265,5 +269,22 @@ public class FileIO {
         Path path = Paths.get(filePath);
         Files.createDirectories(path.getParent()); // Create directory structure if it doesn't exist
         Files.write(path, lines, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    }
+
+
+    public static void writeFile(){
+        Scanner scanner = null;
+        try {
+            scanner = new Scanner(new File("test.txt"));
+            while (scanner.hasNext()) {
+                System.out.println(scanner.nextLine());
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            if (scanner != null) {
+                scanner.close();
+            }
+        }
     }
 }

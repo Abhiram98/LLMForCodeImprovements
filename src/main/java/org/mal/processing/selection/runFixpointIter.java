@@ -1,6 +1,6 @@
-package org.mal.selection;
+package org.mal.processing.selection;
 
-import org.mal.utils.SelectedProjects;
+import org.mal.utils.FetchProjectsAndData;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public class runFixpointIter {
 //        File projectDir = new File(Configurations.PROJECT_REPOSITORY);
         if (args.length == 0){
 //            System.out.println("Shouldn't be here");
-            List<String> projectNames = SelectedProjects.getProjectNames();
+            List<String> projectNames = FetchProjectsAndData.getProjectNames();
             assert projectNames != null;
             for (String name: projectNames){
                 System.out.println("Running: "+ name);

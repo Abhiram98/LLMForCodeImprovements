@@ -1,9 +1,6 @@
-package org.mal;
+package org.mal.prompts;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class Prompt {
+public class PromptForImprovements {
 
     public static String SYSTEM_MSG = "You are an expert Java programmer.";
     public static String getPrompt(String code) {

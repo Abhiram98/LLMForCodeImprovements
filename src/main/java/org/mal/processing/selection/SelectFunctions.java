@@ -1,16 +1,18 @@
-package org.mal.selection;
+package org.mal.processing.selection;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.*;
+import org.mal.ast.MethodDeclaration;
+import org.mal.ast.MethodVisitor;
+import org.mal.utils.FileIO;
+import org.mal.ast.JavaASTUtil;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 public class SelectFunctions {
 
@@ -26,7 +28,7 @@ public class SelectFunctions {
         this.projectPath = projectPath;
     }
 
-    private void toJsonFile(ArrayList<org.mal.MethodDeclaration> selectedMethods){
+    private void toJsonFile(ArrayList<MethodDeclaration> selectedMethods){
         JSONArray array = new JSONArray();
         for (MethodDeclaration m: selectedMethods){
             JSONObject obj = new JSONObject();
@@ -49,16 +51,16 @@ public class SelectFunctions {
 
     }
 
-    private ArrayList<org.mal.MethodDeclaration> selectMethods(
-            HashMap<Integer, ArrayList<org.mal.MethodDeclaration>> byLineNum,
-            ArrayList<org.mal.MethodDeclaration> allSelectedMethods
+    private ArrayList<MethodDeclaration> selectMethods(
+            HashMap<Integer, ArrayList<MethodDeclaration>> byLineNum,
+            ArrayList<MethodDeclaration> allSelectedMethods
             ){
 
         Random ran = new Random(42);
 
         for (Integer lineBucket : byLineNum.keySet()){
             System.out.println("lineBucket:"+lineBucket);
-            ArrayList<org.mal.MethodDeclaration> methods = byLineNum.get(lineBucket);
+            ArrayList<MethodDeclaration> methods = byLineNum.get(lineBucket);
             Integer numMethods = methods.size();
             if (numMethods > 0) {
                 Integer ind = ran.nextInt(numMethods);
@@ -73,14 +75,14 @@ public class SelectFunctions {
         return allSelectedMethods;
     }
 
-    private HashMap<Integer, ArrayList<org.mal.MethodDeclaration>> getByLineNum(
-            List<org.mal.MethodDeclaration> methods,
-            HashMap<Integer, ArrayList<org.mal.MethodDeclaration>> byLineNum
+    private HashMap<Integer, ArrayList<MethodDeclaration>> getByLineNum(
+            List<MethodDeclaration> methods,
+            HashMap<Integer, ArrayList<MethodDeclaration>> byLineNum
             ){
 
-//        HashMap<Integer, ArrayList<org.mal.MethodDeclaration>> byLineNum = new HashMap<>();
+//        HashMap<Integer, ArrayList<org.mal.ast.MethodDeclaration>> byLineNum = new HashMap<>();
 
-        for (org.mal.MethodDeclaration mi : methods){
+        for (MethodDeclaration mi : methods){
             Long len = mi.getMethod().getBody().toString().trim()
                     .chars().filter(ch -> ch == '\n').count() - 1;
             if (len > maxLoc || len < minLoc){
@@ -91,9 +93,9 @@ public class SelectFunctions {
             Integer bucket = int_len - int_len % bucketSize;
 
             if (!byLineNum.containsKey(bucket)){
-                byLineNum.put(bucket, new ArrayList<org.mal.MethodDeclaration>());
+                byLineNum.put(bucket, new ArrayList<MethodDeclaration>());
             }
-            ArrayList<org.mal.MethodDeclaration> lineList = byLineNum.get(bucket);
+            ArrayList<MethodDeclaration> lineList = byLineNum.get(bucket);
             lineList.add(mi);
         }
 
@@ -112,8 +114,8 @@ public class SelectFunctions {
 //            System.out.println(allFiles);
             System.out.println(projectName);
             List<Integer> methodLengths = new ArrayList<Integer>();
-            ArrayList<org.mal.MethodDeclaration> allSelectedMethods = new ArrayList<>();
-            HashMap<Integer, ArrayList<org.mal.MethodDeclaration>> byLineNum = new HashMap<>();
+            ArrayList<MethodDeclaration> allSelectedMethods = new ArrayList<>();
+            HashMap<Integer, ArrayList<MethodDeclaration>> byLineNum = new HashMap<>();
 
             for (Path p: allFiles){
 //                System.out.println(p);
@@ -125,10 +127,10 @@ public class SelectFunctions {
                     CompilationUnit cUnit = (CompilationUnit)node;
                     cUnit.accept(visitor);
 
-                    List<org.mal.MethodDeclaration> methods =
+                    List<MethodDeclaration> methods =
                             visitor.getMethods().stream()
                                     .map(x ->
-                                new org.mal.MethodDeclaration(
+                                new MethodDeclaration(
                                         x, x.getName().getFullyQualifiedName(),
                                         x.getStartPosition(),
                                         x.getLength() + x.getStartPosition(),

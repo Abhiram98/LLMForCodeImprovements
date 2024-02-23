@@ -1,4 +1,4 @@
-package org.mal;
+package org.mal.ast;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
@@ -6,6 +6,11 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mal.Configurations;
+import org.mal.MyGit;
+import org.mal.OpenAIRequestHandler;
+import org.mal.prompts.PromptForImprovements;
+import org.mal.utils.FileIO;
 
 import java.io.File;
 import java.io.IOException;
@@ -95,7 +100,7 @@ public class ProcessAST {
     private JSONObject generateCodeImprovements(MethodDeclaration decleration, String projectName){
         JSONObject ob = new JSONObject();
         OpenAIRequestHandler requestHandler = new OpenAIRequestHandler();
-        JSONArray response = requestHandler.getGPT4Response(Prompt.getPrompt(decleration.getMethod().toString()));
+        JSONArray response = requestHandler.getGPT4Response(PromptForImprovements.getPrompt(decleration.getMethod().toString()));
         ob.put("Method_Improvements",response);
         ob.put("Method_Name",decleration.getName());
         ob.put("File_Path",decleration.getUrl());

@@ -1,11 +1,11 @@
-package org.mal.selection;
+package org.mal.processing.selection;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mal.Configurations;
-import org.mal.FileIO;
+import org.mal.utils.FileIO;
 import org.mal.prompts.PromptForImprovements;
-import org.mal.apply.Improvement;
+import org.mal.projectstructure.Improvement;
 import org.mal.utils.LLMResponseHandler;
 
 import java.io.File;
